@@ -62,11 +62,17 @@ class CaptureProcess:
     async def _read_frames(self):
         assert self.proc and self.proc.stdout
         stdout = self.proc.stdout
+        frames = 0
         try:
             while True:
                 header = await stdout.readexactly(HEADER.size)
                 length, flags, pts_us = HEADER.unpack(header)
                 payload = await stdout.readexactly(length)
+                frames += 1
+                if frames == 1:
+                    log.info("First video frame from helper (%d bytes, key=%s)", length, bool(flags & 1))
+                elif frames % 600 == 0:
+                    log.info("Relayed %d frames (last %d bytes)", frames, length)
                 await self.on_frame(payload, bool(flags & 1), pts_us)
         except (asyncio.IncompleteReadError, ConnectionResetError):
             pass
