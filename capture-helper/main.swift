@@ -15,6 +15,7 @@
 // Requires macOS 13+ (Sonoma recommended). Screen Recording permission must be
 // granted to the process that spawns this helper (e.g. Terminal).
 
+import AppKit
 import AVFoundation
 import CoreGraphics
 import CoreMedia
@@ -56,6 +57,12 @@ func parseArgs() -> (windowID: UInt32, width: Int, height: Int, fps: Int, bitrat
 }
 
 let params = parseArgs()
+
+// CLI processes have no window-server connection by default; ScreenCaptureKit
+// aborts with "CGS_REQUIRE_INIT" without one. Touching CGMainDisplayID and
+// NSApplication wires up the CoreGraphics/AppKit connection.
+_ = CGMainDisplayID()
+NSApplication.shared.setActivationPolicy(.prohibited)
 
 // MARK: - Frame writer (stdout)
 

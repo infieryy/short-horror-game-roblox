@@ -59,6 +59,8 @@ class StreamSession:
         self.tracker: Optional[WindowTracker] = None
         self.injector: Optional[InputInjector] = None
 
+        self._capture_failures = 0
+        self._capture_started_at = 0.0
         self._lock = asyncio.Lock()
         self._grace_task: Optional[asyncio.Task] = None
         self._resize_task: Optional[asyncio.Task] = None
@@ -256,6 +258,7 @@ class StreamSession:
 
     async def _start_capture(self, info):
         width, height = self._capture_size(info)
+        self._capture_started_at = time.monotonic()
         self.capture = CaptureProcess(
             helper_path=settings.capture_helper_path,
             window_id=info.window_id,
@@ -272,6 +275,22 @@ class StreamSession:
         # Capture helper died while session is alive: try to restart it once
         # the window is still around (e.g. transient SCK error).
         if self.state not in (SessionState.RUNNING, SessionState.DRAINING):
+            return
+        if time.monotonic() - self._capture_started_at < 3:
+            self._capture_failures += 1
+        else:
+            self._capture_failures = 1
+        if self._capture_failures >= 5:
+            log.error("Capture helper keeps crashing, giving up")
+            await self._send_json({
+                "type": "error",
+                "message": (
+                    "Screen capture keeps failing. Most likely the Screen Recording "
+                    "permission is missing: System Settings -> Privacy & Security -> "
+                    "Screen Recording -> enable your terminal app, then fully quit "
+                    "and reopen it and restart the server."
+                ),
+            })
             return
         await asyncio.sleep(1)
         if self.state not in (SessionState.RUNNING, SessionState.DRAINING) or self.tracker is None:

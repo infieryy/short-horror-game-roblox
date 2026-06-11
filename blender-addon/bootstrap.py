@@ -74,6 +74,9 @@ def _reader_thread(port: int):
     if sock is None:
         print("[blender-stream] could not reach session manager, lifecycle disabled")
         return
+    # Clear the connect timeout: it would otherwise apply to every recv(),
+    # making an idle (but healthy) connection look dead after 5 seconds.
+    sock.settimeout(None)
 
     with _sock_lock:
         _sock = sock
