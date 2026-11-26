@@ -11,7 +11,7 @@ Data the game reads is packed as modules that return the decoded JSON:
 
 Writes:
     01_install_modules.luau   paste into the Studio command bar to (re)install every script
-    out/<Service>.rbxmx       the same scripts as a model file, one per service
+    out/<Service>.rbxmx       the same scripts as model files, one per place to import into
 """
 import json
 import os
@@ -28,6 +28,8 @@ ASSETS_OUT = os.path.join(ROOT, "assets", "out")
 # assets/out/<piece>/<piece>.<kind>.json files packed as data modules under ServerStorage/DesertFps/Assets.
 ASSET_DATA = {"BreakData": "break", "PartsData": "parts"}
 OUT = os.path.join(HERE, "out")
+# Services whose scripts go in a child of the service: how many path parts name the place to import into.
+CONTAINERS = {"StarterPlayer": 2}
 
 
 def long_string(text):
@@ -132,12 +134,14 @@ def write_install(scripts):
 
 
 def write_models(scripts):
-    """One .rbxmx per service, holding that service's top-level folders."""
+    """One .rbxmx per place to import into (ServerStorage, StarterPlayer.StarterPlayerScripts, ...),
+    holding the top-level folders that go there."""
     os.makedirs(OUT, exist_ok=True)
     trees = {}
     for path, cls, source in scripts:
-        node = trees.setdefault(path[0], {})
-        for part in path[1:-1]:
+        depth = CONTAINERS.get(path[0], 1)
+        node = trees.setdefault(".".join(path[:depth]), {})
+        for part in path[depth:-1]:
             node = node.setdefault(part, {})
         node[path[-1]] = (cls, source)
 

@@ -1,30 +1,52 @@
 --!strict
 -- Pre-cut destruction for map pieces. Server only.
--- A piece stands as one whole part until it is first hit, then is swapped for its shards.
--- Shard layout and the support graph come from assets/out/<piece>/<piece>.break.json.
+-- A piece has one health and is always complete: it stands as one whole part, walls and doors crack along
+-- their cuts as they take damage, and when the health runs out the whole piece comes apart into its shards.
+-- Walls and doors ("chunks" in the break data) sag and fall, starting where they were hit; crates and
+-- barrels ("shatter") burst. The rubble lies for a while, fades and is removed.
+-- Shard layout and health come from assets/out/<piece>/<piece>.break.json. Its per-shard support data
+-- (grounded, neighbors, touches) is not used: a piece never stands with parts missing.
 
 local Debris = game:GetService("Debris")
+local PhysicsService = game:GetService("PhysicsService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Config = require(script.Parent.DestructionConfig)
 local BreakData = require(script.Parent.Parent.Assets.BreakData)
 
 local Breakable = {}
 
-type ShardData = {
-	id: string,
-	center: { number },
-	size: { number },
-	grounded: boolean,
-	neighbors: { string },
-}
-type PieceData = { piece: string, mode: string, chunks: { ShardData } }
+Breakable.Tag = "Breakable"
+
+type ShardData = { id: string, center: { number }, size: { number }, health: number }
+type PieceData = { piece: string, mode: string, health: number?, chunks: { ShardData } }
+
+local random = Random.new()
+
+for _, group in { Config.DebrisGroup, Config.CharacterGroup } do
+	if not PhysicsService:IsCollisionGroupRegistered(group) then
+		PhysicsService:RegisterCollisionGroup(group)
+	end
+end
+PhysicsService:CollisionGroupSetCollidable(Config.DebrisGroup, Config.CharacterGroup, false)
 
 local function pieceData(piece: string): PieceData
 	local data = BreakData[piece]
 	assert(data, `no break data for piece "{piece}"`)
-	-- TODO: "shatter" pieces (crate, barrel) have one health and burst into loose debris; not built yet.
-	assert(data.mode == "chunks", `piece "{piece}" breaks by "{data.mode}", only "chunks" is supported so far`)
 	return data
+end
+
+-- A crate or barrel carries its health in the data; a wall or door is as strong as its shards together.
+local function fullHealth(data: PieceData): number
+	if data.health then
+		return data.health
+	end
+	local total = 0
+	for _, shard in data.chunks do
+		total += shard.health
+	end
+	return total
 end
 
 local function meshTemplates(piece: string): Instance?
@@ -62,6 +84,112 @@ local function pieceBounds(data: PieceData): (Vector3, Vector3)
 	return lo, hi
 end
 
+-- The shards of a piece, built in place of the whole part the first time they are needed.
+local function shardsOf(model: Model, data: PieceData): Instance
+	local shards = model:FindFirstChild("Shards")
+	if shards then
+		return shards
+	end
+	local templates = meshTemplates(data.piece)
+	local shardTemplates = templates and templates:FindFirstChild("Shards")
+
+	local built = Instance.new("Folder")
+	built.Name = "Shards"
+	for _, shard in data.chunks do
+		local template = shardTemplates and shardTemplates:FindFirstChild(shard.id)
+		local part: BasePart = if template and template:IsA("BasePart")
+			then template:Clone()
+			else standIn(vector(shard.size))
+		part.Name = shard.id
+		part.Anchored = true
+		part.CFrame = model.WorldPivot * CFrame.new(vector(shard.center))
+		part.Parent = built
+	end
+	local whole = model:FindFirstChild("Whole")
+	if whole then
+		whole:Destroy()
+	end
+	built.Parent = model
+	return built
+end
+
+-- Opens the cracks of a damaged piece: every shard is pushed and turned a little out of place.
+-- A shard leans the same way at every stage, only further.
+local function crack(model: Model, data: PieceData, stage: number)
+	local shards = shardsOf(model, data)
+	local amount = Config.CrackStages[stage]
+	for index, shard in data.chunks do
+		local part = shards:FindFirstChild(shard.id)
+		if part and part:IsA("BasePart") then
+			local lean = Random.new(index)
+			part.CFrame = model.WorldPivot
+				* CFrame.new(vector(shard.center) + lean:NextUnitVector() * amount.Shift)
+				* CFrame.fromAxisAngle(lean:NextUnitVector(), math.rad(amount.Tilt))
+		end
+	end
+	model:SetAttribute("Cracks", stage)
+end
+
+-- Lets a shard go: it is thrown, tumbles, lies as rubble, fades and is removed.
+local function fall(part: BasePart, velocity: Vector3)
+	if not part.Parent then
+		return
+	end
+	part.Anchored = false
+	if RunService:IsRunning() then
+		part:SetNetworkOwner(nil)
+	end
+	part.AssemblyLinearVelocity = velocity
+	part.AssemblyAngularVelocity = random:NextUnitVector() * Config.Tumble
+	local fade = TweenInfo.new(
+		Config.DebrisFade,
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.Out,
+		0,
+		false,
+		Config.DebrisLifetime - Config.DebrisFade
+	)
+	TweenService:Create(part, fade, { Transparency = 1 }):Play()
+end
+
+-- Takes the whole piece apart. `push` is added to the shards nearest `point`, fading out with distance;
+-- `blast` throws them away from `point` the same way.
+local function crumble(model: Model, data: PieceData, point: Vector3, push: Vector3, blast: number)
+	local how = (Config.Crumble :: any)[data.mode]
+	local lo, hi = pieceBounds(data)
+	local middle = model.WorldPivot * ((lo + hi) / 2)
+	local reach = (hi - lo).Magnitude
+
+	model:SetAttribute("Health", 0)
+	for _, part in shardsOf(model, data):GetChildren() do
+		if part:IsA("BasePart") then
+			part.CollisionGroup = Config.DebrisGroup
+			part.CanQuery = false
+			part.CanTouch = false
+
+			local near = 1 - math.clamp((part.Position - point).Magnitude / reach, 0, 1)
+			local away, outward = part.Position - point, part.Position - middle
+			local velocity = (push + (if away.Magnitude > 1e-3 then away.Unit else Vector3.zero) * blast) * near
+				+ (if outward.Magnitude > 1e-3 then outward.Unit else Vector3.zero) * how.Outward
+				+ random:NextUnitVector() * Vector3.new(1, 0, 1) * how.Scatter
+			task.delay((1 - near) * how.Stagger, fall, part, velocity)
+		end
+	end
+	Debris:AddItem(model, how.Stagger + Config.DebrisLifetime)
+end
+
+-- The breakable piece a part belongs to, if it has not crumbled yet.
+function Breakable.modelOf(part: Instance): Model?
+	local model = part:FindFirstAncestorWhichIsA("Model")
+	while model and model:GetAttribute("Piece") == nil do
+		model = model:FindFirstAncestorWhichIsA("Model")
+	end
+	if model and (model:GetAttribute("Health") :: number) <= 0 then
+		return nil
+	end
+	return model
+end
+
 -- Stands a whole, undamaged piece with its bottom centre at `origin`.
 function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Model
 	local data = pieceData(piece)
@@ -85,117 +213,56 @@ function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Mode
 	model.Name = piece
 	model.WorldPivot = origin
 	model:SetAttribute("Piece", piece)
+	model:SetAttribute("Health", fullHealth(data))
+	model:AddTag(Breakable.Tag)
 	whole.Parent = model
 	model.Parent = parent or workspace
 	return model
 end
 
--- Swaps the whole part for the shards. Does nothing if the piece is already in shards.
-function Breakable.shatter(model: Model)
-	local whole = model:FindFirstChild("Whole")
-	if not whole then
-		return
+-- A shot that landed on `part` at `point`, travelling along the unit vector `direction`.
+-- Returns whether the part belonged to a breakable piece.
+function Breakable.damage(part: BasePart, amount: number, point: Vector3, direction: Vector3): boolean
+	local model = Breakable.modelOf(part)
+	if not model then
+		return false
 	end
-	local piece = model:GetAttribute("Piece") :: string
-	local templates = meshTemplates(piece)
-	local shardTemplates = templates and templates:FindFirstChild("Shards")
+	local data = pieceData(model:GetAttribute("Piece") :: string)
+	local health = (model:GetAttribute("Health") :: number) - amount
+	if health <= 0 then
+		crumble(model, data, point, direction * Config.ShotPush, 0)
+		return true
+	end
+	model:SetAttribute("Health", health)
 
-	local shards = Instance.new("Folder")
-	shards.Name = "Shards"
-	for _, shard in pieceData(piece).chunks do
-		local template = shardTemplates and shardTemplates:FindFirstChild(shard.id)
-		local part: BasePart = if template and template:IsA("BasePart")
-			then template:Clone()
-			else standIn(vector(shard.size))
-		part.Name = shard.id
-		part.Anchored = true
-		part.CFrame = model.WorldPivot * CFrame.new(vector(shard.center))
-		part.Parent = shards
+	if data.mode == "chunks" then
+		local left, stage = health / fullHealth(data), 0
+		for index, entry in Config.CrackStages do
+			if left <= entry.At then
+				stage = index
+			end
+		end
+		if stage > ((model:GetAttribute("Cracks") :: number?) or 0) then
+			crack(model, data, stage)
+		end
 	end
-	whole:Destroy()
-	shards.Parent = model
+	return true
 end
 
--- Removes every shard whose centre is within `radius` of `point`, then lets go of every shard
--- that no longer has a chain of neighbours down to the ground.
--- Returns how many shards were removed and how many fell.
-function Breakable.blast(model: Model, point: Vector3, radius: number): (number, number)
-	local piece = model:GetAttribute("Piece") :: string
-	local data = pieceData(piece)
-
-	local whole = model:FindFirstChild("Whole")
-	if whole and whole:IsA("BasePart") then
-		-- Leave an untouched piece whole unless the blast reaches one of its shards.
-		local reaches = false
-		for _, shard in data.chunks do
-			if ((model.WorldPivot * vector(shard.center)) - point).Magnitude <= radius then
-				reaches = true
-				break
-			end
-		end
-		if not reaches then
-			return 0, 0
-		end
-		Breakable.shatter(model)
+-- An explosion at `point`. A piece with any shard centred within `radius` comes apart at once, thrown away
+-- from the blast. Returns whether it did.
+function Breakable.blast(model: Model, point: Vector3, radius: number): boolean
+	if (model:GetAttribute("Health") :: number) <= 0 then
+		return false
 	end
-
-	local shards = model:FindFirstChild("Shards")
-	if not shards then
-		return 0, 0
-	end
-
-	local removed = 0
-	local standing: { [string]: BasePart } = {}
-	for _, part in shards:GetChildren() do
-		if part:IsA("BasePart") then
-			if (part.Position - point).Magnitude <= radius then
-				part:Destroy()
-				removed += 1
-			else
-				standing[part.Name] = part
-			end
-		end
-	end
-
-	-- Flood out from the shards that stand on the ground.
-	local byId: { [string]: ShardData } = {}
-	local supported: { [string]: boolean } = {}
-	local queue: { string } = {}
+	local data = pieceData(model:GetAttribute("Piece") :: string)
 	for _, shard in data.chunks do
-		byId[shard.id] = shard
-		if shard.grounded and standing[shard.id] then
-			supported[shard.id] = true
-			table.insert(queue, shard.id)
+		if ((model.WorldPivot * vector(shard.center)) - point).Magnitude <= radius then
+			crumble(model, data, point, Vector3.zero, Config.BlastPush)
+			return true
 		end
 	end
-	-- TODO: a shard that touches a neighbouring piece (`touches` in the break data) should also count as held up.
-	local head = 1
-	while head <= #queue do
-		for _, neighbour in byId[queue[head]].neighbors do
-			if standing[neighbour] and not supported[neighbour] then
-				supported[neighbour] = true
-				table.insert(queue, neighbour)
-			end
-		end
-		head += 1
-	end
-
-	local dropped = 0
-	local fallen = model:FindFirstChild("Fallen")
-	for id, part in standing do
-		if not supported[id] then
-			if not fallen then
-				fallen = Instance.new("Folder")
-				fallen.Name = "Fallen"
-				fallen.Parent = model
-			end
-			part.Parent = fallen
-			part.Anchored = false
-			Debris:AddItem(part, Config.DebrisLifetime)
-			dropped += 1
-		end
-	end
-	return removed, dropped
+	return false
 end
 
 return Breakable

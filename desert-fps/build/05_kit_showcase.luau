@@ -1,13 +1,18 @@
--- Stands the imported kit next to the map for checking scale and look: Workspace.KitShowcase.
--- Run in Studio in edit mode, after 03_lighting.luau and 04_import_meshes.luau. Safe to re-run.
+-- Stands the imported kit next to the map: Workspace.KitShowcase. It is both the look check and the firing range.
+-- Run in Studio in edit mode, after 01_install_modules.luau, 03_lighting.luau and 04_import_meshes.luau.
+-- Safe to re-run.
 -- The pieces are laid out like the "whole" scene in assets/preview.py and the group is turned so the sun
--- falls on it from the same side as in that render (assets/out/compare.png).
--- Two default characters stand by the plain wall and in the doorway, and the weapons sit on a shelf.
+-- falls on it from the same side as in that render (assets/out/compare.png). Walls, door, crates and barrels
+-- are placed through Breakable, so they break in a playtest. Two default characters stand by the plain wall
+-- and in the doorway for scale, the weapons sit in the air to the right, and players spawn on the pad in
+-- front (DevConfig.SpawnPath).
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Meshes = ServerStorage.DesertFps.Meshes
+local Breakable = require(ServerStorage.DesertFps.Destruction.Breakable)
+local BreakData = require(ServerStorage.DesertFps.Assets.BreakData)
 
 -- Outside the map (it spans 112 studs each way from the origin), just above the baseplate.
 local POSITION = Vector3.new(0, 0.05, 180)
@@ -23,6 +28,11 @@ local LAYOUT = {
 	{ "barrel", Vector3.new(-3.2, 0, 3.4), 0 },
 	{ "barrel", Vector3.new(-9.6, 0, 3.0), 40 },
 	{ "crate", Vector3.new(2.6, 0, 4.6), -12 },
+	-- more to shoot at
+	{ "wall_plain", Vector3.new(-22, 0, 0), 0 },
+	{ "crate", Vector3.new(-20, 0, 5), 30 },
+	{ "barrel", Vector3.new(-24, 0, 4), 0 },
+	{ "barrel", Vector3.new(12, 0, 5.5), 15 },
 	{ "rifle", Vector3.new(17, 4, 0.5), 0 },
 	{ "pistol", Vector3.new(21.5, 4, 0.5), 0 },
 	{ "knife", Vector3.new(17, 2, 0.5), 0 },
@@ -30,7 +40,8 @@ local LAYOUT = {
 }
 -- Where the characters stand: beside the plain wall, and in the doorway (4 x 7.6 studs).
 local CHARACTERS = { Vector3.new(-13.5, 0, 0.5), Vector3.new(8.05, 0, 0) }
-local GROUND = { Size = Vector3.new(64, 1, 40), Color = Color3.fromRGB(237, 191, 170) }
+local GROUND = { Size = Vector3.new(72, 1, 44), Centre = Vector3.new(0, 0, 6), Color = Color3.fromRGB(237, 191, 170) }
+local SPAWN = { Position = Vector3.new(0, 0, 20), Size = Vector3.new(6, 0.2, 6) }
 local SKIN = Color3.fromRGB(163, 162, 165)
 
 local function heading(v: Vector3): number
@@ -56,18 +67,33 @@ ground.Size = GROUND.Size
 ground.Color = GROUND.Color
 ground.Material = Enum.Material.SmoothPlastic
 ground.TopSurface = Enum.SurfaceType.Smooth
-ground.CFrame = origin * CFrame.new(4, -GROUND.Size.Y / 2, 2)
+ground.CFrame = origin * CFrame.new(GROUND.Centre - Vector3.new(0, GROUND.Size.Y / 2, 0))
 ground.Parent = showcase
+
+-- Faces the walls (a SpawnLocation's front is -Z, and so is the way to the walls from here).
+local spawn = Instance.new("SpawnLocation")
+spawn.Name = "Spawn"
+spawn.Anchored = true
+spawn.Neutral = true
+spawn.Duration = 0
+spawn.Size = SPAWN.Size
+spawn.Color = GROUND.Color
+spawn.Material = Enum.Material.SmoothPlastic
+spawn.TopSurface = Enum.SurfaceType.Smooth
+spawn.CFrame = origin * CFrame.new(SPAWN.Position + Vector3.new(0, SPAWN.Size.Y / 2, 0))
+spawn.Parent = showcase
 
 for _, entry in LAYOUT do
 	local piece, position, turn = entry[1], entry[2], entry[3]
-	local part = Meshes[piece].Whole:Clone()
-	part.Name = piece
-	part.CFrame = origin
-		* CFrame.new(position)
-		* CFrame.Angles(0, math.rad(turn), 0)
-		* CFrame.new(part:GetAttribute("Offset"))
-	part.Parent = showcase
+	local at = origin * CFrame.new(position) * CFrame.Angles(0, math.rad(turn), 0)
+	if BreakData[piece] then
+		Breakable.place(piece, at, showcase)
+	else
+		local part = Meshes[piece].Whole:Clone()
+		part.Name = piece
+		part.CFrame = at * CFrame.new(part:GetAttribute("Offset"))
+		part.Parent = showcase
+	end
 end
 
 local description = Instance.new("HumanoidDescription")
@@ -92,4 +118,4 @@ end
 
 showcase.Parent = workspace
 game:GetService("ChangeHistoryService"):SetWaypoint("Build kit showcase")
-return { origin = tostring(origin), parts = #showcase:GetChildren() }
+return { origin = tostring(origin), children = #showcase:GetChildren() }

@@ -1,0 +1,81 @@
+--!strict
+-- Starts the server side of the game.
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+
+local DesertFps = (ServerStorage :: any).DesertFps
+local DevConfig = require(DesertFps.DevConfig)
+local DestructionConfig = require(DesertFps.Destruction.DestructionConfig)
+local Breakable = require(DesertFps.Destruction.Breakable)
+local WeaponService = require(DesertFps.Weapons.WeaponService)
+
+WeaponService.start()
+
+-- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by
+-- one the first time it cracks.
+local preload = DesertFps.Meshes:Clone()
+preload.Name = "MeshPreload"
+preload.Parent = ReplicatedStorage:WaitForChild("DesertFps")
+
+-- Characters get their own collision group so rubble does not shove them around.
+local function onCharacter(character: Model)
+	local function group(part: Instance)
+		if part:IsA("BasePart") then
+			part.CollisionGroup = DestructionConfig.CharacterGroup
+		end
+	end
+	for _, part in character:GetDescendants() do
+		group(part)
+	end
+	character.DescendantAdded:Connect(group)
+end
+
+local function devSpawn(): SpawnLocation?
+	local node: Instance? = workspace
+	for _, name in DevConfig.SpawnPath or {} do
+		node = node and node:FindFirstChild(name)
+	end
+	return if node and node:IsA("SpawnLocation") then node else nil
+end
+
+local function onPlayer(player: Player)
+	local spawn = devSpawn()
+	if spawn then
+		player.RespawnLocation = spawn
+	end
+	player.CharacterAdded:Connect(onCharacter)
+	local character = player.Character
+	if character then
+		onCharacter(character)
+		if spawn then
+			-- Already spawned somewhere else before this script ran.
+			character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
+		end
+	end
+end
+Players.PlayerAdded:Connect(onPlayer)
+for _, player in Players:GetPlayers() do
+	onPlayer(player)
+end
+
+-- Testing aid: stand a piece up again some time after it is completely destroyed.
+local function rebuild(model: Instance)
+	local seconds = DevConfig.RebuildSeconds
+	if not (seconds and model:IsA("Model")) then
+		return
+	end
+	local piece, origin, parent = model:GetAttribute("Piece") :: string, model.WorldPivot, model.Parent
+	model.Destroying:Once(function()
+		task.delay(seconds, function()
+			if parent and parent:IsDescendantOf(workspace) then
+				Breakable.place(piece, origin, parent)
+			end
+		end)
+	end)
+end
+CollectionService:GetInstanceAddedSignal(Breakable.Tag):Connect(rebuild)
+for _, model in CollectionService:GetTagged(Breakable.Tag) do
+	rebuild(model)
+end

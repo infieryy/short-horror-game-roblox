@@ -4,15 +4,15 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 
 | Step | Script | What it does |
 |---|---|---|
-| 1 | `01_install_modules.luau` | Installs every project script and the map plan under `ServerStorage.DesertFps` |
+| 1 | `01_install_modules.luau` | Installs every project script and data module: `DesertFps` folders in ServerStorage, ReplicatedStorage, ServerScriptService and StarterPlayerScripts |
 | 2 | `02_build_market.luau` | Builds the Market Square graybox in `Workspace.Graybox_market` |
 | 3 | `03_lighting.luau` | Sets the lighting and post effects |
 | 4 | `04_import_meshes.luau` | Loads the uploaded kit into `ServerStorage.DesertFps.Meshes` and checks every mesh against its data |
-| 5 | `05_kit_showcase.luau` | Stands the kit, two characters and the weapons next to the map in `Workspace.KitShowcase` |
+| 5 | `05_kit_showcase.luau` | Stands the kit, two characters and the weapons next to the map in `Workspace.KitShowcase`. It is also the firing range: the pieces break, and players spawn in front of it |
 
 `tests/time_market_routes.luau` runs on the server during a playtest. It walks bots along the planner's routes and writes the timings to the `RouteTiming` attribute on Workspace.
 
-`tests/break_wall.luau` blasts walls and a door the way `assets/out/broken.png` shows, plus one wall at its foot. Run it on the server during a playtest to see unsupported shards fall, then remove `Workspace.BreakTest`.
+`tests/break_wall.luau` runs on the server during a playtest. It damages a wall through its crack stages until it crumbles, bursts a crate and sets off a blast, and returns a list of checks that should all be `ok = true`.
 
 ## Uploading the kit
 
@@ -32,4 +32,4 @@ python ../plan/routes.py
 python pack.py
 ```
 
-`pack.py` rewrites `01_install_modules.luau` and `out/<Service>.rbxmx` (the same scripts as a model file, for importing with an MCP tool). Importing the model file adds a second `DesertFps` folder, so delete the old one first; that also deletes the imported meshes, and step 4 has to be run again.
+`pack.py` rewrites `01_install_modules.luau` and the files in `out/` (the same scripts as model files, for importing with an MCP tool). Each file is named after the place it is imported into, for example `StarterPlayer.StarterPlayerScripts.rbxmx`. Importing adds a second `DesertFps` folder, so delete the old one first. In ServerStorage, move `DesertFps.Meshes` out before deleting and back in after, or run step 4 again.

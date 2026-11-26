@@ -60,6 +60,7 @@ The owner follows the YorusDevs way of building Roblox games with AI. The rules 
 | Concept art (20 images) | Their own, made in ChatGPT |
 | Map pilot pieces (walls, door, crate, barrel) | "they look good!" |
 | Destruction | Must feel jagged, "like bam I just broke something with a missile". Grid cuts were rejected; the current shard cuts were made in response. |
+| Destruction in Studio (holes left where shards were removed) | "reads a bit scattered". "Walls and props should crumble, they shouldnt feel like part there and part not." So a piece is never left with parts missing: see the status notes. |
 | Rifle | "looks good", then asked for more hand-painted detail and brushed edges, then "looks pretty sweet" |
 | Pistol | Asked for a Desert Eagle. Said the result looks like a Glock, but "it ok". **Open flaw, not a blocker.** |
 | Knife (karambit) | First version "really trash". Remade from their reference photo: "much better". |
@@ -149,7 +150,7 @@ Renders for reference: `assets/out/preview.png`, `compare.png` (next to the conc
 ## 5. Known flaws and open decisions
 
 **Not verified anywhere**
-- No game code exists beyond the graybox builder and wall destruction: no weapons, no round logic, no shop.
+- Game code so far: the graybox builder, destruction, and the rifle in first person (fire only). No reload, no damage to players, no round logic, no shop.
 - `assets/run.py` does not repaint identically on another machine (see the status notes below).
 
 **Flaws**
@@ -184,8 +185,20 @@ The Studio place is "FPS MAXXING" (place 82969491633504), saved to Roblox. `buil
 | 1 Import and scale test | Done. The `.fbx` scale is exact (wall 8 x 12, crate 3.09, rifle 3.46 studs, the same as the `.obj`). The importer turned every mesh half a turn about the vertical axis; fixed in `assets/build.py` (`FBX_TURN`). Screenshots: `assets/studio/scale-wall.jpg`, `scale-doorway.jpg`. |
 | 2 Matte look | Done. Every mesh has its texture as a SurfaceAppearance colour map. Lighting tuned against `assets/out/preview.png` (`build/03_lighting.luau` has the numbers and the reasons). Screenshot: `assets/studio/kit.jpg`. |
 | 3 Import the rest | Done. All 10 pieces, 105 meshes, are in `ServerStorage.DesertFps.Meshes`, each within 0.001 studs of the position its data gives. 10 model uploads (one bundle per piece) and 10 textures; ids in `game/ServerStorage/DesertFps/Assets/AssetIds.luau`. |
-| 4 Break test | Done for the walls and the door (`build/tests/break_wall.luau`). The holes match `broken.png` (`assets/studio/broken.jpg`); in a playtest the shards left without support fall. Crates and barrels (`shatter` mode) are not built. |
+| 4 Break test | Done, then changed at the owner's request: see "Rifle and crumbling" below. The first version matched `broken.png` (`assets/studio/broken.jpg`). |
 | 5 Graybox | Done for Market Square. Results are in `plan/PLAN.md`. `zones.py` needed no change. |
+
+### Rifle and crumbling (same session, after job 5)
+
+The owner asked for: rifles destroy walls, crates and barrels shatter, and nothing left "part there and part not".
+
+- **Destruction** (`game/ServerStorage/DesertFps/Destruction/`). Every piece has one health and is always complete. Walls and doors crack along their cuts at 66% and 33% health (the shards shift slightly; none is missing), then the whole piece crumbles, starting where it was hit. Crates and barrels burst outwards. Rubble lies 6 seconds, fades and is removed. A blast takes apart every piece it reaches. The numbers are in `DestructionConfig.luau`. A wall's health is the sum of its shards' health (about 1,100 to 1,200).
+- The per-shard support data in the break files (`grounded`, `neighbors`, `touches`) is not used any more. The version that removed shards one by one and dropped unsupported ones is in git history (commit `04352e3`).
+- **Rifle** (`game/ServerStorage/DesertFps/Weapons/WeaponService.luau`, `game/StarterPlayer/StarterPlayerScripts/DesertFps/WeaponClient.client.luau`, numbers in `game/ReplicatedStorage/DesertFps/Weapons/WeaponConfig.luau`). First person, automatic, 30 damage, 600 shots a minute, no ammo. The client sends where it fired from and the direction; the server checks the fire rate and that the shot starts at the shooter's head, then does the hit itself. The view model is built from the rifle's separate parts, and the bolt slides on each shot using the joint data.
+- **Firing range.** `Workspace.KitShowcase` is now also the range: its walls, door, crates and barrels are breakable, and players spawn in front of it. `game/ServerStorage/DesertFps/DevConfig.luau` holds the two testing switches (spawn at the range; stand a destroyed piece up again after 8 seconds).
+- Checked in a playtest: `assets/studio/rifle-crumble.mp4`, and `build/tests/break_wall.luau` (11 checks, all pass).
+- Not built: reload and ammo, sounds, muzzle flash, hit marks, dust, damage to players, other players seeing the shooter's weapon or tracers, the other three weapons.
+- Not checked: a real person aiming with the mouse (the test aimed the camera by script and held the trigger with simulated input), more than one player, phone or gamepad.
 
 Notes for the next session:
 - `Lighting.Technology` cannot be set by script any more. "Future" is now `LightingStyle = Realistic` with `PrioritizeLightingQuality = true`.
@@ -196,8 +209,8 @@ Notes for the next session:
 - Unused test uploads on the owner's Roblox account, safe to archive in the Creator Dashboard: models 99802333338004, 136057078609739, 126807788706610, 91141018994234.
 - Roblox has no roughness number on a SurfaceAppearance. Nothing shines because `EnvironmentSpecularScale` is 0 and no roughness or metalness map is set.
 - Shade in Roblox is lavender (look rule). In the Blender render it is warmer, because Blender bounces light off the orange ground.
-- The door's top shard falls when the shard under it goes, because the break data has no hinge. The render leaves it hanging.
 - A few dark pin-pricks show along shard seams once a wall is in shards. Not investigated.
+- Clients preload every kit mesh at start (`Preload.client.luau`). Without it, the shards of a piece appear one by one over about a second the first time it cracks.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

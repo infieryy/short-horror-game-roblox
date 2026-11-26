@@ -179,5 +179,5 @@ All ten pieces are imported (see `../build/README.md`). The scale is exact: the 
 - `run.py` is not repeatable across machines: on Windows it repaints five of the pieces differently from the committed textures, because the texture layout shifts with tiny rounding differences. To change only how the `.fbx` files are written, run `python3 rebundle.py`, which rewrites them from the `.obj` meshes and repaints nothing.
 - The weapons have no animations, sounds or firing code, and have not been seen in first person in Roblox.
 - The sockets and joints are positions and directions in a data file. Nothing has been rigged or attached with them yet.
-- Crates and barrels (`shatter` mode) have no destruction code yet. Walls and the door do, and were tested in Studio.
+- In the game a piece is never left with shards missing (the owner's call after seeing holes in Studio): walls and doors crack along the cuts as they take damage and then crumble whole; crates and barrels burst. The modes in the table above describe the data, not the game any more. See `../HANDOFF.md`.
 - The preview is a Blender render with a sun and lavender ambient light set up to resemble the planned Roblox lighting. It is not Roblox.
