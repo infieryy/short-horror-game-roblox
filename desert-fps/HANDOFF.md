@@ -174,6 +174,24 @@ Renders for reference: `assets/out/preview.png`, `compare.png` (next to the conc
 
 Work through these in order. Stop and report after job 5.
 
+### Status on 2026-11-26 (first PC session)
+
+The Studio place is "FPS MAXXING" (place 82969491633504), saved to Roblox. `build/README.md` says how to rebuild it.
+
+| Job | State |
+|---|---|
+| 0 Set up | Done |
+| 1 Import and scale test | **Blocked.** Studio's MCP only uploads files from a folder the owner has approved (Studio: Assistant, Settings, MCP Permissions, approved upload directories). None is approved yet. Nothing has been imported. |
+| 2 Matte look | Lighting is set (`build/03_lighting.luau`). The texture comparison needs job 1. |
+| 3 Import the rest | Blocked with job 1. 115 files in all; consider one bundle file per piece. |
+| 4 Break test | The logic is written and tested on gray stand-in boxes (`game/.../Destruction/Breakable.luau`, `build/tests/break_wall.luau`). It picks up real meshes from `ServerStorage.DesertFps.Meshes.<piece>.Whole` and `.Shards.<id>` once they exist. The look against `broken.png` is not checked. |
+| 5 Graybox | Done for Market Square. Results are in `plan/PLAN.md`. `zones.py` needed no change. |
+
+Notes for the next session:
+- `Lighting.Technology` cannot be set by script any more. "Future" is now `LightingStyle = Realistic` with `PrioritizeLightingQuality = true`.
+- `plan/planner.py` loads its fonts from a Linux path, so it cannot redraw the plan images on Windows. `plan/routes.py` works.
+- Script changes go in `game/`, then `python build/pack.py`, then import `build/out/ServerStorage.rbxmx` (or run `build/01_install_modules.luau`).
+
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
 2. Read `desert-fps/README.md`, `plan/PLAN.md` and `assets/README.md`.
