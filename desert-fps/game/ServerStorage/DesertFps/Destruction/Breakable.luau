@@ -161,6 +161,10 @@ local function crumble(model: Model, data: PieceData, point: Vector3, push: Vect
 	local reach = (hi - lo).Magnitude
 
 	model:SetAttribute("Health", 0)
+	local ramp = model:FindFirstChild("Ramp")
+	if ramp then
+		ramp:Destroy()
+	end
 	for _, part in shardsOf(model, data):GetChildren() do
 		if part:IsA("BasePart") then
 			part.CollisionGroup = Config.DebrisGroup
@@ -216,6 +220,20 @@ function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Mode
 	model:SetAttribute("Health", fullHealth(data))
 	model:AddTag(Breakable.Tag)
 	whole.Parent = model
+
+	local rampSize = (Config.Ramps :: any)[piece]
+	if rampSize then
+		whole.CanCollide = false
+		-- a wedge is tallest at its back (+Z); the pieces climb towards their own -Z
+		local ramp = Instance.new("WedgePart")
+		ramp.Name = "Ramp"
+		ramp.Anchored = true
+		ramp.Transparency = 1
+		ramp.CanQuery = false
+		ramp.Size = rampSize
+		ramp.CFrame = origin * CFrame.new(0, rampSize.Y / 2, 0) * CFrame.Angles(0, math.pi, 0)
+		ramp.Parent = model
+	end
 	model.Parent = parent or workspace
 	return model
 end

@@ -2,14 +2,17 @@
 -- Roblox asset ids of the uploaded kit, one entry per piece in assets/out.
 --   Model    <piece>.bundle.fbx: the whole mesh, the low-detail mesh and every shard or part
 --   Texture  <piece>.png: the painted colour map all of those meshes share
--- build/04_import_meshes.luau turns these into ServerStorage.DesertFps.Meshes.
+-- KitImporter (run by build/04_import_meshes.luau) turns these into ServerStorage.DesertFps.Meshes.
 return {
 	-- walls and what stands on them
 	wall_plain = { Model = 135688760968419, Texture = 138862098007028 },
 	wall_window = { Model = 84401295749564, Texture = 75786669681463 },
 	wall_door = { Model = 134685181880905, Texture = 96011352369868 },
+	wall_upper = { Model = 78481637266989, Texture = 97790471423135 },
+	wall_upper_window = { Model = 133077208303408, Texture = 76085098165086 },
 	door = { Model = 79949303134565, Texture = 120854672972528 },
 	corner = { Model = 126928037378035, Texture = 120740401415426 },
+	corner_upper = { Model = 96251787214703, Texture = 137341447898800 },
 	pillar = { Model = 80140756085473, Texture = 80059467709614 },
 	parapet_plain = { Model = 124854673762242, Texture = 128242936773612 },
 	parapet_crenel = { Model = 137862454262948, Texture = 125725717635992 },
@@ -25,6 +28,7 @@ return {
 	cloth = { Model = 75836189447925, Texture = 115993995556316 },
 	sacks = { Model = 120260512172843, Texture = 139029465132365 },
 	well = { Model = 135593641026960, Texture = 96683377023018 },
+	vat = { Model = 101299231533027, Texture = 123123660466542 },
 	pot_tall = { Model = 97423098986423, Texture = 135563924597401 },
 	pot_round = { Model = 88286217449531, Texture = 71678345962449 },
 	vase = { Model = 98791326366622, Texture = 98382732716420 },

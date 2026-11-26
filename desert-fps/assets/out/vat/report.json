@@ -1,0 +1,12 @@
+{
+ "piece": "vat",
+ "triangles": 444,
+ "triangles_low": 220,
+ "strokes": 46909,
+ "px_per_stud": 46.1,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 724,
+ "problems": [],
+ "seconds": 15.1
+}

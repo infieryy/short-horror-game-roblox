@@ -120,14 +120,17 @@ end
 -- Roblox asset ids of the uploaded kit, one entry per piece in assets/out.
 --   Model    <piece>.bundle.fbx: the whole mesh, the low-detail mesh and every shard or part
 --   Texture  <piece>.png: the painted colour map all of those meshes share
--- build/04_import_meshes.luau turns these into ServerStorage.DesertFps.Meshes.
+-- KitImporter (run by build/04_import_meshes.luau) turns these into ServerStorage.DesertFps.Meshes.
 return {
 	-- walls and what stands on them
 	wall_plain = { Model = 135688760968419, Texture = 138862098007028 },
 	wall_window = { Model = 84401295749564, Texture = 75786669681463 },
 	wall_door = { Model = 134685181880905, Texture = 96011352369868 },
+	wall_upper = { Model = 78481637266989, Texture = 97790471423135 },
+	wall_upper_window = { Model = 133077208303408, Texture = 76085098165086 },
 	door = { Model = 79949303134565, Texture = 120854672972528 },
 	corner = { Model = 126928037378035, Texture = 120740401415426 },
+	corner_upper = { Model = 96251787214703, Texture = 137341447898800 },
 	pillar = { Model = 80140756085473, Texture = 80059467709614 },
 	parapet_plain = { Model = 124854673762242, Texture = 128242936773612 },
 	parapet_crenel = { Model = 137862454262948, Texture = 125725717635992 },
@@ -143,6 +146,7 @@ return {
 	cloth = { Model = 75836189447925, Texture = 115993995556316 },
 	sacks = { Model = 120260512172843, Texture = 139029465132365 },
 	well = { Model = 135593641026960, Texture = 96683377023018 },
+	vat = { Model = 101299231533027, Texture = 123123660466542 },
 	pot_tall = { Model = 97423098986423, Texture = 135563924597401 },
 	pot_round = { Model = 88286217449531, Texture = 71678345962449 },
 	vase = { Model = 98791326366622, Texture = 98382732716420 },
@@ -161,8 +165,126 @@ return {
 local HttpService = game:GetService("HttpService")
 
 return HttpService:JSONDecode([=[
-{"awning":{"piece":"awning","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":50,"chunks":[{"id":"s00","mesh":"chunks/awning_s00.fbx","center":[-0.016,1.875,0.516],"size":[6.351,3.75,1.033],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":68,"neighbors":["s01","s02","s03","s04"]},{"id":"s01","mesh":"chunks/awning_s01.fbx","center":[-3.045,1.84,0.982],"size":[0.81,3.681,1.964],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":60,"neighbors":["s00","s03","s04"]},{"id":"s02","mesh":"chunks/awning_s02.fbx","center":[1.27,1.833,2.307],"size":[4.359,2.582,2.956],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":312,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/awning_s03.fbx","center":[-1.908,2.343,2.067],"size":[3.083,2.641,3.436],"material":"canvas","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":256,"neighbors":["s00","s01","s02","s04"]},{"id":"s04","mesh":"chunks/awning_s04.fbx","center":[0.08,2.622,1.169],"size":[6.74,2.256,2.337],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":292,"neighbors":["s00","s01","s02","s03"]}]},"barrel":{"piece":"barrel","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":115,"chunks":[{"id":"s00","mesh":"chunks/barrel_s00.fbx","center":[0.417,1.553,-0.678],"size":[1.586,1.402,1.224],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":62,"neighbors":["s01","s02","s04","s06"]},{"id":"s01","mesh":"chunks/barrel_s01.fbx","center":[0.642,2.589,0.473],"size":[1.295,2.023,1.634],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":164,"neighbors":["s00","s02","s03","s04","s05","s06"]},{"id":"s02","mesh":"chunks/barrel_s02.fbx","center":[0.268,2.768,-0.681],"size":[1.702,1.664,1.034],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":96,"neighbors":["s00","s01","s03","s04"]},{"id":"s03","mesh":"chunks/barrel_s03.fbx","center":[-0.28,2.7,0.16],"size":[1.803,1.8,2.26],"material":"wood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":158,"neighbors":["s01","s02","s04"]},{"id":"s04","mesh":"chunks/barrel_s04.fbx","center":[-0.492,1.514,0.074],"size":[1.596,3.028,2.432],"material":"wood","health":30,"collision":"Hull","grounded":true,"touches":[],"triangles":170,"neighbors":["s00","s01","s02","s03","s05","s06"]},{"id":"s05","mesh":"chunks/barrel_s05.fbx","center":[0.195,0.861,0.613],"size":[1.93,1.722,1.34],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":76,"neighbors":["s01","s04","s06"]},{"id":"s06","mesh":"chunks/barrel_s06.fbx","center":[0.277,0.943,-0.313],"size":[2.027,1.885,1.738],"material":"wood","health":20,"collision":"Hull","grounded":true,"touches":[],"triangles":102,"neighbors":["s00","s01","s04","s05"]}]},"cloth":{"piece":"cloth","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":40,"chunks":[{"id":"s00","mesh":"chunks/cloth_s00.fbx","center":[0.0,2.875,0.26],"size":[6.6,3.351,0.37],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":220,"neighbors":["s01","s03"]},{"id":"s01","mesh":"chunks/cloth_s01.fbx","center":[0.801,6.033,0.26],"size":[4.999,5.498,0.37],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":84,"neighbors":["s00","s02","s03"]},{"id":"s02","mesh":"chunks/cloth_s02.fbx","center":[1.349,8.717,0.081],"size":[5.302,2.336,0.729],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":["right"],"triangles":180,"neighbors":["s01","s03"]},{"id":"s03","mesh":"chunks/cloth_s03.fbx","center":[-2.193,6.881,0.081],"size":[3.614,6.009,0.729],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":["left"],"triangles":132,"neighbors":["s00","s01","s02"]}]},"corner":{"piece":"corner","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/corner_s00.fbx","center":[0.073,3.912,-0.073],"size":[1.646,4.685,1.646],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["s01","s02","s03"]},{"id":"s01","mesh":"chunks/corner_s01.fbx","center":[0.0,5.426,0.0],"size":[1.5,2.639,1.5],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":16,"neighbors":["s00","s02","s03"]},{"id":"s02","mesh":"chunks/corner_s02.fbx","center":[0.0,8.81,-0.0],"size":[1.5,6.38,1.5],"material":"plaster","health":155,"collision":"Hull","grounded":false,"touches":["right"],"triangles":16,"neighbors":["s00","s01"]},{"id":"s03","mesh":"chunks/corner_s03.fbx","center":[0.0,2.507,-0.0],"size":[1.837,5.013,1.837],"material":"plaster","health":135,"collision":"Hull","grounded":true,"touches":["left"],"triangles":36,"neighbors":["s00","s01"]}]},"crate":{"piece":"crate","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":185,"chunks":[{"id":"s00","mesh":"chunks/crate_s00.fbx","center":[-0.603,0.757,0.333],"size":[1.795,1.514,2.333],"material":"darkwood","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":156,"neighbors":["s01","s02","s03","s05"]},{"id":"s01","mesh":"chunks/crate_s01.fbx","center":[-0.474,1.804,0.581],"size":[2.051,2.393,1.839],"material":"darkwood","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":264,"neighbors":["s00","s02","s03","s04","s05","s07"]},{"id":"s02","mesh":"chunks/crate_s02.fbx","center":[-0.515,1.813,-0.641],"size":[1.97,2.373,1.719],"material":"darkwood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":256,"neighbors":["s00","s01","s03","s04","s05","s06"]},{"id":"s03","mesh":"chunks/crate_s03.fbx","center":[0.0,1.039,-0.48],"size":[3.0,2.078,2.041],"material":"darkwood","health":35,"collision":"Hull","grounded":true,"touches":[],"triangles":212,"neighbors":["s00","s01","s02","s04","s05","s06"]},{"id":"s04","mesh":"chunks/crate_s04.fbx","center":[0.376,2.248,-0.012],"size":[1.908,1.505,2.827],"material":"darkwood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":144,"neighbors":["s01","s02","s03","s05","s06","s07"]},{"id":"s05","mesh":"chunks/crate_s05.fbx","center":[0.464,1.006,0.242],"size":[2.072,2.012,2.515],"material":"darkwood","health":35,"collision":"Hull","grounded":true,"touches":[],"triangles":184,"neighbors":["s00","s01","s02","s03","s04","s06","s07"]},{"id":"s06","mesh":"chunks/crate_s06.fbx","center":[0.843,1.572,-0.368],"size":[1.315,2.856,2.264],"material":"darkwood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":252,"neighbors":["s02","s03","s04","s05","s07"]},{"id":"s07","mesh":"chunks/crate_s07.fbx","center":[0.792,2.097,0.544],"size":[1.416,1.806,1.912],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":200,"neighbors":["s01","s04","s05","s06"]}]},"door":{"piece":"door","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/door_s00.fbx","center":[0.0,0.813,0.002],"size":[3.9,1.626,0.465],"material":"darkwood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":268,"neighbors":["s01","s04"]},{"id":"s01","mesh":"chunks/door_s01.fbx","center":[-0.356,2.461,0.002],"size":[3.187,2.806,0.465],"material":"darkwood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":248,"neighbors":["s00","s02","s04"]},{"id":"s02","mesh":"chunks/door_s02.fbx","center":[-0.54,4.731,-0.032],"size":[2.82,2.788,0.345],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":152,"neighbors":["s01","s03","s04","s05"]},{"id":"s03","mesh":"chunks/door_s03.fbx","center":[-0.742,6.478,0.002],"size":[2.415,2.043,0.465],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":224,"neighbors":["s02","s05"]},{"id":"s04","mesh":"chunks/door_s04.fbx","center":[1.1,3.066,0.035],"size":[1.699,3.762,0.53],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":292,"neighbors":["s00","s01","s02","s05"]},{"id":"s05","mesh":"chunks/door_s05.fbx","center":[0.807,6.07,0.002],"size":[2.285,2.86,0.465],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":232,"neighbors":["s02","s03","s04"]}]},"ladder":{"piece":"ladder","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":50,"chunks":[{"id":"s00","mesh":"chunks/ladder_s00.fbx","center":[0.0,6.604,0.1],"size":[2.44,4.271,0.453],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":104,"neighbors":["s03","s04"]},{"id":"s01","mesh":"chunks/ladder_s01.fbx","center":[0.252,1.798,0.093],"size":[1.937,3.596,0.466],"material":"darkwood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":72,"neighbors":["s02","s04"]},{"id":"s02","mesh":"chunks/ladder_s02.fbx","center":[-0.709,1.496,0.093],"size":[1.022,2.992,0.466],"material":"darkwood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":72,"neighbors":["s01","s04"]},{"id":"s03","mesh":"chunks/ladder_s03.fbx","center":[0.0,10.471,0.101],"size":[2.44,4.657,0.449],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":124,"neighbors":["s00"]},{"id":"s04","mesh":"chunks/ladder_s04.fbx","center":[0.0,4.248,0.099],"size":[2.44,2.694,0.454],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":80,"neighbors":["s00","s01","s02"]}]},"parapet_corner":{"piece":"parapet_corner","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/parapet_corner_s00.fbx","center":[0.0,2.579,-0.0],"size":[1.44,1.443,1.44],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":36,"neighbors":["s01"]},{"id":"s01","mesh":"chunks/parapet_corner_s01.fbx","center":[0.0,1.209,-0.0],"size":[1.44,2.417,1.44],"material":"plaster","health":55,"collision":"Hull","grounded":true,"touches":["left"],"triangles":36,"neighbors":["s00"]}]},"parapet_crenel":{"piece":"parapet_crenel","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/parapet_crenel_s00.fbx","center":[-2.163,3.416,-0.0],"size":[3.674,1.769,1.32],"material":"plaster","health":25,"collision":"Hull","grounded":false,"touches":["left"],"triangles":92,"neighbors":["s01","s03"]},{"id":"s01","mesh":"chunks/parapet_crenel_s01.fbx","center":[0.098,2.15,-0.0],"size":[3.437,4.3,1.32],"material":"plaster","health":110,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":68,"neighbors":["s00","s02","s03","s04"]},{"id":"s02","mesh":"chunks/parapet_crenel_s02.fbx","center":[1.836,2.452,-0.0],"size":[4.327,3.696,1.32],"material":"plaster","health":100,"collision":"Hull","grounded":false,"touches":["right"],"triangles":104,"neighbors":["s01","s04"]},{"id":"s03","mesh":"chunks/parapet_crenel_s03.fbx","center":[-2.557,1.593,-0.0],"size":[2.887,3.185,1.32],"material":"plaster","health":95,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":52,"neighbors":["s00","s01"]},{"id":"s04","mesh":"chunks/parapet_crenel_s04.fbx","center":[2.797,0.964,-0.0],"size":[2.406,1.927,1.0],"material":"plaster","health":35,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":12,"neighbors":["s01","s02"]}]},"parapet_plain":{"piece":"parapet_plain","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/parapet_plain_s00.fbx","center":[-1.335,1.5,-0.0],"size":[2.944,3.0,1.32],"material":"plaster","health":90,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":28,"neighbors":["s02","s03","s04"]},{"id":"s01","mesh":"chunks/parapet_plain_s01.fbx","center":[2.343,1.569,-0.0],"size":[3.313,2.863,1.32],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":["right"],"triangles":20,"neighbors":["s04"]},{"id":"s02","mesh":"chunks/parapet_plain_s02.fbx","center":[-2.975,0.544,-0.0],"size":[2.05,1.089,1.0],"material":"plaster","health":20,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":12,"neighbors":["s00","s03"]},{"id":"s03","mesh":"chunks/parapet_plain_s03.fbx","center":[-3.084,1.937,-0.0],"size":[1.831,2.127,1.32],"material":"plaster","health":40,"collision":"Hull","grounded":false,"touches":["left"],"triangles":24,"neighbors":["s00","s02"]},{"id":"s04","mesh":"chunks/parapet_plain_s04.fbx","center":[1.874,1.5,-0.0],"size":[4.251,3.0,1.32],"material":"plaster","health":95,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":28,"neighbors":["s00","s01"]}]},"pillar":{"piece":"pillar","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/pillar_s00.fbx","center":[0.0,1.415,-0.0],"size":[2.5,2.829,2.5],"material":"stone","health":180,"collision":"Hull","grounded":true,"touches":["left"],"triangles":116,"neighbors":["s02"]},{"id":"s01","mesh":"chunks/pillar_s01.fbx","center":[0.0,10.957,-0.0],"size":[2.3,2.087,2.3],"material":"stone","health":110,"collision":"Hull","grounded":false,"touches":["right"],"triangles":124,"neighbors":["s04"]},{"id":"s02","mesh":"chunks/pillar_s02.fbx","center":[-0.002,4.375,0.001],"size":[1.688,4.491,1.688],"material":"stone","health":110,"collision":"Hull","grounded":false,"touches":[],"triangles":32,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/pillar_s03.fbx","center":[0.012,7.248,-0.0],"size":[1.627,3.596,1.642],"material":"stone","health":55,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["s02","s04"]},{"id":"s04","mesh":"chunks/pillar_s04.fbx","center":[-0.021,8.697,0.072],"size":[1.858,4.289,1.756],"material":"stone","health":75,"collision":"Hull","grounded":false,"touches":[],"triangles":52,"neighbors":["s01","s02","s03"]}]},"plank":{"piece":"plank","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":105,"chunks":[{"id":"s00","mesh":"chunks/plank_s00.fbx","center":[-2.536,0.375,-0.784],"size":[2.927,0.75,2.708],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":["left"],"triangles":52,"neighbors":["s01","s02","s03","s04","s05"]},{"id":"s01","mesh":"chunks/plank_s01.fbx","center":[1.435,0.375,0.03],"size":[5.129,0.75,6.18],"material":"wood","health":45,"collision":"Hull","grounded":true,"touches":["right"],"triangles":104,"neighbors":["s00","s04","s05"]},{"id":"s02","mesh":"chunks/plank_s02.fbx","center":[-2.327,0.375,1.814],"size":[3.347,0.75,2.613],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":["left"],"triangles":64,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/plank_s03.fbx","center":[-3.214,0.62,0.21],"size":[1.512,0.26,3.228],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s00","s02"]},{"id":"s04","mesh":"chunks/plank_s04.fbx","center":[-0.289,0.375,1.249],"size":[3.959,0.75,3.742],"material":"wood","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":72,"neighbors":["s00","s01","s02"]},{"id":"s05","mesh":"chunks/plank_s05.fbx","center":[-1.56,0.375,-2.035],"size":[4.88,0.75,2.05],"material":"wood","health":15,"collision":"Hull","grounded":true,"touches":["left"],"triangles":76,"neighbors":["s00","s01"]}]},"pot_round":{"piece":"pot_round","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":50,"chunks":[{"id":"s00","mesh":"chunks/pot_round_s00.fbx","center":[-0.35,1.195,0.047],"size":[1.462,1.771,1.798],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":102,"neighbors":["s01","s02","s03","s04"]},{"id":"s01","mesh":"chunks/pot_round_s01.fbx","center":[0.199,1.07,-0.576],"size":[1.877,2.021,1.188],"material":"band","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":82,"neighbors":["s00","s03","s04"]},{"id":"s02","mesh":"chunks/pot_round_s02.fbx","center":[0.183,1.47,0.651],"size":[1.463,1.22,1.037],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":66,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/pot_round_s03.fbx","center":[0.093,0.478,0.257],"size":[2.119,0.957,1.778],"material":"band","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":60,"neighbors":["s00","s01","s02","s04"]},{"id":"s04","mesh":"chunks/pot_round_s04.fbx","center":[0.66,1.399,0.095],"size":[1.08,1.362,1.202],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":72,"neighbors":["s00","s01","s02","s03"]}]},"pot_tall":{"piece":"pot_tall","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":60,"chunks":[{"id":"s00","mesh":"chunks/pot_tall_s00.fbx","center":[-0.027,2.353,0.168],"size":[2.665,1.694,1.848],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":180,"neighbors":["s02","s03","s04"]},{"id":"s01","mesh":"chunks/pot_tall_s01.fbx","center":[-0.249,0.714,0.197],"size":[1.361,1.428,1.506],"material":"clay","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":46,"neighbors":["s02","s03","s04"]},{"id":"s02","mesh":"chunks/pot_tall_s02.fbx","center":[-0.41,1.196,0.676],"size":[1.103,0.821,0.831],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":30,"neighbors":["s00","s01","s03","s04"]},{"id":"s03","mesh":"chunks/pot_tall_s03.fbx","center":[0.279,1.379,-0.051],"size":[2.162,2.759,2.081],"material":"clay","health":20,"collision":"Hull","grounded":true,"touches":[],"triangles":98,"neighbors":["s00","s01","s02","s04"]},{"id":"s04","mesh":"chunks/pot_tall_s04.fbx","center":[-0.677,1.72,-0.099],"size":[1.367,1.476,1.744],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":56,"neighbors":["s00","s01","s02","s03"]}]},"roof":{"piece":"roof","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/roof_s00.fbx","center":[0.894,0.237,-2.544],"size":[6.212,1.645,2.912],"material":"plaster","health":160,"collision":"Hull","grounded":true,"touches":["right","top"],"triangles":88,"neighbors":["s02","s04","s05"]},{"id":"s01","mesh":"chunks/roof_s01.fbx","center":[0.347,0.237,2.678],"size":[3.618,1.645,2.643],"material":"plaster","health":75,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":56,"neighbors":["s02","s03","s05","s06"]},{"id":"s02","mesh":"chunks/roof_s02.fbx","center":[-1.59,0.237,-0.552],"size":[4.441,1.645,4.182],"material":"plaster","health":145,"collision":"Hull","grounded":true,"touches":[],"triangles":92,"neighbors":["s00","s01","s03","s04","s05"]},{"id":"s03","mesh":"chunks/roof_s03.fbx","center":[-2.185,0.237,2.276],"size":[3.631,1.645,3.448],"material":"plaster","health":125,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":52,"neighbors":["s01","s02","s04"]},{"id":"s04","mesh":"chunks/roof_s04.fbx","center":[-2.846,0.237,-1.64],"size":[2.308,1.645,4.719],"material":"plaster","health":90,"collision":"Hull","grounded":true,"touches":["left","top"],"triangles":52,"neighbors":["s00","s02","s03"]},{"id":"s05","mesh":"chunks/roof_s05.fbx","center":[1.969,0.237,-0.361],"size":[4.062,1.645,4.892],"material":"plaster","health":165,"collision":"Hull","grounded":true,"touches":["right"],"triangles":72,"neighbors":["s00","s01","s02","s06"]},{"id":"s06","mesh":"chunks/roof_s06.fbx","center":[2.498,0.237,2.234],"size":[3.004,1.645,3.532],"material":"plaster","health":90,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":48,"neighbors":["s01","s05"]}]},"sacks":{"piece":"sacks","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":85,"chunks":[{"id":"s00","mesh":"chunks/sacks_s00.fbx","center":[1.537,1.262,-0.543],"size":[3.15,2.477,2.95],"material":"burlap","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":190,"neighbors":["s01","s02","s05"]},{"id":"s01","mesh":"chunks/sacks_s01.fbx","center":[-0.358,0.815,-1.079],"size":[3.168,1.583,1.768],"material":"burlap","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":164,"neighbors":["s00","s02","s03","s04","s05"]},{"id":"s02","mesh":"chunks/sacks_s02.fbx","center":[1.106,1.272,0.606],"size":[3.807,2.498,2.617],"material":"burlap","health":25,"collision":"Hull","grounded":true,"touches":[],"triangles":280,"neighbors":["s00","s01","s03","s05"]},{"id":"s03","mesh":"chunks/sacks_s03.fbx","center":[-1.824,0.693,0.591],"size":[2.438,1.339,2.739],"material":"burlap","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":114,"neighbors":["s01","s02","s04","s05"]},{"id":"s04","mesh":"chunks/sacks_s04.fbx","center":[-2.189,0.449,-1.196],"size":[1.551,0.851,1.519],"material":"burlap","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":42,"neighbors":["s01","s03","s05"]},{"id":"s05","mesh":"chunks/sacks_s05.fbx","center":[-0.948,1.298,0.368],"size":[2.044,2.446,2.727],"material":"burlap","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":190,"neighbors":["s00","s01","s02","s03","s04"]}]},"stairs":{"piece":"stairs","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/stairs_s00.fbx","center":[-2.104,2.315,1.898],"size":[3.791,4.629,4.404],"material":"plaster","health":410,"collision":"Hull","grounded":true,"touches":["left"],"triangles":154,"neighbors":["s01","s03","s04","s05"]},{"id":"s01","mesh":"chunks/stairs_s01.fbx","center":[0.0,4.042,-1.99],"size":[8.0,8.083,4.019],"material":"plaster","health":1340,"collision":"Hull","grounded":true,"touches":["left"],"triangles":24,"neighbors":["s00","s02","s03","s04","s05"]},{"id":"s02","mesh":"chunks/stairs_s02.fbx","center":[0.887,9.355,-1.95],"size":[6.225,5.53,4.1],"material":"plaster","health":445,"collision":"Hull","grounded":false,"touches":[],"triangles":192,"neighbors":["s01","s03","s04","s05"]},{"id":"s03","mesh":"chunks/stairs_s03.fbx","center":[-0.206,6.548,-0.145],"size":[7.589,5.144,4.49],"material":"plaster","health":250,"collision":"Hull","grounded":false,"touches":[],"triangles":156,"neighbors":["s00","s01","s02","s04","s05"]},{"id":"s04","mesh":"chunks/stairs_s04.fbx","center":[0.668,3.42,0.052],"size":[6.664,6.839,8.096],"material":"plaster","health":1805,"collision":"Hull","grounded":true,"touches":["left"],"triangles":196,"neighbors":["s00","s01","s02","s03","s05"]},{"id":"s05","mesh":"chunks/stairs_s05.fbx","center":[-0.815,7.42,-1.489],"size":[6.371,9.399,5.022],"material":"plaster","health":1065,"collision":"Hull","grounded":false,"touches":[],"triangles":234,"neighbors":["s00","s01","s02","s03","s04"]}]},"stall":{"piece":"stall","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":120,"chunks":[{"id":"s00","mesh":"chunks/stall_s00.fbx","center":[2.38,0.938,-0.0],"size":[1.96,1.876,4.72],"material":"stone","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":68,"neighbors":["s03","s09"]},{"id":"s01","mesh":"chunks/stall_s01.fbx","center":[1.618,5.332,0.111],"size":[3.865,4.343,4.947],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":316,"neighbors":["s02","s03","s06","s07","s08"]},{"id":"s02","mesh":"chunks/stall_s02.fbx","center":[-1.887,4.729,0.111],"size":[3.327,5.548,4.947],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":352,"neighbors":["s01","s04","s06","s07"]},{"id":"s03","mesh":"chunks/stall_s03.fbx","center":[2.6,1.799,-0.0],"size":[1.521,3.598,4.72],"material":"wood","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":104,"neighbors":["s00","s01","s08","s09"]},{"id":"s04","mesh":"chunks/stall_s04.fbx","center":[-1.658,1.692,-1.169],"size":[3.084,2.416,2.382],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":24,"neighbors":["s02","s05","s07","s08"]},{"id":"s05","mesh":"chunks/stall_s05.fbx","center":[-2.059,0.621,-0.0],"size":[2.602,1.243,4.72],"material":"stone","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":92,"neighbors":["s04","s07","s09"]},{"id":"s06","mesh":"chunks/stall_s06.fbx","center":[1.56,6.02,0.749],"size":[3.98,2.113,3.671],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":256,"neighbors":["s01","s02"]},{"id":"s07","mesh":"chunks/stall_s07.fbx","center":[-1.305,3.003,1.232],"size":[4.11,5.413,2.705],"material":"wood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":160,"neighbors":["s01","s02","s04","s05","s08","s09"]},{"id":"s08","mesh":"chunks/stall_s08.fbx","center":[1.317,2.596,-0.129],"size":[3.316,1.331,4.143],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":96,"neighbors":["s01","s03","s04","s07","s09"]},{"id":"s09","mesh":"chunks/stall_s09.fbx","center":[0.393,1.386,1.74],"size":[3.175,2.531,0.42],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":88,"neighbors":["s00","s03","s05","s07","s08"]}]},"vase":{"piece":"vase","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":40,"chunks":[{"id":"s00","mesh":"chunks/vase_s00.fbx","center":[-0.047,0.763,-0.442],"size":[1.384,1.525,0.714],"material":"band","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":88,"neighbors":["s01","s02","s03"]},{"id":"s01","mesh":"chunks/vase_s01.fbx","center":[0.263,1.339,-0.071],"size":[1.113,1.921,1.081],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":124,"neighbors":["s00","s02","s03"]},{"id":"s02","mesh":"chunks/vase_s02.fbx","center":[-0.438,1.645,-0.028],"size":[0.57,1.31,0.733],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":62,"neighbors":["s00","s01","s03"]},{"id":"s03","mesh":"chunks/vase_s03.fbx","center":[-0.012,0.932,0.253],"size":[1.453,1.864,1.093],"material":"band","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":118,"neighbors":["s00","s01","s02"]}]},"wall_door":{"piece":"wall_door","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"lintel","mesh":"chunks/wall_door_lintel.fbx","center":[0.0,7.945,-0.0],"size":[5.8,0.81,1.5],"material":"wood","health":50,"collision":"Hull","grounded":false,"touches":[],"triangles":44,"neighbors":["s00","s02","s03","s06","s08","s09"]},{"id":"s00","mesh":"chunks/wall_door_s00.fbx","center":[2.99,8.578,-0.0],"size":[2.019,2.997,1.0],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":["right"],"triangles":28,"neighbors":["lintel","s02","s09","s10"]},{"id":"s01","mesh":"chunks/wall_door_s01.fbx","center":[2.97,1.987,-0.0],"size":[2.06,4.094,1.4],"material":"plaster","health":165,"collision":"Hull","grounded":true,"touches":["right"],"triangles":120,"neighbors":["s07","s09"]},{"id":"s02","mesh":"chunks/wall_door_s02.fbx","center":[0.816,8.651,-0.0],"size":[2.957,3.043,1.0],"material":"plaster","health":70,"collision":"Hull","grounded":false,"touches":[],"triangles":32,"neighbors":["lintel","s00","s04","s06","s09","s10"]},{"id":"s03","mesh":"chunks/wall_door_s03.fbx","center":[-2.97,4.713,-0.0],"size":[2.06,5.655,1.4],"material":"plaster","health":190,"collision":"Hull","grounded":false,"touches":["left"],"triangles":148,"neighbors":["lintel","s05","s06","s08"]},{"id":"s04","mesh":"chunks/wall_door_s04.fbx","center":[-0.156,10.667,0.475],"size":[4.571,2.666,1.95],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["top"],"triangles":104,"neighbors":["s02","s06","s08","s10"]},{"id":"s05","mesh":"chunks/wall_door_s05.fbx","center":[-2.97,1.352,-0.0],"size":[2.06,2.823,1.4],"material":"plaster","health":105,"collision":"Hull","grounded":true,"touches":["left"],"triangles":72,"neighbors":["s03"]},{"id":"s06","mesh":"chunks/wall_door_s06.fbx","center":[-1.841,8.543,-0.0],"size":[3.151,4.006,1.0],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["lintel","s02","s03","s04","s08"]},{"id":"s07","mesh":"chunks/wall_door_s07.fbx","center":[2.601,4.982,-0.0],"size":[1.321,2.424,1.4],"material":"stone","health":40,"collision":"Hull","grounded":false,"touches":[],"triangles":52,"neighbors":["s01","s09"]},{"id":"s08","mesh":"chunks/wall_door_s08.fbx","center":[-2.735,9.13,0.475],"size":[2.53,5.74,1.95],"material":"plaster","health":115,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":108,"neighbors":["lintel","s03","s04","s06"]},{"id":"s09","mesh":"chunks/wall_door_s09.fbx","center":[2.97,5.489,-0.0],"size":[2.06,4.102,1.4],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["right"],"triangles":64,"neighbors":["lintel","s00","s01","s02","s07"]},{"id":"s10","mesh":"chunks/wall_door_s10.fbx","center":[2.781,10.861,0.475],"size":[2.439,2.278,1.95],"material":"plaster","health":55,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":100,"neighbors":["s00","s02","s04"]}]},"wall_plain":{"piece":"wall_plain","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/wall_plain_s00.fbx","center":[-2.286,10.136,0.475],"size":[3.429,3.728,1.95],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":88,"neighbors":["s04","s10"]},{"id":"s01","mesh":"chunks/wall_plain_s01.fbx","center":[3.014,1.151,0.085],"size":[1.972,2.301,1.17],"material":"plaster","health":50,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":26,"neighbors":["s02","s08"]},{"id":"s02","mesh":"chunks/wall_plain_s02.fbx","center":[1.036,1.342,0.085],"size":[2.94,2.684,1.17],"material":"plaster","health":80,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":32,"neighbors":["s01","s05","s06","s08"]},{"id":"s03","mesh":"chunks/wall_plain_s03.fbx","center":[2.701,7.723,-0.0],"size":[2.598,3.208,1.0],"material":"plaster","health":65,"collision":"Hull","grounded":false,"touches":["right"],"triangles":16,"neighbors":["s04","s07","s09","s11"]},{"id":"s04","mesh":"chunks/wall_plain_s04.fbx","center":[-0.327,9.542,0.475],"size":[4.709,4.917,1.95],"material":"plaster","health":175,"collision":"Hull","grounded":false,"touches":["top"],"triangles":96,"neighbors":["s00","s03","s07","s10","s11"]},{"id":"s05","mesh":"chunks/wall_plain_s05.fbx","center":[-2.134,1.325,0.085],"size":[3.732,2.65,1.17],"material":"plaster","health":115,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":32,"neighbors":["s02","s06","s10"]},{"id":"s06","mesh":"chunks/wall_plain_s06.fbx","center":[-1.042,4.074,0.071],"size":[4.523,4.434,1.141],"material":"plaster","health":130,"collision":"Hull","grounded":false,"touches":[],"triangles":36,"neighbors":["s02","s05","s07","s08","s09","s10"]},{"id":"s07","mesh":"chunks/wall_plain_s07.fbx","center":[0.576,6.162,-0.0],"size":[4.026,3.405,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":[],"triangles":16,"neighbors":["s03","s04","s06","s09","s10"]},{"id":"s08","mesh":"chunks/wall_plain_s08.fbx","center":[2.512,3.484,0.037],"size":[2.975,3.353,1.075],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["right"],"triangles":30,"neighbors":["s01","s02","s06","s09"]},{"id":"s09","mesh":"chunks/wall_plain_s09.fbx","center":[2.243,5.238,-0.0],"size":[3.515,3.281,1.0],"material":"plaster","health":70,"collision":"Hull","grounded":false,"touches":["right"],"triangles":16,"neighbors":["s03","s06","s07","s08"]},{"id":"s10","mesh":"chunks/wall_plain_s10.fbx","center":[-2.506,5.484,-0.0],"size":[2.988,6.234,1.0],"material":"plaster","health":150,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s00","s04","s05","s06","s07"]},{"id":"s11","mesh":"chunks/wall_plain_s11.fbx","center":[2.284,10.253,0.475],"size":[3.433,3.494,1.95],"material":"plaster","health":100,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":88,"neighbors":["s03","s04"]}]},"wall_window":{"piece":"wall_window","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/wall_window_s00.fbx","center":[1.155,11.11,-0.0],"size":[3.188,1.78,1.0],"material":"plaster","health":45,"collision":"Hull","grounded":false,"touches":["top"],"triangles":20,"neighbors":["s06","s07","s09"]},{"id":"s01","mesh":"chunks/wall_window_s01.fbx","center":[-1.654,2.314,0.085],"size":[4.692,4.628,1.17],"material":"plaster","health":175,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":60,"neighbors":["s03","s04","s05","window"]},{"id":"s02","mesh":"chunks/wall_window_s02.fbx","center":[3.081,7.182,-0.0],"size":[1.838,5.394,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["right"],"triangles":24,"neighbors":["s03","s07","s09","s11"]},{"id":"s03","mesh":"chunks/wall_window_s03.fbx","center":[1.02,4.862,-0.0],"size":[5.961,3.628,1.0],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["right"],"triangles":44,"neighbors":["s01","s02","s04","s05","s10","s11","window"]},{"id":"s04","mesh":"chunks/wall_window_s04.fbx","center":[-2.861,5.637,-0.0],"size":[2.278,5.083,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s01","s03","s10","window"]},{"id":"s05","mesh":"chunks/wall_window_s05.fbx","center":[0.965,1.636,0.085],"size":[6.069,3.271,1.17],"material":"plaster","health":200,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":52,"neighbors":["s01","s03"]},{"id":"s06","mesh":"chunks/wall_window_s06.fbx","center":[-1.964,10.46,0.475],"size":[3.821,3.08,1.95],"material":"plaster","health":95,"collision":"Hull","grounded":false,"touches":["top"],"triangles":100,"neighbors":["s00","s07","s08","s10","window"]},{"id":"s07","mesh":"chunks/wall_window_s07.fbx","center":[0.927,9.661,0.475],"size":[3.59,2.317,1.95],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":[],"triangles":104,"neighbors":["s00","s02","s06","s09","s10","s11","window"]},{"id":"s08","mesh":"chunks/wall_window_s08.fbx","center":[-3.22,10.417,-0.0],"size":[1.56,3.166,1.0],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":12,"neighbors":["s06","s10"]},{"id":"s09","mesh":"chunks/wall_window_s09.fbx","center":[2.971,10.749,0.475],"size":[2.058,2.502,1.95],"material":"plaster","health":50,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":92,"neighbors":["s00","s02","s07"]},{"id":"s10","mesh":"chunks/wall_window_s10.fbx","center":[-2.087,7.484,-0.0],"size":[3.827,3.984,1.0],"material":"plaster","health":85,"collision":"Hull","grounded":false,"touches":["left"],"triangles":40,"neighbors":["s03","s04","s06","s07","s08","s11","window"]},{"id":"s11","mesh":"chunks/wall_window_s11.fbx","center":[1.392,7.51,-0.0],"size":[3.31,3.418,1.0],"material":"plaster","health":40,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["s02","s03","s07","s10","window"]},{"id":"window","mesh":"chunks/wall_window_window.fbx","center":[0.0,6.3,0.298],"size":[3.9,5.2,0.785],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":352,"neighbors":["s01","s03","s04","s06","s07","s10","s11"]}]},"well":{"piece":"well","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":395,"chunks":[{"id":"s00","mesh":"chunks/well_s00.fbx","center":[0.613,1.638,1.851],"size":[2.463,1.725,1.397],"material":"stone","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":58,"neighbors":["s03","s05","s06"]},{"id":"s01","mesh":"chunks/well_s01.fbx","center":[1.915,5.478,-0.0],"size":[1.57,3.243,0.54],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":48,"neighbors":["s06","s08","s09"]},{"id":"s02","mesh":"chunks/well_s02.fbx","center":[-1.569,1.377,-0.291],"size":[1.962,2.754,3.605],"material":"stone","health":75,"collision":"Hull","grounded":true,"touches":[],"triangles":94,"neighbors":["s03","s04","s05"]},{"id":"s03","mesh":"chunks/well_s03.fbx","center":[0.12,0.891,1.458],"size":[4.132,1.782,2.184],"material":"stone","health":50,"collision":"Hull","grounded":true,"touches":[],"triangles":76,"neighbors":["s00","s02","s05","s06"]},{"id":"s04","mesh":"chunks/well_s04.fbx","center":[0.157,1.25,-1.457],"size":[4.147,2.5,2.186],"material":"stone","health":100,"collision":"Hull","grounded":true,"touches":[],"triangles":104,"neighbors":["s02","s06"]},{"id":"s05","mesh":"chunks/well_s05.fbx","center":[-1.357,2.17,0.946],"size":[2.269,2.608,2.701],"material":"stone","health":35,"collision":"Hull","grounded":false,"touches":[],"triangles":66,"neighbors":["s00","s02","s03","s07"]},{"id":"s06","mesh":"chunks/well_s06.fbx","center":[1.783,2.024,0.079],"size":[1.533,4.048,3.322],"material":"stone","health":65,"collision":"Hull","grounded":true,"touches":[],"triangles":90,"neighbors":["s00","s01","s03","s04"]},{"id":"s07","mesh":"chunks/well_s07.fbx","center":[-1.077,5.093,0.276],"size":[3.245,4.014,1.092],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":140,"neighbors":["s05","s08"]},{"id":"s08","mesh":"chunks/well_s08.fbx","center":[-0.505,5.875,0.02],"size":[3.647,2.45,0.76],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":88,"neighbors":["s01","s07"]},{"id":"s09","mesh":"chunks/well_s09.fbx","center":[1.97,7.051,-0.196],"size":[0.181,0.098,0.047],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":4,"neighbors":["s01"]}]}}]=]) :: any
+{"awning":{"piece":"awning","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":50,"chunks":[{"id":"s00","mesh":"chunks/awning_s00.fbx","center":[-0.016,1.875,0.516],"size":[6.351,3.75,1.033],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":68,"neighbors":["s01","s02","s03","s04"]},{"id":"s01","mesh":"chunks/awning_s01.fbx","center":[-3.045,1.84,0.982],"size":[0.81,3.681,1.964],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":60,"neighbors":["s00","s03","s04"]},{"id":"s02","mesh":"chunks/awning_s02.fbx","center":[1.27,1.833,2.307],"size":[4.359,2.582,2.956],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":312,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/awning_s03.fbx","center":[-1.908,2.343,2.067],"size":[3.083,2.641,3.436],"material":"canvas","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":256,"neighbors":["s00","s01","s02","s04"]},{"id":"s04","mesh":"chunks/awning_s04.fbx","center":[0.08,2.622,1.169],"size":[6.74,2.256,2.337],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":292,"neighbors":["s00","s01","s02","s03"]}]},"barrel":{"piece":"barrel","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":115,"chunks":[{"id":"s00","mesh":"chunks/barrel_s00.fbx","center":[0.417,1.553,-0.678],"size":[1.586,1.402,1.224],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":62,"neighbors":["s01","s02","s04","s06"]},{"id":"s01","mesh":"chunks/barrel_s01.fbx","center":[0.642,2.589,0.473],"size":[1.295,2.023,1.634],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":164,"neighbors":["s00","s02","s03","s04","s05","s06"]},{"id":"s02","mesh":"chunks/barrel_s02.fbx","center":[0.268,2.768,-0.681],"size":[1.702,1.664,1.034],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":96,"neighbors":["s00","s01","s03","s04"]},{"id":"s03","mesh":"chunks/barrel_s03.fbx","center":[-0.28,2.7,0.16],"size":[1.803,1.8,2.26],"material":"wood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":158,"neighbors":["s01","s02","s04"]},{"id":"s04","mesh":"chunks/barrel_s04.fbx","center":[-0.492,1.514,0.074],"size":[1.596,3.028,2.432],"material":"wood","health":30,"collision":"Hull","grounded":true,"touches":[],"triangles":170,"neighbors":["s00","s01","s02","s03","s05","s06"]},{"id":"s05","mesh":"chunks/barrel_s05.fbx","center":[0.195,0.861,0.613],"size":[1.93,1.722,1.34],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":76,"neighbors":["s01","s04","s06"]},{"id":"s06","mesh":"chunks/barrel_s06.fbx","center":[0.277,0.943,-0.313],"size":[2.027,1.885,1.738],"material":"wood","health":20,"collision":"Hull","grounded":true,"touches":[],"triangles":102,"neighbors":["s00","s01","s04","s05"]}]},"cloth":{"piece":"cloth","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":40,"chunks":[{"id":"s00","mesh":"chunks/cloth_s00.fbx","center":[0.0,2.875,0.26],"size":[6.6,3.351,0.37],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":220,"neighbors":["s01","s03"]},{"id":"s01","mesh":"chunks/cloth_s01.fbx","center":[0.801,6.033,0.26],"size":[4.999,5.498,0.37],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":84,"neighbors":["s00","s02","s03"]},{"id":"s02","mesh":"chunks/cloth_s02.fbx","center":[1.349,8.717,0.081],"size":[5.302,2.336,0.729],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":["right"],"triangles":180,"neighbors":["s01","s03"]},{"id":"s03","mesh":"chunks/cloth_s03.fbx","center":[-2.193,6.881,0.081],"size":[3.614,6.009,0.729],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":["left"],"triangles":132,"neighbors":["s00","s01","s02"]}]},"corner":{"piece":"corner","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/corner_s00.fbx","center":[0.073,3.912,-0.073],"size":[1.646,4.685,1.646],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["s01","s02","s03"]},{"id":"s01","mesh":"chunks/corner_s01.fbx","center":[0.0,5.426,0.0],"size":[1.5,2.639,1.5],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":16,"neighbors":["s00","s02","s03"]},{"id":"s02","mesh":"chunks/corner_s02.fbx","center":[0.0,8.81,-0.0],"size":[1.5,6.38,1.5],"material":"plaster","health":155,"collision":"Hull","grounded":false,"touches":["right"],"triangles":16,"neighbors":["s00","s01"]},{"id":"s03","mesh":"chunks/corner_s03.fbx","center":[0.0,2.507,-0.0],"size":[1.837,5.013,1.837],"material":"plaster","health":135,"collision":"Hull","grounded":true,"touches":["left"],"triangles":36,"neighbors":["s00","s01"]}]},"corner_upper":{"piece":"corner_upper","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/corner_upper_s00.fbx","center":[0.0,1.957,-0.0],"size":[1.5,3.915,1.5],"material":"plaster","health":100,"collision":"Hull","grounded":true,"touches":["left"],"triangles":12,"neighbors":["s02"]},{"id":"s01","mesh":"chunks/corner_upper_s01.fbx","center":[0.0,10.291,-0.0],"size":[1.5,3.418,1.5],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["right"],"triangles":12,"neighbors":["s03"]},{"id":"s02","mesh":"chunks/corner_upper_s02.fbx","center":[0.0,5.664,-0.0],"size":[1.5,4.078,1.5],"material":"plaster","health":95,"collision":"Hull","grounded":false,"touches":[],"triangles":12,"neighbors":["s00","s03"]},{"id":"s03","mesh":"chunks/corner_upper_s03.fbx","center":[0.0,8.343,-0.0],"size":[1.5,2.961,1.5],"material":"plaster","health":50,"collision":"Hull","grounded":false,"touches":[],"triangles":12,"neighbors":["s01","s02"]}]},"crate":{"piece":"crate","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":185,"chunks":[{"id":"s00","mesh":"chunks/crate_s00.fbx","center":[-0.603,0.757,0.333],"size":[1.795,1.514,2.333],"material":"darkwood","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":156,"neighbors":["s01","s02","s03","s05"]},{"id":"s01","mesh":"chunks/crate_s01.fbx","center":[-0.474,1.804,0.581],"size":[2.051,2.393,1.839],"material":"darkwood","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":264,"neighbors":["s00","s02","s03","s04","s05","s07"]},{"id":"s02","mesh":"chunks/crate_s02.fbx","center":[-0.515,1.813,-0.641],"size":[1.97,2.373,1.719],"material":"darkwood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":256,"neighbors":["s00","s01","s03","s04","s05","s06"]},{"id":"s03","mesh":"chunks/crate_s03.fbx","center":[0.0,1.039,-0.48],"size":[3.0,2.078,2.041],"material":"darkwood","health":35,"collision":"Hull","grounded":true,"touches":[],"triangles":212,"neighbors":["s00","s01","s02","s04","s05","s06"]},{"id":"s04","mesh":"chunks/crate_s04.fbx","center":[0.376,2.248,-0.012],"size":[1.908,1.505,2.827],"material":"darkwood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":144,"neighbors":["s01","s02","s03","s05","s06","s07"]},{"id":"s05","mesh":"chunks/crate_s05.fbx","center":[0.464,1.006,0.242],"size":[2.072,2.012,2.515],"material":"darkwood","health":35,"collision":"Hull","grounded":true,"touches":[],"triangles":184,"neighbors":["s00","s01","s02","s03","s04","s06","s07"]},{"id":"s06","mesh":"chunks/crate_s06.fbx","center":[0.843,1.572,-0.368],"size":[1.315,2.856,2.264],"material":"darkwood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":252,"neighbors":["s02","s03","s04","s05","s07"]},{"id":"s07","mesh":"chunks/crate_s07.fbx","center":[0.792,2.097,0.544],"size":[1.416,1.806,1.912],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":200,"neighbors":["s01","s04","s05","s06"]}]},"door":{"piece":"door","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/door_s00.fbx","center":[0.0,0.813,0.002],"size":[3.9,1.626,0.465],"material":"darkwood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":268,"neighbors":["s01","s04"]},{"id":"s01","mesh":"chunks/door_s01.fbx","center":[-0.356,2.461,0.002],"size":[3.187,2.806,0.465],"material":"darkwood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":248,"neighbors":["s00","s02","s04"]},{"id":"s02","mesh":"chunks/door_s02.fbx","center":[-0.54,4.731,-0.032],"size":[2.82,2.788,0.345],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":152,"neighbors":["s01","s03","s04","s05"]},{"id":"s03","mesh":"chunks/door_s03.fbx","center":[-0.742,6.478,0.002],"size":[2.415,2.043,0.465],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":224,"neighbors":["s02","s05"]},{"id":"s04","mesh":"chunks/door_s04.fbx","center":[1.1,3.066,0.035],"size":[1.699,3.762,0.53],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":292,"neighbors":["s00","s01","s02","s05"]},{"id":"s05","mesh":"chunks/door_s05.fbx","center":[0.807,6.07,0.002],"size":[2.285,2.86,0.465],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":232,"neighbors":["s02","s03","s04"]}]},"ladder":{"piece":"ladder","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":50,"chunks":[{"id":"s00","mesh":"chunks/ladder_s00.fbx","center":[0.0,6.604,0.1],"size":[2.44,4.271,0.453],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":104,"neighbors":["s03","s04"]},{"id":"s01","mesh":"chunks/ladder_s01.fbx","center":[0.252,1.798,0.093],"size":[1.937,3.596,0.466],"material":"darkwood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":72,"neighbors":["s02","s04"]},{"id":"s02","mesh":"chunks/ladder_s02.fbx","center":[-0.709,1.496,0.093],"size":[1.022,2.992,0.466],"material":"darkwood","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":72,"neighbors":["s01","s04"]},{"id":"s03","mesh":"chunks/ladder_s03.fbx","center":[0.0,10.471,0.101],"size":[2.44,4.657,0.449],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":124,"neighbors":["s00"]},{"id":"s04","mesh":"chunks/ladder_s04.fbx","center":[0.0,4.248,0.099],"size":[2.44,2.694,0.454],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":80,"neighbors":["s00","s01","s02"]}]},"parapet_corner":{"piece":"parapet_corner","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/parapet_corner_s00.fbx","center":[0.0,2.579,-0.0],"size":[1.44,1.443,1.44],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":36,"neighbors":["s01"]},{"id":"s01","mesh":"chunks/parapet_corner_s01.fbx","center":[0.0,1.209,-0.0],"size":[1.44,2.417,1.44],"material":"plaster","health":55,"collision":"Hull","grounded":true,"touches":["left"],"triangles":36,"neighbors":["s00"]}]},"parapet_crenel":{"piece":"parapet_crenel","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/parapet_crenel_s00.fbx","center":[-2.163,3.416,-0.0],"size":[3.674,1.769,1.32],"material":"plaster","health":25,"collision":"Hull","grounded":false,"touches":["left"],"triangles":92,"neighbors":["s01","s03"]},{"id":"s01","mesh":"chunks/parapet_crenel_s01.fbx","center":[0.098,2.15,-0.0],"size":[3.437,4.3,1.32],"material":"plaster","health":110,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":68,"neighbors":["s00","s02","s03","s04"]},{"id":"s02","mesh":"chunks/parapet_crenel_s02.fbx","center":[1.836,2.452,-0.0],"size":[4.327,3.696,1.32],"material":"plaster","health":100,"collision":"Hull","grounded":false,"touches":["right"],"triangles":104,"neighbors":["s01","s04"]},{"id":"s03","mesh":"chunks/parapet_crenel_s03.fbx","center":[-2.557,1.593,-0.0],"size":[2.887,3.185,1.32],"material":"plaster","health":95,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":52,"neighbors":["s00","s01"]},{"id":"s04","mesh":"chunks/parapet_crenel_s04.fbx","center":[2.797,0.964,-0.0],"size":[2.406,1.927,1.0],"material":"plaster","health":35,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":12,"neighbors":["s01","s02"]}]},"parapet_plain":{"piece":"parapet_plain","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/parapet_plain_s00.fbx","center":[-1.335,1.5,-0.0],"size":[2.944,3.0,1.32],"material":"plaster","health":90,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":28,"neighbors":["s02","s03","s04"]},{"id":"s01","mesh":"chunks/parapet_plain_s01.fbx","center":[2.343,1.569,-0.0],"size":[3.313,2.863,1.32],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":["right"],"triangles":20,"neighbors":["s04"]},{"id":"s02","mesh":"chunks/parapet_plain_s02.fbx","center":[-2.975,0.544,-0.0],"size":[2.05,1.089,1.0],"material":"plaster","health":20,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":12,"neighbors":["s00","s03"]},{"id":"s03","mesh":"chunks/parapet_plain_s03.fbx","center":[-3.084,1.937,-0.0],"size":[1.831,2.127,1.32],"material":"plaster","health":40,"collision":"Hull","grounded":false,"touches":["left"],"triangles":24,"neighbors":["s00","s02"]},{"id":"s04","mesh":"chunks/parapet_plain_s04.fbx","center":[1.874,1.5,-0.0],"size":[4.251,3.0,1.32],"material":"plaster","health":95,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":28,"neighbors":["s00","s01"]}]},"pillar":{"piece":"pillar","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/pillar_s00.fbx","center":[0.0,1.415,-0.0],"size":[2.5,2.829,2.5],"material":"stone","health":180,"collision":"Hull","grounded":true,"touches":["left"],"triangles":116,"neighbors":["s02"]},{"id":"s01","mesh":"chunks/pillar_s01.fbx","center":[0.0,10.957,-0.0],"size":[2.3,2.087,2.3],"material":"stone","health":110,"collision":"Hull","grounded":false,"touches":["right"],"triangles":124,"neighbors":["s04"]},{"id":"s02","mesh":"chunks/pillar_s02.fbx","center":[-0.002,4.375,0.001],"size":[1.688,4.491,1.688],"material":"stone","health":110,"collision":"Hull","grounded":false,"touches":[],"triangles":32,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/pillar_s03.fbx","center":[0.012,7.248,-0.0],"size":[1.627,3.596,1.642],"material":"stone","health":55,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["s02","s04"]},{"id":"s04","mesh":"chunks/pillar_s04.fbx","center":[-0.021,8.697,0.072],"size":[1.858,4.289,1.756],"material":"stone","health":75,"collision":"Hull","grounded":false,"touches":[],"triangles":52,"neighbors":["s01","s02","s03"]}]},"plank":{"piece":"plank","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":105,"chunks":[{"id":"s00","mesh":"chunks/plank_s00.fbx","center":[-2.536,0.375,-0.784],"size":[2.927,0.75,2.708],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":["left"],"triangles":52,"neighbors":["s01","s02","s03","s04","s05"]},{"id":"s01","mesh":"chunks/plank_s01.fbx","center":[1.435,0.375,0.03],"size":[5.129,0.75,6.18],"material":"wood","health":45,"collision":"Hull","grounded":true,"touches":["right"],"triangles":104,"neighbors":["s00","s04","s05"]},{"id":"s02","mesh":"chunks/plank_s02.fbx","center":[-2.327,0.375,1.814],"size":[3.347,0.75,2.613],"material":"wood","health":10,"collision":"Hull","grounded":true,"touches":["left"],"triangles":64,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/plank_s03.fbx","center":[-3.214,0.62,0.21],"size":[1.512,0.26,3.228],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s00","s02"]},{"id":"s04","mesh":"chunks/plank_s04.fbx","center":[-0.289,0.375,1.249],"size":[3.959,0.75,3.742],"material":"wood","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":72,"neighbors":["s00","s01","s02"]},{"id":"s05","mesh":"chunks/plank_s05.fbx","center":[-1.56,0.375,-2.035],"size":[4.88,0.75,2.05],"material":"wood","health":15,"collision":"Hull","grounded":true,"touches":["left"],"triangles":76,"neighbors":["s00","s01"]}]},"pot_round":{"piece":"pot_round","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":50,"chunks":[{"id":"s00","mesh":"chunks/pot_round_s00.fbx","center":[-0.35,1.195,0.047],"size":[1.462,1.771,1.798],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":102,"neighbors":["s01","s02","s03","s04"]},{"id":"s01","mesh":"chunks/pot_round_s01.fbx","center":[0.199,1.07,-0.576],"size":[1.877,2.021,1.188],"material":"band","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":82,"neighbors":["s00","s03","s04"]},{"id":"s02","mesh":"chunks/pot_round_s02.fbx","center":[0.183,1.47,0.651],"size":[1.463,1.22,1.037],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":66,"neighbors":["s00","s03","s04"]},{"id":"s03","mesh":"chunks/pot_round_s03.fbx","center":[0.093,0.478,0.257],"size":[2.119,0.957,1.778],"material":"band","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":60,"neighbors":["s00","s01","s02","s04"]},{"id":"s04","mesh":"chunks/pot_round_s04.fbx","center":[0.66,1.399,0.095],"size":[1.08,1.362,1.202],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":72,"neighbors":["s00","s01","s02","s03"]}]},"pot_tall":{"piece":"pot_tall","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":60,"chunks":[{"id":"s00","mesh":"chunks/pot_tall_s00.fbx","center":[-0.027,2.353,0.168],"size":[2.665,1.694,1.848],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":180,"neighbors":["s02","s03","s04"]},{"id":"s01","mesh":"chunks/pot_tall_s01.fbx","center":[-0.249,0.714,0.197],"size":[1.361,1.428,1.506],"material":"clay","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":46,"neighbors":["s02","s03","s04"]},{"id":"s02","mesh":"chunks/pot_tall_s02.fbx","center":[-0.41,1.196,0.676],"size":[1.103,0.821,0.831],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":30,"neighbors":["s00","s01","s03","s04"]},{"id":"s03","mesh":"chunks/pot_tall_s03.fbx","center":[0.279,1.379,-0.051],"size":[2.162,2.759,2.081],"material":"clay","health":20,"collision":"Hull","grounded":true,"touches":[],"triangles":98,"neighbors":["s00","s01","s02","s04"]},{"id":"s04","mesh":"chunks/pot_tall_s04.fbx","center":[-0.677,1.72,-0.099],"size":[1.367,1.476,1.744],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":56,"neighbors":["s00","s01","s02","s03"]}]},"roof":{"piece":"roof","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/roof_s00.fbx","center":[0.894,0.237,-2.544],"size":[6.212,1.645,2.912],"material":"plaster","health":160,"collision":"Hull","grounded":true,"touches":["right","top"],"triangles":88,"neighbors":["s02","s04","s05"]},{"id":"s01","mesh":"chunks/roof_s01.fbx","center":[0.347,0.237,2.678],"size":[3.618,1.645,2.643],"material":"plaster","health":75,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":56,"neighbors":["s02","s03","s05","s06"]},{"id":"s02","mesh":"chunks/roof_s02.fbx","center":[-1.59,0.237,-0.552],"size":[4.441,1.645,4.182],"material":"plaster","health":145,"collision":"Hull","grounded":true,"touches":[],"triangles":92,"neighbors":["s00","s01","s03","s04","s05"]},{"id":"s03","mesh":"chunks/roof_s03.fbx","center":[-2.185,0.237,2.276],"size":[3.631,1.645,3.448],"material":"plaster","health":125,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":52,"neighbors":["s01","s02","s04"]},{"id":"s04","mesh":"chunks/roof_s04.fbx","center":[-2.846,0.237,-1.64],"size":[2.308,1.645,4.719],"material":"plaster","health":90,"collision":"Hull","grounded":true,"touches":["left","top"],"triangles":52,"neighbors":["s00","s02","s03"]},{"id":"s05","mesh":"chunks/roof_s05.fbx","center":[1.969,0.237,-0.361],"size":[4.062,1.645,4.892],"material":"plaster","health":165,"collision":"Hull","grounded":true,"touches":["right"],"triangles":72,"neighbors":["s00","s01","s02","s06"]},{"id":"s06","mesh":"chunks/roof_s06.fbx","center":[2.498,0.237,2.234],"size":[3.004,1.645,3.532],"material":"plaster","health":90,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":48,"neighbors":["s01","s05"]}]},"sacks":{"piece":"sacks","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":85,"chunks":[{"id":"s00","mesh":"chunks/sacks_s00.fbx","center":[1.537,1.262,-0.543],"size":[3.15,2.477,2.95],"material":"burlap","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":190,"neighbors":["s01","s02","s05"]},{"id":"s01","mesh":"chunks/sacks_s01.fbx","center":[-0.358,0.815,-1.079],"size":[3.168,1.583,1.768],"material":"burlap","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":164,"neighbors":["s00","s02","s03","s04","s05"]},{"id":"s02","mesh":"chunks/sacks_s02.fbx","center":[1.106,1.272,0.606],"size":[3.807,2.498,2.617],"material":"burlap","health":25,"collision":"Hull","grounded":true,"touches":[],"triangles":280,"neighbors":["s00","s01","s03","s05"]},{"id":"s03","mesh":"chunks/sacks_s03.fbx","center":[-1.824,0.693,0.591],"size":[2.438,1.339,2.739],"material":"burlap","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":114,"neighbors":["s01","s02","s04","s05"]},{"id":"s04","mesh":"chunks/sacks_s04.fbx","center":[-2.189,0.449,-1.196],"size":[1.551,0.851,1.519],"material":"burlap","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":42,"neighbors":["s01","s03","s05"]},{"id":"s05","mesh":"chunks/sacks_s05.fbx","center":[-0.948,1.298,0.368],"size":[2.044,2.446,2.727],"material":"burlap","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":190,"neighbors":["s00","s01","s02","s03","s04"]}]},"stairs":{"piece":"stairs","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/stairs_s00.fbx","center":[-2.104,2.315,1.898],"size":[3.791,4.629,4.404],"material":"plaster","health":410,"collision":"Hull","grounded":true,"touches":["left"],"triangles":154,"neighbors":["s01","s03","s04","s05"]},{"id":"s01","mesh":"chunks/stairs_s01.fbx","center":[0.0,4.042,-1.99],"size":[8.0,8.083,4.019],"material":"plaster","health":1340,"collision":"Hull","grounded":true,"touches":["left"],"triangles":24,"neighbors":["s00","s02","s03","s04","s05"]},{"id":"s02","mesh":"chunks/stairs_s02.fbx","center":[0.887,9.355,-1.95],"size":[6.225,5.53,4.1],"material":"plaster","health":445,"collision":"Hull","grounded":false,"touches":[],"triangles":192,"neighbors":["s01","s03","s04","s05"]},{"id":"s03","mesh":"chunks/stairs_s03.fbx","center":[-0.206,6.548,-0.145],"size":[7.589,5.144,4.49],"material":"plaster","health":250,"collision":"Hull","grounded":false,"touches":[],"triangles":156,"neighbors":["s00","s01","s02","s04","s05"]},{"id":"s04","mesh":"chunks/stairs_s04.fbx","center":[0.668,3.42,0.052],"size":[6.664,6.839,8.096],"material":"plaster","health":1805,"collision":"Hull","grounded":true,"touches":["left"],"triangles":196,"neighbors":["s00","s01","s02","s03","s05"]},{"id":"s05","mesh":"chunks/stairs_s05.fbx","center":[-0.815,7.42,-1.489],"size":[6.371,9.399,5.022],"material":"plaster","health":1065,"collision":"Hull","grounded":false,"touches":[],"triangles":234,"neighbors":["s00","s01","s02","s03","s04"]}]},"stall":{"piece":"stall","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":120,"chunks":[{"id":"s00","mesh":"chunks/stall_s00.fbx","center":[2.38,0.938,-0.0],"size":[1.96,1.876,4.72],"material":"stone","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":68,"neighbors":["s03","s09"]},{"id":"s01","mesh":"chunks/stall_s01.fbx","center":[1.618,5.332,0.111],"size":[3.865,4.343,4.947],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":316,"neighbors":["s02","s03","s06","s07","s08"]},{"id":"s02","mesh":"chunks/stall_s02.fbx","center":[-1.887,4.729,0.111],"size":[3.327,5.548,4.947],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":352,"neighbors":["s01","s04","s06","s07"]},{"id":"s03","mesh":"chunks/stall_s03.fbx","center":[2.6,1.799,-0.0],"size":[1.521,3.598,4.72],"material":"wood","health":15,"collision":"Hull","grounded":true,"touches":[],"triangles":104,"neighbors":["s00","s01","s08","s09"]},{"id":"s04","mesh":"chunks/stall_s04.fbx","center":[-1.658,1.692,-1.169],"size":[3.084,2.416,2.382],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":24,"neighbors":["s02","s05","s07","s08"]},{"id":"s05","mesh":"chunks/stall_s05.fbx","center":[-2.059,0.621,-0.0],"size":[2.602,1.243,4.72],"material":"stone","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":92,"neighbors":["s04","s07","s09"]},{"id":"s06","mesh":"chunks/stall_s06.fbx","center":[1.56,6.02,0.749],"size":[3.98,2.113,3.671],"material":"redcloth","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":256,"neighbors":["s01","s02"]},{"id":"s07","mesh":"chunks/stall_s07.fbx","center":[-1.305,3.003,1.232],"size":[4.11,5.413,2.705],"material":"wood","health":20,"collision":"Hull","grounded":false,"touches":[],"triangles":160,"neighbors":["s01","s02","s04","s05","s08","s09"]},{"id":"s08","mesh":"chunks/stall_s08.fbx","center":[1.317,2.596,-0.129],"size":[3.316,1.331,4.143],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":96,"neighbors":["s01","s03","s04","s07","s09"]},{"id":"s09","mesh":"chunks/stall_s09.fbx","center":[0.393,1.386,1.74],"size":[3.175,2.531,0.42],"material":"darkwood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":88,"neighbors":["s00","s03","s05","s07","s08"]}]},"vase":{"piece":"vase","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":40,"chunks":[{"id":"s00","mesh":"chunks/vase_s00.fbx","center":[-0.047,0.763,-0.442],"size":[1.384,1.525,0.714],"material":"band","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":88,"neighbors":["s01","s02","s03"]},{"id":"s01","mesh":"chunks/vase_s01.fbx","center":[0.263,1.339,-0.071],"size":[1.113,1.921,1.081],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":124,"neighbors":["s00","s02","s03"]},{"id":"s02","mesh":"chunks/vase_s02.fbx","center":[-0.438,1.645,-0.028],"size":[0.57,1.31,0.733],"material":"clay","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":62,"neighbors":["s00","s01","s03"]},{"id":"s03","mesh":"chunks/vase_s03.fbx","center":[-0.012,0.932,0.253],"size":[1.453,1.864,1.093],"material":"band","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":118,"neighbors":["s00","s01","s02"]}]},"vat":{"piece":"vat","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":355,"chunks":[{"id":"s00","mesh":"chunks/vat_s00.fbx","center":[0.483,0.85,1.218],"size":[2.942,1.7,4.051],"material":"redcloth","health":30,"collision":"Hull","grounded":true,"touches":[],"triangles":68,"neighbors":["s01","s02","s04","s06","s07"]},{"id":"s01","mesh":"chunks/vat_s01.fbx","center":[1.784,0.85,1.006],"size":[3.333,1.7,3.662],"material":"redcloth","health":65,"collision":"Hull","grounded":true,"touches":[],"triangles":114,"neighbors":["s00","s02","s03","s06"]},{"id":"s02","mesh":"chunks/vat_s02.fbx","center":[-0.863,0.62,0.938],"size":[3.256,1.24,4.466],"material":"redcloth","health":10,"collision":"Hull","grounded":true,"touches":[],"triangles":50,"neighbors":["s00","s01","s04","s06","s07"]},{"id":"s03","mesh":"chunks/vat_s03.fbx","center":[2.458,0.85,-1.32],"size":[1.983,1.7,3.045],"material":"stone","health":30,"collision":"Hull","grounded":true,"touches":[],"triangles":84,"neighbors":["s01","s06"]},{"id":"s04","mesh":"chunks/vat_s04.fbx","center":[-1.244,0.85,2.185],"size":[3.532,1.7,2.529],"material":"stone","health":65,"collision":"Hull","grounded":true,"touches":[],"triangles":122,"neighbors":["s00","s02","s07"]},{"id":"s05","mesh":"chunks/vat_s05.fbx","center":[-1.259,0.85,-2.349],"size":[3.348,1.7,2.202],"material":"stone","health":60,"collision":"Hull","grounded":true,"touches":[],"triangles":106,"neighbors":["s06","s07"]},{"id":"s06","mesh":"chunks/vat_s06.fbx","center":[0.953,0.85,-1.872],"size":[3.53,1.7,3.015],"material":"redcloth","health":45,"collision":"Hull","grounded":true,"touches":[],"triangles":88,"neighbors":["s00","s01","s02","s03","s05","s07"]},{"id":"s07","mesh":"chunks/vat_s07.fbx","center":[-1.812,0.85,-0.235],"size":[3.276,1.7,2.644],"material":"redcloth","health":50,"collision":"Hull","grounded":true,"touches":[],"triangles":92,"neighbors":["s00","s02","s04","s05","s06"]}]},"wall_door":{"piece":"wall_door","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"lintel","mesh":"chunks/wall_door_lintel.fbx","center":[0.0,7.945,-0.0],"size":[5.8,0.81,1.5],"material":"wood","health":50,"collision":"Hull","grounded":false,"touches":[],"triangles":44,"neighbors":["s00","s02","s03","s06","s08","s09"]},{"id":"s00","mesh":"chunks/wall_door_s00.fbx","center":[2.99,8.578,-0.0],"size":[2.019,2.997,1.0],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":["right"],"triangles":28,"neighbors":["lintel","s02","s09","s10"]},{"id":"s01","mesh":"chunks/wall_door_s01.fbx","center":[2.97,1.987,-0.0],"size":[2.06,4.094,1.4],"material":"plaster","health":165,"collision":"Hull","grounded":true,"touches":["right"],"triangles":120,"neighbors":["s07","s09"]},{"id":"s02","mesh":"chunks/wall_door_s02.fbx","center":[0.816,8.651,-0.0],"size":[2.957,3.043,1.0],"material":"plaster","health":70,"collision":"Hull","grounded":false,"touches":[],"triangles":32,"neighbors":["lintel","s00","s04","s06","s09","s10"]},{"id":"s03","mesh":"chunks/wall_door_s03.fbx","center":[-2.97,4.713,-0.0],"size":[2.06,5.655,1.4],"material":"plaster","health":190,"collision":"Hull","grounded":false,"touches":["left"],"triangles":148,"neighbors":["lintel","s05","s06","s08"]},{"id":"s04","mesh":"chunks/wall_door_s04.fbx","center":[-0.156,10.667,0.475],"size":[4.571,2.666,1.95],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["top"],"triangles":104,"neighbors":["s02","s06","s08","s10"]},{"id":"s05","mesh":"chunks/wall_door_s05.fbx","center":[-2.97,1.352,-0.0],"size":[2.06,2.823,1.4],"material":"plaster","health":105,"collision":"Hull","grounded":true,"touches":["left"],"triangles":72,"neighbors":["s03"]},{"id":"s06","mesh":"chunks/wall_door_s06.fbx","center":[-1.841,8.543,-0.0],"size":[3.151,4.006,1.0],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["lintel","s02","s03","s04","s08"]},{"id":"s07","mesh":"chunks/wall_door_s07.fbx","center":[2.601,4.982,-0.0],"size":[1.321,2.424,1.4],"material":"stone","health":40,"collision":"Hull","grounded":false,"touches":[],"triangles":52,"neighbors":["s01","s09"]},{"id":"s08","mesh":"chunks/wall_door_s08.fbx","center":[-2.735,9.13,0.475],"size":[2.53,5.74,1.95],"material":"plaster","health":115,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":108,"neighbors":["lintel","s03","s04","s06"]},{"id":"s09","mesh":"chunks/wall_door_s09.fbx","center":[2.97,5.489,-0.0],"size":[2.06,4.102,1.4],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["right"],"triangles":64,"neighbors":["lintel","s00","s01","s02","s07"]},{"id":"s10","mesh":"chunks/wall_door_s10.fbx","center":[2.781,10.861,0.475],"size":[2.439,2.278,1.95],"material":"plaster","health":55,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":100,"neighbors":["s00","s02","s04"]}]},"wall_plain":{"piece":"wall_plain","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/wall_plain_s00.fbx","center":[-2.286,10.136,0.475],"size":[3.429,3.728,1.95],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":88,"neighbors":["s04","s10"]},{"id":"s01","mesh":"chunks/wall_plain_s01.fbx","center":[3.014,1.151,0.085],"size":[1.972,2.301,1.17],"material":"plaster","health":50,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":26,"neighbors":["s02","s08"]},{"id":"s02","mesh":"chunks/wall_plain_s02.fbx","center":[1.036,1.342,0.085],"size":[2.94,2.684,1.17],"material":"plaster","health":80,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":32,"neighbors":["s01","s05","s06","s08"]},{"id":"s03","mesh":"chunks/wall_plain_s03.fbx","center":[2.701,7.723,-0.0],"size":[2.598,3.208,1.0],"material":"plaster","health":65,"collision":"Hull","grounded":false,"touches":["right"],"triangles":16,"neighbors":["s04","s07","s09","s11"]},{"id":"s04","mesh":"chunks/wall_plain_s04.fbx","center":[-0.327,9.542,0.475],"size":[4.709,4.917,1.95],"material":"plaster","health":175,"collision":"Hull","grounded":false,"touches":["top"],"triangles":96,"neighbors":["s00","s03","s07","s10","s11"]},{"id":"s05","mesh":"chunks/wall_plain_s05.fbx","center":[-2.134,1.325,0.085],"size":[3.732,2.65,1.17],"material":"plaster","health":115,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":32,"neighbors":["s02","s06","s10"]},{"id":"s06","mesh":"chunks/wall_plain_s06.fbx","center":[-1.042,4.074,0.071],"size":[4.523,4.434,1.141],"material":"plaster","health":130,"collision":"Hull","grounded":false,"touches":[],"triangles":36,"neighbors":["s02","s05","s07","s08","s09","s10"]},{"id":"s07","mesh":"chunks/wall_plain_s07.fbx","center":[0.576,6.162,-0.0],"size":[4.026,3.405,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":[],"triangles":16,"neighbors":["s03","s04","s06","s09","s10"]},{"id":"s08","mesh":"chunks/wall_plain_s08.fbx","center":[2.512,3.484,0.037],"size":[2.975,3.353,1.075],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["right"],"triangles":30,"neighbors":["s01","s02","s06","s09"]},{"id":"s09","mesh":"chunks/wall_plain_s09.fbx","center":[2.243,5.238,-0.0],"size":[3.515,3.281,1.0],"material":"plaster","health":70,"collision":"Hull","grounded":false,"touches":["right"],"triangles":16,"neighbors":["s03","s06","s07","s08"]},{"id":"s10","mesh":"chunks/wall_plain_s10.fbx","center":[-2.506,5.484,-0.0],"size":[2.988,6.234,1.0],"material":"plaster","health":150,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s00","s04","s05","s06","s07"]},{"id":"s11","mesh":"chunks/wall_plain_s11.fbx","center":[2.284,10.253,0.475],"size":[3.433,3.494,1.95],"material":"plaster","health":100,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":88,"neighbors":["s03","s04"]}]},"wall_upper":{"piece":"wall_upper","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/wall_upper_s00.fbx","center":[-0.899,10.888,0.475],"size":[4.951,2.223,1.95],"material":"plaster","health":80,"collision":"Hull","grounded":false,"touches":["top"],"triangles":88,"neighbors":["s01","s04","s10"]},{"id":"s01","mesh":"chunks/wall_upper_s01.fbx","center":[-0.198,8.482,-0.0],"size":[3.246,3.598,1.0],"material":"plaster","health":80,"collision":"Hull","grounded":false,"touches":[],"triangles":20,"neighbors":["s00","s02","s04","s05","s09","s10"]},{"id":"s02","mesh":"chunks/wall_upper_s02.fbx","center":[2.479,7.584,-0.0],"size":[3.043,3.846,1.0],"material":"plaster","health":85,"collision":"Hull","grounded":false,"touches":["right"],"triangles":20,"neighbors":["s01","s04","s06","s09","s11"]},{"id":"s03","mesh":"chunks/wall_upper_s03.fbx","center":[1.871,1.808,-0.0],"size":[4.259,3.616,1.0],"material":"plaster","health":155,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":16,"neighbors":["s06","s07","s08"]},{"id":"s04","mesh":"chunks/wall_upper_s04.fbx","center":[1.839,10.306,0.475],"size":[4.322,3.388,1.95],"material":"plaster","health":95,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":96,"neighbors":["s00","s01","s02","s11"]},{"id":"s05","mesh":"chunks/wall_upper_s05.fbx","center":[-2.481,6.07,-0.0],"size":[3.038,4.249,1.0],"material":"plaster","health":85,"collision":"Hull","grounded":false,"touches":["left"],"triangles":16,"neighbors":["s01","s07","s09","s10"]},{"id":"s06","mesh":"chunks/wall_upper_s06.fbx","center":[2.116,5.22,-0.0],"size":[3.769,3.841,1.0],"material":"plaster","health":120,"collision":"Hull","grounded":false,"touches":["right"],"triangles":20,"neighbors":["s02","s03","s07","s08","s09"]},{"id":"s07","mesh":"chunks/wall_upper_s07.fbx","center":[-1.697,4.825,-0.0],"size":[4.606,3.061,1.0],"material":"plaster","health":95,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s03","s05","s06","s08","s09"]},{"id":"s08","mesh":"chunks/wall_upper_s08.fbx","center":[-1.656,1.781,-0.0],"size":[4.688,3.562,1.0],"material":"plaster","health":175,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":16,"neighbors":["s03","s06","s07"]},{"id":"s09","mesh":"chunks/wall_upper_s09.fbx","center":[0.162,6.141,-0.0],"size":[2.952,3.566,1.0],"material":"plaster","health":50,"collision":"Hull","grounded":false,"touches":[],"triangles":16,"neighbors":["s01","s02","s05","s06","s07"]},{"id":"s10","mesh":"chunks/wall_upper_s10.fbx","center":[-2.758,9.463,0.475],"size":[2.485,5.074,1.95],"material":"plaster","health":110,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":92,"neighbors":["s00","s01","s05"]},{"id":"s11","mesh":"chunks/wall_upper_s11.fbx","center":[3.131,9.997,-0.0],"size":[1.737,4.006,1.0],"material":"plaster","health":35,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":12,"neighbors":["s02","s04"]}]},"wall_upper_window":{"piece":"wall_upper_window","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/wall_upper_window_s00.fbx","center":[-0.927,4.768,-0.0],"size":[4.269,3.527,1.0],"material":"plaster","health":35,"collision":"Hull","grounded":false,"touches":[],"triangles":24,"neighbors":["s03","s04","s06","s08","s09","window"]},{"id":"s01","mesh":"chunks/wall_upper_window_s01.fbx","center":[-1.018,10.492,-0.0],"size":[2.832,3.017,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["top"],"triangles":24,"neighbors":["s03","s06","s07","s10"]},{"id":"s02","mesh":"chunks/wall_upper_window_s02.fbx","center":[-3.378,7.871,-0.0],"size":[1.245,4.244,1.0],"material":"plaster","health":35,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s03","s07","s09"]},{"id":"s03","mesh":"chunks/wall_upper_window_s03.fbx","center":[-1.999,7.96,-0.0],"size":[3.034,4.052,1.0],"material":"plaster","health":70,"collision":"Hull","grounded":false,"touches":[],"triangles":40,"neighbors":["s00","s01","s02","s06","s07","s09","window"]},{"id":"s04","mesh":"chunks/wall_upper_window_s04.fbx","center":[1.746,2.239,-0.0],"size":[4.508,4.479,1.0],"material":"plaster","health":185,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":38,"neighbors":["s00","s08","s09","s11","window"]},{"id":"s05","mesh":"chunks/wall_upper_window_s05.fbx","center":[-3.011,2.141,-0.0],"size":[1.979,4.283,1.0],"material":"plaster","health":55,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":18,"neighbors":["s09","s11"]},{"id":"s06","mesh":"chunks/wall_upper_window_s06.fbx","center":[-0.132,7.816,-0.0],"size":[3.838,2.754,1.0],"material":"plaster","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":24,"neighbors":["s00","s01","s03","s08","s10","window"]},{"id":"s07","mesh":"chunks/wall_upper_window_s07.fbx","center":[-3.113,10.426,0.475],"size":[1.773,3.149,1.95],"material":"plaster","health":55,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":92,"neighbors":["s01","s02","s03"]},{"id":"s08","mesh":"chunks/wall_upper_window_s08.fbx","center":[2.464,6.001,-0.0],"size":[3.073,4.072,1.0],"material":"plaster","health":110,"collision":"Hull","grounded":false,"touches":["right"],"triangles":32,"neighbors":["s00","s04","s06","s10","window"]},{"id":"s09","mesh":"chunks/wall_upper_window_s09.fbx","center":[-2.062,3.766,-0.0],"size":[3.876,4.458,1.0],"material":"plaster","health":110,"collision":"Hull","grounded":false,"touches":["left"],"triangles":46,"neighbors":["s00","s02","s03","s04","s05","s11","window"]},{"id":"s10","mesh":"chunks/wall_upper_window_s10.fbx","center":[1.85,9.94,0.475],"size":[4.3,4.12,1.95],"material":"plaster","health":185,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":188,"neighbors":["s01","s06","s08","window"]},{"id":"s11","mesh":"chunks/wall_upper_window_s11.fbx","center":[-0.91,1.19,-0.0],"size":[4.89,2.38,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":true,"touches":["bottom"],"triangles":26,"neighbors":["s04","s05","s09"]},{"id":"window","mesh":"chunks/wall_upper_window_window.fbx","center":[0.0,6.3,0.298],"size":[3.9,5.2,0.785],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":352,"neighbors":["s00","s03","s04","s06","s08","s09","s10"]}]},"wall_window":{"piece":"wall_window","mode":"chunks","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":null,"chunks":[{"id":"s00","mesh":"chunks/wall_window_s00.fbx","center":[1.155,11.11,-0.0],"size":[3.188,1.78,1.0],"material":"plaster","health":45,"collision":"Hull","grounded":false,"touches":["top"],"triangles":20,"neighbors":["s06","s07","s09"]},{"id":"s01","mesh":"chunks/wall_window_s01.fbx","center":[-1.654,2.314,0.085],"size":[4.692,4.628,1.17],"material":"plaster","health":175,"collision":"Hull","grounded":true,"touches":["left","bottom"],"triangles":60,"neighbors":["s03","s04","s05","window"]},{"id":"s02","mesh":"chunks/wall_window_s02.fbx","center":[3.081,7.182,-0.0],"size":[1.838,5.394,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["right"],"triangles":24,"neighbors":["s03","s07","s09","s11"]},{"id":"s03","mesh":"chunks/wall_window_s03.fbx","center":[1.02,4.862,-0.0],"size":[5.961,3.628,1.0],"material":"plaster","health":105,"collision":"Hull","grounded":false,"touches":["right"],"triangles":44,"neighbors":["s01","s02","s04","s05","s10","s11","window"]},{"id":"s04","mesh":"chunks/wall_window_s04.fbx","center":[-2.861,5.637,-0.0],"size":[2.278,5.083,1.0],"material":"plaster","health":75,"collision":"Hull","grounded":false,"touches":["left"],"triangles":20,"neighbors":["s01","s03","s10","window"]},{"id":"s05","mesh":"chunks/wall_window_s05.fbx","center":[0.965,1.636,0.085],"size":[6.069,3.271,1.17],"material":"plaster","health":200,"collision":"Hull","grounded":true,"touches":["right","bottom"],"triangles":52,"neighbors":["s01","s03"]},{"id":"s06","mesh":"chunks/wall_window_s06.fbx","center":[-1.964,10.46,0.475],"size":[3.821,3.08,1.95],"material":"plaster","health":95,"collision":"Hull","grounded":false,"touches":["top"],"triangles":100,"neighbors":["s00","s07","s08","s10","window"]},{"id":"s07","mesh":"chunks/wall_window_s07.fbx","center":[0.927,9.661,0.475],"size":[3.59,2.317,1.95],"material":"plaster","health":60,"collision":"Hull","grounded":false,"touches":[],"triangles":104,"neighbors":["s00","s02","s06","s09","s10","s11","window"]},{"id":"s08","mesh":"chunks/wall_window_s08.fbx","center":[-3.22,10.417,-0.0],"size":[1.56,3.166,1.0],"material":"plaster","health":30,"collision":"Hull","grounded":false,"touches":["left","top"],"triangles":12,"neighbors":["s06","s10"]},{"id":"s09","mesh":"chunks/wall_window_s09.fbx","center":[2.971,10.749,0.475],"size":[2.058,2.502,1.95],"material":"plaster","health":50,"collision":"Hull","grounded":false,"touches":["right","top"],"triangles":92,"neighbors":["s00","s02","s07"]},{"id":"s10","mesh":"chunks/wall_window_s10.fbx","center":[-2.087,7.484,-0.0],"size":[3.827,3.984,1.0],"material":"plaster","health":85,"collision":"Hull","grounded":false,"touches":["left"],"triangles":40,"neighbors":["s03","s04","s06","s07","s08","s11","window"]},{"id":"s11","mesh":"chunks/wall_window_s11.fbx","center":[1.392,7.51,-0.0],"size":[3.31,3.418,1.0],"material":"plaster","health":40,"collision":"Hull","grounded":false,"touches":[],"triangles":28,"neighbors":["s02","s03","s07","s10","window"]},{"id":"window","mesh":"chunks/wall_window_window.fbx","center":[0.0,6.3,0.298],"size":[3.9,5.2,0.785],"material":"wood","health":15,"collision":"Hull","grounded":false,"touches":[],"triangles":352,"neighbors":["s01","s03","s04","s06","s07","s10","s11"]}]},"well":{"piece":"well","mode":"shatter","coords":"Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.","health":395,"chunks":[{"id":"s00","mesh":"chunks/well_s00.fbx","center":[0.613,1.638,1.851],"size":[2.463,1.725,1.397],"material":"stone","health":30,"collision":"Hull","grounded":false,"touches":[],"triangles":58,"neighbors":["s03","s05","s06"]},{"id":"s01","mesh":"chunks/well_s01.fbx","center":[1.915,5.478,-0.0],"size":[1.57,3.243,0.54],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":48,"neighbors":["s06","s08","s09"]},{"id":"s02","mesh":"chunks/well_s02.fbx","center":[-1.569,1.377,-0.291],"size":[1.962,2.754,3.605],"material":"stone","health":75,"collision":"Hull","grounded":true,"touches":[],"triangles":94,"neighbors":["s03","s04","s05"]},{"id":"s03","mesh":"chunks/well_s03.fbx","center":[0.12,0.891,1.458],"size":[4.132,1.782,2.184],"material":"stone","health":50,"collision":"Hull","grounded":true,"touches":[],"triangles":76,"neighbors":["s00","s02","s05","s06"]},{"id":"s04","mesh":"chunks/well_s04.fbx","center":[0.157,1.25,-1.457],"size":[4.147,2.5,2.186],"material":"stone","health":100,"collision":"Hull","grounded":true,"touches":[],"triangles":104,"neighbors":["s02","s06"]},{"id":"s05","mesh":"chunks/well_s05.fbx","center":[-1.357,2.17,0.946],"size":[2.269,2.608,2.701],"material":"stone","health":35,"collision":"Hull","grounded":false,"touches":[],"triangles":66,"neighbors":["s00","s02","s03","s07"]},{"id":"s06","mesh":"chunks/well_s06.fbx","center":[1.783,2.024,0.079],"size":[1.533,4.048,3.322],"material":"stone","health":65,"collision":"Hull","grounded":true,"touches":[],"triangles":90,"neighbors":["s00","s01","s03","s04"]},{"id":"s07","mesh":"chunks/well_s07.fbx","center":[-1.077,5.093,0.276],"size":[3.245,4.014,1.092],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":140,"neighbors":["s05","s08"]},{"id":"s08","mesh":"chunks/well_s08.fbx","center":[-0.505,5.875,0.02],"size":[3.647,2.45,0.76],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":88,"neighbors":["s01","s07"]},{"id":"s09","mesh":"chunks/well_s09.fbx","center":[1.97,7.051,-0.196],"size":[0.181,0.098,0.047],"material":"wood","health":10,"collision":"Hull","grounded":false,"touches":[],"triangles":4,"neighbors":["s01"]}]}}]=]) :: any
 ]==] },
+	{ path = { "ServerStorage", "DesertFps", "Assets", "KitImporter" }, class = "ModuleScript", source = [=[
+--!strict
+-- Loads the uploaded kit pieces into ServerStorage.DesertFps.Meshes, where Breakable, the map builder and
+-- the weapons pick them up. Studio only, in edit mode (build/04_import_meshes.luau runs it).
+--   Meshes.<piece>.Whole, .Low          the whole mesh and its low-detail version
+--   Meshes.<piece>.Shards.<shard id>    pieces that break (walls, stairs, props, ...)
+--   Meshes.<piece>.Parts.<part id>      pieces that do not break (weapons, the ground)
+-- Every mesh gets the piece's texture as a SurfaceAppearance colour map, and an "Offset" attribute:
+-- where its centre sits relative to the piece origin. It stops if a mesh is not where its data says.
+
+local DesertFps = script.Parent.Parent
+local AssetIds = require(script.Parent.AssetIds)
+local BreakData = require(script.Parent.BreakData)
+local PartsData = require(script.Parent.PartsData)
+
+local KitImporter = {}
+
+-- Studs a mesh may sit from the centre its data gives.
+local TOLERANCE = 0.01
+-- Collision of the whole and low-detail mesh, where the default (a rough set of blocks) will not do.
+local PRECISE, HULL = Enum.CollisionFidelity.PreciseConvexDecomposition, Enum.CollisionFidelity.Hull
+local FIDELITY = {
+	wall_door = PRECISE, -- the opening has to stay open
+	wall_window = PRECISE,
+	wall_upper_window = PRECISE,
+	well = PRECISE,
+	vat = PRECISE,
+	stall = PRECISE,
+	awning = PRECISE,
+	stairs = HULL, -- one smooth ramp to walk up
+}
+-- Pieces players pass straight through. Shots still hit them.
+-- (A ladder is climbed on the TrussPart the map builder stands with it.)
+local WALK_THROUGH = { cloth = true, ladder = true }
+
+local function import(piece: string, ids: { Model: number, Texture: number }, meshes: Instance): { meshes: number, worstOffset: number }
+	local fixed = PartsData[piece] ~= nil -- does not break
+	local data = BreakData[piece] or PartsData[piece]
+	assert(data, `no break or parts data for "{piece}"`)
+	local entries = data.chunks or data.parts
+	local centres: { [string]: Vector3 } = {}
+	for _, entry in entries do
+		centres[entry.id] = Vector3.new(entry.center[1], entry.center[2], entry.center[3])
+	end
+
+	local model = game:GetObjects(`rbxassetid://{ids.Model}`)[1] :: Model
+	local pivot = model:GetPivot()
+
+	local folder = Instance.new("Folder")
+	folder.Name = piece
+	local group = Instance.new("Folder")
+	group.Name = if fixed then "Parts" else "Shards"
+	group.Parent = folder
+
+	local worst = 0
+	for _, part in model:GetDescendants() do
+		if not part:IsA("MeshPart") then
+			continue
+		end
+		local offset = pivot:ToObjectSpace(part.CFrame)
+		assert(offset.Rotation:FuzzyEq(CFrame.identity, 1e-4), `{part.Name} arrived turned`)
+		part:SetAttribute("Offset", offset.Position)
+		part.Anchored = true
+		part.CFrame = CFrame.new(offset.Position)
+
+		local appearance = Instance.new("SurfaceAppearance")
+		appearance.ColorMap = `rbxassetid://{ids.Texture}`
+		appearance.Parent = part
+
+		if part.Name == piece or part.Name == piece .. "_low" then
+			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else FIDELITY[piece] or Enum.CollisionFidelity.Default
+			part.CanCollide = not WALK_THROUGH[piece]
+			part.Name = if part.Name == piece then "Whole" else "Low"
+			part.Parent = folder
+		else
+			local id = part.Name:sub(#piece + 2)
+			assert(centres[id], `{part.Name} is not in the data for "{piece}"`)
+			worst = math.max(worst, (offset.Position - centres[id]).Magnitude)
+			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else HULL
+			part.Name = id
+			part.Parent = group
+		end
+	end
+	model:Destroy()
+
+	assert(folder:FindFirstChild("Whole") and folder:FindFirstChild("Low"), `"{piece}" has no whole or low mesh`)
+	assert(#group:GetChildren() == #entries, `"{piece}": {#group:GetChildren()} meshes for {#entries} data entries`)
+	assert(worst <= TOLERANCE, `"{piece}": a mesh sits {worst} studs from its data centre`)
+
+	local old = meshes:FindFirstChild(piece)
+	if old then
+		old:Destroy()
+	end
+	folder.Parent = meshes
+	return { meshes = #group:GetChildren() + 2, worstOffset = math.round(worst * 1e4) / 1e4 }
+end
+
+-- Imports every piece in AssetIds, or only the ones named. A piece that is already there is replaced.
+function KitImporter.run(only: { string }?): { [string]: { meshes: number, worstOffset: number } }
+	local meshes = DesertFps:FindFirstChild("Meshes")
+	if not meshes then
+		meshes = Instance.new("Folder")
+		meshes.Name = "Meshes"
+		meshes.Parent = DesertFps
+	end
+	local report = {}
+	for piece, ids in AssetIds :: { [string]: { Model: number, Texture: number } } do
+		if only == nil or table.find(only, piece) then
+			report[piece] = import(piece, ids, meshes :: Instance)
+			task.wait()
+		end
+	end
+	game:GetService("ChangeHistoryService"):SetWaypoint("Import kit meshes")
+	return report
+end
+
+return KitImporter
+]=] },
 	{ path = { "ServerStorage", "DesertFps", "Assets", "PartsData" }, class = "ModuleScript", source = [==[
 --!strict
 -- Generated by build/pack.py from assets/out/<piece>/<piece>.parts.json. Do not edit; rebuild the source and re-run pack.py.
@@ -335,6 +457,10 @@ local function crumble(model: Model, data: PieceData, point: Vector3, push: Vect
 	local reach = (hi - lo).Magnitude
 
 	model:SetAttribute("Health", 0)
+	local ramp = model:FindFirstChild("Ramp")
+	if ramp then
+		ramp:Destroy()
+	end
 	for _, part in shardsOf(model, data):GetChildren() do
 		if part:IsA("BasePart") then
 			part.CollisionGroup = Config.DebrisGroup
@@ -390,6 +516,20 @@ function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Mode
 	model:SetAttribute("Health", fullHealth(data))
 	model:AddTag(Breakable.Tag)
 	whole.Parent = model
+
+	local rampSize = (Config.Ramps :: any)[piece]
+	if rampSize then
+		whole.CanCollide = false
+		-- a wedge is tallest at its back (+Z); the pieces climb towards their own -Z
+		local ramp = Instance.new("WedgePart")
+		ramp.Name = "Ramp"
+		ramp.Anchored = true
+		ramp.Transparency = 1
+		ramp.CanQuery = false
+		ramp.Size = rampSize
+		ramp.CFrame = origin * CFrame.new(0, rampSize.Y / 2, 0) * CFrame.Angles(0, math.pi, 0)
+		ramp.Parent = model
+	end
 	model.Parent = parent or workspace
 	return model
 end
@@ -475,6 +615,10 @@ return {
 	DebrisLifetime = 6,
 	DebrisFade = 1,
 
+	-- Pieces players walk up. A character cannot climb the 1.5-stud steps of the mesh itself, so the mesh
+	-- does not collide and an unseen ramp of this size (wide, high, long) stands in it until the piece breaks.
+	Ramps = { stairs = Vector3.new(8, 12, 8) },
+
 	-- Collision groups. Rubble does not shove players around, and shots pass through it.
 	DebrisGroup = "Debris",
 	CharacterGroup = "Characters",
@@ -485,18 +629,20 @@ return {
 -- Switches for testing while the game has no rounds, teams or loadouts. Set both to nil for the real game.
 return {
 	-- Every player spawns on this SpawnLocation (a path under Workspace) if it exists.
-	SpawnPath = { "KitShowcase", "Spawn" } :: { string }?,
+	-- { "KitShowcase", "Spawn" } is the firing range outside the town wall.
+	SpawnPath = { "Map", "Zones", "market", "SpawnA" } :: { string }?,
 	-- Seconds after a breakable piece is completely destroyed before it is stood up again.
-	RebuildSeconds = 8 :: number?,
+	RebuildSeconds = 30 :: number?,
 }
 ]=] },
 	{ path = { "ServerStorage", "DesertFps", "Graybox", "GrayboxBuilder" }, class = "ModuleScript", source = [=[
 --!strict
 -- Builds one duel zone from the grid plan as gray boxes.
--- The meaning of every grid character mirrors plan/planner.py; change them together.
+-- What the grid characters mean lives in Plan/PlanGrid.
 
 local Config = require(script.Parent.GrayboxConfig)
 local PlanData = require(script.Parent.Parent.Plan.PlanData)
+local PlanGrid = require(script.Parent.Parent.Plan.PlanGrid)
 
 local GrayboxBuilder = {}
 
@@ -513,56 +659,8 @@ type Ctx = {
 	counts: { [string]: number },
 }
 
-local ROOM_CELLS = "idWpqQ"
-local SIDES = {
-	{ name = "N", dr = -1, dc = 0 },
-	{ name = "S", dr = 1, dc = 0 },
-	{ name = "W", dr = 0, dc = -1 },
-	{ name = "E", dr = 0, dc = 1 },
-}
-
-local function isRoom(ch: string?): boolean
-	return ch ~= nil and string.find(ROOM_CELLS, ch, 1, true) ~= nil
-end
-
-local function solidStoreys(ch: string?): number
-	if ch == "1" then
-		return 1
-	elseif ch == "2" then
-		return 2
-	elseif ch == "3" then
-		return 3
-	end
-	return 0
-end
-
--- Walkable roof height of a cell, in storeys (planner.height).
-local function storeys(ch: string?): number
-	local solid = solidStoreys(ch)
-	if solid > 0 then
-		return solid
-	end
-	if isRoom(ch) or ch == "=" then
-		return 1
-	end
-	return 0
-end
-
--- What stands on the edge between a room cell and its neighbour (planner.edge).
-local function edgeKind(room: string, other: string?): string
-	if other == nil then
-		return "wall"
-	elseif isRoom(other) then
-		return "none"
-	elseif solidStoreys(other) > 0 then
-		return "solid" -- the neighbouring building is the wall
-	elseif room == "d" then
-		return "open"
-	elseif room == "W" then
-		return "window"
-	end
-	return "wall"
-end
+local SIDES = PlanGrid.SIDES
+local isRoom, solidStoreys, storeys, edgeKind = PlanGrid.isRoom, PlanGrid.solidStoreys, PlanGrid.storeys, PlanGrid.edgeKind
 
 local function cellAt(ctx: Ctx, r: number, c: number): string?
 	if r < 0 or c < 0 or r >= ctx.n or c >= ctx.n then
@@ -1105,19 +1203,39 @@ local function walk(model: Model, route: Route): Result
 	local bot, humanoid, root = makeBot(nodePosition(route.path[1]))
 	task.wait(1.5) -- let the bot land and settle
 
+	local onStairs = RaycastParams.new()
+	onStairs.FilterType = Enum.RaycastFilterType.Exclude
+	onStairs.FilterDescendantsInstances = { bot }
+
 	local studs = 0
 	local started = time()
 	for i = 2, #route.path do
 		local target = nodePosition(route.path[i])
 		studs += (target - nodePosition(route.path[i - 1])).Magnitude
+		-- Halfway up a flight of stairs the feet are between two levels: any height from the node before
+		-- to the node after counts.
+		local low, high = target.Y, target.Y
+		for _, near in { route.path[i - 1], route.path[i + 1] } do
+			local y = nodePosition(near).Y
+			low, high = math.min(low, y), math.max(high, y)
+		end
 		local stepStarted = time()
 		while true do
 			humanoid:MoveTo(target)
 			RunService.Heartbeat:Wait()
 			local feet = root.Position.Y - root.Size.Y / 2 - humanoid.HipHeight
 			local flat = Vector3.new(root.Position.X - target.X, 0, root.Position.Z - target.Z).Magnitude
-			if flat < REACH and math.abs(feet - target.Y) < FEET_TOLERANCE then
+			if flat < REACH and feet > low - FEET_TOLERANCE and feet < high + FEET_TOLERANCE then
 				break
+			end
+			-- A route that only crosses a stairs cell is up on the flight at this point.
+			if flat < REACH then
+				local under = workspace:Raycast(root.Position, Vector3.new(0, -8, 0), onStairs)
+				local standsOn = under and under.Instance
+				-- a graybox wedge is called Stairs; a kit flight is a mesh inside a model called stairs
+				if standsOn and (standsOn.Name == "Stairs" or (standsOn.Parent :: Instance).Name == "stairs") then
+					break
+				end
 			end
 			if time() - stepStarted > STEP_TIMEOUT then
 				local node = route.path[i]
@@ -1162,6 +1280,702 @@ end
 
 return RouteTimer
 ]=] },
+	{ path = { "ServerStorage", "DesertFps", "Map", "MapBuilder" }, class = "ModuleScript", source = [=[
+--!strict
+-- Builds the town out of kit pieces from the grid plan: Workspace.Map.
+--   Map.<district>.<kind>   the pieces, by district ("ring" is the ring road and the town wall)
+--   Map.Zones.<zone>        one model per duel zone: where it is, its spawns and its barriers
+-- Every piece that can break is stood up through Breakable, so the whole town can be shot down.
+-- Which piece stands where is in MapConfig; what the plan's characters mean is in Plan/PlanGrid.
+
+local Config = require(script.Parent.MapConfig)
+local DesertFps = script.Parent.Parent
+local BreakData = require(DesertFps.Assets.BreakData)
+local Breakable = require(DesertFps.Destruction.Breakable)
+local PlanData = require(DesertFps.Plan.PlanData)
+local PlanGrid = require(DesertFps.Plan.PlanGrid)
+
+local MapBuilder = {}
+
+type Side = { name: string, dr: number, dc: number }
+type Edges = { [number]: { [string]: boolean } } -- [story or roof height][edge] = something stands on it
+type Ctx = {
+	town: PlanGrid.Town,
+	cell: number,
+	story: number,
+	origin: CFrame,
+	map: Instance,
+	only: { [string]: boolean }?,
+	districtNames: { [number]: string },
+	folders: { [string]: Instance },
+	counts: { [string]: number },
+	placed: number,
+	walls: Edges,
+	parapets: Edges,
+}
+
+local SIDES: { Side } = PlanGrid.SIDES
+local isRoom, solidStoreys, storeys, edgeKind = PlanGrid.isRoom, PlanGrid.solidStoreys, PlanGrid.storeys, PlanGrid.edgeKind
+-- Pieces placed between two yields. Studio stays responsive while the town goes up.
+local BATCH = 200
+
+local function at(ctx: Ctx, r: number, c: number): string?
+	local row = ctx.town.grid[r + 1]
+	return row and row[c + 1]
+end
+
+-- Which district a cell belongs to; the town wall and ring road are "ring".
+local function districtOf(ctx: Ctx, r: number, c: number): string
+	local n, first = PlanData.zone_cells, PlanGrid.RING + 1
+	local gr, gc = (r - first) // n, (c - first) // n
+	if gr < 0 or gc < 0 or gr > 2 or gc > 2 then
+		return "ring"
+	end
+	return ctx.districtNames[gr * 3 + gc]
+end
+
+local function wanted(ctx: Ctx, r: number, c: number): boolean
+	return ctx.only == nil or ctx.only[districtOf(ctx, r, c)] == true
+end
+
+-- A point in the town: x studs east of its west edge, z studs south of its north edge, y above the street.
+local function world(ctx: Ctx, x: number, y: number, z: number): CFrame
+	local half = ctx.town.size * ctx.cell / 2
+	return ctx.origin * CFrame.new(x - half, y, z - half)
+end
+
+local function cellCentre(ctx: Ctx, r: number, c: number, y: number): CFrame
+	return world(ctx, (c + 0.5) * ctx.cell, y, (r + 0.5) * ctx.cell)
+end
+
+-- Turns a piece so its front (+Z) looks along (dx, dz).
+local function facing(dx: number, dz: number): CFrame
+	return CFrame.Angles(0, math.atan2(dx, dz), 0)
+end
+
+-- The same choice for the same cell on every build.
+local function pick(r: number, c: number, salt: number, choices: number): number
+	return (r * 7919 + c * 104729 + salt * 31337) % choices
+end
+
+local function folderFor(ctx: Ctx, district: string, kind: string): Instance
+	local key = district .. "/" .. kind
+	local folder = ctx.folders[key]
+	if not folder then
+		local parent = ctx.map:FindFirstChild(district)
+		if not parent then
+			parent = Instance.new("Folder")
+			parent.Name = district
+			parent.Parent = ctx.map
+		end
+		folder = Instance.new("Folder")
+		folder.Name = kind
+		folder.Parent = parent
+		ctx.folders[key] = folder
+	end
+	return folder
+end
+
+local function count(ctx: Ctx, what: string)
+	ctx.counts[what] = (ctx.counts[what] or 0) + 1
+	ctx.placed += 1
+	if ctx.placed % BATCH == 0 then
+		task.wait()
+	end
+end
+
+-- Stands one kit piece with its origin at `cf`. Returns its mesh part.
+local function stand(ctx: Ctx, district: string, kind: string, piece: string, cf: CFrame): BasePart
+	local parent = folderFor(ctx, district, kind)
+	local part: BasePart
+	if BreakData[piece] then
+		part = (Breakable.place(piece, cf, parent) :: any).Whole
+	else
+		local template = (DesertFps :: any).Meshes[piece].Whole
+		part = template:Clone()
+		part.Name = piece
+		part.CFrame = cf * CFrame.new(template:GetAttribute("Offset"))
+		part.Parent = parent
+	end
+	count(ctx, piece)
+	return part
+end
+
+-- A plain part where the kit has no piece yet.
+local function standIn(ctx: Ctx, district: string, kind: string, name: string, size: Vector3, cf: CFrame, color: Color3): Part
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Anchored = true
+	part.Size = size
+	part.CFrame = cf
+	part.Color = color
+	part.Material = Enum.Material.SmoothPlastic
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	part:SetAttribute("StandIn", true)
+	part.Parent = folderFor(ctx, district, kind)
+	count(ctx, name)
+	return part
+end
+
+local function edgeKey(r: number, c: number, side: Side): string
+	if side.name == "N" then
+		return `H:{r}:{c}`
+	elseif side.name == "S" then
+		return `H:{r + 1}:{c}`
+	elseif side.name == "W" then
+		return `V:{r}:{c}`
+	end
+	return `V:{r}:{c + 1}`
+end
+
+local function mark(edges: Edges, level: number, key: string)
+	local set = edges[level]
+	if not set then
+		set = {}
+		edges[level] = set
+	end
+	set[key] = true
+end
+
+-- A piece one cell wide standing on a cell's edge, front facing out of the cell.
+local function onEdge(ctx: Ctx, r: number, c: number, side: Side, y: number, kind: string, piece: string)
+	local x, z = (c + 0.5 + side.dc * 0.5) * ctx.cell, (r + 0.5 + side.dr * 0.5) * ctx.cell
+	stand(ctx, districtOf(ctx, r, c), kind, piece, world(ctx, x, y, z) * facing(side.dc, side.dr))
+end
+
+local function isTownWall(ctx: Ctx, r: number, c: number): boolean
+	local last = ctx.town.size - 1
+	return r == 0 or c == 0 or r == last or c == last
+end
+
+local function buildGround(ctx: Ctx)
+	for r = 0, ctx.town.size - 1 do
+		for c = 0, ctx.town.size - 1 do
+			if wanted(ctx, r, c) and solidStoreys(at(ctx, r, c)) == 0 then
+				local turn = CFrame.Angles(0, pick(r, c, 1, 4) * math.pi / 2, 0) -- so the paving does not repeat
+				local tile = stand(ctx, districtOf(ctx, r, c), "Ground", "ground", cellCentre(ctx, r, c, -Config.PavingThickness) * turn)
+				tile.CastShadow = false -- flat on the ground: nothing to shade, and thousands fewer shadow casters
+			end
+		end
+	end
+end
+
+local function buildWalls(ctx: Ctx)
+	local W = Config.Wall
+	for r = 0, ctx.town.size - 1 do
+		for c = 0, ctx.town.size - 1 do
+			local ch = at(ctx, r, c)
+			if not (ch and wanted(ctx, r, c)) then
+				continue
+			end
+			local height = solidStoreys(ch)
+			for index, side in SIDES do
+				local other = at(ctx, r + side.dr, c + side.dc)
+				if height > 0 then
+					-- a solid building shows a wall wherever it stands taller than its neighbour
+					for level = solidStoreys(other) + 1, height do
+						local piece = W.Upper
+						if level == 1 then
+							piece = W.Ground
+						elseif
+							not isTownWall(ctx, r, c)
+							and storeys(other) < level
+							and pick(r, c, index * 10 + level, W.UpperWindowOneIn) == 0
+						then
+							piece = W.UpperWindow
+						end
+						onEdge(ctx, r, c, side, (level - 1) * ctx.story, "Walls", piece)
+						mark(ctx.walls, level, edgeKey(r, c, side))
+					end
+				elseif isRoom(ch) then
+					local kind = edgeKind(ch, other)
+					local piece = if kind == "wall" then W.Ground elseif kind == "open" then W.Door elseif kind == "window" then W.Window else nil
+					if piece then
+						onEdge(ctx, r, c, side, 0, "Walls", piece)
+						mark(ctx.walls, 1, edgeKey(r, c, side))
+					end
+				end
+			end
+		end
+	end
+end
+
+-- A post wherever pieces along a row and pieces along a column meet at a grid corner.
+local function buildPosts(ctx: Ctx, edges: Edges, kind: string, pieceFor: (level: number) -> string, height: (level: number) -> number)
+	for level, set in edges do
+		for vr = 0, ctx.town.size do
+			for vc = 0, ctx.town.size do
+				local along = set[`H:{vr}:{vc - 1}`] or set[`H:{vr}:{vc}`]
+				local across = set[`V:{vr - 1}:{vc}`] or set[`V:{vr}:{vc}`]
+				if along and across then
+					local last = ctx.town.size - 1
+					local district = districtOf(ctx, math.min(vr, last), math.min(vc, last))
+					stand(ctx, district, kind, pieceFor(level), world(ctx, vc * ctx.cell, height(level), vr * ctx.cell))
+				end
+			end
+		end
+	end
+end
+
+local function buildRoofs(ctx: Ctx)
+	for r = 0, ctx.town.size - 1 do
+		for c = 0, ctx.town.size - 1 do
+			local ch = at(ctx, r, c)
+			if not (ch and wanted(ctx, r, c)) then
+				continue
+			end
+			local district = districtOf(ctx, r, c)
+			local height = solidStoreys(ch)
+			local solid = height > 0
+			local ceiling = (Config.Covered :: any)[district]
+			if height == 0 and isRoom(ch) then
+				height = 1
+			elseif height == 0 and ceiling then
+				height = ceiling
+				local lamp = Config.CoveredLamp
+				if r % lamp.Every == 0 and c % lamp.Every == 0 then
+					local holder = standIn(ctx, district, "Lamps", "Lamp", Vector3.one, cellCentre(ctx, r, c, ceiling * ctx.story - 2.5), lamp.Color)
+					holder.Transparency = 1
+					holder.CanCollide = false
+					holder.CanQuery = false
+					local light = Instance.new("PointLight")
+					light.Range, light.Brightness, light.Color = lamp.Range, lamp.Brightness, lamp.Color
+					light.Parent = holder
+				end
+			end
+			if height > 0 then
+				local slab = stand(ctx, district, "Roofs", "roof", cellCentre(ctx, r, c, height * ctx.story - Config.RoofDrop))
+				-- the walls of a solid building already throw its shadow; only roofs over rooms need to
+				slab.CastShadow = not solid
+			elseif ch == "=" then
+				-- a plank bridge runs between the roofs it joins
+				local alongX = storeys(at(ctx, r, c - 1)) > 0 or storeys(at(ctx, r, c + 1)) > 0
+				local turn = if alongX then CFrame.identity else CFrame.Angles(0, math.pi / 2, 0)
+				stand(ctx, district, "Roofs", "plank", cellCentre(ctx, r, c, ctx.story - Config.PlankRise) * turn)
+			end
+		end
+	end
+end
+
+-- Parapets stand on the edge of every roof that looks down on its neighbour, except where a ladder
+-- or stairs come up.
+local function buildParapets(ctx: Ctx)
+	for r = 0, ctx.town.size - 1 do
+		for c = 0, ctx.town.size - 1 do
+			local ch = at(ctx, r, c)
+			if not (ch and wanted(ctx, r, c)) then
+				continue
+			end
+			local height = if isRoom(ch) then 1 else solidStoreys(ch)
+			for _, side in SIDES do
+				local other = at(ctx, r + side.dr, c + side.dc)
+				-- The top step of a flight is one stud deep, right at the end of its cell: a parapet that
+				-- ends or runs past there would block the step sideways onto the roof. So no parapet where
+				-- a stairs cell is next to this cell along the edge, or next to the cell the edge faces.
+				local beside = false
+				for _, way in { -1, 1 } do
+					local dr, dc = way * side.dc, way * side.dr -- one cell along the edge
+					beside = beside or at(ctx, r + dr, c + dc) == "s" or at(ctx, r + side.dr + dr, c + side.dc + dc) == "s"
+				end
+				if height > 0 and storeys(other) < height and other ~= "L" and other ~= "s" and not beside then
+					onEdge(ctx, r, c, side, height * ctx.story, "Parapets", (Config.Parapet :: any)[height])
+					mark(ctx.parapets, height, edgeKey(r, c, side))
+				end
+			end
+		end
+	end
+end
+
+local function standLayout(ctx: Ctx, r: number, c: number, layout: { { any } })
+	local centre = cellCentre(ctx, r, c, 0)
+	for _, entry in layout do
+		stand(ctx, districtOf(ctx, r, c), "Props", entry[1], centre * CFrame.new(entry[2]) * CFrame.Angles(0, math.rad(entry[3]), 0))
+	end
+end
+
+-- Greedy merge of matching cells into rectangles: (first row, first column, last row, last column).
+local function rectangles(ctx: Ctx, matches: (r: number, c: number) -> boolean): { { number } }
+	local size = ctx.town.size
+	local used: { [number]: boolean } = {}
+	local rects = {}
+	local function free(r: number, c: number): boolean
+		return not used[r * size + c] and matches(r, c)
+	end
+	for r = 0, size - 1 do
+		for c = 0, size - 1 do
+			if free(r, c) then
+				local c1 = c
+				while c1 + 1 < size and free(r, c1 + 1) do
+					c1 += 1
+				end
+				local r1 = r
+				while r1 + 1 < size do
+					local whole = true
+					for cc = c, c1 do
+						whole = whole and free(r1 + 1, cc)
+					end
+					if not whole then
+						break
+					end
+					r1 += 1
+				end
+				for rr = r, r1 do
+					for cc = c, c1 do
+						used[rr * size + cc] = true
+					end
+				end
+				table.insert(rects, { r, c, r1, c1 })
+			end
+		end
+	end
+	return rects
+end
+
+-- A ladder cell gets a ladder against every building it touches, as the planner assumes.
+local function buildLadder(ctx: Ctx, r: number, c: number)
+	local L, district = Config.Ladder, districtOf(ctx, r, c)
+	for _, side in SIDES do
+		local height = storeys(at(ctx, r + side.dr, c + side.dc))
+		if height > 0 then
+			local out = ctx.cell / 2 - L.FromWall
+			local foot = cellCentre(ctx, r, c, 0) * CFrame.new(side.dc * out, 0, side.dr * out)
+			for level = 1, height do
+				-- the ladder's back is to the wall
+				stand(ctx, district, "Ladders", L.Piece, foot * CFrame.new(0, (level - 1) * ctx.story, 0) * facing(-side.dc, -side.dr))
+			end
+			-- The ladder piece is only the look; this is what a player climbs.
+			local reach = ctx.cell / 2 - 0.5 - L.Truss / 2
+			local truss = Instance.new("TrussPart")
+			truss.Name = "Climb"
+			truss.Anchored = true
+			truss.Transparency = 1
+			truss.Size = Vector3.new(L.Truss, height * ctx.story, L.Truss)
+			truss.CFrame = cellCentre(ctx, r, c, height * ctx.story / 2) * CFrame.new(side.dc * reach, 0, side.dr * reach)
+			truss.Parent = folderFor(ctx, district, "Ladders")
+		end
+	end
+end
+
+local function buildProps(ctx: Ctx)
+	for r = 0, ctx.town.size - 1 do
+		for c = 0, ctx.town.size - 1 do
+			local ch = at(ctx, r, c)
+			if not (ch and wanted(ctx, r, c)) then
+				continue
+			end
+			local district = districtOf(ctx, r, c)
+			if ch == "c" then
+				standLayout(ctx, r, c, Config.LowCover[pick(r, c, 2, #Config.LowCover) + 1])
+			elseif ch == "C" and (Config.Stalls :: any)[district] then
+				-- a stall looks at the middle of its district
+				local place = ctx.town.districts[district]
+				local dx = place.column + PlanData.zone_cells / 2 - (c + 0.5)
+				local dz = place.row + PlanData.zone_cells / 2 - (r + 0.5)
+				local look = if math.abs(dx) > math.abs(dz) then facing(math.sign(dx), 0) else facing(0, math.sign(dz))
+				stand(ctx, district, "Props", "stall", cellCentre(ctx, r, c, 0) * look)
+			elseif ch == "C" or ch == "Q" then
+				standLayout(ctx, r, c, Config.HighCover[pick(r, c, 3, #Config.HighCover) + 1])
+			elseif ch == "q" then
+				standLayout(ctx, r, c, Config.InteriorLowCover[pick(r, c, 4, #Config.InteriorLowCover) + 1])
+			elseif ch == "p" or ch == "P" then
+				stand(ctx, district, "Props", "pillar", cellCentre(ctx, r, c, 0))
+			elseif ch == "k" then
+				-- cloths in a line hang along the line; a single one hangs across the street
+				local line = at(ctx, r - 1, c) == "k" or at(ctx, r + 1, c) == "k"
+				local across = storeys(at(ctx, r, c - 1)) == 0 and storeys(at(ctx, r, c + 1)) == 0
+				local turn = if line or (across and at(ctx, r, c - 1) ~= "k" and at(ctx, r, c + 1) ~= "k") then facing(1, 0) else CFrame.identity
+				stand(ctx, district, "Props", "cloth", cellCentre(ctx, r, c, 0) * turn)
+			elseif ch == "T" then
+				local T = Config.Tree
+				standIn(ctx, district, "Props", "Tree", T.Trunk, cellCentre(ctx, r, c, T.Trunk.Y / 2), T.TrunkColor)
+				local crown = standIn(ctx, district, "Props", "Tree", Vector3.one * T.Crown, cellCentre(ctx, r, c, T.Trunk.Y + T.Crown / 4), T.CrownColor)
+				crown.Shape = Enum.PartType.Ball
+			elseif ch == "L" then
+				buildLadder(ctx, r, c)
+			elseif ch == "s" then
+				-- A flight is entered from open ground and climbs away from it: towards a roof where it can,
+				-- and along the street where the roofs are only to its sides (its top step reaches them both).
+				local function open(side: Side): boolean
+					local behind = at(ctx, r - side.dr, c - side.dc)
+					return behind ~= nil and storeys(behind) == 0 and string.find("cCwPT", behind, 1, true) == nil
+				end
+				-- Of the ways it could run, it takes the one entered from nearest the middle of its district.
+				-- A zone's two halves are each other turned half round, so both teams get the same stairs.
+				local place = ctx.town.districts[district]
+				local middleR, middleC = place.row + PlanData.zone_cells / 2 - 0.5, place.column + PlanData.zone_cells / 2 - 0.5
+				local climb: Side? = nil
+				for _, needsRoof in { true, false } do
+					local nearest = math.huge
+					for _, side in SIDES do
+						if open(side) and (not needsRoof or storeys(at(ctx, r + side.dr, c + side.dc)) == 1) then
+							local away = math.abs(r - side.dr - middleR) + math.abs(c - side.dc - middleC)
+							if away < nearest then
+								climb, nearest = side, away
+							end
+						end
+					end
+					if climb then
+						break
+					end
+				end
+				if climb then
+					-- the low end of the piece is its front
+					stand(ctx, district, "Stairs", "stairs", cellCentre(ctx, r, c, 0) * facing(-climb.dc, -climb.dr))
+				end
+			end
+		end
+	end
+
+	local function middle(rect: { number }, y: number): CFrame
+		return world(ctx, (rect[2] + rect[4] + 1) / 2 * ctx.cell, y, (rect[1] + rect[3] + 1) / 2 * ctx.cell)
+	end
+	for _, rect in rectangles(ctx, function(r, c)
+		return at(ctx, r, c) == "w" and wanted(ctx, r, c)
+	end) do
+		local district = districtOf(ctx, rect[1], rect[2])
+		stand(ctx, district, "Props", if (Config.Wells :: any)[district] then Config.Well else Config.Vat, middle(rect, 0))
+	end
+	for _, rect in rectangles(ctx, function(r, c)
+		return at(ctx, r, c) == "v" and wanted(ctx, r, c)
+	end) do
+		local S = Config.ShallowWater
+		local size = Vector3.new((rect[4] - rect[2] + 1) * ctx.cell, S.Height, (rect[3] - rect[1] + 1) * ctx.cell)
+		local sheet = standIn(ctx, districtOf(ctx, rect[1], rect[2]), "Water", "ShallowWater", size, middle(rect, S.Height / 2), S.Color)
+		sheet.Transparency = S.Transparency
+		sheet.CanCollide = false
+		sheet.CanQuery = false
+		-- TODO: slow players wading through by SlowFactor once movement code exists.
+		sheet:SetAttribute("SlowFactor", S.SlowFactor)
+	end
+end
+
+-- One model per duel zone. Its pivot is the middle of the zone at street level, so a cell of the zone's
+-- own plan can be found with GrayboxBuilder.cellToWorld.
+local function buildZones(ctx: Ctx)
+	local zones = ctx.map:FindFirstChild("Zones")
+	if not zones then
+		zones = Instance.new("Folder")
+		zones.Name = "Zones"
+		zones.Parent = ctx.map
+	end
+	local n = PlanData.zone_cells
+	for key, place in ctx.town.districts do
+		if not place.zone or (ctx.only and not ctx.only[key]) then
+			continue
+		end
+		local old = (zones :: Instance):FindFirstChild(key)
+		if old then
+			old:Destroy()
+		end
+		local model = Instance.new("Model")
+		model.Name = key
+		model.WorldPivot = world(ctx, (place.column + n / 2) * ctx.cell, 0, (place.row + n / 2) * ctx.cell)
+		model:SetAttribute("Zone", key)
+		model:SetAttribute("ZoneCells", n)
+		model:SetAttribute("CellStuds", ctx.cell)
+		model:SetAttribute("StoryStuds", ctx.story)
+
+		local grid = PlanData.zones[key].grid
+		local function inZone(r: number, c: number): string
+			return string.sub(grid[r - place.row + 1], c - place.column + 1, c - place.column + 1)
+		end
+		for r = place.row, place.row + n - 1 do
+			for c = place.column, place.column + n - 1 do
+				local ch = inZone(r, c)
+				if ch == "A" or ch == "B" then
+					local size = Config.Spawn.Size
+					local spawn = Instance.new("SpawnLocation")
+					spawn.Name = "Spawn" .. ch
+					spawn.Anchored = true
+					spawn.Size = size
+					spawn.Transparency = 1
+					spawn.CanCollide = false
+					spawn.CanQuery = false
+					spawn.Neutral = true
+					spawn.Duration = 0
+					spawn:SetAttribute("Team", ch)
+					local position = cellCentre(ctx, r, c, size.Y / 2).Position
+					local centre = model.WorldPivot.Position
+					spawn.CFrame = CFrame.lookAt(position, Vector3.new(centre.X, position.Y, centre.Z))
+					spawn.Parent = model
+				end
+			end
+		end
+		for _, rect in rectangles(ctx, function(r, c)
+			local inside = r >= place.row and r < place.row + n and c >= place.column and c < place.column + n
+			return inside and inZone(r, c) == "X"
+		end) do
+			local barrier = Instance.new("Part")
+			barrier.Name = "Barrier"
+			barrier.Anchored = true
+			barrier.Size = Vector3.new((rect[4] - rect[2] + 1) * ctx.cell, Config.Barrier.Height, (rect[3] - rect[1] + 1) * ctx.cell)
+			barrier.CFrame = world(ctx, (rect[2] + rect[4] + 1) / 2 * ctx.cell, Config.Barrier.Height / 2, (rect[1] + rect[3] + 1) / 2 * ctx.cell)
+			barrier.Transparency = 1
+			barrier.CanCollide = false
+			barrier.CanQuery = false
+			barrier:SetAttribute("Closed", false)
+			barrier.Parent = model
+		end
+		model.Parent = zones
+	end
+end
+
+-- Builds the town, or only the districts named in `only` ("ring" is the ring road and town wall).
+-- Rebuilding a district replaces it. Returns how many of each piece were placed.
+function MapBuilder.build(only: { string }?, parent: Instance?): { [string]: number }
+	local container = parent or workspace
+	local map = container:FindFirstChild("Map")
+	if not map then
+		map = Instance.new("Folder")
+		map.Name = "Map"
+		map.Parent = container
+	end
+	local town = PlanGrid.town()
+
+	local ctx: Ctx = {
+		town = town,
+		cell = PlanData.cell_studs,
+		story = PlanData.story_studs,
+		origin = Config.Origin,
+		map = map :: Instance,
+		only = nil,
+		districtNames = {},
+		folders = {},
+		counts = {},
+		placed = 0,
+		walls = {},
+		parapets = {},
+	}
+	local first = PlanGrid.RING + 1
+	for key, place in town.districts do
+		ctx.districtNames[(place.row - first) // PlanData.zone_cells * 3 + (place.column - first) // PlanData.zone_cells] = key
+	end
+	if only then
+		ctx.only = {}
+		for _, name in only do
+			(ctx.only :: any)[name] = true
+		end
+	end
+	for _, folder in (map :: Instance):GetChildren() do
+		if folder.Name ~= "Zones" and (ctx.only == nil or ctx.only[folder.Name]) then
+			folder:Destroy()
+		end
+	end
+
+	buildGround(ctx)
+	buildWalls(ctx)
+	buildPosts(ctx, ctx.walls, "Walls", function(level)
+		return if level == 1 then Config.Corner.Ground else Config.Corner.Upper
+	end, function(level)
+		return (level - 1) * ctx.story
+	end)
+	buildRoofs(ctx)
+	buildParapets(ctx)
+	buildPosts(ctx, ctx.parapets, "Parapets", function()
+		return Config.Parapet.Corner
+	end, function(level)
+		return level * ctx.story
+	end)
+	buildProps(ctx)
+	buildZones(ctx)
+	return ctx.counts
+end
+
+return MapBuilder
+]=] },
+	{ path = { "ServerStorage", "DesertFps", "Map", "MapConfig" }, class = "ModuleScript", source = [=[
+--!strict
+-- Which kit piece stands where when the town is built from the plan. Sizes of the pieces themselves
+-- live in assets/config.py.
+return {
+	-- The middle of the town at street level: the top of the paving. Walls stand on this.
+	Origin = CFrame.new(0, 0.5, 0),
+	-- The paving piece's top is this far above its own origin.
+	PavingThickness = 0.5,
+	-- A roof slab's origin sits this far below the top of the story it closes.
+	RoofDrop = 1,
+	-- A plank bridge's walking surface is this far above its own origin.
+	PlankRise = 0.75,
+
+	Wall = {
+		Ground = "wall_plain",
+		Door = "wall_door",
+		Window = "wall_window",
+		Upper = "wall_upper",
+		UpperWindow = "wall_upper_window",
+		-- One upper wall in this many, facing a street, gets a window. The town wall gets none.
+		UpperWindowOneIn = 4,
+	},
+	Corner = { Ground = "corner", Upper = "corner_upper" },
+	-- Parapet by the height of the roof it stands on, in stories.
+	Parapet = { [1] = "parapet_plain", [2] = "parapet_crenel", [3] = "parapet_crenel", Corner = "parapet_corner" },
+
+	-- Districts under a ceiling, and how many stories up it is (the Cistern is the underground zone).
+	Covered = { cistern = 1 },
+	-- A warm lamp under the ceiling, one every this many cells each way.
+	CoveredLamp = { Every = 4, Range = 30, Brightness = 1.6, Color = Color3.fromRGB(255, 196, 140) },
+
+	-- Cover. Each entry is one way to fill a cell: pieces with their place in the cell (studs from its
+	-- middle) and their turn in degrees. Cells pick one by position, so the layout is the same every build.
+	LowCover = {
+		{ { "sacks", Vector3.new(0, 0, 0), 0 } },
+		{ { "crate", Vector3.new(-1.6, 0, -0.5), 12 }, { "barrel", Vector3.new(1.9, 0, 0.8), 0 } },
+		{ { "crate", Vector3.new(-1.6, 0, 0.5), -8 }, { "crate", Vector3.new(1.7, 0, -0.4), 20 } },
+		{ { "sacks", Vector3.new(0, 0, 0), 90 } },
+	},
+	-- High cover has to block the view, so it is stacked above eye level.
+	HighCover = {
+		{
+			{ "crate", Vector3.new(-1.6, 0, -1.6), 5 },
+			{ "crate", Vector3.new(1.6, 0, -1.5), -7 },
+			{ "crate", Vector3.new(-1.5, 0, 1.6), -4 },
+			{ "crate", Vector3.new(1.6, 0, 1.6), 9 },
+			{ "crate", Vector3.new(-1.4, 3.05, -1.4), 14 },
+			{ "crate", Vector3.new(1.4, 3.05, 1.3), -11 },
+		},
+		{
+			{ "crate", Vector3.new(-1.6, 0, -1.5), -6 },
+			{ "crate", Vector3.new(1.6, 0, -1.6), 8 },
+			{ "crate", Vector3.new(0, 3.05, -1.5), 3 },
+			{ "barrel", Vector3.new(-1.7, 0, 1.6), 0 },
+			{ "barrel", Vector3.new(1.5, 0, 1.7), 30 },
+			{ "sacks", Vector3.new(0, 3.6, 1.6), 0 },
+		},
+	},
+	-- Districts where high cover in the street is a market stall facing the middle of the district.
+	-- A stall is open between counter and roof, so it hides less than the plan assumes.
+	Stalls = { market = true },
+	InteriorLowCover = {
+		{ { "crate", Vector3.new(-0.9, 0, 0), 10 }, { "pot_tall", Vector3.new(1.9, 0, 0.6), 0 } },
+		{ { "sacks", Vector3.new(0, 0, 0), 0 } },
+		{ { "barrel", Vector3.new(-1.3, 0, 0.2), 0 }, { "pot_round", Vector3.new(1.3, 0, -0.4), 0 }, { "vase", Vector3.new(1.6, 0, 1.6), 0 } },
+	},
+
+	-- Water. A block of "w" cells is a well in a district listed under Wells, a dye vat elsewhere.
+	Wells = { market = true },
+	Well = "well",
+	Vat = "vat",
+	-- Shallow water has no kit piece: a flat sheet over the paving. Players wade through it.
+	ShallowWater = { Height = 0.25, SlowFactor = 1.6, Color = Color3.fromRGB(104, 158, 146), Transparency = 0.35 },
+	-- Trees have no kit piece yet: a plain trunk and crown stand in.
+	Tree = {
+		Trunk = Vector3.new(1.6, 9, 1.6),
+		Crown = 9,
+		TrunkColor = Color3.fromRGB(150, 98, 72),
+		CrownColor = Color3.fromRGB(122, 140, 92),
+	},
+
+	Ladder = {
+		Piece = "ladder",
+		FromWall = 0.9, -- studs from the wall's centre line to the ladder
+		Truss = 2, -- the climbable part: studs wide and deep, standing against the wall face
+	},
+	Spawn = { Size = Vector3.new(6, 0.2, 6) },
+	-- Zone barriers stay open and unseen until a round closes them.
+	Barrier = { Height = 24 },
+}
+]=] },
 	{ path = { "ServerStorage", "DesertFps", "Plan", "PlanData" }, class = "ModuleScript", source = [==[
 --!strict
 -- Generated by build/pack.py from plan/out/plan.json. Do not edit; rebuild the source and re-run pack.py.
@@ -1170,6 +1984,145 @@ local HttpService = game:GetService("HttpService")
 return HttpService:JSONDecode([=[
 {"cell_studs":8,"story_studs":12,"zone_cells":28,"legend":{".":"street / open ground","i":"interior floor (enterable, 1 story, roof walkable)","d":"interior cell with a doorway on its outside edges","W":"interior cell with a window on its outside edges","p":"interior pillar","q":"interior low cover (table, cushions)","Q":"interior high cover (shelf, counter)","1":"solid building, 1 story (roof walkable)","2":"solid building, 2 stories","3":"tower, 3 stories","c":"low cover (crates, sacks) - blocks movement, not sight","C":"high cover (stall, stacked crates) - blocks movement and sight","k":"hanging cloth - walk through, blocks sight","w":"water / vat / well - blocks movement, not sight","v":"shallow water - walkable but slow","P":"pillar","T":"tree","L":"ladder (from this cell up to the adjacent roof)","s":"stairs (from this cell up to an adjacent 1-story roof)","=":"plank / bridge: walk underneath and on top (1 story)","X":"zone barrier (closed during a round)","A":"spawn A (B is generated)"},"town":{"rooftops":[0,0],"teahouse":[0,1],"caravan":[0,2],"courtyard":[1,0],"market":[1,1],"dyeworks":[1,2],"gate":[2,0],"potters":[2,1],"cistern":[2,2]},"reserve":{"caravan":"Caravan Yard","potters":"Potters' Row"},"zones":{"market":{"name":"Market Square","spawns":"north / south","level":"surface","grid":["222222222222XXXX222222222222","2iiiiiiii2...AA...2222222222","2iiiiiiid.........2222222222","2iiiQiiii.........L222222222","2iiiiiiii.........2222222222","2iiiiiiii2.................2","2iiiidiii2.......111111....2","2................111111....2","111.......................C2","111...CC..C..........CC....2","111L.......C.....c....C....2","111........CC..CC..........2","XC....CC.....CC.....CC....CX","XC...........ww...........CX","XC...........ww...........CX","XC....CC.....CC.....CC....CX","2..........CC..CC........111","2....C....c.....C.......L111","2....CC..........C..CC...111","2C.......................111","2....111111................2","2....111111.......2iiidiiii2","2.................2iiiiiiii2","2222222222.........iiiiiiii2","222222222L.........iiiiQiii2","2222222222.........diiiiiii2","2222222222...BB...2iiiiiiii2","222222222222XXXX222222222222"]},"teahouse":{"name":"Tea House","spawns":"west / east","level":"surface","grid":["222222222222XXXX222222222222","211111111111....111111111112","2111....................1112","2111.cc...C......C...cc.1112","2111....................1112","2111ss1111111111111111ss1112","2111..1111111111111111..1112","2.........C......C.........2","211111..iiWiiddiiWii..c....2","211111..iiiiiiiiiiii.......2","211111..dqiipiipiiqi...C...2","2.......iiiiiQQiiiid.......2","XAA.....iiiiiQQiiiii.......X","XAA.....iiiiiQQiiiii.......X","X.......iiiiiQQiiiii.....BBX","X.......iiiiiQQiiiii.....BBX","2.......diiiiQQiiiii.......2","2...C...iqiipiipiiqd..111112","2.......iiiiiiiiiiii..111112","2....c..iiWiiddiiWii..111112","2.........C......C.........2","2111..1111111111111111..1112","2111ss1111111111111111ss1112","2111....................1112","2111.cc...C......C...cc.1112","2111....................1112","211111111111....111111111112","222222222222XXXX222222222222"]},"courtyard":{"name":"Courtyard House","spawns":"north / south","level":"surface","grid":["222222222222XXXX222222222222","211111.......AA.......111112","2111....................1112","2......C............C......2","2...iiWiiiddiiiiiiiiiWii...2","2...iiiiiQiiiiiiiiQiiiiiCC.2","2..Liqiiiiiiiiiiiiiiiiqi...2","2...iiiiidpdpddpdpdiiiii.CC2","2...iiiips.........piiii...2","2.CCWiiid..........diiiW...2","2...QQQip.C......C.pQQQi...2","2CC.iqiid..........diiii...2","X...diiip...CccC...piiid...X","X...iiiid...cTTc...diiii...X","X...iiiid...cTTc...diiii...X","X...diiip...CccC...piiid...X","2...iiiid..........diiqi.CC2","2...iQQQp.C......C.piQQQ...2","2...Wiiid..........diiiWCC.2","2...iiiip.........spiiii...2","2CC.iiiiidpdpddpdpdiiiii...2","2...iqiiiiiiiiiiiiiiiiqiL..2","2.CCiiiiiQiiiiiiiiQiiiii...2","2...iiWiiiiiiiiiddiiiWii...2","2......C............C......2","2111....................1112","211111.......BB.......111112","222222222222XXXX222222222222"]},"dyeworks":{"name":"Dye Works","spawns":"west / east","level":"surface","grid":["222222222222XXXX222222222222","2iiiiiiiii2.........11111112","2iiiQiiiii2........s11111112","2iiiiiiiid..........11111112","2iqiiiiiii2CC.......11111112","2iiiiiiiii2.........11111112","2iiidiiiii2.........11111112","2C.....................L..C2","211111......k..............2","211111......k.......k......2","21111s...ww.k....ww.k......2","2......k....k....ww.k..c...2","XAA....k.....kk.....k......X","XAA....k.....CC............X","X............CC.....k....BBX","X......k.....kk.....k....BBX","2...c..k.ww....k....k......2","2......k.ww....k.ww...s11112","2......k.......k......111112","2..............k......111112","2C..L.....................C2","21111111.........2iiiiidiii2","21111111.........2iiiiiiiii2","21111111.......CC2iiiiiiiqi2","21111111..........diiiiiiii2","21111111s........2iiiiiQiii2","21111111.........2iiiiiiiii2","222222222222XXXX222222222222"]},"cistern":{"name":"Cistern","spawns":"north / south","level":"underground","grid":["222222222222XXXX222222222222","222222222222.AA.222222222222","222222222222....222222222222","222......................222","222......................222","222.P..P..P.P..P.P..P..P.222","222......C........c......222","222......................222","222..P..P..P....P..P..P..222","222c........CCCC.........222","222......................222","222vvv..vvvvvvvvvvvv..vvv222","222vvv..vvvvvvvvvvvv..vvv222","222..c...CC.PPPP......c..222","222..c......PPPP.CC...c..222","222vvv..vvvvvvvvvvvv..vvv222","222vvv..vvvvvvvvvvvv..vvv222","222......................222","222.........CCCC........c222","222..P..P..P....P..P..P..222","222......................222","222......c........C......222","222.P..P..P.P..P.P..P..P.222","222......................222","222......................222","222222222222....222222222222","222222222222.BB.222222222222","222222222222XXXX222222222222"]},"gate":{"name":"Gate","spawns":"north / south","level":"surface","grid":["222222222222XXXX222222222222","21111........AA........11112","21111..................11112","21111..c............c..11112","2iiiiW................111112","2iqiii...C........C...111112","2iiiid................L11112","2iiiii....c......c....111112","2iiWii................111112","2..........CCCCCC.....C....2","2.cc................C...cc.2","2........222....222........2","2.....s..222....222........2","211=11111222====22211111=112","211=11111222====22211111=112","2........222....222..s.....2","2........222....222........2","2.cc...C................cc.2","2....C.....CCCCCC..........2","211111................iiWii2","211111....c......c....iiiii2","21111L................diiii2","211111...C........C...iiiqi2","211111................Wiiii2","21111..c............c..11112","21111..................11112","21111........BB........11112","222222222222XXXX222222222222"]},"rooftops":{"name":"Rooftops","spawns":"west / east","level":"surface","grid":["222222222222XXXX222222222222","21111.22222......11111.11112","21111L22222......11111.11112","21111.22222CCC...11111=11112","21111.22222......11111.11112","21111.22222......11111L11112","2..=...C.........=..C......2","21111.11111......iiiWi.11112","21111=11111......diiii=11112","21111.11111======iiqii.11112","21111s11111......iiiid.11112","2......C............C......2","XAA...............11111....X","XAA.........L33...11111....X","X....11111...33L.........BBX","X....11111...............BBX","2......C............C......2","21111.diiii......11111s11112","21111.iiqii======11111.11112","21111=iiiid......11111=11112","21111.iWiii......11111.11112","2......C..=.........C...=..2","21111L11111......22222.11112","21111.11111......22222.11112","21111=11111...CCC22222.11112","21111.11111......22222L11112","21111.11111......22222.11112","222222222222XXXX222222222222"]}}}]=]) :: any
 ]==] },
+	{ path = { "ServerStorage", "DesertFps", "Plan", "PlanGrid" }, class = "ModuleScript", source = [=[
+--!strict
+-- What the characters of the grid plan mean, and the whole town as one grid.
+-- This mirrors plan/planner.py (height, edge, reserve_block, render_town); change them together.
+
+local PlanData = require(script.Parent.PlanData)
+
+local PlanGrid = {}
+
+export type Grid = { { string } } -- [row][column], both from 1; rows run north to south
+
+PlanGrid.ROOM_CELLS = "idWpqQ"
+PlanGrid.SIDES = {
+	{ name = "N", dr = -1, dc = 0 },
+	{ name = "S", dr = 1, dc = 0 },
+	{ name = "W", dr = 0, dc = -1 },
+	{ name = "E", dr = 0, dc = 1 },
+}
+-- Cells of ring road between the town wall and the districts.
+PlanGrid.RING = 3
+
+function PlanGrid.isRoom(ch: string?): boolean
+	return ch ~= nil and string.find(PlanGrid.ROOM_CELLS, ch, 1, true) ~= nil
+end
+
+function PlanGrid.solidStoreys(ch: string?): number
+	if ch == "1" then
+		return 1
+	elseif ch == "2" then
+		return 2
+	elseif ch == "3" then
+		return 3
+	end
+	return 0
+end
+
+-- Walkable roof height of a cell, in storeys (planner.height).
+function PlanGrid.storeys(ch: string?): number
+	local solid = PlanGrid.solidStoreys(ch)
+	if solid > 0 then
+		return solid
+	end
+	if PlanGrid.isRoom(ch) or ch == "=" then
+		return 1
+	end
+	return 0
+end
+
+-- What stands on the edge between a room cell and its neighbour (planner.edge).
+function PlanGrid.edgeKind(room: string, other: string?): string
+	if other == nil then
+		return "wall"
+	elseif PlanGrid.isRoom(other) then
+		return "none"
+	elseif PlanGrid.solidStoreys(other) > 0 then
+		return "solid" -- the neighbouring building is the wall
+	elseif room == "d" then
+		return "open"
+	elseif room == "W" then
+		return "window"
+	end
+	return "wall"
+end
+
+local function square(n: number, fill: string): Grid
+	local grid: Grid = table.create(n)
+	for r = 1, n do
+		grid[r] = table.create(n, fill)
+	end
+	return grid
+end
+
+-- Placeholder housing for a district with no duel layout yet (planner.reserve_block).
+local function reserveBlock(n: number): Grid
+	local grid = square(n, "2")
+	for r = 1, n - 2 do
+		for c = 1, n - 2 do
+			grid[r + 1][c + 1] = if (r // 5 + c // 5) % 2 == 1 then "1" else "2"
+		end
+	end
+	for i = 0, n - 1 do
+		for j = 12, 15 do
+			grid[i + 1][j + 1] = "."
+			grid[j + 1][i + 1] = "."
+		end
+	end
+	for i = 1, n - 2 do
+		for _, j in { 5, 22 } do
+			grid[i + 1][j + 1] = "."
+			grid[j + 1][i + 1] = "."
+		end
+	end
+	return grid
+end
+
+export type Town = {
+	grid: Grid,
+	size: number, -- cells across
+	-- every district: its name, whether it is a duel zone, and the row and column (from 0) of its north-west cell
+	districts: { [string]: { zone: boolean, row: number, column: number } },
+}
+
+-- The whole town as one grid: the town wall, the ring road and the 3 x 3 districts.
+-- Spawns and zone barriers are streets here; they belong to the zones, not to the town.
+function PlanGrid.town(): Town
+	local n, ring = PlanData.zone_cells, PlanGrid.RING
+	local size = 3 * n + 2 * (ring + 1)
+	local grid = square(size, ".")
+	for i = 1, size do
+		grid[1][i], grid[size][i], grid[i][1], grid[i][size] = "2", "2", "2", "2"
+	end
+
+	local districts = {}
+	for key, place in PlanData.town do
+		local zone = PlanData.zones[key]
+		local row, column = ring + 1 + place[1] * n, ring + 1 + place[2] * n
+		local block = if zone then nil else reserveBlock(n)
+		for r = 1, n do
+			for c = 1, n do
+				local ch = if zone then string.sub(zone.grid[r], c, c) else (block :: Grid)[r][c]
+				if ch == "A" or ch == "B" or ch == "X" then
+					ch = "."
+				end
+				grid[row + r][column + c] = ch
+			end
+		end
+		districts[key] = { zone = zone ~= nil, row = row, column = column }
+	end
+
+	-- the town gate: a gap in the south wall below the Gate district
+	local gate = ring + 1 + PlanData.town.gate[2] * n + 12
+	for c = gate, gate + 3 do
+		grid[size][c + 1] = "."
+	end
+	return { grid = grid, size = size, districts = districts }
+end
+
+return PlanGrid
+]=] },
 	{ path = { "ServerStorage", "DesertFps", "Plan", "RouteData" }, class = "ModuleScript", source = [==[
 --!strict
 -- Generated by build/pack.py from plan/out/routes.json. Do not edit; rebuild the source and re-run pack.py.

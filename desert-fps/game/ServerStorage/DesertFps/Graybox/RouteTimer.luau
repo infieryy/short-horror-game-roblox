@@ -56,19 +56,39 @@ local function walk(model: Model, route: Route): Result
 	local bot, humanoid, root = makeBot(nodePosition(route.path[1]))
 	task.wait(1.5) -- let the bot land and settle
 
+	local onStairs = RaycastParams.new()
+	onStairs.FilterType = Enum.RaycastFilterType.Exclude
+	onStairs.FilterDescendantsInstances = { bot }
+
 	local studs = 0
 	local started = time()
 	for i = 2, #route.path do
 		local target = nodePosition(route.path[i])
 		studs += (target - nodePosition(route.path[i - 1])).Magnitude
+		-- Halfway up a flight of stairs the feet are between two levels: any height from the node before
+		-- to the node after counts.
+		local low, high = target.Y, target.Y
+		for _, near in { route.path[i - 1], route.path[i + 1] } do
+			local y = nodePosition(near).Y
+			low, high = math.min(low, y), math.max(high, y)
+		end
 		local stepStarted = time()
 		while true do
 			humanoid:MoveTo(target)
 			RunService.Heartbeat:Wait()
 			local feet = root.Position.Y - root.Size.Y / 2 - humanoid.HipHeight
 			local flat = Vector3.new(root.Position.X - target.X, 0, root.Position.Z - target.Z).Magnitude
-			if flat < REACH and math.abs(feet - target.Y) < FEET_TOLERANCE then
+			if flat < REACH and feet > low - FEET_TOLERANCE and feet < high + FEET_TOLERANCE then
 				break
+			end
+			-- A route that only crosses a stairs cell is up on the flight at this point.
+			if flat < REACH then
+				local under = workspace:Raycast(root.Position, Vector3.new(0, -8, 0), onStairs)
+				local standsOn = under and under.Instance
+				-- a graybox wedge is called Stairs; a kit flight is a mesh inside a model called stairs
+				if standsOn and (standsOn.Name == "Stairs" or (standsOn.Parent :: Instance).Name == "stairs") then
+					break
+				end
 			end
 			if time() - stepStarted > STEP_TIMEOUT then
 				local node = route.path[i]

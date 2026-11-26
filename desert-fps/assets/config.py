@@ -239,13 +239,14 @@ KIT = {
     "cloth": {"w": 6.6, "pole_z": 9.6, "drop": 8.4, "t": 0.07, "folds": 9, "fold_out": 0.3},
     "sacks": {"len": 3.0, "w": 1.9, "h": 1.0},
     "well": {"r_in": 1.75, "r_out": 2.45, "h": 2.5, "segments": 16, "post_h": 4.6, "beam_z": 6.5},
+    "vat": {"r_in": 2.75, "r_out": 3.35, "h": 1.7, "segments": 16},
 }
 
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
 DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
-                "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "stall": 0.7, "awning": 0.7}
+                "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -306,10 +307,13 @@ BREAK = {
         "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall_window": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall_door": {"mode": "chunks", "shards": 11, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall_upper": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall_upper_window": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
         "door": {"mode": "chunks", "shards": 6, "through": "y", "slant": 0.25, "apart": 0.5},
         "crate": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "barrel": {"mode": "shatter", "shards": 7, "apart": 0.5},
         "corner": {"mode": "chunks", "shards": 4, "apart": 0.6},
+        "corner_upper": {"mode": "chunks", "shards": 4, "apart": 0.6},
         "pillar": {"mode": "chunks", "shards": 5, "apart": 0.6},
         "parapet_plain": {"mode": "chunks", "shards": 5, "through": "y", "slant": 0.4, "apart": 0.55},
         "parapet_crenel": {"mode": "chunks", "shards": 5, "through": "y", "slant": 0.4, "apart": 0.55},
@@ -323,6 +327,7 @@ BREAK = {
         "cloth": {"mode": "shatter", "shards": 4, "apart": 0.5},
         "sacks": {"mode": "shatter", "shards": 6, "apart": 0.5},
         "well": {"mode": "shatter", "shards": 10, "apart": 0.5},
+        "vat": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "pot_tall": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "pot_round": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "vase": {"mode": "shatter", "shards": 4, "apart": 0.5},

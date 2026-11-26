@@ -1,4 +1,5 @@
-"""Wall pieces: one story tall, one grid cell wide. Plain, with a window, or with a doorway."""
+"""Wall pieces: one story tall, one grid cell wide. Plain, with a window, or with a doorway.
+Upper-story walls have no plinth and no turquoise band: the band belongs at the foot of the ground floor."""
 import math
 
 import config as C
@@ -72,8 +73,8 @@ def _doorway(p, x0, x1, z1):
           extra={"chunk": "lintel"})
 
 
-def build(p, opening=None, beams=True):
-    zs = {0.0, K["plinth_h"], K["plinth_h"] + K["plinth_chamfer"], C.STORY}
+def build(p, opening=None, beams=True, upper=False):
+    zs = {0.0, C.STORY} if upper else {0.0, K["plinth_h"], K["plinth_h"] + K["plinth_chamfer"], C.STORY}
     xs, holes = [-HALF, HALF], []
     if opening == "window":
         w = K["window"]
@@ -87,7 +88,7 @@ def build(p, opening=None, beams=True):
     zs = sorted(zs)
     if opening:
         holes = [(1, j) for j in range(len(zs) - 1) if z0 <= zs[j] and zs[j + 1] <= z1]
-    p.wall(xs, zs, _front, lambda z: T, holes, extra={"cut": True})
+    p.wall(xs, zs, (lambda z: -T) if upper else _front, lambda z: T, holes, band=not upper, extra={"cut": True})
     p.seams = [(0, -HALF), (0, HALF), (2, 0.0), (2, C.STORY)]
     if beams:
         _beams(p)

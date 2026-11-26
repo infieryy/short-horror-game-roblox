@@ -141,6 +141,34 @@ What the graybox showed that the planner does not model:
 
 Still unchecked: sightlines from roofs and over low cover, shallow-water slowdown (no zone with water has been built), stairs, planks and windows (Market Square has none), and a playtest with real players.
 
+## The town built from the kit
+
+![The town in Studio](../assets/studio/town.jpg)
+
+`game/ServerStorage/DesertFps/Map/MapBuilder.luau` builds the whole plan out of kit pieces: all nine districts, the ring road and the town wall, about 20,800 pieces. Bots then walked every route the planner exports (`build/tests/time_all_routes.luau`) and every flight of stairs (`build/tests/climb_stairs.luau`).
+
+| Zone | Lanes and meet points | Gap to the planner | Ladder climbs | Stairs onto roofs |
+|---|---|---|---|---|
+| Market Square | 5 of 5 | within 9% | 4 of 4 | none |
+| Tea House | 5 of 5 | within 4% (lane 3 once 11% slow) | none | 8 of 8 |
+| Courtyard House | 5 of 5 | within 3% | see below | 4 of 4 |
+| Dye Works | 5 of 5 | within 3% | 2 of 2 | 6 of 6 |
+| Cistern | 5 of 5 | lane 3 is 13% fast | none | none |
+| Gate | 5 of 5 | within 4% | 2 of 2 | 2 of 2 |
+| Rooftops | 4 of 5 | within 6% | see below | 4 of 4 |
+
+What the build showed:
+- **Stairs are one-way objects; the planner treats them as open ground.** A stairs cell in the plan can be walked through and climbs to any roof beside it. A real flight fills its cell, is entered from its low end and ends in a 12-stud drop. Where a street runs through a stairs cell (Rooftops, Courtyard House), a player can climb over and drop down going one way but not the other. Flights are turned so both teams get the same direction. Thirteen of the 71 routes cross a stairs cell from the side or step sideways off one; the straight-line bots cannot do that, so those routes are not confirmed (the stairs test confirms the flights themselves).
+- **Rooftops lane 3 is one of them.** It goes up a flight and sideways onto a roof. The stairs test does that climb, but the lane as a whole has not been timed.
+- **A ladder cell needs a ladder on every building it touches.** The graybox gave it one; on Rooftops the two buildings beside a ladder cell are not joined, and one roof could not be reached. The town builder stands a ladder against every side.
+- **Parapets block the top of the stairs.** The last step is one stud deep, so a parapet running past it stops the step sideways onto the roof. The builder leaves parapets off next to stairs.
+- **The Cistern is 13% faster than planned** because wading through shallow water does not slow anyone yet.
+- **Market stalls hide less than the plan assumes.** The plan's high cover blocks the view; a stall is open between counter and roof. Other zones use stacked crates.
+- **Solid buildings are hollow shells.** Their walls can be shot down, which opens them up. The plan treats them as solid.
+- **The Cistern is a covered hall at street level,** not underground.
+
+Still unchecked: sightlines (from roofs, over cover, through stalls and windows), the 13 routes above, frame rate (the Studio session this was built in runs at 14 frames a second with or without the map, so it says nothing), and a playtest with real players.
+
 ## Next step
-- Build the other six zones with the same builder and time them.
-- A zone picker for testing, and barriers that open and close.
+- Decide what a stairs cell should be: change the plan so streets do not run through them, or make a narrower flight that leaves room to pass.
+- Rounds: a zone picker, barriers that close, spawns by team.

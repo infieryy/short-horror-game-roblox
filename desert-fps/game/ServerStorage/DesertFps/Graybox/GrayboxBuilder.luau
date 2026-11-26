@@ -1,9 +1,10 @@
 --!strict
 -- Builds one duel zone from the grid plan as gray boxes.
--- The meaning of every grid character mirrors plan/planner.py; change them together.
+-- What the grid characters mean lives in Plan/PlanGrid.
 
 local Config = require(script.Parent.GrayboxConfig)
 local PlanData = require(script.Parent.Parent.Plan.PlanData)
+local PlanGrid = require(script.Parent.Parent.Plan.PlanGrid)
 
 local GrayboxBuilder = {}
 
@@ -20,56 +21,8 @@ type Ctx = {
 	counts: { [string]: number },
 }
 
-local ROOM_CELLS = "idWpqQ"
-local SIDES = {
-	{ name = "N", dr = -1, dc = 0 },
-	{ name = "S", dr = 1, dc = 0 },
-	{ name = "W", dr = 0, dc = -1 },
-	{ name = "E", dr = 0, dc = 1 },
-}
-
-local function isRoom(ch: string?): boolean
-	return ch ~= nil and string.find(ROOM_CELLS, ch, 1, true) ~= nil
-end
-
-local function solidStoreys(ch: string?): number
-	if ch == "1" then
-		return 1
-	elseif ch == "2" then
-		return 2
-	elseif ch == "3" then
-		return 3
-	end
-	return 0
-end
-
--- Walkable roof height of a cell, in storeys (planner.height).
-local function storeys(ch: string?): number
-	local solid = solidStoreys(ch)
-	if solid > 0 then
-		return solid
-	end
-	if isRoom(ch) or ch == "=" then
-		return 1
-	end
-	return 0
-end
-
--- What stands on the edge between a room cell and its neighbour (planner.edge).
-local function edgeKind(room: string, other: string?): string
-	if other == nil then
-		return "wall"
-	elseif isRoom(other) then
-		return "none"
-	elseif solidStoreys(other) > 0 then
-		return "solid" -- the neighbouring building is the wall
-	elseif room == "d" then
-		return "open"
-	elseif room == "W" then
-		return "window"
-	end
-	return "wall"
-end
+local SIDES = PlanGrid.SIDES
+local isRoom, solidStoreys, storeys, edgeKind = PlanGrid.isRoom, PlanGrid.solidStoreys, PlanGrid.storeys, PlanGrid.edgeKind
 
 local function cellAt(ctx: Ctx, r: number, c: number): string?
 	if r < 0 or c < 0 or r >= ctx.n or c >= ctx.n then

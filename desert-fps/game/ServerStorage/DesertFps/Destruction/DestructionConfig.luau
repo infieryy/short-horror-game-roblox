@@ -31,6 +31,10 @@ return {
 	DebrisLifetime = 6,
 	DebrisFade = 1,
 
+	-- Pieces players walk up. A character cannot climb the 1.5-stud steps of the mesh itself, so the mesh
+	-- does not collide and an unseen ramp of this size (wide, high, long) stands in it until the piece breaks.
+	Ramps = { stairs = Vector3.new(8, 12, 8) },
+
 	-- Collision groups. Rubble does not shove players around, and shots pass through it.
 	DebrisGroup = "Debris",
 	CharacterGroup = "Characters",

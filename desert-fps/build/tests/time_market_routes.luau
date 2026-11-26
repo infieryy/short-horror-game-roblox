@@ -9,7 +9,8 @@ local RouteData = require(ServerStorage.DesertFps.Plan.RouteData)
 
 workspace:SetAttribute("RouteTiming", nil)
 task.spawn(function()
-	local results = RouteTimer.run(workspace:WaitForChild("Graybox_market"), RouteData.zones.market)
+	-- The kit-built zone; for the gray boxes pass workspace.Graybox_market (build/02_build_market.luau).
+	local results = RouteTimer.run(workspace.Map.Zones.market, RouteData.zones.market)
 	workspace:SetAttribute("RouteTiming", HttpService:JSONEncode(results))
 end)
 return "started"

@@ -39,3 +39,24 @@ def build(p):
             grain="z", frame=frame_axes((0, -0.35, 0), (1, 0, 0), (0, 1, 0)), extra={"staves": 10, "tone": -1})
     p.lathe([(0.5, bucket_top - 0.2), (0.545, bucket_top - 0.2), (0.545, bucket_top - 0.08), (0.515, bucket_top - 0.08)],
             10, "iron", closed=True, grain=None, group="hoop", frame=frame_axes((0, -0.35, 0), (1, 0, 0), (0, 1, 0)))
+
+
+V = C.KIT["vat"]
+
+
+def vat(p):
+    """Dye vat: a low, wide ring of stone blocks with a turquoise foot, full of red dye."""
+    r0, r1, h, n = V["r_in"], V["r_out"], V["h"], V["segments"]
+    lip = 0.28
+    ring = p.lathe([(r1, 0.0), (r1, h - lip), (r1 + 0.1, h - lip), (r1 + 0.1, h), (r0 - 0.1, h), (r0 - 0.1, h - lip),
+                    (r0, h - lip), (r0, 0.0)], n, "stone", closed=True, grain=None, extra=CUT)
+    half = (h - lip) / 2
+    p.mark(ring, "lathe", [(k / n, half) for k in range(n + 1)], tone=-3, width=0.045)
+    for c, (a, b) in enumerate(((0.0, half), (half, h - lip))):
+        for k in range(0, n, 2):
+            turn = (k + c) / n
+            p.mark(ring, "lathe", [(turn, a + 0.03), (turn, b - 0.03)], tone=-3, width=0.045)
+    p.lathe([(r1 + 0.1, 0.0), (r1 + 0.1, 0.5), (r1 + 0.01, 0.62), (r1 + 0.01, 0.0)], n, "band",
+            closed=True, grain=None, group="foot", extra=CUT)
+    # the dye: a flat pool just inside the ring, below its lip
+    p.lathe([(r0 - 0.01, 0.05), (r0 - 0.01, h - lip - 0.18)], n, "redcloth", grain=None, group="dye", extra=CUT)

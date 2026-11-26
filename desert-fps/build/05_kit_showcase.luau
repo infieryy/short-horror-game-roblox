@@ -16,8 +16,8 @@ local Meshes = ServerStorage.DesertFps.Meshes
 local Breakable = require(ServerStorage.DesertFps.Destruction.Breakable)
 local BreakData = require(ServerStorage.DesertFps.Assets.BreakData)
 
--- Outside the map (it spans 112 studs each way from the origin), just above the baseplate.
-local POSITION = Vector3.new(0, 0.05, 180)
+-- Outside the town wall (the town spans 368 studs each way from the origin), just above the baseplate.
+local POSITION = Vector3.new(0, 0.05, 470)
 -- Towards the sun in assets/preview.py, in Roblox axes with the walls facing +Z.
 local PREVIEW_SUN = Vector3.new(-0.485, 0.616, 0.621)
 -- piece, position, turn about Y in degrees: preview.py's "whole" scene, (x, y, z) there is (x, z, -y) here
