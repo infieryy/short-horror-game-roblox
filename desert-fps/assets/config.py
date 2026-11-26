@@ -1,0 +1,118 @@
+"""All numbers for the asset kit live here: scale, texture, palette, paint rules, piece sizes.
+
+1 Blender unit = 1 stud. Pieces snap to the plan grid (8-stud cells, 12-stud stories).
+"""
+
+# ---------------------------------------------------------------- scale
+CELL = 8.0            # studs, plan grid cell = width of one wall piece
+STORY = 12.0          # studs, height of one story
+WALL_T = 1.0          # studs, wall thickness
+
+# ---------------------------------------------------------------- texture
+TEX = 1024            # px, texture size per piece (phone-friendly)
+PAD = 6               # px of padding around every UV island
+AO_STEP = 2           # compute contact shade on every Nth texel
+AO_RAYS = 16
+AO_DIST = 0.45        # studs: only close contact darkens ("corners and cracks")
+SEED = 11
+
+# ---------------------------------------------------------------- palette
+# Measured from reference/kit and reference/concept. Colours are (hue deg, lightness, saturation).
+# Every material has ONE family; strokes may only move inside its ranges.
+PALETTE = {
+    "plaster": {"h": (13, 25), "l": (0.655, 0.775), "s": (0.78, 0.98), "step": 0.016, "hue_step": 1.2,
+                "bases": [(21, 0.725, 0.95), (19, 0.715, 0.93), (23, 0.74, 0.96), (16, 0.705, 0.86)]},
+    "band":    {"h": (146, 168), "l": (0.50, 0.63), "s": (0.15, 0.30), "step": 0.018, "hue_step": -1.5,
+                "bases": [(160, 0.565, 0.24), (156, 0.575, 0.21)]},
+    "stone":   {"h": (16, 27), "l": (0.70, 0.83), "s": (0.68, 0.95), "step": 0.016, "hue_step": 0.6,
+                "bases": [(22, 0.765, 0.90), (24, 0.78, 0.88)]},
+    "wood":    {"h": (13, 24), "l": (0.42, 0.64), "s": (0.40, 0.72), "step": 0.022, "hue_step": 0.6,
+                "bases": [(18, 0.545, 0.52), (20, 0.57, 0.58), (16, 0.52, 0.48)]},
+    "darkwood": {"h": (11, 19), "l": (0.31, 0.53), "s": (0.24, 0.42), "step": 0.022, "hue_step": 0.4,
+                 "bases": [(15, 0.455, 0.33), (14, 0.43, 0.30), (16, 0.48, 0.35)]},
+    "iron":    {"h": (0, 14), "l": (0.28, 0.45), "s": (0.08, 0.20), "step": 0.02, "hue_step": 0.5,
+                "bases": [(5, 0.37, 0.14), (8, 0.40, 0.13)]},
+}
+LAVENDER = (268, 0.66, 0.42)      # the only shade colour; never gray
+PALE = (30, 0.90, 0.85)           # light-catching glaze on protruding edges
+
+BAND_H = 2.2          # studs: turquoise band height on ground-floor walls
+
+# ---------------------------------------------------------------- paint rules
+# Stroke sizes in studs. `per_stud2` = strokes per square stud of surface.
+# Every stroke is ONE step lighter or darker than the paint under it.
+PAINT = {
+    "plaster": {
+        "lean": 42, "lean_jitter": 8,           # all strokes lean up and to the right
+        "layers": [
+            {"per_stud2": 0.20, "len": (4.0, 9.0), "wid": (0.9, 1.9), "opacity": (0.35, 0.55), "round": 0.15},
+            {"per_stud2": 9.0, "len": (0.4, 1.0), "wid": (0.32, 0.75), "opacity": (0.55, 0.9), "round": 0.9, "jitter": 35},
+            {"per_stud2": 1.6, "len": (1.2, 3.2), "wid": (0.2, 0.48), "opacity": (0.35, 0.6), "round": 0.2},
+            {"per_stud2": 7.0, "len": (0.3, 0.9), "wid": (0.07, 0.16), "opacity": (0.5, 0.85), "round": 0.1},
+        ],
+    },
+    "band": {
+        "lean": 42, "lean_jitter": 10,
+        "layers": [
+            {"per_stud2": 9.0, "len": (0.3, 0.8), "wid": (0.25, 0.55), "opacity": (0.5, 0.85), "round": 0.9, "jitter": 35},
+            {"per_stud2": 6.0, "len": (0.5, 1.6), "wid": (0.1, 0.25), "opacity": (0.45, 0.75), "round": 0.2},
+        ],
+        "ragged": 0.42,      # studs the top edge wanders up and down
+        "chips": 0.45,       # plaster showing through, dabs per square stud of band
+    },
+    "stone": {
+        "lean": 42, "lean_jitter": 10,
+        "layers": [
+            {"per_stud2": 7.0, "len": (0.3, 0.8), "wid": (0.22, 0.5), "opacity": (0.5, 0.8), "round": 0.9, "jitter": 35},
+            {"per_stud2": 8.0, "len": (0.3, 0.9), "wid": (0.06, 0.14), "opacity": (0.5, 0.8), "round": 0.1},
+        ],
+    },
+    "wood": {
+        "lean_jitter": 3,                        # strokes follow the grain
+        "layers": [
+            {"per_stud2": 5.0, "len": (1.0, 2.6), "wid": (0.16, 0.36), "opacity": (0.45, 0.75), "round": 0.15},
+            {"per_stud2": 16.0, "len": (0.5, 1.6), "wid": (0.035, 0.08), "opacity": (0.5, 0.85), "round": 0.0},
+        ],
+        "end_grain": {"per_stud2": 40.0, "len": (0.1, 0.24), "wid": (0.07, 0.15), "opacity": (0.5, 0.8), "round": 0.9},
+    },
+    "iron": {
+        "lean_jitter": 6,
+        "layers": [
+            {"per_stud2": 14.0, "len": (0.2, 0.7), "wid": (0.06, 0.16), "opacity": (0.45, 0.75), "round": 0.4},
+        ],
+    },
+}
+PAINT["darkwood"] = PAINT["wood"]
+
+GLAZE = {
+    "shade_per_stud2": 260.0,  # dark glaze dabs per square stud of fully occluded surface
+    "shade_size": (0.05, 0.16),
+    "shade_steps": 2,          # each dab is this many steps darker than the paint under it...
+    "shade_mix": 0.16,         # ...and moves this far toward lavender
+    "edge_cover": 0.7,         # share of every protruding edge that catches light
+    "edge_len": (0.3, 0.9),
+    "edge_wid": (0.05, 0.10),
+    "edge_mix": 0.2,
+    "edge_min": 0.25,          # studs: shorter edges (studs, tiny parts) get no highlight
+}
+# groups whose base colour is fixed for the whole kit, so neighbouring pieces match (measured from the concept walls)
+SHARED_MIX = {("wall", "plaster"): (21.5, 0.735, 0.95), ("wall", "band"): (160, 0.565, 0.24)}
+
+# ---------------------------------------------------------------- kit sizes (studs)
+KIT = {
+    "wall": {
+        "plinth_out": 0.14, "plinth_h": 2.0, "plinth_chamfer": 0.2,
+        "beams": {"count": 3, "z": 10.4, "radius": 0.3, "out": 0.95, "segments": 10},
+        "window": {"w": 3.0, "sill": 4.2, "h": 4.2, "board_h": 0.5, "board_over": 0.45, "board_out": 0.14,
+                   "bar": 0.13, "bar_gap": 0.62, "inset": 0.35},
+        "door": {"w": 4.0, "h": 7.6, "jamb_w": 0.7, "jamb_out": 0.2, "jamb_blocks": 4,
+                 "lintel_h": 0.75, "lintel_over": 0.9},
+    },
+    "door": {"w": 3.9, "h": 7.5, "t": 0.28, "planks": 6, "strap_z": (1.3, 6.2), "strap_h": 0.36},
+    "crate": {"size": 3.0, "frame_w": 0.42, "frame_out": 0.13, "planks": 3},
+    "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
+}
+
+# ---------------------------------------------------------------- budgets (triangles)
+TRI_LIMIT = 20000      # Roblox hard limit per mesh
+TRI_BUDGET = {"wall_plain": 400, "wall_window": 1200, "wall_door": 800, "door": 1200, "crate": 1600, "barrel": 900}

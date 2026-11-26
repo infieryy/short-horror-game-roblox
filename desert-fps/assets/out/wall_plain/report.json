@@ -1,0 +1,10 @@
+{
+ "piece": "wall_plain",
+ "triangles": 256,
+ "triangles_low": 160,
+ "strokes": 5423,
+ "px_per_stud": 52.6,
+ "islands": 9,
+ "problems": [],
+ "seconds": 5.6
+}

@@ -46,4 +46,5 @@ Reference images are targets only. Final models and textures are built by code.
 ## Next steps
 1. ~~Grid plan (8-stud cells): zones, spawns, cover, routes, sightlines~~ done, see [`plan/PLAN.md`](plan/PLAN.md)
 2. Graybox script in Studio + playtest
-3. Kit modeling, stroke-painted textures, lighting, set dressing, sky/map edge
+3. Kit modeling and stroke-painted textures: pilot pieces done, see [`assets/README.md`](assets/README.md)
+4. Lighting, set dressing, sky/map edge
