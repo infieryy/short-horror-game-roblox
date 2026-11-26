@@ -12,10 +12,13 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 | 6 | `06_build_map.luau` | Builds the whole town out of kit pieces in `Workspace.Map`: nine districts, ring road, town wall (about 20,800 pieces, 7 seconds) |
 | 7 | `07_build_teahouse.luau` | Stands the pilot building, the tea house, on its own paved yard outside the south wall: `Workspace.Buildings.TeaHouse` (197 pieces). Players spawn in front of it |
 | 8 | `08_sky.luau` | Sets the painted sky (six faces cut from one painting by `assets/sky.py`) |
+| 9 | `09_graybox_town.luau` | Builds the compact town (plan v2) as gray boxes in `Workspace.Graybox_town`, west of the old town |
 
 `tests/time_market_routes.luau` runs on the server during a playtest. It walks bots along the planner's Market Square routes and writes the timings to the `RouteTiming` attribute on Workspace. `tests/time_all_routes.luau` does the same for every zone and writes a summary to `RouteSummary`.
 
 `tests/climb_stairs.luau` walks a bot up every flight of stairs in the town and onto each roof it should reach.
+
+`tests/time_town_routes.luau` walks bots along the planner's routes in every arena of the compact town's graybox; the summary lands in `TownRouteSummary`.
 
 `tests/walk_teahouse.luau` walks bots through the tea house: in at each door, up both flights of stairs, out onto both terraces. The result lands in the `TeaHouseWalk` attribute on Workspace.
 

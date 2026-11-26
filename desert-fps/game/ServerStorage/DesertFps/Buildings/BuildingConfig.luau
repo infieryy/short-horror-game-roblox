@@ -16,8 +16,12 @@ return {
 		LightColor = Color3.fromRGB(255, 176, 122),
 		Brightness = 0.62,
 		Range = 13,
-		Shadows = true,
+		-- A lamp that casts shadows is the dearest thing in a room to draw. Hanging lanterns cast them; wall
+		-- lanterns do not (most hang outside in sunlight, where their shadows cannot be seen anyway).
+		Shadows = { lantern = true, lantern_wall = false },
 	},
+	-- Pieces too small or too flat for their shadow to be missed. They cast none.
+	NoShadow = { rug = true, banner = true, sign_tea = true, tea_table = true, shelf = true, vase = true, pot_round = true },
 	-- A fill is a soft light with no lamp to see, where a recipe asks for one (daylight under a dome).
 	Fill = {
 		LightColor = Color3.fromRGB(255, 176, 122),

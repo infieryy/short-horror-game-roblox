@@ -400,9 +400,12 @@ function GrayboxBuilder.cellToWorld(model: Model, r: number, c: number, height: 
 end
 
 -- Builds (or rebuilds) a zone under `parent`. Returns the model and how many parts of each kind it made.
-function GrayboxBuilder.build(zoneKey: string, parent: Instance?): (Model, { [string]: number })
-	local zone = PlanData.zones[zoneKey]
-	assert(zone, `no zone "{zoneKey}" in the plan`)
+-- The key is one of the plan's duel zones, or a whole town (the compact town is "town"). `origin` is where
+-- its middle goes; left out, it is the graybox origin in GrayboxConfig.
+function GrayboxBuilder.build(zoneKey: string, parent: Instance?, origin: CFrame?): (Model, { [string]: number })
+	local zone = PlanData.zones[zoneKey] or (PlanData.towns and PlanData.towns[zoneKey])
+	assert(zone, `no zone or town "{zoneKey}" in the plan`)
+	local middle = origin or Config.Origin
 	local container = parent or workspace
 
 	local name = "Graybox_" .. zoneKey
@@ -413,23 +416,23 @@ function GrayboxBuilder.build(zoneKey: string, parent: Instance?): (Model, { [st
 
 	local model = Instance.new("Model")
 	model.Name = name
-	model.WorldPivot = Config.Origin
+	model.WorldPivot = middle
 	model:SetAttribute("Zone", zoneKey)
-	model:SetAttribute("ZoneCells", PlanData.zone_cells)
+	model:SetAttribute("ZoneCells", #zone.grid)
 	model:SetAttribute("CellStuds", PlanData.cell_studs)
 	model:SetAttribute("StoryStuds", PlanData.story_studs)
 
 	local ctx: Ctx = {
 		grid = zone.grid,
-		n = PlanData.zone_cells,
+		n = #zone.grid,
 		cell = PlanData.cell_studs,
 		story = PlanData.story_studs,
-		origin = Config.Origin,
+		origin = middle,
 		model = model,
 		folders = {},
 		counts = {},
 	}
-	assert(#ctx.grid == ctx.n, `zone "{zoneKey}" has {#ctx.grid} rows, expected {ctx.n}`)
+	assert(#ctx.grid[1] == ctx.n, `"{zoneKey}" is {#ctx.grid} rows by {#ctx.grid[1]} columns; it must be square`)
 
 	buildFloor(ctx)
 	buildSolids(ctx)

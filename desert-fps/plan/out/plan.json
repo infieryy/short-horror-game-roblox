@@ -314,5 +314,1109 @@
     "222222222222XXXX222222222222"
    ]
   }
+ },
+ "towns": {
+  "town": {
+   "grid": [
+    "2222222222222222222222222222222222222222",
+    "2...............22222222...............2",
+    "2........11........TT........11........2",
+    "2........11.C....T....T....C.11........2",
+    "2...222..222................222..222...2",
+    "2...222..222...WiWiddiWiW...222..222...2",
+    "2...222..222...iiQiiiiQii...222..222...2",
+    "2..............diiiQQiiid..............2",
+    "2.....L........diqiQQiqid........L.....2",
+    "2.11222..222...iQiiiiiiQi...222..22211.2",
+    "2.11222..222...WWiiddiiWW...222..22211.2",
+    "2...222..222....Csc..csC....222..222...2",
+    "2...............k......k...............2",
+    "2.......C.......k......k.......C.......2",
+    "2...iiiddiii..11c......c11..iiiddiii...2",
+    "2...iddddddi..11s......s11..iddddddi...2",
+    "22..Wd..c.dWkk..cC....Cc..kkWd.w..dW..22",
+    "22T.id.T..di....C......C....id..C.di.T22",
+    "22..id....dd......C..C......dd....di..22",
+    "22..dd..T.dd...C...CC...C...dd.C..dd..22",
+    "22..dd..T.dd...C...CC...C...dd.C..dd..22",
+    "22..id....dd......C..C......dd....di..22",
+    "22T.id.T..di....C......C....id..C.di.T22",
+    "22..Wd..c.dWkk..cC....Cc..kkWd.w..dW..22",
+    "2...iddddddi..11s......s11..iddddddi...2",
+    "2...iiiddiii..11c......c11..iiiddiii...2",
+    "2.......C.......k......k.......C.......2",
+    "2...............k......k...............2",
+    "2...222..222....Csc..csC....222..222...2",
+    "2.11222..222...WWiiddiiWW...222..22211.2",
+    "2.11222..222...iQiiiiiiQi...222..22211.2",
+    "2.....L........diqiQQiqid........L.....2",
+    "2..............diiiQQiiid..............2",
+    "2...222..222...iiQiiiiQii...222..222...2",
+    "2...222..222...WiWiddiWiW...222..222...2",
+    "2...222..222................222..222...2",
+    "2........11.C....T....T....C.11........2",
+    "2........11........TT........11........2",
+    "2...............22222222...............2",
+    "2222222222222222222222222222222222222222"
+   ],
+   "arenas": {
+    "teahouse": {
+     "name": "Tea House",
+     "spawns": "west / east",
+     "rect": [
+      0,
+      0,
+      13,
+      39
+     ],
+     "spawn_a": [
+      [
+       1,
+       1
+      ],
+      [
+       2,
+       1
+      ],
+      [
+       1,
+       2
+      ]
+     ],
+     "spawn_b": [
+      [
+       1,
+       38
+      ],
+      [
+       2,
+       38
+      ],
+      [
+       1,
+       37
+      ]
+     ],
+     "barriers": [
+      [
+       14,
+       1
+      ],
+      [
+       14,
+       2
+      ],
+      [
+       14,
+       3
+      ],
+      [
+       14,
+       7
+      ],
+      [
+       14,
+       12
+      ],
+      [
+       14,
+       13
+      ],
+      [
+       14,
+       17
+      ],
+      [
+       14,
+       18
+      ],
+      [
+       14,
+       19
+      ],
+      [
+       14,
+       20
+      ],
+      [
+       14,
+       21
+      ],
+      [
+       14,
+       22
+      ],
+      [
+       14,
+       26
+      ],
+      [
+       14,
+       27
+      ],
+      [
+       14,
+       32
+      ],
+      [
+       14,
+       36
+      ],
+      [
+       14,
+       37
+      ],
+      [
+       14,
+       38
+      ]
+     ],
+     "metrics": {
+      "key": "town_teahouse",
+      "name": "Tea House",
+      "spawns": "west / east",
+      "meet_s": 9.62,
+      "meet_cell": [
+       4,
+       19,
+       0
+      ],
+      "first_sight_s": 6.0,
+      "first_sight_pair": [
+       [
+        1,
+        14
+       ],
+       [
+        8,
+        31
+       ]
+      ],
+      "longest_sightline_studs": 169,
+      "longest_pair": [
+       [
+        7,
+        1
+       ],
+       [
+        9,
+        22
+       ]
+      ],
+      "lanes": [
+       {
+        "time_s": 18.74,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 23.33,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 27.91,
+        "uses_roofs": false
+       }
+      ],
+      "unreachable_cells": 0,
+      "cover_low": 2,
+      "cover_high": 6,
+      "cloth": 4,
+      "ladders": 2,
+      "stairs": 2,
+      "planks": 0,
+      "checks": {
+       "meet": true,
+       "first_sight": true,
+       "sightline": true,
+       "lanes": true,
+       "reachable": true
+      },
+      "contest_gap_s": 0.21,
+      "walkable_cells": 376,
+      "unreachable": []
+     }
+    },
+    "cistern": {
+     "name": "Cistern Hall",
+     "spawns": "west / east",
+     "rect": [
+      26,
+      0,
+      39,
+      39
+     ],
+     "spawn_a": [
+      [
+       38,
+       1
+      ],
+      [
+       37,
+       1
+      ],
+      [
+       38,
+       2
+      ]
+     ],
+     "spawn_b": [
+      [
+       38,
+       38
+      ],
+      [
+       37,
+       38
+      ],
+      [
+       38,
+       37
+      ]
+     ],
+     "barriers": [
+      [
+       25,
+       1
+      ],
+      [
+       25,
+       2
+      ],
+      [
+       25,
+       3
+      ],
+      [
+       25,
+       7
+      ],
+      [
+       25,
+       12
+      ],
+      [
+       25,
+       13
+      ],
+      [
+       25,
+       17
+      ],
+      [
+       25,
+       18
+      ],
+      [
+       25,
+       19
+      ],
+      [
+       25,
+       20
+      ],
+      [
+       25,
+       21
+      ],
+      [
+       25,
+       22
+      ],
+      [
+       25,
+       26
+      ],
+      [
+       25,
+       27
+      ],
+      [
+       25,
+       32
+      ],
+      [
+       25,
+       36
+      ],
+      [
+       25,
+       37
+      ],
+      [
+       25,
+       38
+      ]
+     ],
+     "metrics": {
+      "key": "town_cistern",
+      "name": "Cistern Hall",
+      "spawns": "west / east",
+      "meet_s": 9.62,
+      "meet_cell": [
+       35,
+       19,
+       0
+      ],
+      "first_sight_s": 6.0,
+      "first_sight_pair": [
+       [
+        31,
+        8
+       ],
+       [
+        38,
+        25
+       ]
+      ],
+      "longest_sightline_studs": 169,
+      "longest_pair": [
+       [
+        30,
+        17
+       ],
+       [
+        32,
+        38
+       ]
+      ],
+      "lanes": [
+       {
+        "time_s": 18.74,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 23.33,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 28.74,
+        "uses_roofs": false
+       }
+      ],
+      "unreachable_cells": 0,
+      "cover_low": 2,
+      "cover_high": 6,
+      "cloth": 4,
+      "ladders": 2,
+      "stairs": 2,
+      "planks": 0,
+      "checks": {
+       "meet": true,
+       "first_sight": true,
+       "sightline": true,
+       "lanes": true,
+       "reachable": true
+      },
+      "contest_gap_s": 0.21,
+      "walkable_cells": 376,
+      "unreachable": []
+     }
+    },
+    "courtyard": {
+     "name": "Courtyard House",
+     "spawns": "north / south",
+     "rect": [
+      0,
+      0,
+      39,
+      13
+     ],
+     "spawn_a": [
+      [
+       1,
+       1
+      ],
+      [
+       1,
+       2
+      ],
+      [
+       2,
+       1
+      ]
+     ],
+     "spawn_b": [
+      [
+       38,
+       1
+      ],
+      [
+       38,
+       2
+      ],
+      [
+       37,
+       1
+      ]
+     ],
+     "barriers": [
+      [
+       1,
+       14
+      ],
+      [
+       2,
+       14
+      ],
+      [
+       3,
+       14
+      ],
+      [
+       4,
+       14
+      ],
+      [
+       5,
+       14
+      ],
+      [
+       6,
+       14
+      ],
+      [
+       7,
+       14
+      ],
+      [
+       8,
+       14
+      ],
+      [
+       9,
+       14
+      ],
+      [
+       10,
+       14
+      ],
+      [
+       11,
+       14
+      ],
+      [
+       12,
+       14
+      ],
+      [
+       13,
+       14
+      ],
+      [
+       16,
+       14
+      ],
+      [
+       17,
+       14
+      ],
+      [
+       18,
+       14
+      ],
+      [
+       19,
+       14
+      ],
+      [
+       20,
+       14
+      ],
+      [
+       21,
+       14
+      ],
+      [
+       22,
+       14
+      ],
+      [
+       23,
+       14
+      ],
+      [
+       26,
+       14
+      ],
+      [
+       27,
+       14
+      ],
+      [
+       28,
+       14
+      ],
+      [
+       29,
+       14
+      ],
+      [
+       30,
+       14
+      ],
+      [
+       31,
+       14
+      ],
+      [
+       32,
+       14
+      ],
+      [
+       33,
+       14
+      ],
+      [
+       34,
+       14
+      ],
+      [
+       35,
+       14
+      ],
+      [
+       36,
+       14
+      ],
+      [
+       37,
+       14
+      ],
+      [
+       38,
+       14
+      ]
+     ],
+     "metrics": {
+      "key": "town_courtyard",
+      "name": "Courtyard House",
+      "spawns": "north / south",
+      "meet_s": 9.41,
+      "meet_cell": [
+       19,
+       3,
+       0
+      ],
+      "first_sight_s": 5.5,
+      "first_sight_pair": [
+       [
+        11,
+        3
+       ],
+       [
+        28,
+        3
+       ]
+      ],
+      "longest_sightline_studs": 186,
+      "longest_pair": [
+       [
+        2,
+        8
+       ],
+       [
+        25,
+        5
+       ]
+      ],
+      "lanes": [
+       {
+        "time_s": 18.33,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 22.74,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 29.74,
+        "uses_roofs": false
+       }
+      ],
+      "unreachable_cells": 0,
+      "cover_low": 2,
+      "cover_high": 4,
+      "cloth": 4,
+      "ladders": 2,
+      "stairs": 0,
+      "planks": 0,
+      "checks": {
+       "meet": true,
+       "first_sight": true,
+       "sightline": true,
+       "lanes": true,
+       "reachable": true
+      },
+      "contest_gap_s": 0.21,
+      "walkable_cells": 386,
+      "unreachable": []
+     }
+    },
+    "dyeworks": {
+     "name": "Dye Works",
+     "spawns": "north / south",
+     "rect": [
+      0,
+      26,
+      39,
+      39
+     ],
+     "spawn_a": [
+      [
+       1,
+       38
+      ],
+      [
+       1,
+       37
+      ],
+      [
+       2,
+       38
+      ]
+     ],
+     "spawn_b": [
+      [
+       38,
+       38
+      ],
+      [
+       38,
+       37
+      ],
+      [
+       37,
+       38
+      ]
+     ],
+     "barriers": [
+      [
+       1,
+       25
+      ],
+      [
+       2,
+       25
+      ],
+      [
+       3,
+       25
+      ],
+      [
+       4,
+       25
+      ],
+      [
+       5,
+       25
+      ],
+      [
+       6,
+       25
+      ],
+      [
+       7,
+       25
+      ],
+      [
+       8,
+       25
+      ],
+      [
+       9,
+       25
+      ],
+      [
+       10,
+       25
+      ],
+      [
+       11,
+       25
+      ],
+      [
+       12,
+       25
+      ],
+      [
+       13,
+       25
+      ],
+      [
+       16,
+       25
+      ],
+      [
+       17,
+       25
+      ],
+      [
+       18,
+       25
+      ],
+      [
+       19,
+       25
+      ],
+      [
+       20,
+       25
+      ],
+      [
+       21,
+       25
+      ],
+      [
+       22,
+       25
+      ],
+      [
+       23,
+       25
+      ],
+      [
+       26,
+       25
+      ],
+      [
+       27,
+       25
+      ],
+      [
+       28,
+       25
+      ],
+      [
+       29,
+       25
+      ],
+      [
+       30,
+       25
+      ],
+      [
+       31,
+       25
+      ],
+      [
+       32,
+       25
+      ],
+      [
+       33,
+       25
+      ],
+      [
+       34,
+       25
+      ],
+      [
+       35,
+       25
+      ],
+      [
+       36,
+       25
+      ],
+      [
+       37,
+       25
+      ],
+      [
+       38,
+       25
+      ]
+     ],
+     "metrics": {
+      "key": "town_dyeworks",
+      "name": "Dye Works",
+      "spawns": "north / south",
+      "meet_s": 9.41,
+      "meet_cell": [
+       19,
+       36,
+       0
+      ],
+      "first_sight_s": 5.5,
+      "first_sight_pair": [
+       [
+        11,
+        36
+       ],
+       [
+        28,
+        36
+       ]
+      ],
+      "longest_sightline_studs": 186,
+      "longest_pair": [
+       [
+        2,
+        31
+       ],
+       [
+        25,
+        34
+       ]
+      ],
+      "lanes": [
+       {
+        "time_s": 18.33,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 22.74,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 29.74,
+        "uses_roofs": false
+       }
+      ],
+      "unreachable_cells": 0,
+      "cover_low": 0,
+      "cover_high": 8,
+      "cloth": 4,
+      "ladders": 2,
+      "stairs": 0,
+      "planks": 0,
+      "checks": {
+       "meet": true,
+       "first_sight": true,
+       "sightline": true,
+       "lanes": true,
+       "reachable": true
+      },
+      "contest_gap_s": 0.21,
+      "walkable_cells": 386,
+      "unreachable": []
+     }
+    },
+    "market": {
+     "name": "Market Square",
+     "spawns": "west / east",
+     "rect": [
+      11,
+      0,
+      28,
+      39
+     ],
+     "spawn_a": [
+      [
+       19,
+       2
+      ],
+      [
+       20,
+       2
+      ],
+      [
+       19,
+       3
+      ],
+      [
+       20,
+       3
+      ]
+     ],
+     "spawn_b": [
+      [
+       19,
+       37
+      ],
+      [
+       20,
+       37
+      ],
+      [
+       19,
+       36
+      ],
+      [
+       20,
+       36
+      ]
+     ],
+     "barriers": [
+      [
+       10,
+       1
+      ],
+      [
+       10,
+       7
+      ],
+      [
+       10,
+       8
+      ],
+      [
+       10,
+       12
+      ],
+      [
+       10,
+       13
+      ],
+      [
+       10,
+       14
+      ],
+      [
+       10,
+       19
+      ],
+      [
+       10,
+       20
+      ],
+      [
+       10,
+       25
+      ],
+      [
+       10,
+       26
+      ],
+      [
+       10,
+       27
+      ],
+      [
+       10,
+       31
+      ],
+      [
+       10,
+       32
+      ],
+      [
+       10,
+       38
+      ],
+      [
+       29,
+       1
+      ],
+      [
+       29,
+       7
+      ],
+      [
+       29,
+       8
+      ],
+      [
+       29,
+       12
+      ],
+      [
+       29,
+       13
+      ],
+      [
+       29,
+       14
+      ],
+      [
+       29,
+       19
+      ],
+      [
+       29,
+       20
+      ],
+      [
+       29,
+       25
+      ],
+      [
+       29,
+       26
+      ],
+      [
+       29,
+       27
+      ],
+      [
+       29,
+       31
+      ],
+      [
+       29,
+       32
+      ],
+      [
+       29,
+       38
+      ]
+     ],
+     "metrics": {
+      "key": "town_market",
+      "name": "Market Square",
+      "spawns": "west / east",
+      "meet_s": 9.21,
+      "meet_cell": [
+       17,
+       19,
+       0
+      ],
+      "first_sight_s": 7.71,
+      "first_sight_pair": [
+       [
+        17,
+        17
+       ],
+       [
+        17,
+        22
+       ]
+      ],
+      "longest_sightline_studs": 170,
+      "longest_pair": [
+       [
+        11,
+        19
+       ],
+       [
+        27,
+        33
+       ]
+      ],
+      "lanes": [
+       {
+        "time_s": 17.91,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 23.41,
+        "uses_roofs": false
+       },
+       {
+        "time_s": 23.41,
+        "uses_roofs": false
+       }
+      ],
+      "unreachable_cells": 0,
+      "cover_low": 14,
+      "cover_high": 32,
+      "cloth": 16,
+      "ladders": 0,
+      "stairs": 8,
+      "planks": 0,
+      "checks": {
+       "meet": true,
+       "first_sight": true,
+       "sightline": true,
+       "lanes": true,
+       "reachable": true
+      },
+      "contest_gap_s": 0.21,
+      "walkable_cells": 572,
+      "unreachable": []
+     }
+    }
+   }
+  }
  }
 }

@@ -63,7 +63,7 @@ local function standLamp(piece: string, cf: CFrame, parent: Instance)
 	light.Color = Config.Lamp.LightColor
 	light.Brightness = Config.Lamp.Brightness
 	light.Range = Config.Lamp.Range
-	light.Shadows = Config.Lamp.Shadows
+	light.Shadows = Config.Lamp.Shadows[piece]
 	light.Parent = glass
 	lamp.PrimaryPart = body
 	lamp.Parent = parent
@@ -88,9 +88,16 @@ function BuildingBuilder.build(name: string, origin: CFrame, parent: Instance?):
 		if Config.Lamp.Pieces[piece] then
 			standLamp(piece, cf, lamps)
 		elseif BreakData[piece] then
-			Breakable.place(piece, cf, structure)
+			local placed = Breakable.place(piece, cf, structure)
+			if Config.NoShadow[piece] then
+				for _, part in placed:GetDescendants() do
+					if part:IsA("BasePart") then
+						part.CastShadow = false
+					end
+				end
+			end
 		else
-			copy(meshes(piece):FindFirstChild("Whole") :: BasePart, cf, piece, dressing)
+			copy(meshes(piece):FindFirstChild("Whole") :: BasePart, cf, piece, dressing).CastShadow = not Config.NoShadow[piece]
 		end
 		counts[piece] = (counts[piece] or 0) + 1
 		if index % BATCH == 0 then

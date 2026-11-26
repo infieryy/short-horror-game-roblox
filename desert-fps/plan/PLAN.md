@@ -1,4 +1,78 @@
-# Desert Village: grid plan (v1)
+# Desert Village: grid plan
+
+**Plan v2, the compact town, is the current plan.** Plan v1 (nine districts, 736 studs across) is kept below for reference; it was built and judged the wrong kind of map.
+
+## Plan v2: the compact town
+
+![The compact town](out/town.png)
+
+- **Size:** 40 x 40 cells of 8 studs, 320 studs across inside its wall. Plan v1 was 92 x 92.
+- **Layout:** a market square with the well in the middle, a landmark building on each side of it, and a quarter of four small houses in every corner.
+- **Source:** `plan/town.py`. You draw the north-west quarter; the other three are its mirror images. `python town.py` checks every arena, draws the pictures and exports the town for the game.
+
+| | West | Middle | East |
+|---|---|---|---|
+| **North** | Watchtower Quarter | Tea House (the pilot building) | Potters' Quarter |
+| **Middle** | Courtyard House | Market Square | Dye Works |
+| **South** | Gate Quarter | Cistern Hall | Weavers' Quarter |
+
+### Arenas
+A duel still uses one part of town per round. An arena is a band three blocks long: two corner quarters with a landmark between them. The streets out of the band are closed for the round (the pink squares in the pictures). Bands overlap, so every building is fought over in two arenas.
+
+| Arena | Spawns | Meet | First sight | Longest view (studs) | Lanes A to B (s) | Bots: routes passed | Bots vs plan |
+|---|---|---|---|---|---|---|---|
+| Tea House | west / east | 9.62 s | 6.0 s | 169 | 18.7 / 23.3 / 27.9 | 9 of 9 | within 2.8% |
+| Cistern Hall | west / east | 9.62 s | 6.0 s | 169 | 18.7 / 23.3 / 28.7 | 9 of 9 | within 2.1% |
+| Courtyard House | north / south | 9.41 s | 5.5 s | 186 | 18.3 / 22.7 / 29.7 | 7 of 7 | within 3.2% |
+| Dye Works | north / south | 9.41 s | 5.5 s | 186 | 18.3 / 22.7 / 29.7 | 7 of 7 | within 3.2% |
+| Market Square | west / east | 9.21 s | 7.7 s | 170 | 17.9 / 23.4 / 23.4 | 9 of 9 | within 3.0% |
+
+All five pass the same checks as v1 (meet in 6 to 10 s, no sight of the other team before 3.5 s, no view over 200 studs, three lanes, every cell reachable).
+
+![Tea House arena](out/town-teahouse.png)
+
+### Built as gray boxes and walked by bots
+
+![The gray-box town in Studio](out/graybox-town.png)
+
+`build/09_graybox_town.luau` builds it (`Workspace.Graybox_town`, 680 parts, west of the old town). `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 41 of 41 pass.
+
+- **Fairness.** The two teams' runs to the meet point come out about 0.5 s apart in every arena (for example 9.0 s and 9.5 s). The town is an exact mirror, so this is the walking bots, not the map: the same gap shows up everywhere, on whichever side happens to turn a corner the awkward way. Players need to confirm it.
+- **Found by the bots:** a flight of stairs standing free in a street was walked onto from the side, and the bot got stuck. Stairs are now boxed in with cover on both sides, so they are entered from the foot.
+- **Long views** needed three rounds of fixes: a shed that pinches each outer lane, washing lines across the streets into the square, a tree in each yard. First drafts had views of 296 and 311 studs and one spawn that could see the other.
+
+### Built for frame rate
+What the plan itself does for frame rate:
+
+- **Small.** 320 studs across instead of 736; an arena is 112 x 320 studs.
+- **Short views.** No view at eye level is longer than 186 studs, and none runs from one end of an arena to the other. Less of the town is on screen at once.
+- **One arena per round.** Whatever lies outside the band can be drawn in low detail or not at all during a round. Not built yet.
+
+Budgets, from what the tea house costs (measured in a playtest with nothing else in the picture):
+
+| | Triangles | Draw calls |
+|---|---|---|
+| Whole tea house, seen from its yard | 53,000 | 46 |
+| Inside its hall | 31,000 | 36 |
+| Inside its gallery | 37,000 | 37 |
+
+- **Landmark building** (5 of them): up to 75,000 triangles in all, up to 12 lamps that cast shadows.
+- **Small house** (16 of them): up to 15,000 triangles, 2 lamps that cast shadows.
+- **Whole town:** about 700,000 triangles and 6,000 pieces. The source video's town is about 2,000,000 triangles.
+- **Any view in a round:** aim for under 150,000 triangles.
+- **Lamps:** hanging lanterns cast shadows, wall lanterns do not. Rugs, banners, signs, tables, shelves and small pots cast no shadows (`Buildings/BuildingConfig.luau`).
+
+**Frame rate itself is not measured.** This Studio session draws 16 frames a second whether the whole tea house or an empty sky is on screen, so it says nothing. It needs a run on a phone and on an ordinary PC.
+
+### Not done
+- Only the Tea House has a building recipe. The other four landmarks and the sixteen houses are boxes.
+- The tea house is 4 x 4 cells; its place in this plan is 10 x 6. The plan's Tea House block needs redrawing round the real building (or the building needs wings), and the arena re-checking.
+- Sight is still only checked at eye level on the ground, not from roofs.
+- Barriers that close an arena, rounds and team spawns are not built.
+
+---
+
+# Plan v1 (superseded)
 
 ![Town overview](out/town-overview.png)
 
