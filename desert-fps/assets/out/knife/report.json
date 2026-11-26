@@ -1,12 +1,12 @@
 {
  "piece": "knife",
- "triangles": 684,
- "triangles_low": 292,
- "strokes": 1993,
- "px_per_stud": 1074.9,
+ "triangles": 1328,
+ "triangles_low": 560,
+ "strokes": 3973,
+ "px_per_stud": 1094.4,
  "break_mode": "parts",
  "chunks": 4,
- "chunk_triangles": 684,
+ "chunk_triangles": 1328,
  "problems": [],
- "seconds": 3.3
+ "seconds": 4.9
 }

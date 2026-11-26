@@ -32,7 +32,7 @@ python3 preview.py
 | `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
 | `rifle` | 1,772 | 756 | not breakable: 11 parts | 1,772 | 11,039 | 265.9 px/stud |
 | `pistol` | 996 | 476 | not breakable: 8 parts | 996 | 10,103 | 453.5 px/stud |
-| `knife` | 684 | 292 | not breakable: 4 parts | 684 | 1,993 | 1,074.9 px/stud |
+| `knife` | 1,328 | 560 | not breakable: 4 parts | 1,328 | 3,973 | 1,094.4 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -80,7 +80,7 @@ The weapons were built without concept art, from the proportions of real ones, t
 |---|---|---|---|---|
 | `rifle` | a wooden-furniture, curved-magazine service rifle | 3.3 studs | 1,772 | body, cover, stock, grip, handguard, barrel, muzzle, magazine, bolt, trigger, selector |
 | `pistol` | the Desert Eagle | 1.1 studs | 996 | body, slide, barrel, grip, magazine, trigger, hammer, charm |
-| `knife` | a karambit | 0.8 studs | 684 | body (ring, guard, pins), blade, handle, charm |
+| `knife` | a karambit, traced from a reference photo | 0.7 studs | 1,328 | blade, handle, ring, charm |
 
 ### Every gun is modular
 
@@ -107,7 +107,12 @@ g.joint("bolt", "slide", 198, 19, (-1, 0, 0), 70)
 ```
 
 ### The knife
-The karambit uses the same toolkit, scale and part system as the guns. Its blade is a `loft`: a row of cross-sections from guard to tip, each flat near the spine and ground down to a thin edge, so it has a real bevel and gets thinner toward the point. Its sockets are `blade_base` and `blade_tip` (for slash trails and hit checks), `ring` and `charm`, and it has one joint: the spin round the finger ring.
+The karambit uses the same toolkit, scale and part system as the guns. Its outline was traced from a reference photo: `recipes/knife.py` lists pixel positions measured on the photo and converts them to millimetres, so the sickle blade, the hooked guard, the two finger grooves and the ring sit where they do on the real knife. The style is ours: steel blade, the guns' dark metal for the handle frame, wooden grip panels, brass pins, a turquoise cloth on the ring.
+
+- **Blade:** a `loft`, a row of cross-sections from guard to tip. Each is flat near the spine and ground down to a thin edge, so the blade has a real bevel and gets thinner toward the point.
+- **Painted detail:** the grind line, the plunge line at the base, ribs on the front panel, checkering on the rear panel, jimping along the spine.
+- **Sockets:** `blade_base` and `blade_tip` (for slash trails and hit checks), `ring` and `charm`.
+- **Joint:** the spin round the finger ring.
 
 ### Paint
 - **Finer brush.** Small objects use the map's paint rules with a smaller brush (`DETAIL_SCALE` in `config.py`).
