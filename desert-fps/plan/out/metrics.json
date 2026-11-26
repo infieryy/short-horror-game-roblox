@@ -1,0 +1,429 @@
+[
+ {
+  "key": "market",
+  "name": "Market Square",
+  "spawns": "north / south",
+  "meet_s": 7.33,
+  "meet_cell": [
+   13,
+   18,
+   0
+  ],
+  "first_sight_s": 4.12,
+  "first_sight_pair": [
+   [
+    1,
+    15
+   ],
+   [
+    20,
+    18
+   ]
+  ],
+  "longest_sightline_studs": 192,
+  "longest_pair": [
+   [
+    7,
+    1
+   ],
+   [
+    8,
+    25
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 14.45,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 14.74,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 20.04,
+    "uses_roofs": false
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 2,
+  "cover_high": 44,
+  "cloth": 0,
+  "ladders": 4,
+  "stairs": 0,
+  "planks": 0,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ },
+ {
+  "key": "teahouse",
+  "name": "Tea House",
+  "spawns": "west / east",
+  "meet_s": 6.91,
+  "meet_cell": [
+   18,
+   13,
+   0
+  ],
+  "first_sight_s": 4.41,
+  "first_sight_pair": [
+   [
+    8,
+    8
+   ],
+   [
+    10,
+    19
+   ]
+  ],
+  "longest_sightline_studs": 152,
+  "longest_pair": [
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    23
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 13.74,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 14.04,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 23.56,
+    "uses_roofs": true
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 10,
+  "cover_high": 10,
+  "cloth": 0,
+  "ladders": 0,
+  "stairs": 8,
+  "planks": 0,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ },
+ {
+  "key": "courtyard",
+  "name": "Courtyard House",
+  "spawns": "north / south",
+  "meet_s": 7.41,
+  "meet_cell": [
+   12,
+   16,
+   0
+  ],
+  "first_sight_s": 3.91,
+  "first_sight_pair": [
+   [
+    4,
+    8
+   ],
+   [
+    23,
+    12
+   ]
+  ],
+  "longest_sightline_studs": 190,
+  "longest_pair": [
+   [
+    5,
+    23
+   ],
+   [
+    16,
+    2
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 14.36,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 24.45,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 24.45,
+    "uses_roofs": false
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 8,
+  "cover_high": 28,
+  "cloth": 0,
+  "ladders": 2,
+  "stairs": 2,
+  "planks": 0,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ },
+ {
+  "key": "dyeworks",
+  "name": "Dye Works",
+  "spawns": "west / east",
+  "meet_s": 6.0,
+  "meet_cell": [
+   15,
+   13,
+   0
+  ],
+  "first_sight_s": 3.91,
+  "first_sight_pair": [
+   [
+    7,
+    6
+   ],
+   [
+    7,
+    23
+   ]
+  ],
+  "longest_sightline_studs": 192,
+  "longest_pair": [
+   [
+    7,
+    2
+   ],
+   [
+    8,
+    26
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 11.91,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 12.62,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 14.54,
+    "uses_roofs": false
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 2,
+  "cover_high": 12,
+  "cloth": 26,
+  "ladders": 2,
+  "stairs": 4,
+  "planks": 0,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ },
+ {
+  "key": "cistern",
+  "name": "Cistern",
+  "spawns": "north / south",
+  "meet_s": 7.74,
+  "meet_cell": [
+   13,
+   7,
+   0
+  ],
+  "first_sight_s": 4.21,
+  "first_sight_pair": [
+   [
+    3,
+    6
+   ],
+   [
+    20,
+    9
+   ]
+  ],
+  "longest_sightline_studs": 192,
+  "longest_pair": [
+   [
+    1,
+    12
+   ],
+   [
+    24,
+    5
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 14.99,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 15.28,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 20.33,
+    "uses_roofs": false
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 8,
+  "cover_high": 14,
+  "cloth": 0,
+  "ladders": 0,
+  "stairs": 0,
+  "planks": 0,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ },
+ {
+  "key": "gate",
+  "name": "Gate",
+  "spawns": "north / south",
+  "meet_s": 8.41,
+  "meet_cell": [
+   13,
+   12,
+   0
+  ],
+  "first_sight_s": 6.41,
+  "first_sight_pair": [
+   [
+    10,
+    12
+   ],
+   [
+    17,
+    12
+   ]
+  ],
+  "longest_sightline_studs": 193,
+  "longest_pair": [
+   [
+    9,
+    1
+   ],
+   [
+    11,
+    25
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 16.33,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 16.62,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 18.4,
+    "uses_roofs": false
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 16,
+  "cover_high": 20,
+  "cloth": 0,
+  "ladders": 2,
+  "stairs": 2,
+  "planks": 12,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ },
+ {
+  "key": "rooftops",
+  "name": "Rooftops",
+  "spawns": "west / east",
+  "meet_s": 6.0,
+  "meet_cell": [
+   15,
+   13,
+   0
+  ],
+  "first_sight_s": 4.21,
+  "first_sight_pair": [
+   [
+    11,
+    2
+   ],
+   [
+    16,
+    17
+   ]
+  ],
+  "longest_sightline_studs": 186,
+  "longest_pair": [
+   [
+    1,
+    14
+   ],
+   [
+    24,
+    11
+   ]
+  ],
+  "lanes": [
+   {
+    "time_s": 11.91,
+    "uses_roofs": false
+   },
+   {
+    "time_s": 20.21,
+    "uses_roofs": true
+   },
+   {
+    "time_s": 19.97,
+    "uses_roofs": true
+   }
+  ],
+  "unreachable_cells": 0,
+  "cover_low": 0,
+  "cover_high": 14,
+  "cloth": 0,
+  "ladders": 6,
+  "stairs": 2,
+  "planks": 22,
+  "checks": {
+   "meet": true,
+   "first_sight": true,
+   "sightline": true,
+   "lanes": true,
+   "reachable": true
+  }
+ }
+]

@@ -44,6 +44,6 @@ Zones (from `reference/concept/01-aerial-master.webp`):
 Reference images are targets only. Final models and textures are built by code.
 
 ## Next steps
-1. Grid plan (8-stud cells): zones, spawns, cover, routes, sightlines
+1. ~~Grid plan (8-stud cells): zones, spawns, cover, routes, sightlines~~ done, see [`plan/PLAN.md`](plan/PLAN.md)
 2. Graybox script in Studio + playtest
 3. Kit modeling, stroke-painted textures, lighting, set dressing, sky/map edge
