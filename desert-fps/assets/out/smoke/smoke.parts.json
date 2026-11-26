@@ -1,0 +1,121 @@
+{
+ "piece": "smoke",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [
+  {
+   "name": "smoke",
+   "position": [
+    0.0,
+    0.2175,
+    -0.0
+   ],
+   "forward": [
+    0,
+    1,
+    0
+   ],
+   "up": [
+    1,
+    0,
+    0
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "part": "pin",
+   "type": "detach",
+   "pivot": [
+    0.0112,
+    0.2925,
+    -0.0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "amount": 0,
+   "unit": "direction"
+  },
+  {
+   "part": "lever",
+   "type": "hinge",
+   "pivot": [
+    -0.0412,
+    0.3412,
+    -0.0
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "amount": 100,
+   "unit": "degrees"
+  }
+ ],
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/smoke_body.fbx",
+   "center": [
+    0.0,
+    0.002,
+    -0.0
+   ],
+   "size": [
+    0.23,
+    0.431,
+    0.23
+   ],
+   "triangles": 312
+  },
+  {
+   "id": "fuze",
+   "mesh": "parts/smoke_fuze.fbx",
+   "center": [
+    0.004,
+    0.275,
+    -0.0
+   ],
+   "size": [
+    0.097,
+    0.122,
+    0.071
+   ],
+   "triangles": 80
+  },
+  {
+   "id": "lever",
+   "mesh": "parts/smoke_lever.fbx",
+   "center": [
+    0.048,
+    0.146,
+    -0.0
+   ],
+   "size": [
+    0.179,
+    0.399,
+    0.056
+   ],
+   "triangles": 52
+  },
+  {
+   "id": "pin",
+   "mesh": "parts/smoke_pin.fbx",
+   "center": [
+    0.011,
+    0.252,
+    -0.0
+   ],
+   "size": [
+    0.094,
+    0.092,
+    0.112
+   ],
+   "triangles": 188
+  }
+ ]
+}

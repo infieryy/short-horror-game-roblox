@@ -204,9 +204,12 @@ class Piece:
 
     def mark(self, pid, facet, points, tone=-3, width=0.01, closed=False):
         """Paint a detail line on one face of a part (a panel line, a slot, an engraving).
-        points are world positions; the line is drawn on the part's `facet` ("-y", "+z", ...)."""
+        points are world positions; the line is drawn on the part's `facet` ("-y", "+z", ...).
+        On the round side of a lathed part use facet "lathe" and points (turn 0..1, distance along
+        the profile in studs)."""
         if pid is not None:
-            self.marks.append({"pid": pid, "facet": facet, "points": [Vector(q) for q in points], "tone": tone,
+            self.marks.append({"pid": pid, "facet": facet, "tone": tone,
+                               "points": [q if facet == "lathe" else Vector(q) for q in points],
                                "width": width, "closed": closed})
 
     # ------------------------------------------------------------ unwrap

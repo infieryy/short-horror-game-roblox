@@ -203,9 +203,13 @@ class Painter:
                 continue
             isl, place, fam = islands[key], piece.layout["islands"][key], C.PALETTE[part["mat"]]
             clip = (self.maps["island"] == isl["id"]).astype(np.float32)
-            inv, (U, V) = part["frame"].inverted(), FACETS[m["facet"]]
-            pts = [(isl["origin_px"][0] + ((inv @ q).dot(U) - place["min"][0]) * self.px,
-                    isl["origin_px"][1] + ((inv @ q).dot(V) - place["min"][1]) * self.px) for q in m["points"]]
+            if m["facet"] == "lathe":
+                pts = [(isl["origin_px"][0] + turn * isl["size"][0] * self.px,
+                        isl["origin_px"][1] + (along - place["min"][1]) * self.px) for turn, along in m["points"]]
+            else:
+                inv, (U, V) = part["frame"].inverted(), FACETS[m["facet"]]
+                pts = [(isl["origin_px"][0] + ((inv @ q).dot(U) - place["min"][0]) * self.px,
+                        isl["origin_px"][1] + ((inv @ q).dot(V) - place["min"][1]) * self.px) for q in m["points"]]
             if m["closed"]:
                 pts.append(pts[0])
             width = max(1.6, m["width"] * self.px)

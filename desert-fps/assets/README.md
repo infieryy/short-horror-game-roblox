@@ -18,7 +18,7 @@ python3 run.py
 python3 preview.py
 ```
 
-`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle pistol knife` renders the weapons.
+`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle pistol knife smoke` renders the weapons.
 
 ## Pilot pieces
 
@@ -33,6 +33,7 @@ python3 preview.py
 | `rifle` | 1,772 | 756 | not breakable: 11 parts | 1,772 | 11,039 | 265.9 px/stud |
 | `pistol` | 996 | 476 | not breakable: 8 parts | 996 | 10,103 | 453.5 px/stud |
 | `knife` | 1,328 | 560 | not breakable: 4 parts | 1,328 | 3,973 | 1,094.4 px/stud |
+| `smoke` | 632 | 348 | not breakable: 4 parts | 632 | 3,634 | 931.5 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -74,6 +75,8 @@ To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `sl
 
 ![Karambit](out/knife-side.png)
 
+![Smoke grenade](out/smoke-front.png)
+
 The weapons were built without concept art, from the proportions of real ones, then painted with the same brush rules as the map. They share one scale (`GUN_MM` in `config.py`: an 880 mm rifle is 3.3 studs), so they are in proportion to each other.
 
 | Gun | Based on | Length | Triangles | Parts |
@@ -81,6 +84,7 @@ The weapons were built without concept art, from the proportions of real ones, t
 | `rifle` | a wooden-furniture, curved-magazine service rifle | 3.3 studs | 1,772 | body, cover, stock, grip, handguard, barrel, muzzle, magazine, bolt, trigger, selector |
 | `pistol` | the Desert Eagle | 1.1 studs | 996 | body, slide, barrel, grip, magazine, trigger, hammer, charm |
 | `knife` | a karambit, traced from a reference photo | 0.7 studs | 1,328 | blade, handle, ring, charm |
+| `smoke` | the standard military smoke canister | 0.55 studs tall | 632 | body, fuze, lever, pin |
 
 ### Every gun is modular
 
@@ -113,6 +117,13 @@ The karambit uses the same toolkit, scale and part system as the guns. Its outli
 - **Painted detail:** the grind line, the plunge line at the base, ribs on the front panel, checkering on the rear panel, jimping along the spine.
 - **Sockets:** `blade_base` and `blade_tip` (for slash trails and hit checks), `ring` and `charm`.
 - **Joint:** the spin round the finger ring.
+
+### The smoke grenade
+A can with rolled rims, a brass fuze, a steel safety lever bent over the fuze and down the side, and a pull pin with its ring. The turquoise band is the game's accent colour, used here the way real cans use a colour band; the stencilled bars stand in for lettering.
+
+- **Parts:** the `lever` and the `pin` are separate so the pin can be pulled and the lever can fly off when it is thrown.
+- **Socket:** `smoke`, on the lid, where the smoke comes out.
+- **Joints:** the pin pulls out sideways; the lever hinges at the top of the fuze.
 
 ### Paint
 - **Finer brush.** Small objects use the map's paint rules with a smaller brush (`DETAIL_SCALE` in `config.py`).

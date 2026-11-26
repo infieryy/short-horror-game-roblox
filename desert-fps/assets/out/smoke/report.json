@@ -1,0 +1,12 @@
+{
+ "piece": "smoke",
+ "triangles": 632,
+ "triangles_low": 348,
+ "strokes": 3634,
+ "px_per_stud": 931.5,
+ "break_mode": "parts",
+ "chunks": 4,
+ "chunk_triangles": 632,
+ "problems": [],
+ "seconds": 4.1
+}

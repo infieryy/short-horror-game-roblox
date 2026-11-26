@@ -166,13 +166,14 @@ KIT = {
     "rifle": {"chunky": 1.2},
     "pistol": {"chunky": 1.15},
     "knife": {"chunky": 1.3},
+    "smoke": {"chunky": 1.0},
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
 }
 
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
-DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1}
+DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -209,6 +210,8 @@ STYLE["pistol"] = STYLE["rifle"]
 STYLE["knife"] = {**STYLE["rifle"], "extra_layers": {**STYLE["rifle"]["extra_layers"],
                                                      "steel": STYLE["rifle"]["extra_layers"]["gunmetal"]}}
 
+STYLE["smoke"] = STYLE["knife"]
+
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).
 # mode "chunks":  every shard has its own health and stays until it is destroyed (walls, doors).
@@ -233,10 +236,11 @@ BREAK = {
         "rifle": {"mode": "parts"},
         "pistol": {"mode": "parts"},
         "knife": {"mode": "parts"},
+        "smoke": {"mode": "parts"},
     },
 }
 
 # ---------------------------------------------------------------- budgets (triangles)
 TRI_LIMIT = 20000      # Roblox hard limit per mesh
 TRI_BUDGET = {"wall_plain": 400, "wall_window": 1200, "wall_door": 800, "door": 1200, "crate": 1600, "barrel": 900,
-              "rifle": 6000, "pistol": 3000, "knife": 2500}
+              "rifle": 6000, "pistol": 3000, "knife": 2500, "smoke": 1500}
