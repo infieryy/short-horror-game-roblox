@@ -113,9 +113,34 @@ All 7 zones pass all checks.
 - **Walls inside a cell are thin walls on the cell's edges.** The graybox builder will turn them into real walls with door and window gaps.
 - **Timings are estimates.** Bot or friend playtests in the graybox are the real check.
 
+## Graybox check: Market Square
+
+![Market Square graybox in Studio](out/graybox-market.jpg)
+
+`game/ServerStorage/DesertFps/Graybox/GrayboxBuilder.luau` builds a zone from `out/plan.json` as gray parts. Bots then walked the planner's own routes (`routes.py` exports them to `out/routes.json`) in a Studio playtest at the default walk speed.
+
+| Route | Planner | Bot in Studio |
+|---|---|---|
+| Lane 1, A to B | 14.45 s | 14.20 s |
+| Lane 2, A to B | 14.74 s | 14.47 s |
+| Lane 3, A to B | 20.04 s | 19.57 s |
+| A to the meet point | 7.12 s | 6.97 s |
+| B to the meet point | 7.33 s | 7.20 s |
+| A up the ladder to the 2-story roof | 5.00 s | 4.92 s |
+| B up the ladder to the 2-story roof | 5.00 s | 4.89 s |
+| A up the ladder to the 1-story roof | 9.23 s | 9.17 s |
+| B up the ladder to the 1-story roof | 9.23 s | 9.17 s |
+
+Every route is within 3 % of the planner, and the two teams match each other. The planner's walk and ladder speeds hold in Roblox, so `zones.py` needed no change.
+
+What the graybox showed that the planner does not model:
+- **Players cut corners.** The planner moves cell to cell. Bots steered by Roblox's pathfinder took straighter lines and were about 5 % faster (A to B in 14.2 s on a 214-stud line, a meet point at about 6.9 s). Still inside the 6 to 10 s target.
+- **Low cover can be climbed.** It is 3.5 studs tall and the default jump clears 7.2, so a player can stand on it. The planner treats it as blocking movement. Not tested with a player yet.
+- **A ladder cell with buildings on several sides gets one ladder,** against the first wall in north, south, west, east order. The planner counts every side. The roofs join, so the routes are the same.
+- **Roblox's pathfinder struggles in tight spots.** It found no way up the ladder in the one-cell alcove with a 2-stud agent, and it clipped door jambs and cover corners. This only matters if the game gets bots.
+
+Still unchecked: sightlines from roofs and over low cover, shallow-water slowdown (no zone with water has been built), stairs, planks and windows (Market Square has none), and a playtest with real players.
+
 ## Next step
-Build a Roblox Studio graybox from `out/plan.json`:
-- grey parts for buildings, walls, cover and stairs
-- barriers that open and close zones
-- spawn points
-- a zone picker for testing
+- Build the other six zones with the same builder and time them.
+- A zone picker for testing, and barriers that open and close.
