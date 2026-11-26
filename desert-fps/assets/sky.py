@@ -26,14 +26,15 @@ PPD = H / 180.0                # pixels per degree
 SEED = 23
 
 # Which way each face of Roblox's sky box looks, and where the right and top edges of its picture point.
-# Worked out with `python sky.py test` in Studio; see build/08_sky.luau.
+# Found in Studio with `python sky.py test` (labelled faces, looked at along every axis): Roblox's "Rt" face
+# is on the -X side and "Lf" on +X, and the top and bottom faces lie a quarter turn from the usual layout.
 FACES = {
     "Ft": ((0, 0, -1), (1, 0, 0), (0, 1, 0)),
     "Bk": ((0, 0, 1), (-1, 0, 0), (0, 1, 0)),
-    "Rt": ((1, 0, 0), (0, 0, 1), (0, 1, 0)),
-    "Lf": ((-1, 0, 0), (0, 0, -1), (0, 1, 0)),
-    "Up": ((0, 1, 0), (1, 0, 0), (0, 0, 1)),
-    "Dn": ((0, -1, 0), (1, 0, 0), (0, 0, -1)),
+    "Rt": ((-1, 0, 0), (0, 0, -1), (0, 1, 0)),
+    "Lf": ((1, 0, 0), (0, 0, 1), (0, 1, 0)),
+    "Up": ((0, 1, 0), (0, 0, -1), (1, 0, 0)),
+    "Dn": ((0, -1, 0), (0, 0, -1), (-1, 0, 0)),
 }
 
 VIOLET, MAUVE, ROSE = (138, 129, 198), (176, 146, 206), (214, 158, 200)
