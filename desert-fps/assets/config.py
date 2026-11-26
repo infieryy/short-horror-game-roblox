@@ -33,6 +33,14 @@ PALETTE = {
     "iron":    {"h": (0, 14), "l": (0.28, 0.45), "s": (0.08, 0.20), "step": 0.02, "hue_step": 0.5,
                 "bases": [(5, 0.37, 0.14), (8, 0.40, 0.13)]},
 }
+# weapons
+PALETTE["gunmetal"] = {"h": (250, 285), "l": (0.20, 0.38), "s": (0.05, 0.16), "step": 0.02, "hue_step": 0.0,
+                       "bases": [(268, 0.285, 0.10), (262, 0.30, 0.09)]}
+PALETTE["brass"] = {"h": (36, 47), "l": (0.46, 0.68), "s": (0.46, 0.70), "step": 0.022, "hue_step": 0.5,
+                    "bases": [(42, 0.57, 0.58), (40, 0.55, 0.56)]}
+PALETTE["cloth"] = {"h": (150, 172), "l": (0.44, 0.62), "s": (0.22, 0.40), "step": 0.02, "hue_step": -1.2,
+                    "bases": [(163, 0.53, 0.32), (159, 0.55, 0.30)]}
+
 # what shows when a part is cut open
 PALETTE["adobe"] = {"h": (17, 27), "l": (0.44, 0.60), "s": (0.30, 0.48), "step": 0.02, "hue_step": 0.6,
                     "bases": [(22, 0.525, 0.40), (20, 0.54, 0.38)]}
@@ -90,6 +98,20 @@ PAINT = {
     },
 }
 PAINT["darkwood"] = PAINT["wood"]
+PAINT["gunmetal"] = {
+    "lean": 0, "lean_jitter": 6,
+    "layers": [
+        {"per_stud2": 5.0, "len": (0.8, 2.2), "wid": (0.14, 0.32), "opacity": (0.4, 0.7), "round": 0.2},
+        {"per_stud2": 12.0, "len": (0.25, 0.8), "wid": (0.05, 0.12), "opacity": (0.45, 0.8), "round": 0.3},
+    ],
+}
+PAINT["brass"] = PAINT["iron"]
+PAINT["cloth"] = {
+    "lean": 80, "lean_jitter": 10,               # strokes run along the wraps
+    "layers": [
+        {"per_stud2": 10.0, "len": (0.4, 1.2), "wid": (0.08, 0.2), "opacity": (0.45, 0.8), "round": 0.3},
+    ],
+}
 PAINT["adobe"] = {                              # mud brick: dabs, plus thin level lines for the brick courses
     "lean": 0, "lean_jitter": 4,
     "layers": [
@@ -130,8 +152,15 @@ KIT = {
     },
     "door": {"w": 3.9, "h": 7.5, "t": 0.28, "planks": 6, "strap_z": (1.3, 6.2), "strap_h": 0.36},
     "crate": {"size": 3.0, "frame_w": 0.42, "frame_out": 0.13, "planks": 3},
+    # length in studs; `chunky` thickens it a little over the real proportions so it reads on screen
+    "rifle": {"length": 3.3, "chunky": 1.2},
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
 }
+
+# ---------------------------------------------------------------- small objects
+# Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
+# uses them scaled down (0.2 = a brush one fifth the size).
+DETAIL_SCALE = {"rifle": 0.2}
 
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).
@@ -153,9 +182,12 @@ BREAK = {
         "door": {"mode": "chunks", "shards": 6, "through": "y", "slant": 0.25, "apart": 0.5},
         "crate": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "barrel": {"mode": "shatter", "shards": 7, "apart": 0.5},
+        # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
+        "rifle": {"mode": "parts"},
     },
 }
 
 # ---------------------------------------------------------------- budgets (triangles)
 TRI_LIMIT = 20000      # Roblox hard limit per mesh
-TRI_BUDGET = {"wall_plain": 400, "wall_window": 1200, "wall_door": 800, "door": 1200, "crate": 1600, "barrel": 900}
+TRI_BUDGET = {"wall_plain": 400, "wall_window": 1200, "wall_door": 800, "door": 1200, "crate": 1600, "barrel": 900,
+              "rifle": 6000}

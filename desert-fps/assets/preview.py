@@ -36,9 +36,13 @@ SCENES = {
         ("crate", (-7.2, -4.6, 0), 18, {"explode": 0.55}), ("barrel", (-2.6, -4.0, 0), 0, {"explode": 0.5}),
         ("crate", (3.0, -4.6, 0), -12, {}),
     ],
+    "rifle": [("rifle", (0, 0, 1.6), 0, {})],
+    "rifle-parts": [("rifle", (0, 0, 1.6), 0, {"explode": 0.6})],
 }
 CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
-           "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38)}
+           "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38),
+           "rifle-side": ((0.57, -9.0, 1.62), (0.57, 0, 1.62), 85), "rifle-left": ((-2.4, 3.4, 2.7), (0.5, 0, 1.55), 55),
+           "rifle-front": ((3.6, -2.6, 2.5), (0.6, 0, 1.55), 50)}
 
 
 def load(name, mesh=None):
@@ -125,6 +129,12 @@ def compare(render_path, out_path):
 
 
 if __name__ == "__main__":
+    import sys
+    if "rifle" in sys.argv:
+        render("rifle", "rifle-side", os.path.join(OUT, "rifle-side.png"), size=(1600, 640))
+        render("rifle", "rifle-left", os.path.join(OUT, "rifle-left.png"))
+        render("rifle", "rifle-front", os.path.join(OUT, "rifle-front.png"))
+        sys.exit()
     render("whole", "preview", os.path.join(OUT, "preview.png"))
     render("whole", "close", os.path.join(OUT, "preview-close.png"))
     render("broken", "broken", os.path.join(OUT, "broken.png"))

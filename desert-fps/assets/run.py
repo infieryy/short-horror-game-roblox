@@ -28,7 +28,8 @@ def make(name):
     fn, options = RECIPES[name]
     spec = C.BREAK["pieces"][name]
     folder = os.path.join(OUT, name)
-    chunk_folder = os.path.join(folder, "chunks")
+    sub = "parts" if spec["mode"] == "parts" else "chunks"
+    chunk_folder = os.path.join(folder, sub)
     os.makedirs(chunk_folder, exist_ok=True)
     for old in os.listdir(chunk_folder):
         os.remove(os.path.join(chunk_folder, old))
@@ -60,9 +61,9 @@ def make(name):
         chunk_tris, chunk_problems = chunk.check()
         problems += [f"chunk {key}: {q}" for q in chunk_problems]
         chunk.export(chunk_folder, texture)
-        files.append((chunk_tris, f"chunks/{chunk.name}.fbx"))
+        files.append((chunk_tris, f"{sub}/{chunk.name}.fbx"))
     manifest = chunker.manifest(piece, spec, pieces, files)
-    with open(os.path.join(folder, name + ".break.json"), "w") as fh:
+    with open(os.path.join(folder, f"{name}.{'parts' if sub == 'parts' else 'break'}.json"), "w") as fh:
         json.dump(manifest, fh, indent=1)
 
     report = {"piece": name, "triangles": tris, "triangles_low": low_tris, "strokes": painter.strokes,
@@ -80,6 +81,6 @@ if __name__ == "__main__":
         r = make(name)
         failed |= bool(r["problems"])
         print(f"{'FIX' if r['problems'] else 'OK '} {name:12s} {r['triangles']:5d} tris ({r['triangles_low']} low)  "
-              f"{r['chunks']} {r['break_mode']} chunks ({r['chunk_triangles']} tris)  {r['strokes']:5d} strokes  "
+              f"{r['chunks']} {r['break_mode']} ({r['chunk_triangles']} tris)  {r['strokes']:5d} strokes  "
               f"{r['px_per_stud']} px/stud  {r['seconds']}s  {'; '.join(r['problems'])}")
     sys.exit(1 if failed else 0)

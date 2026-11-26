@@ -71,7 +71,7 @@
    "collision": "Hull",
    "grounded": false,
    "touches": [],
-   "triangles": 148,
+   "triangles": 152,
    "neighbors": [
     "s01",
     "s03",

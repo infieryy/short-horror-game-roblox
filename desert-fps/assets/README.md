@@ -18,7 +18,7 @@ python3 run.py
 python3 preview.py
 ```
 
-`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art.
+`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle` renders the rifle.
 
 ## Pilot pieces
 
@@ -30,6 +30,7 @@ python3 preview.py
 | `door` | 688 | 216 | 6 shards | 1,412 | 6,771 | 62.5 px/stud |
 | `crate` | 1,468 | 588 | 8 shards (debris) | 1,660 | 22,890 | 47.0 px/stud |
 | `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
+| `rifle` | 1,676 | 708 | not breakable: 4 moving parts | 1,676 | 8,781 | 271.0 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -63,6 +64,19 @@ To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `sl
 
 **Suggested use in the game:** show the single whole mesh until a piece is first damaged, then swap it for its shards. Undamaged walls then cost one part each, not twelve.
 
+## Weapons
+
+![Rifle, right side](out/rifle-side.png)
+
+![Rifle, three-quarter view](out/rifle-front.png)
+
+The assault rifle was built without concept art, from the proportions of a real wooden-furniture, curved-magazine service rifle (about 880 mm long), thickened by 20% so it reads on screen, then painted with the same brush rules as the map.
+
+- **Size:** 3.3 studs long. The barrel points along +X and the origin is the top of the pistol grip.
+- **Not breakable.** It splits into four separate meshes so it can be animated: `body`, `magazine`, `bolt` (carrier and charging handle) and `trigger`. `rifle.parts.json` gives where each one sits.
+- **Finer brush.** Small objects use the map's paint rules at one fifth the brush size (`DETAIL_SCALE` in `config.py`).
+- **Shape language.** Every part is a side-view outline in millimetres in `recipes/rifle.py`, pushed through its thickness and rounded. Change a number and run it again.
+
 ## Files
 
 | File | What it does |
@@ -70,7 +84,7 @@ To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `sl
 | `config.py` | Every number: scale, texture size, palette, paint rules, piece sizes, triangle budgets |
 | `recipes/` | One file per kind of piece |
 | `build.py` | Builds closed solids, unwraps them, bakes the paint guides, checks and exports |
-| `chunks.py` | Cuts a piece into jagged shards, fills the cut faces, writes the break data |
+| `chunks.py` | Cuts a piece into jagged shards, fills the cut faces, writes the break data. Also splits off moving parts (weapons). |
 | `brush.py` | Flat-brush engine: each stroke is a centre, length, width, angle and colour |
 | `paint.py` | The look rules, applied stroke by stroke |
 | `run.py` | Runs recipes |
@@ -99,5 +113,6 @@ To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `sl
 
 ## Not verified yet
 - Nothing has been imported into Roblox Studio. The scale (1 unit = 1 stud; the `.fbx` is exported at 0.01) and the matte look need checking on the first import.
+- The rifle has no animations, sounds or firing code, and has not been seen in first person in Roblox.
 - No destruction code exists in the game yet. The shards and break data are ready for it, but removing shards, debris and falling unsupported shards are untested in Roblox.
 - The preview is a Blender render with a sun and lavender ambient light set up to resemble the planned Roblox lighting. It is not Roblox.

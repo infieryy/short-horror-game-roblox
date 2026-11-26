@@ -1,0 +1,12 @@
+{
+ "piece": "rifle",
+ "triangles": 1676,
+ "triangles_low": 708,
+ "strokes": 8781,
+ "px_per_stud": 271.0,
+ "break_mode": "parts",
+ "chunks": 4,
+ "chunk_triangles": 1676,
+ "problems": [],
+ "seconds": 5.9
+}

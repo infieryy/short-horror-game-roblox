@@ -1,0 +1,67 @@
+{
+ "piece": "rifle",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre.",
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/rifle_body.fbx",
+   "center": [
+    0.57,
+    -0.008,
+    -0.0
+   ],
+   "size": [
+    3.457,
+    0.773,
+    0.223
+   ],
+   "triangles": 1336
+  },
+  {
+   "id": "bolt",
+   "mesh": "parts/rifle_bolt.fbx",
+   "center": [
+    0.517,
+    0.242,
+    0.111
+   ],
+   "size": [
+    0.322,
+    0.049,
+    0.131
+   ],
+   "triangles": 56
+  },
+  {
+   "id": "magazine",
+   "mesh": "parts/rifle_magazine.fbx",
+   "center": [
+    0.583,
+    -0.391,
+    -0.0
+   ],
+   "size": [
+    0.453,
+    0.852,
+    0.138
+   ],
+   "triangles": 264
+  },
+  {
+   "id": "trigger",
+   "mesh": "parts/rifle_trigger.fbx",
+   "center": [
+    0.21,
+    -0.053,
+    -0.0
+   ],
+   "size": [
+    0.052,
+    0.112,
+    0.023
+   ],
+   "triangles": 20
+  }
+ ]
+}

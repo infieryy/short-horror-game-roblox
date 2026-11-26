@@ -54,6 +54,7 @@ class Piece:
         self.islands = []
         self.layout = None
         self.seams = []          # (axis, value): planes where this piece meets its neighbours; no edge highlight there
+        self.scale = C.DETAIL_SCALE.get(name.split("_")[0], C.DETAIL_SCALE.get(name, 1.0))   # 1 = building-sized
 
     # ------------------------------------------------------------ parts
     def _part(self, mat, group, grain, frame, band, extra=None):
@@ -93,15 +94,37 @@ class Piece:
             bmesh.ops.bevel(tb, geom=tb.edges[:], offset=bevel, segments=1, affect="EDGES", profile=0.5)
         self._merge(tb, pid)
 
+    def extrude(self, profile, half, mat, bevel=0.0, segments=1, group=None, grain=None, frame=None, band=False,
+                detail=False, extra=None):
+        """Side-profile shape: an (x, z) outline pushed through the thickness (-half..half on Y),
+        with the edges of both faces rounded by `bevel`."""
+        self.serial += 1
+        if detail and self.lod:
+            return
+        pid = self._part(mat, group, grain, frame, band, extra)
+        tb = bmesh.new()
+        front = [tb.verts.new((x, -half, z)) for x, z in profile]
+        back = [tb.verts.new((x, half, z)) for x, z in profile]
+        caps = [tb.faces.new(front), tb.faces.new(back[::-1])]
+        for i in range(len(profile)):
+            j = (i + 1) % len(profile)
+            tb.faces.new((front[i], back[i], back[j], front[j]))
+        bmesh.ops.recalc_face_normals(tb, faces=tb.faces[:])
+        if bevel > 0 and not self.lod:
+            bmesh.ops.bevel(tb, geom=[e for f in caps for e in f.edges], offset=bevel, segments=segments,
+                            affect="EDGES", profile=0.5, clamp_overlap=True)
+        self._merge(tb, pid)
+
     def lathe(self, profile, segments, mat, closed=False, r_ref=None, group=None, grain="z", frame=None,
-              band=False, detail=False, extra=None):
-        """Revolve (radius, height) points around the frame's Z axis. Open profiles get flat caps."""
+              band=False, detail=False, extra=None, smooth=False):
+        """Revolve (radius, height) points around the frame's Z axis. Open profiles get flat caps.
+        `smooth` shades the sides as one round surface (a barrel) instead of flat facets (staves)."""
         self.serial += 1
         if detail and self.lod:
             return
         if self.lod:
             segments = max(6, segments // 2)
-        pid = self._part(mat, group, grain, frame, band, extra)
+        pid = self._part(mat, group, grain, frame, band, {**(extra or {}), "smooth": smooth})
         r_ref = r_ref or max(r for r, _ in profile)
         tb = bmesh.new()
         cl = tb.loops.layers.uv.new("canvas")
@@ -225,8 +248,11 @@ class Piece:
         planes = {}
         for f in bm.faces:
             n = f.normal
-            key = (round(n.x, 2), round(n.y, 2), round(n.z, 2), round(n.dot(f.verts[0].co) * 20))
+            key = (round(n.x, 2), round(n.y, 2), round(n.z, 2), round(n.dot(f.verts[0].co) * 20 / self.scale))
             planes.setdefault(key, []).append(f)
+        triangles = {}
+        for tri in bm.calc_loop_triangles():
+            triangles.setdefault(tri[0].face, []).append([loop.vert.co for loop in tri])
         flicker, shells, self.flickers = 0, {}, []
         for f in bm.faces:
             shells.setdefault(f[self.l_part], []).append(f)
@@ -253,7 +279,8 @@ class Piece:
                 origin = hit[0] + direction * 1e-4
 
         def visible(point, n, own):
-            return not any(inside(pid, point + n * 0.01) for pid in shells if pid not in own)
+            return not any(inside(pid, point + n * 0.01 * self.scale) for pid in shells if pid not in own) \
+                and not any(inside(pid, point + n * 0.002 * self.scale) for pid in own)
 
         for key, faces in planes.items():
             if len({f[self.l_part] for f in faces}) < 2:
@@ -261,17 +288,21 @@ class Piece:
             n = Vector(key[:3])
             a = n.orthogonal().normalized()
             b = n.cross(a)
-            polys = [(f[self.l_part], [(v.co.dot(a), v.co.dot(b)) for v in f.verts]) for f in faces]
-            depth = n.dot(faces[0].verts[0].co)
+            polys = [(f[self.l_part], [(co.dot(a), co.dot(b)) for co in tri], n.dot(tri[0]))
+                     for f in faces for tri in triangles[f]]
             for i in range(len(polys)):
                 for j in range(i + 1, len(polys)):
                     if polys[i][0] == polys[j][0]:
                         continue
-                    shared = _overlap(polys[i][1], polys[j][1])
-                    if shared and visible(a * shared[0] + b * shared[1] + n * depth, n, (polys[i][0], polys[j][0])):
+                    shared = _overlap(polys[i][1], polys[j][1], 2e-3 * self.scale ** 2)
+                    if not shared:
+                        continue
+                    own = (polys[i][0], polys[j][0])
+                    spots = [a * shared[0] + b * shared[1] + n * polys[k][2] for k in (i, j)]
+                    if all(visible(spot, n, own) for spot in spots):      # if one is buried, nothing fights
                         flicker += 1
-                        self.flickers.append((self.parts[polys[i][0]]["group"], self.parts[polys[j][0]]["group"],
-                                              tuple(round(c, 2) for c in a * shared[0] + b * shared[1] + n * depth)))
+                        self.flickers.append((self.parts[own[0]]["group"], self.parts[own[1]]["group"],
+                                              tuple(round(c, 2) for c in spots[0])))
         if flicker:
             problems.append(f"{flicker} overlapping coplanar faces (would flicker)")
         if self.density < 24:
@@ -339,11 +370,11 @@ class Piece:
         Tn /= np.linalg.norm(Tn, axis=1, keepdims=True)
         Bn = np.cross(N, Tn)
         dirs = hemi[None, :, 0:1] * Tn[:, None] + hemi[None, :, 1:2] * Bn[:, None] + hemi[None, :, 2:3] * N[:, None]
-        origins = (P + N * 0.012).tolist()
+        origins = (P + N * 0.012 * self.scale).tolist()
         dirs = dirs.tolist()
         owner = chunk[::step, ::step][ys, xs].tolist()
         occ = np.zeros(len(origins), np.float32)
-        D = C.AO_DIST
+        D = C.AO_DIST * self.scale
         for i, o in enumerate(origins):
             total, cast = 0.0, trees[owner[i]].ray_cast
             for d in dirs[i]:
@@ -367,6 +398,8 @@ class Piece:
                 continue
             if any(self.parts[f[self.l_part]].get("core") for f in e.link_faces):
                 continue                         # a break line is not an edge until the piece breaks
+            if all(f[self.l_kind] == 1 and self.parts[f[self.l_part]].get("smooth") for f in e.link_faces):
+                continue                         # facets of a round surface are not edges
             for f in e.link_faces:
                 loops = {l.vert: l for l in f.loops}
                 a, b = loops[e.verts[0]][uv].uv, loops[e.verts[1]][uv].uv
@@ -376,6 +409,9 @@ class Piece:
     # ------------------------------------------------------------ export
     def to_object(self, texture_path=None):
         bm = self.bm.copy()
+        part, kind = bm.faces.layers.int["part"], bm.faces.layers.int["kind"]
+        for f in bm.faces:
+            f.smooth = f[kind] == 1 and bool(self.parts[f[part]].get("smooth"))
         bm.loops.layers.uv.remove(bm.loops.layers.uv["canvas"])
         bmesh.ops.triangulate(bm, faces=bm.faces[:])
         mesh = bpy.data.meshes.new(self.name)
@@ -416,12 +452,14 @@ def matte_material(name, texture_path):
     return mat
 
 
-def _overlap(p, q):
+def _overlap(p, q, min_area=2e-3):
     """Centre of the area two convex polygons share, or None if they only touch."""
     def area(poly):
         return sum(poly[k][0] * poly[(k + 1) % len(poly)][1] - poly[(k + 1) % len(poly)][0] * poly[k][1]
                    for k in range(len(poly))) / 2
 
+    if abs(area(p)) < 1e-12 or abs(area(q)) < 1e-12:
+        return None
     if area(q) < 0:
         q = q[::-1]
     out = p
@@ -440,7 +478,7 @@ def _overlap(p, q):
         out = clipped
         if len(out) < 3:
             return None
-    if abs(area(out)) < 2e-3:
+    if abs(area(out)) < min_area:
         return None
     return sum(pt[0] for pt in out) / len(out), sum(pt[1] for pt in out) / len(out)
 

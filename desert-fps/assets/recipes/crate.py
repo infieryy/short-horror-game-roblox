@@ -17,9 +17,9 @@ def build(p):
     a, b = h - o - 0.05, h - 0.035
     for sx in (-1, 1):
         for sy in (-1, 1):
-            p.box((min(sx * a, sx * b), min(sy * a, sy * b), 0.035), (max(sx * a, sx * b), max(sy * a, sy * b), s - 0.035), "darkwood", extra=CUT)
+            p.box((min(sx * a, sx * b), min(sy * a, sy * b), 0.035), (max(sx * a, sx * b), max(sy * a, sy * b), s - o - 0.05), "darkwood", extra=CUT)
         p.box((min(sx * a, sx * b), -b, s - o - 0.05), (max(sx * a, sx * b), b, s - 0.035), "darkwood", extra=CUT)
-        p.box((-b, min(sx * a, sx * b), s - o - 0.05), (b, max(sx * a, sx * b), s - 0.035), "darkwood", extra=CUT)
+        p.box((-a, min(sx * a, sx * b), s - o - 0.05), (a, max(sx * a, sx * b), s - 0.035), "darkwood", extra=CUT)
     # X faces span the full cube; Y faces and the top stop short so no two boards share a plane
     faces = [("+x", (h - o, 0, h), h, h), ("-x", (-h + o, 0, h), h, h),
              ("+y", (0, h - o, h), h - o, h), ("-y", (0, -h + o, h), h - o, h),

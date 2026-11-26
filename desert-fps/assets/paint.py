@@ -35,7 +35,8 @@ class Painter:
     def __init__(self, piece, maps, seed):
         self.piece, self.maps = piece, maps
         self.rng = np.random.default_rng(seed)
-        self.pps = piece.density                    # pixels per stud
+        self.px = piece.density                     # pixels per stud
+        self.pps = piece.density * piece.scale      # pixels per stud of brush size (small objects get a finer brush)
         self.canvas = np.zeros((C.TEX, C.TEX, 3), np.float32)
         self.strokes = 0
         self.mixes = {}
@@ -44,7 +45,7 @@ class Painter:
         for isl in piece.islands:
             if isl["part"].get("core"):
                 x0, y0 = (int(v) - 2 for v in isl["origin_px"])
-                x1, y1 = (int(o + s * self.pps) + 3 for o, s in zip(isl["origin_px"], isl["size"]))
+                x1, y1 = (int(o + s * self.px) + 3 for o, s in zip(isl["origin_px"], isl["size"]))
                 block = self.maps["island"][max(y0, 0):y1, max(x0, 0):x1]
                 block[block < 0] = isl["id"]
 
@@ -93,7 +94,7 @@ class Painter:
             g = isl["grain_world"]
             gu, gv = (0.0, 1.0) if isl["U"] is None else (g.dot(isl["U"]), g.dot(isl["V"]))
             if math.hypot(gu, gv) < 0.4:             # looking at the cut end of the wood
-                self.layers(mask_b, mask, [spec["end_grain"]], fam, 0, 180)
+                self.layers(mask_b, mask, [spec.get("end_grain", spec["layers"][-1])], fam, 0, 180)
             else:
                 self.layers(mask_b, mask, spec["layers"], fam, math.degrees(math.atan2(gv, gu)), spec["lean_jitter"])
         else:
@@ -106,7 +107,7 @@ class Painter:
 
     def _stave_edges(self, isl, count):
         x0 = isl["origin_px"][0]
-        return [x0 + isl["size"][0] * self.pps * k / count for k in range(count + 1)]
+        return [x0 + isl["size"][0] * self.px * k / count for k in range(count + 1)]
 
     def staves(self, isl, mask_b, base, fam, count):
         """Each stave of a barrel is its own board with its own mix."""
@@ -117,7 +118,7 @@ class Painter:
 
     def stave_seams(self, isl, mask, fam, count):
         rng, pps = self.rng, self.pps
-        y0, height = isl["origin_px"][1], isl["size"][1] * pps
+        y0, height = isl["origin_px"][1], isl["size"][1] * self.px
         for x in self._stave_edges(isl, count):
             t = 0.0
             while t < height:

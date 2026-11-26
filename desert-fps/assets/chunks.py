@@ -125,9 +125,10 @@ def split(piece, spec, points=None):
     shells = {}
     for f in src.faces:
         shells.setdefault(f[sp], []).append(f)
-    if points is None:
+    if points is None and spec.get("shards"):
         lo, hi = _bounds([f for pid, faces in shells.items() if piece.parts[pid].get("cut") for f in faces])
         points = crack_points(piece.name, lo, hi, spec)
+    points = points or []                 # no cracks: the piece only separates into its tagged parts
     regions = [[(j, (p + q) / 2, (q - p).normalized()) for j, q in enumerate(points) if j != i]
                for i, p in enumerate(points)]
     name_of = lambda i: f"s{i:02d}"
@@ -146,7 +147,7 @@ def split(piece, spec, points=None):
 
     def add(key, tb, mat, touched=()):
         volume = abs(tb.calc_volume())
-        if not tb.faces or volume < 1e-5:
+        if not tb.faces or volume < 1e-9:
             return
         entry = bins.setdefault(key, {"bm": _empty(), "volume": {}, "touched": set()})
         _copy(tb, tb.faces, entry["bm"])
@@ -161,6 +162,8 @@ def split(piece, spec, points=None):
         mid = (lo + hi) / 2
         if part.get("chunk"):
             add(part["chunk"], shell, part["mat"])
+        elif not points:
+            add("body", shell, part["mat"])
         elif not part.get("cut"):
             nearest = min(range(len(points)), key=lambda i: (points[i] - mid).length)
             add(name_of(nearest), shell, part["mat"])
@@ -198,6 +201,15 @@ def manifest(piece, spec, shards, files):
         return [round(v.x, 3), round(v.z, 3), round(-v.y, 3)]
 
     rules, out = C.BREAK, []
+    if spec["mode"] == "parts":           # not breakable: just where each separate (moving) part sits
+        return {
+            "piece": piece.name, "mode": "parts",
+            "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre.",
+            "parts": [{"id": key, "mesh": file, "center": roblox((info["lo"] + info["hi"]) / 2),
+                       "size": [round(e, 3) for e in ((info["hi"] - info["lo"]).x, (info["hi"] - info["lo"]).z,
+                                                      (info["hi"] - info["lo"]).y)], "triangles": tris}
+                      for (key, _, info), (tris, file) in zip(shards, files)],
+        }
     for (key, shard, info), (tris, file) in zip(shards, files):
         lo, hi = info["lo"], info["hi"]
         extent = hi - lo
