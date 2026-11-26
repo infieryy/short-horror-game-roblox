@@ -38,7 +38,7 @@ SCENES = {
     ],
 }
 # guns: (centre x, centre height, span) in studs, used to frame the camera
-GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7)}
+GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7), "knife": (0.08, -0.13, 1.25)}
 CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
            "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38)}
 

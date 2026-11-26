@@ -43,6 +43,8 @@ PALETTE["brass"] = {"h": (36, 47), "l": (0.46, 0.68), "s": (0.46, 0.70), "step":
 PALETTE["cloth"] = {"h": (150, 172), "l": (0.44, 0.62), "s": (0.22, 0.40), "step": 0.02, "hue_step": -1.2,
                     "bases": [(163, 0.53, 0.32), (159, 0.55, 0.30)]}
 
+PALETTE["steel"] = {"h": (238, 275), "l": (0.40, 0.84), "s": (0.05, 0.16), "step": 0.02, "hue_step": 0.0,
+                    "bases": [(256, 0.555, 0.10), (250, 0.57, 0.09)]}
 PALETTE["bore"] = {"h": (255, 285), "l": (0.05, 0.13), "s": (0.05, 0.16), "step": 0.012, "hue_step": 0.0,
                    "bases": [(270, 0.085, 0.10)]}
 
@@ -110,6 +112,7 @@ PAINT["gunmetal"] = {
         {"per_stud2": 12.0, "len": (0.25, 0.8), "wid": (0.05, 0.12), "opacity": (0.45, 0.8), "round": 0.3},
     ],
 }
+PAINT["steel"] = PAINT["gunmetal"]
 PAINT["brass"] = PAINT["iron"]
 PAINT["bore"] = {"lean": 0, "lean_jitter": 90,     # the dark inside of a barrel
                  "layers": [{"per_stud2": 8.0, "len": (0.2, 0.5), "wid": (0.1, 0.2), "opacity": (0.4, 0.7), "round": 0.9}]}
@@ -162,13 +165,14 @@ KIT = {
     # guns: `chunky` thickens one a little over the real widths so it reads on screen
     "rifle": {"chunky": 1.2},
     "pistol": {"chunky": 1.15},
+    "knife": {"chunky": 1.3},
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
 }
 
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
-DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12}
+DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -202,6 +206,8 @@ STYLE = {
 }
 
 STYLE["pistol"] = STYLE["rifle"]
+STYLE["knife"] = {**STYLE["rifle"], "extra_layers": {**STYLE["rifle"]["extra_layers"],
+                                                     "steel": STYLE["rifle"]["extra_layers"]["gunmetal"]}}
 
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).
@@ -226,10 +232,11 @@ BREAK = {
         # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
         "rifle": {"mode": "parts"},
         "pistol": {"mode": "parts"},
+        "knife": {"mode": "parts"},
     },
 }
 
 # ---------------------------------------------------------------- budgets (triangles)
 TRI_LIMIT = 20000      # Roblox hard limit per mesh
 TRI_BUDGET = {"wall_plain": 400, "wall_window": 1200, "wall_door": 800, "door": 1200, "crate": 1600, "barrel": 900,
-              "rifle": 6000, "pistol": 3000}
+              "rifle": 6000, "pistol": 3000, "knife": 2500}

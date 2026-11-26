@@ -119,6 +119,25 @@ class Piece:
         self._merge(tb, pid)
         return pid
 
+    def loft(self, rings, mat, group=None, grain=None, frame=None, band=False, detail=False, extra=None):
+        """Skin a row of rings (each the same number of 3D points) into one closed shell, capped at
+        both ends. For shapes whose cross-section changes along their length, like a blade."""
+        self.serial += 1
+        if detail and self.lod:
+            return
+        pid = self._part(mat, group, grain, frame, band, extra)
+        tb = bmesh.new()
+        rows = [[tb.verts.new(q) for q in ring] for ring in rings]
+        count = len(rings[0])
+        for a, b in zip(rows, rows[1:]):
+            for i in range(count):
+                j = (i + 1) % count
+                tb.faces.new((a[i], a[j], b[j], b[i]))
+        tb.faces.new(rows[0][::-1])
+        tb.faces.new(rows[-1])
+        self._merge(tb, pid)
+        return pid
+
     def lathe(self, profile, segments, mat, closed=False, r_ref=None, group=None, grain="z", frame=None,
               band=False, detail=False, extra=None, smooth=False):
         """Revolve (radius, height) points around the frame's Z axis. Open profiles get flat caps.

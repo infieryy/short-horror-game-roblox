@@ -1,0 +1,159 @@
+{
+ "piece": "knife",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [
+  {
+   "name": "blade_base",
+   "position": [
+    0.1762,
+    0.0112,
+    -0.0
+   ],
+   "forward": [
+    1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "blade_tip",
+   "position": [
+    0.4575,
+    -0.27,
+    -0.0
+   ],
+   "forward": [
+    0.1,
+    -1,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "ring",
+   "position": [
+    -0.2475,
+    -0.1125,
+    -0.0
+   ],
+   "forward": [
+    0,
+    0,
+    -1
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "charm",
+   "position": [
+    -0.2475,
+    -0.1762,
+    -0.0
+   ],
+   "forward": [
+    0,
+    -1,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "part": "knife",
+   "type": "hinge",
+   "pivot": [
+    -0.2475,
+    -0.1125,
+    -0.0
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "amount": 360,
+   "unit": "degrees"
+  }
+ ],
+ "parts": [
+  {
+   "id": "blade",
+   "mesh": "parts/knife_blade.fbx",
+   "center": [
+    0.321,
+    -0.109,
+    -0.0
+   ],
+   "size": [
+    0.296,
+    0.33,
+    0.02
+   ],
+   "triangles": 80
+  },
+  {
+   "id": "body",
+   "mesh": "parts/knife_body.fbx",
+   "center": [
+    -0.055,
+    -0.053,
+    -0.0
+   ],
+   "size": [
+    0.515,
+    0.248,
+    0.088
+   ],
+   "triangles": 372
+  },
+  {
+   "id": "charm",
+   "mesh": "parts/knife_charm.fbx",
+   "center": [
+    -0.24,
+    -0.244,
+    -0.0
+   ],
+   "size": [
+    0.082,
+    0.173,
+    0.044
+   ],
+   "triangles": 68
+  },
+  {
+   "id": "handle",
+   "mesh": "parts/knife_handle.fbx",
+   "center": [
+    -0.026,
+    -0.047,
+    -0.0
+   ],
+   "size": [
+    0.382,
+    0.221,
+    0.073
+   ],
+   "triangles": 164
+  }
+ ]
+}

@@ -18,7 +18,7 @@ python3 run.py
 python3 preview.py
 ```
 
-`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle pistol` renders the guns.
+`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle pistol knife` renders the weapons.
 
 ## Pilot pieces
 
@@ -32,6 +32,7 @@ python3 preview.py
 | `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
 | `rifle` | 1,772 | 756 | not breakable: 11 parts | 1,772 | 11,039 | 265.9 px/stud |
 | `pistol` | 996 | 476 | not breakable: 8 parts | 996 | 10,103 | 453.5 px/stud |
+| `knife` | 684 | 292 | not breakable: 4 parts | 684 | 1,993 | 1,074.9 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -71,12 +72,15 @@ To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `sl
 
 ![Pistol, right side](out/pistol-side.png)
 
-Both guns were built without concept art, from the proportions of real firearms, then painted with the same brush rules as the map. They share one scale (`GUN_MM` in `config.py`: an 880 mm rifle is 3.3 studs), so they are in proportion to each other.
+![Karambit](out/knife-side.png)
+
+The weapons were built without concept art, from the proportions of real ones, then painted with the same brush rules as the map. They share one scale (`GUN_MM` in `config.py`: an 880 mm rifle is 3.3 studs), so they are in proportion to each other.
 
 | Gun | Based on | Length | Triangles | Parts |
 |---|---|---|---|---|
 | `rifle` | a wooden-furniture, curved-magazine service rifle | 3.3 studs | 1,772 | body, cover, stock, grip, handguard, barrel, muzzle, magazine, bolt, trigger, selector |
 | `pistol` | the Desert Eagle | 1.1 studs | 996 | body, slide, barrel, grip, magazine, trigger, hammer, charm |
+| `knife` | a karambit | 0.8 studs | 684 | body (ring, guard, pins), blade, handle, charm |
 
 ### Every gun is modular
 
@@ -101,6 +105,9 @@ g.muzzle("muzzle", "gunmetal", 640, 668, 0, 9.5, 5.0, 12)   # a ring with a dark
 g.socket("muzzle", 668, 0)
 g.joint("bolt", "slide", 198, 19, (-1, 0, 0), 70)
 ```
+
+### The knife
+The karambit uses the same toolkit, scale and part system as the guns. Its blade is a `loft`: a row of cross-sections from guard to tip, each flat near the spine and ground down to a thin edge, so it has a real bevel and gets thinner toward the point. Its sockets are `blade_base` and `blade_tip` (for slash trails and hit checks), `ring` and `charm`, and it has one joint: the spin round the finger ring.
 
 ### Paint
 - **Finer brush.** Small objects use the map's paint rules with a smaller brush (`DETAIL_SCALE` in `config.py`).
@@ -147,7 +154,7 @@ g.joint("bolt", "slide", 198, 19, (-1, 0, 0), 70)
 
 ## Not verified yet
 - Nothing has been imported into Roblox Studio. The scale (1 unit = 1 stud; the `.fbx` is exported at 0.01) and the matte look need checking on the first import.
-- The guns have no animations, sounds or firing code, and have not been seen in first person in Roblox.
+- The weapons have no animations, sounds or firing code, and have not been seen in first person in Roblox.
 - The sockets and joints are positions and directions in a data file. Nothing has been rigged or attached with them yet.
 - No destruction code exists in the game yet. The shards and break data are ready for it, but removing shards, debris and falling unsupported shards are untested in Roblox.
 - The preview is a Blender render with a sun and lavender ambient light set up to resemble the planned Roblox lighting. It is not Roblox.
