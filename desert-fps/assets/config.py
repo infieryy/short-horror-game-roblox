@@ -34,7 +34,7 @@ PALETTE = {
                 "bases": [(5, 0.37, 0.14), (8, 0.40, 0.13)]},
 }
 # weapons
-PALETTE["gunmetal"] = {"h": (250, 285), "l": (0.20, 0.38), "s": (0.05, 0.16), "step": 0.02, "hue_step": 0.0,
+PALETTE["gunmetal"] = {"h": (250, 285), "l": (0.18, 0.48), "s": (0.05, 0.16), "step": 0.02, "hue_step": 0.0,
                        "bases": [(268, 0.285, 0.10), (262, 0.30, 0.09)]}
 PALETTE["brass"] = {"h": (36, 47), "l": (0.46, 0.68), "s": (0.46, 0.70), "step": 0.022, "hue_step": 0.5,
                     "bases": [(42, 0.57, 0.58), (40, 0.55, 0.56)]}
@@ -161,6 +161,37 @@ KIT = {
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
 DETAIL_SCALE = {"rifle": 0.2}
+
+# ---------------------------------------------------------------- per-piece style
+# Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
+#   step_gain     how much bigger one "step lighter or darker" is (more contrast between strokes)
+#   glaze         overrides for GLAZE. edge_steps: the highlight is first that many steps lighter in the
+#                 material's own colour, then edge_mix toward pale. edge_dark adds a thin dark stroke
+#                 just inside every highlighted edge.
+#   extra_layers  more stroke layers per material: `step` = how many steps, `dark` = share of darker strokes
+#   round_shine   brushed highlight along round parts (a barrel); 0 = none
+STYLE = {
+    "rifle": {
+        "step_gain": 1.5,
+        "glaze": {"edge_steps": 5, "edge_mix": 0.22, "edge_cover": 0.95, "edge_wid": (0.03, 0.055),
+                  "edge_len": (0.25, 0.9), "edge_min": 0.1,
+                  "edge_dark": {"steps": 3, "cover": 0.7, "wid": (0.02, 0.035), "inset": 2.0}},
+        "extra_layers": {
+            "wood": [       # dark grain lines, then a few pale scuffs
+                {"per_stud2": 7.0, "len": (1.0, 3.2), "wid": (0.028, 0.05), "opacity": (0.6, 0.9), "step": 3, "dark": 1.0},
+                {"per_stud2": 2.0, "len": (0.4, 1.0), "wid": (0.05, 0.09), "opacity": (0.5, 0.8), "step": 3, "dark": 0.0, "jitter": 20},
+            ],
+            "gunmetal": [   # grime dabs, then bright scratches
+                {"per_stud2": 2.5, "len": (0.2, 0.5), "wid": (0.1, 0.2), "opacity": (0.3, 0.5), "round": 0.9, "step": 2, "dark": 1.0, "jitter": 90},
+                {"per_stud2": 5.0, "len": (0.3, 1.2), "wid": (0.02, 0.04), "opacity": (0.5, 0.85), "step": 5, "dark": 0.0, "jitter": 35},
+            ],
+            "cloth": [      # folds
+                {"per_stud2": 8.0, "len": (0.5, 1.4), "wid": (0.03, 0.05), "opacity": (0.55, 0.85), "step": 3, "dark": 0.8},
+            ],
+        },
+        "round_shine": 0.4,
+    },
+}
 
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).

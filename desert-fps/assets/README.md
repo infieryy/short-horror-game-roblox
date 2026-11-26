@@ -30,7 +30,7 @@ python3 preview.py
 | `door` | 688 | 216 | 6 shards | 1,412 | 6,771 | 62.5 px/stud |
 | `crate` | 1,468 | 588 | 8 shards (debris) | 1,660 | 22,890 | 47.0 px/stud |
 | `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
-| `rifle` | 1,676 | 708 | not breakable: 4 moving parts | 1,676 | 8,781 | 271.0 px/stud |
+| `rifle` | 1,676 | 708 | not breakable: 4 moving parts | 1,676 | 12,639 | 271.0 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -75,6 +75,11 @@ The assault rifle was built without concept art, from the proportions of a real 
 - **Size:** 3.3 studs long. The barrel points along +X and the origin is the top of the pistol grip.
 - **Not breakable.** It splits into four separate meshes so it can be animated: `body`, `magazine`, `bolt` (carrier and charging handle) and `trigger`. `rifle.parts.json` gives where each one sits.
 - **Finer brush.** Small objects use the map's paint rules at one fifth the brush size (`DETAIL_SCALE` in `config.py`).
+- **Extra hand-painted detail** (`STYLE` in `config.py`), only on pieces seen up close:
+  - every sharp edge gets a brushed highlight in the material's own colour, with a thin dark stroke just inside it
+  - wood gets dark grain lines and pale scuffs; metal gets grime dabs and bright scratches; the cloth gets folds
+  - the round barrel gets a brushed highlight along its length
+  - detail lines painted where modelling isn't worth it (`p.mark` in the recipe): ejection port, panel lines, pins, magazine seams, sling slot, grip hatching, handguard grooves
 - **Shape language.** Every part is a side-view outline in millimetres in `recipes/rifle.py`, pushed through its thickness and rounded. Change a number and run it again.
 
 ## Files

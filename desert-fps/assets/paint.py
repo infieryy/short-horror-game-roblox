@@ -12,6 +12,7 @@ import numpy as np
 
 import brush
 import config as C
+from build import FACETS
 
 
 def rgb(hls):
@@ -19,8 +20,9 @@ def rgb(hls):
     return np.array(colorsys.hls_to_rgb((h % 360) / 360.0, l, s), np.float32)
 
 
-def step(color, n, fam):
+def step(color, n, fam, gain=1.0):
     """Move a colour n small steps lighter (+) or darker (-), staying inside its family."""
+    n = n * gain
     h, l, s = colorsys.rgb_to_hls(*[float(c) for c in np.clip(color, 0, 1)])
     h *= 360.0
     lo, hi = fam["h"]
@@ -40,6 +42,11 @@ class Painter:
         self.canvas = np.zeros((C.TEX, C.TEX, 3), np.float32)
         self.strokes = 0
         self.mixes = {}
+        style = C.STYLE.get(piece.name, C.STYLE.get(piece.name.split("_")[0], {}))
+        self.gain = style.get("step_gain", 1.0)
+        self.G = {**C.GLAZE, **style.get("glaze", {})}
+        self.extra_layers = style.get("extra_layers", {})
+        self.round_shine = style.get("round_shine", 0.0)
         # cut faces: paint the island's whole rectangle, so the low-detail shards (slightly different
         # outlines) never reach an unpainted texel
         for isl in piece.islands:
@@ -71,7 +78,8 @@ class Painter:
             count = int(L["per_stud2"] * area + rng.random())
             for k in rng.integers(0, len(ys), count):
                 cx, cy = xs[k] + rng.random(), ys[k] + rng.random()
-                color = step(self.canvas[ys[k], xs[k]], 1 if rng.random() < 0.5 else -1, fam)
+                sign = -1 if rng.random() < L.get("dark", 0.5) else 1
+                color = step(self.canvas[ys[k], xs[k]], sign * L.get("step", 1), fam, self.gain)
                 a = math.radians(angle + rng.uniform(-1, 1) * L.get("jitter", jitter))
                 brush.stroke(self.canvas, clip, cx, cy, rng.uniform(*L["len"]) * pps, rng.uniform(*L["wid"]) * pps,
                              a, color, rng.uniform(*L["opacity"]), rng, round_=L.get("round", 0.0),
@@ -85,6 +93,7 @@ class Painter:
         mask = mask_b.astype(np.float32)
         part, family = isl["part"], isl["part"]["mat"]
         spec, fam = C.PAINT[family], C.PALETTE[family]
+        spec = {**spec, "layers": spec["layers"] + self.extra_layers.get(family, [])}
         base = step(self.mix(part["group"], family), part.get("tone", 0), fam)
         self.canvas[mask_b] = base
         if part.get("staves") and isl["facet"] == "lathe":
@@ -102,6 +111,8 @@ class Painter:
 
         if part.get("staves") and isl["facet"] == "lathe":
             self.stave_seams(isl, mask, fam, part["staves"])
+        if self.round_shine and part.get("smooth") and isl["facet"] == "lathe":
+            self.shine(isl, mask, fam)
         if part["band"] and family in ("plaster", "stone"):
             self.band(isl, mask_b)
 
@@ -160,10 +171,62 @@ class Painter:
                          math.radians(rng.uniform(0, 180)), worn, rng.uniform(0.5, 0.8), rng, round_=0.9)
         self.strokes += chips
 
+    def shine(self, isl, mask, fam):
+        """A round part catches the light along one line: brush a highlight there, a dark line under it."""
+        rng, frame = self.rng, isl["part"]["frame"].to_3x3()
+        light = (-0.25, -0.55, 0.8)                       # up, and toward the side the player sees
+        facing = lambda axis: sum(frame[k][axis] * light[k] for k in range(3))
+        turn = math.atan2(facing(1), facing(0)) % (2 * math.pi)
+        width, height = isl["size"][0] * self.px, isl["size"][1] * self.px
+        pale = rgb(C.PALE)
+        for offset, lighter, wide in ((0.0, True, 0.11), (0.3, False, 0.05)):
+            x = isl["origin_px"][0] + ((turn / (2 * math.pi) + offset) % 1.0) * width
+            t = 0.0
+            while t < height:
+                seg = rng.uniform(0.25, 0.7) * height
+                cy = isl["origin_px"][1] + min(t + seg / 2, height)
+                under = self.canvas[min(int(cy), C.TEX - 1), min(max(int(x), 0), C.TEX - 1)]
+                color = under + (pale - under) * self.round_shine if lighter else step(under, -3, fam, self.gain)
+                brush.stroke(self.canvas, mask, x + rng.uniform(-1, 1), cy, seg * 1.1, max(2.0, wide * width),
+                             math.pi / 2, color, rng.uniform(0.55, 0.85), rng, round_=0.2)
+                self.strokes += 1
+                t += seg * rng.uniform(0.8, 1.1)
+
+    def marks(self):
+        """Detail lines a recipe asked for: a dark stroke, and a thin light one beside it so it reads as cut in."""
+        rng, piece = self.rng, self.piece
+        islands = {isl["key"]: isl for isl in piece.islands}
+        for m in piece.marks:
+            part = piece.parts[m["pid"]]
+            key = (part["group"], part["mat"], m["facet"])
+            if key not in islands:
+                continue
+            isl, place, fam = islands[key], piece.layout["islands"][key], C.PALETTE[part["mat"]]
+            clip = (self.maps["island"] == isl["id"]).astype(np.float32)
+            inv, (U, V) = part["frame"].inverted(), FACETS[m["facet"]]
+            pts = [(isl["origin_px"][0] + ((inv @ q).dot(U) - place["min"][0]) * self.px,
+                    isl["origin_px"][1] + ((inv @ q).dot(V) - place["min"][1]) * self.px) for q in m["points"]]
+            if m["closed"]:
+                pts.append(pts[0])
+            width = max(1.6, m["width"] * self.px)
+            for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+                length, angle = math.hypot(x1 - x0, y1 - y0), math.atan2(y1 - y0, x1 - x0)
+                pieces = max(1, int(length / (width * 9)))
+                for k in range(pieces):
+                    a, b = k / pieces, (k + 1) / pieces
+                    cx, cy = x0 + (x1 - x0) * (a + b) / 2, y0 + (y1 - y0) * (a + b) / 2
+                    under = self.canvas[min(max(int(cy), 0), C.TEX - 1), min(max(int(cx), 0), C.TEX - 1)]
+                    seg = length * (b - a) * 1.25 + width
+                    brush.stroke(self.canvas, clip, cx, cy, seg, width * rng.uniform(0.85, 1.2), angle + rng.uniform(-0.03, 0.03),
+                                 step(under, m["tone"], fam, self.gain), rng.uniform(0.75, 0.95), rng, rag=0.08)
+                    brush.stroke(self.canvas, clip, cx + width * 0.9 * math.sin(angle), cy - width * 0.9 * math.cos(angle) - 0.4,
+                                 seg * 0.9, width * 0.6, angle, step(under, 3, fam, self.gain), rng.uniform(0.35, 0.6), rng, rag=0.2)
+                    self.strokes += 2
+
     def glazes(self):
         """Dark glaze settles where surfaces meet (toward lavender, never gray);
         pale glaze stays on protruding edges."""
-        G, rng, pps = C.GLAZE, self.rng, self.pps
+        G, rng, pps = self.G, self.rng, self.pps
         covered = self.maps["island"] >= 0
         mask = covered.astype(np.float32)
         occ = np.where(covered, self.maps["ao"], 0.0)
@@ -181,30 +244,45 @@ class Painter:
                 brush.stroke(self.canvas, mask, xs[k] + rng.random(), ys[k] + rng.random(), size * rng.uniform(1.0, 2.0),
                              size, math.radians(rng.uniform(0, 180)), color, min(0.2 + 0.6 * o, 0.85), rng, round_=0.9)
             self.strokes += count
+        dark_spec = G.get("edge_dark")
         for isl_id, segments in self.maps["edges"].items():
             clip = (self.maps["island"] == isl_id).astype(np.float32)
-            for x0, y0, x1, y1 in segments:
+            fam = C.PALETTE[self.piece.islands[isl_id]["part"]["mat"]]
+            for x0, y0, x1, y1, fx, fy, sharp in segments:
                 length = math.hypot(x1 - x0, y1 - y0)
                 if length < G["edge_min"] * pps:
                     continue
+                # a rounded edge is several shallow folds: each gets a broken line, not a solid one
+                cover = min(1.0, max(0.25, (math.degrees(sharp) - 25.0) / 20.0))
                 angle = math.atan2(y1 - y0, x1 - x0)
+                nx, ny = -(y1 - y0) / length, (x1 - x0) / length            # points into the face
+                if nx * (fx - (x0 + x1) / 2) + ny * (fy - (y0 + y1) / 2) < 0:
+                    nx, ny = -nx, -ny
                 t = 0.0
                 while t < length:
                     seg = rng.uniform(*G["edge_len"]) * pps
-                    if rng.random() < G["edge_cover"]:
-                        m = min(t + seg / 2, length) / length
-                        cx, cy = x0 + (x1 - x0) * m, y0 + (y1 - y0) * m
+                    m = min(t + seg / 2, length) / length
+                    cx, cy = x0 + (x1 - x0) * m, y0 + (y1 - y0) * m
+                    wid = rng.uniform(*G["edge_wid"]) * pps
+                    if dark_spec and rng.random() < dark_spec["cover"] * cover:      # dark stroke just inside the edge
+                        dx, dy = cx + nx * wid * dark_spec["inset"], cy + ny * wid * dark_spec["inset"]
+                        under = self.canvas[min(max(int(dy), 0), C.TEX - 1), min(max(int(dx), 0), C.TEX - 1)]
+                        brush.stroke(self.canvas, clip, dx, dy, min(seg, length) * 1.1, rng.uniform(*dark_spec["wid"]) * pps,
+                                     angle, step(under, -dark_spec["steps"], fam, self.gain), rng.uniform(0.5, 0.8), rng)
+                        self.strokes += 1
+                    if rng.random() < G["edge_cover"] * cover:
                         iy, ix = min(max(int(cy), 0), C.TEX - 1), min(max(int(cx), 0), C.TEX - 1)
-                        under = self.canvas[iy, ix]
+                        under = step(self.canvas[iy, ix], G.get("edge_steps", 0), fam, self.gain)
                         color = under + (pale - under) * G["edge_mix"]
-                        brush.stroke(self.canvas, clip, cx, cy, min(seg, length), rng.uniform(*G["edge_wid"]) * pps * 2,
-                                     angle, color, rng.uniform(0.5, 0.85), rng, round_=0.3)
+                        brush.stroke(self.canvas, clip, cx, cy, min(seg, length) * 1.15, wid * 2,
+                                     angle, color, rng.uniform(0.6, 0.9), rng, round_=0.3)
                         self.strokes += 1
                     t += seg
 
     def run(self):
         for isl in self.piece.islands:
             self.island(isl)
+        self.marks()
         self.glazes()
         covered = self.maps["island"] >= 0
         out = brush.pad(self.canvas, covered, C.PAD * 2)

@@ -2,7 +2,7 @@
  "piece": "wall_door",
  "triangles": 700,
  "triangles_low": 316,
- "strokes": 10904,
+ "strokes": 10832,
  "px_per_stud": 44.8,
  "break_mode": "chunks",
  "chunks": 12,

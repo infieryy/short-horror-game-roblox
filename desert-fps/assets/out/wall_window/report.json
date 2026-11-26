@@ -2,11 +2,11 @@
  "piece": "wall_window",
  "triangles": 676,
  "triangles_low": 468,
- "strokes": 7260,
+ "strokes": 7175,
  "px_per_stud": 45.5,
  "break_mode": "chunks",
  "chunks": 13,
  "chunk_triangles": 948,
  "problems": [],
- "seconds": 5.5
+ "seconds": 5.6
 }

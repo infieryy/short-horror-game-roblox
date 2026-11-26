@@ -176,7 +176,7 @@ def split(piece, spec, points=None):
         shell.free()
 
     union = Piece(piece.name, lod=piece.lod)
-    union.parts, union.seams = piece.parts, piece.seams
+    union.parts, union.seams, union.marks = piece.parts, piece.seams, piece.marks
     shards = []
     for number, key in enumerate(sorted(bins)):
         entry = bins[key]

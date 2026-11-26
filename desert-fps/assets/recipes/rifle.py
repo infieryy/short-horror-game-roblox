@@ -44,17 +44,19 @@ def build(p):
     mm = S
 
     # receiver, dust cover, sights
-    p.extrude(outline([(0, 12), (0, -45), (258, -45), (266, -30), (266, 12)]), half(33), steel, bevel=2 * mm, grain="x")
-    p.extrude(outline([(12, 12), (12, 24), (22, 33), (232, 33), (246, 22), (246, 12)]), half(30), steel,
-              bevel=6 * mm, segments=2, grain="x", extra={"tone": 1})
+    receiver = p.extrude(outline([(0, 12), (0, -45), (258, -45), (266, -30), (266, 12)]), half(33), steel,
+                         bevel=2 * mm, grain="x")
+    cover = p.extrude(outline([(12, 12), (12, 24), (22, 33), (232, 33), (246, 22), (246, 12)]), half(30), steel,
+                      bevel=6 * mm, segments=2, grain="x", extra={"tone": 1})
     p.extrude(outline([(248, 12), (248, 44), (262, 48), (304, 42), (304, 12)]), half(15), steel, bevel=1.5 * mm, grain="x")
 
     # stock, brass butt plate, pistol grip
-    p.extrude(outline([(2, 6), (2, -40), (-40, -50), (-150, -92), (-238, -122), (-246, -118), (-246, -22),
-                       (-150, -8), (-50, 4)]), half(30), wood, bevel=7 * mm, segments=2, grain="x", extra={"tone": -1})
+    stock = p.extrude(outline([(2, 6), (2, -40), (-40, -50), (-150, -92), (-238, -122), (-246, -118), (-246, -22),
+                               (-150, -8), (-50, 4)]), half(30), wood, bevel=7 * mm, segments=2, grain="x",
+                      extra={"tone": -1})
     p.extrude(outline([(-244, -19), (-244, -121), (-254, -121), (-254, -19)]), half(31), "brass", bevel=1.5 * mm)
-    p.extrude(outline([(34, -43), (84, -43), (78, -70), (62, -150), (20, -146), (26, -110), (36, -75)]), half(26), wood,
-              bevel=6 * mm, segments=2, grain="z", extra={"tone": -1})
+    grip = p.extrude(outline([(34, -43), (84, -43), (78, -70), (62, -150), (20, -146), (26, -110), (36, -75)]),
+                     half(26), wood, bevel=6 * mm, segments=2, grain="z", extra={"tone": -1})
 
     # three stiffening ribs across the dust cover, and a raised rib along each side of the magazine
     for x in (60, 120, 180):
@@ -73,18 +75,18 @@ def build(p):
     arc = lambda r, a: (top + radius - r * math.cos(a), -45 - r * math.sin(a))
     rear = [arc(radius + width / 2, a) for a in angles]
     front = [arc(radius - width / 2 + 4 * k / 9, a) for k, a in enumerate(angles)]
-    p.extrude(outline(rear + front[::-1]), half(27), steel, bevel=3 * mm, grain="z",
-              extra={"chunk": "magazine", "tone": 1})
+    magazine = p.extrude(outline(rear + front[::-1]), half(27), steel, bevel=3 * mm, grain="z",
+                         extra={"chunk": "magazine", "tone": 1})
     rib_a = [arc(radius + 8, a) for a in angles[2:9]]
     rib_b = [arc(radius - 8, a) for a in angles[2:9]]
     p.extrude(outline(rib_a + rib_b[::-1]), half(27) + 2.2 * mm, steel, bevel=1.2 * mm, grain="z",
               extra={"chunk": "magazine", "tone": 1})
 
     # handguards with brass ferrules, and the steel that shows between them
-    p.extrude(outline([(266, 4), (266, -36), (280, -42), (392, -42), (410, -30), (410, 4)]), half(42), wood,
-              bevel=7 * mm, segments=2, grain="x")
-    p.extrude(outline([(274, 9), (274, 32), (284, 39), (388, 39), (400, 30), (400, 9)]), half(32), wood,
-              bevel=7 * mm, segments=2, grain="x")
+    lower = p.extrude(outline([(266, 4), (266, -36), (280, -42), (392, -42), (410, -30), (410, 4)]), half(42), wood,
+                      bevel=7 * mm, segments=2, grain="x")
+    upper = p.extrude(outline([(274, 9), (274, 32), (284, 39), (388, 39), (400, 30), (400, 9)]), half(32), wood,
+                      bevel=7 * mm, segments=2, grain="x")
     p.extrude(outline([(264, 2), (264, 12), (412, 12), (412, 2)]), half(24), steel, grain="x")
     p.extrude(outline([(261, 7), (261, -38), (269, -38), (269, 7)]), half(44), "brass", bevel=1.5 * mm)
     p.extrude(outline([(407, 7), (407, -34), (417, -34), (417, 7)]), half(44), "brass", bevel=1.5 * mm)
@@ -106,14 +108,14 @@ def build(p):
     p.lathe([(r * 1.2, 0), (r * 1.25, 20 * mm), (r * 1.0, 28 * mm)], 12, steel, frame=along_barrel(640, 0), smooth=True)
 
     # bolt carrier and charging handle on the right side (-Y)
-    cover = half(30)
+    cover_half = half(30)
     bx0, bz0 = pt(150, 13)
     bx1, bz1 = pt(236, 26)
-    p.box((bx0, -cover - 3.5 * mm, bz0), (bx1, -cover + 6 * mm, bz1), steel, grain="x",
+    p.box((bx0, -cover_half - 3.5 * mm, bz0), (bx1, -cover_half + 6 * mm, bz1), steel, grain="x",
           extra={"chunk": "bolt", "tone": 3})
     hx, hz = pt(198, 19)
     p.lathe([(5 * mm, 0), (5.5 * mm, 22 * mm), (4 * mm, 26 * mm)], 8, steel,
-            frame=frame_axes((hx, -cover - 3 * mm, hz), (1, 0, 0), (0, 0, 1)), extra={"chunk": "bolt", "tone": 3})
+            frame=frame_axes((hx, -cover_half - 3 * mm, hz), (1, 0, 0), (0, 0, 1)), extra={"chunk": "bolt", "tone": 3})
 
     # selector lever and rivets
     body = half(33)
@@ -126,8 +128,35 @@ def build(p):
                     frame=frame_axes((rx, sy * body, rz), (1, 0, 0), (0, 0, -sy)))
 
     # turquoise cloth wrapped round the lower handguard, with a loose end
-    grip = half(42)
+    guard = half(42)
     for x0, x1, extra in ((322, 334, 2.5), (334, 347, 4.5), (347, 359, 2.0)):
         p.extrude(outline([(x0, 6 + extra), (x0, -43 - extra), (x1, -43 - extra), (x1, 6 + extra)]),
-                  grip + extra * mm, "cloth", bevel=2.5 * mm, segments=2)
-    p.extrude(outline([(339, -44), (351, -44), (358, -92), (344, -86)]), 1.4 * mm, "cloth", frame=side(-grip * 0.5))
+                  guard + extra * mm, "cloth", bevel=2.5 * mm, segments=2)
+    p.extrude(outline([(339, -44), (351, -44), (358, -92), (344, -86)]), 1.4 * mm, "cloth", frame=side(-guard * 0.5))
+
+    # ---- painted detail: lines too small to be worth modelling
+    def line(pid, points, sides=("-y", "+y"), tone=-4, width=2.0, closed=False):
+        for facet in sides:
+            p.mark(pid, facet, [(pt(x, z)[0], 0, pt(x, z)[1]) for x, z in points], tone, width * mm, closed)
+
+    line(receiver, [(8, -3), (254, -3)])                                             # rail under the dust cover
+    line(receiver, [(238, 8), (238, -42)])                                           # front trunnion
+    line(receiver, [(30, 8), (30, -42)], width=1.6)
+    line(receiver, [(168, -12), (212, -12), (217, -19), (212, -27), (168, -27), (163, -19)], closed=True)   # magazine dimple
+    for x, z in ((100, -22), (126, -30), (60, -20)):                                 # pins
+        line(receiver, [(x - 3, z), (x, z + 3), (x + 3, z), (x, z - 3)], closed=True, width=1.6)
+    line(cover, [(20, 17), (240, 17)], width=1.6)
+    line(cover, [(146, 11), (242, 11), (242, 28), (146, 28)], sides=("-y",), closed=True, tone=-5)   # ejection port
+    for a in (math.radians(4), math.radians(33.5)):                                  # magazine lip and floor plate
+        line(magazine, [arc(radius + width / 2 - 3, a), arc(radius - width / 2 + 5, a)])
+    line(magazine, [arc(radius - 22, a) for a in angles[2:9]], width=1.6, tone=-3)
+    line(stock, [(-168, -50), (-120, -40), (-118, -48), (-166, -58)], closed=True, tone=-6, width=2.6)   # sling slot
+    line(stock, [(-10, -8), (-110, -22), (-232, -44)], width=1.5, tone=-3)
+    line(stock, [(-20, -30), (-120, -62), (-232, -100)], width=1.5, tone=-3)
+    line(stock, [(-236, -24), (-236, -116)], width=1.8)
+    line(lower, [(276, -15), (402, -15)], tone=-5, width=2.4)                        # finger groove
+    line(lower, [(282, -30), (394, -30)], width=1.5, tone=-3)
+    line(upper, [(282, 22), (392, 22)], width=1.6)
+    for k in range(6):                                                               # hatching on the grip
+        z = -62 - k * 13
+        line(grip, [(34 - k * 2.2, z), (70 - k * 2.6, z - 9)], width=1.5, tone=-4)

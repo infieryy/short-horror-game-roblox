@@ -2,11 +2,11 @@
  "piece": "crate",
  "triangles": 1468,
  "triangles_low": 588,
- "strokes": 22476,
+ "strokes": 22489,
  "px_per_stud": 47.0,
  "break_mode": "shatter",
  "chunks": 8,
  "chunk_triangles": 1668,
  "problems": [],
- "seconds": 11.0
+ "seconds": 10.2
 }

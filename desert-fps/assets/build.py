@@ -54,6 +54,7 @@ class Piece:
         self.islands = []
         self.layout = None
         self.seams = []          # (axis, value): planes where this piece meets its neighbours; no edge highlight there
+        self.marks = []          # painted detail lines, see mark()
         self.scale = C.DETAIL_SCALE.get(name.split("_")[0], C.DETAIL_SCALE.get(name, 1.0))   # 1 = building-sized
 
     # ------------------------------------------------------------ parts
@@ -93,6 +94,7 @@ class Piece:
         if bevel > 0 and not self.lod:
             bmesh.ops.bevel(tb, geom=tb.edges[:], offset=bevel, segments=1, affect="EDGES", profile=0.5)
         self._merge(tb, pid)
+        return pid
 
     def extrude(self, profile, half, mat, bevel=0.0, segments=1, group=None, grain=None, frame=None, band=False,
                 detail=False, extra=None):
@@ -114,6 +116,7 @@ class Piece:
             bmesh.ops.bevel(tb, geom=[e for f in caps for e in f.edges], offset=bevel, segments=segments,
                             affect="EDGES", profile=0.5, clamp_overlap=True)
         self._merge(tb, pid)
+        return pid
 
     def lathe(self, profile, segments, mat, closed=False, r_ref=None, group=None, grain="z", frame=None,
               band=False, detail=False, extra=None, smooth=False):
@@ -147,6 +150,7 @@ class Piece:
             tb.faces.new(rings[0][::-1])
             tb.faces.new(rings[-1])
         self._merge(tb, pid, explicit=True)
+        return pid
 
     def wall(self, xs, zs, yf, yb, holes=(), mat="plaster", group="wall", band=True, extra=None):
         """One closed wall shell on a grid of x/z break lines. yf(z), yb(z) give the front and back
@@ -176,6 +180,14 @@ class Piece:
                     tb.faces.new((F[j + 1][i], F[j + 1][i + 1], B[j + 1][i + 1], B[j + 1][i]))
         bmesh.ops.delete(tb, geom=[v for v in tb.verts if not v.link_faces], context="VERTS")
         self._merge(tb, pid)
+        return pid
+
+    def mark(self, pid, facet, points, tone=-3, width=0.01, closed=False):
+        """Paint a detail line on one face of a part (a panel line, a slot, an engraving).
+        points are world positions; the line is drawn on the part's `facet` ("-y", "+z", ...)."""
+        if pid is not None:
+            self.marks.append({"pid": pid, "facet": facet, "points": [Vector(q) for q in points], "tone": tone,
+                               "width": width, "closed": closed})
 
     # ------------------------------------------------------------ unwrap
     def finalize(self, layout=None):
@@ -392,7 +404,8 @@ class Piece:
         """Protruding (convex) edges, as pixel segments per island."""
         T, uv, out = C.TEX, self.l_uv, {}
         for e in self.bm.edges:
-            if len(e.link_faces) != 2 or e.calc_face_angle_signed(0.0) < math.radians(28):
+            angle = e.calc_face_angle_signed(0.0) if len(e.link_faces) == 2 else 0.0
+            if angle < math.radians(28):
                 continue
             if any(all(abs(v.co[axis] - value) < 1e-4 for v in e.verts) for axis, value in self.seams):
                 continue
@@ -403,7 +416,9 @@ class Piece:
             for f in e.link_faces:
                 loops = {l.vert: l for l in f.loops}
                 a, b = loops[e.verts[0]][uv].uv, loops[e.verts[1]][uv].uv
-                out.setdefault(self.face_island[f.index], []).append((a.x * T, a.y * T, b.x * T, b.y * T))
+                mid = sum((l[uv].uv for l in f.loops), Vector((0.0, 0.0))) / len(f.loops)   # which side is the face
+                out.setdefault(self.face_island[f.index], []).append((a.x * T, a.y * T, b.x * T, b.y * T,
+                                                                     mid.x * T, mid.y * T, angle))
         return out
 
     # ------------------------------------------------------------ export
