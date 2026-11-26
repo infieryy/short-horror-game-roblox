@@ -24,6 +24,12 @@ FACETS = {
 }
 GRAIN = {"x": Vector((1, 0, 0)), "y": Vector((0, 1, 0)), "z": Vector((0, 0, 1))}
 
+# Roblox's importer turns every .fbx half a turn about the up axis (measured in Studio: x and z arrive
+# negated). The .fbx meshes are turned the other way first, so an imported mesh has the same axes as the
+# .obj files and the break / parts data.
+FBX_TURN = Matrix.Rotation(math.pi, 4, "Z")
+FBX_OPTIONS = dict(global_scale=0.01, axis_forward="-Z", axis_up="Y", path_mode="STRIP", mesh_smooth_type="FACE")
+
 
 def _facet(n):
     best, name = -1.0, None
@@ -474,9 +480,33 @@ class Piece:
         base = os.path.join(out_dir, self.name + suffix)
         bpy.ops.wm.obj_export(filepath=base + ".obj", export_selected_objects=True, export_materials=False,
                               forward_axis="NEGATIVE_Z", up_axis="Y")
-        bpy.ops.export_scene.fbx(filepath=base + ".fbx", use_selection=True, global_scale=0.01,
-                                 axis_forward="-Z", axis_up="Y", path_mode="STRIP", mesh_smooth_type="FACE")
+        write_fbx(base + ".fbx", [obj])
         return base
+
+
+def write_fbx(path, objects):
+    """Writes mesh objects to one .fbx, turned for Roblox."""
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in objects:
+        obj.data.transform(FBX_TURN)
+        obj.select_set(True)
+    bpy.ops.export_scene.fbx(filepath=path, use_selection=True, **FBX_OPTIONS)
+    for obj in objects:
+        obj.data.transform(FBX_TURN)             # half a turn again: back where it was
+
+
+def export_bundle(path, members, texture_path):
+    """One .fbx holding several meshes as separate objects, so a kit piece with all its shards is one upload.
+    members: (Piece, object name)."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    material = matte_material(os.path.splitext(os.path.basename(texture_path))[0], texture_path)
+    objects = []
+    for piece, name in members:
+        obj = piece.to_object()
+        obj.name = obj.data.name = name
+        obj.data.materials.append(material)
+        objects.append(obj)
+    write_fbx(path, objects)
 
 
 def matte_material(name, texture_path):

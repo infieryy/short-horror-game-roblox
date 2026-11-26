@@ -123,6 +123,7 @@ desert-fps/
 Every piece folder contains:
 - `<piece>.fbx` and `<piece>.obj`: the whole mesh
 - `<piece>_low.fbx` and `.obj`: a low-detail mesh using the same texture
+- `<piece>.bundle.fbx`: every mesh of the piece in one file. This is the file that is uploaded to Roblox.
 - `<piece>.png`: one 1024 px texture shared by every mesh of that piece
 - `chunks/` and `<piece>.break.json` (map pieces), or `parts/` and `<piece>.parts.json` (weapons)
 - `report.json`
@@ -148,9 +149,8 @@ Renders for reference: `assets/out/preview.png`, `compare.png` (next to the conc
 ## 5. Known flaws and open decisions
 
 **Not verified anywhere**
-- Nothing has been imported into Roblox. Scale, axes and the matte look are untested.
-- The `.fbx` files are exported at scale 0.01 on the assumption that this gives 1 unit = 1 stud. The `.obj` files are 1:1.
-- No game code exists: no destruction, no weapons, no round logic, no shop.
+- No game code exists beyond the graybox builder and wall destruction: no weapons, no round logic, no shop.
+- `assets/run.py` does not repaint identically on another machine (see the status notes below).
 
 **Flaws**
 - The pistol reads as a Glock, not a Desert Eagle.
@@ -181,16 +181,23 @@ The Studio place is "FPS MAXXING" (place 82969491633504), saved to Roblox. `buil
 | Job | State |
 |---|---|
 | 0 Set up | Done |
-| 1 Import and scale test | **Blocked.** Studio's MCP only uploads files from a folder the owner has approved (Studio: Assistant, Settings, MCP Permissions, approved upload directories). None is approved yet. Nothing has been imported. |
-| 2 Matte look | Lighting is set (`build/03_lighting.luau`). The texture comparison needs job 1. |
-| 3 Import the rest | Blocked with job 1. 115 files in all; consider one bundle file per piece. |
-| 4 Break test | The logic is written and tested on gray stand-in boxes (`game/.../Destruction/Breakable.luau`, `build/tests/break_wall.luau`). It picks up real meshes from `ServerStorage.DesertFps.Meshes.<piece>.Whole` and `.Shards.<id>` once they exist. The look against `broken.png` is not checked. |
+| 1 Import and scale test | Done. The `.fbx` scale is exact (wall 8 x 12, crate 3.09, rifle 3.46 studs, the same as the `.obj`). The importer turned every mesh half a turn about the vertical axis; fixed in `assets/build.py` (`FBX_TURN`). Screenshots: `assets/studio/scale-wall.jpg`, `scale-doorway.jpg`. |
+| 2 Matte look | Done. Every mesh has its texture as a SurfaceAppearance colour map. Lighting tuned against `assets/out/preview.png` (`build/03_lighting.luau` has the numbers and the reasons). Screenshot: `assets/studio/kit.jpg`. |
+| 3 Import the rest | Done. All 10 pieces, 105 meshes, are in `ServerStorage.DesertFps.Meshes`, each within 0.001 studs of the position its data gives. 10 model uploads (one bundle per piece) and 10 textures; ids in `game/ServerStorage/DesertFps/Assets/AssetIds.luau`. |
+| 4 Break test | Done for the walls and the door (`build/tests/break_wall.luau`). The holes match `broken.png` (`assets/studio/broken.jpg`); in a playtest the shards left without support fall. Crates and barrels (`shatter` mode) are not built. |
 | 5 Graybox | Done for Market Square. Results are in `plan/PLAN.md`. `zones.py` needed no change. |
 
 Notes for the next session:
 - `Lighting.Technology` cannot be set by script any more. "Future" is now `LightingStyle = Realistic` with `PrioritizeLightingQuality = true`.
 - `plan/planner.py` loads its fonts from a Linux path, so it cannot redraw the plan images on Windows. `plan/routes.py` works.
-- Script changes go in `game/`, then `python build/pack.py`, then import `build/out/ServerStorage.rbxmx` (or run `build/01_install_modules.luau`).
+- Script changes go in `game/`, then `python build/pack.py`, then run `build/01_install_modules.luau` (it replaces scripts one by one and leaves the imported meshes alone).
+- Uploads go through the Studio MCP from an approved folder. A `desert-fps` folder in the owner's Documents is approved; the repo is cloned in it, with a Python environment (`.venv`, Blender module 5.3) beside the clone.
+- `assets/run.py` on Windows repaints the crate, barrel, door and two of the walls differently from the committed textures (the texture layout shifts with tiny rounding differences). So the committed meshes and textures were kept, and `assets/rebundle.py` rewrote only the `.fbx` files from the `.obj` meshes. Do not re-run `run.py` just to change export settings.
+- Unused test uploads on the owner's Roblox account, safe to archive in the Creator Dashboard: models 99802333338004, 136057078609739, 126807788706610, 91141018994234.
+- Roblox has no roughness number on a SurfaceAppearance. Nothing shines because `EnvironmentSpecularScale` is 0 and no roughness or metalness map is set.
+- Shade in Roblox is lavender (look rule). In the Blender render it is warmer, because Blender bounces light off the orange ground.
+- The door's top shard falls when the shard under it goes, because the break data has no hinge. The render leaves it hanging.
+- A few dark pin-pricks show along shard seams once a wall is in shards. Not investigated.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

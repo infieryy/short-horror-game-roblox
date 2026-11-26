@@ -1,7 +1,11 @@
 -- Sets the place lighting to the look rules in HANDOFF.md section 2.
 -- Run in Studio in edit mode. Safe to re-run.
--- The numbers follow the Blender preview (assets/preview.py): a late-afternoon sun 38 degrees
--- above the horizon, slightly dim and warm, with lavender-blue light in the shade.
+-- A late-afternoon sun 38 degrees above the horizon (as in assets/preview.py), slightly dim and warm,
+-- with lavender-blue light in the shade.
+-- Brightness, ColorShift_Top and the two ambients were tuned against assets/out/preview.png with the kit
+-- stood up by 05_kit_showcase.luau: sunlit plaster, ground and the teal band land within about 15 levels
+-- (of 255) of the render. Shade stays lavender by the look rules; in the render it is warmer, because
+-- Blender bounces light off the orange ground and Roblox does not.
 local Lighting = game:GetService("Lighting")
 
 local LOOK = {
@@ -9,11 +13,12 @@ local LOOK = {
 	LightingStyle = Enum.LightingStyle.Realistic,
 	PrioritizeLightingQuality = true,
 	GlobalShadows = true,
-	Brightness = 2.4, -- template default is 3; lower so bright walls don't burn out
-	ColorShift_Top = Color3.fromRGB(255, 237, 209),
+	Brightness = 2.5, -- template default is 3; lower so bright walls don't burn out
+	-- Much more orange than the render's sun: Roblox's tone mapping washes bright warm colours out otherwise.
+	ColorShift_Top = Color3.fromRGB(255, 186, 148),
 	ColorShift_Bottom = Color3.fromRGB(0, 0, 0),
-	OutdoorAmbient = Color3.fromRGB(150, 146, 208), -- lavender-blue
-	Ambient = Color3.fromRGB(128, 112, 142), -- warm lavender
+	OutdoorAmbient = Color3.fromRGB(115, 113, 165), -- lavender-blue
+	Ambient = Color3.fromRGB(98, 86, 110), -- warm lavender; untested, the kit showcase has no indoors
 	-- No sky-driven ambient or reflections: shade colour comes only from the two ambients, and nothing shines.
 	EnvironmentDiffuseScale = 0,
 	EnvironmentSpecularScale = 0,

@@ -37,6 +37,7 @@ python3 preview.py
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
+- `<piece>.bundle.fbx`: every mesh of the piece as separate objects in one file, so a piece is one upload to Roblox
 - `chunks/`: one mesh per shard
 - one 1024 px texture shared by all of them
 - `<piece>.break.json`: the data the game needs to break it
@@ -168,9 +169,15 @@ A can with rolled rims, a brass fuze, a steel safety lever bent over the fuze an
 - Contact shading is only painted between parts of the same shard, so a destroyed shard leaves no shadow behind on the wall.
 - Break lines get no edge highlight, so cracks are invisible until the piece breaks.
 
+## In Roblox Studio
+
+![The kit in Studio](studio/kit.jpg)
+
+All ten pieces are imported (see `../build/README.md`). The scale is exact: the `.fbx` files are exported at 0.01 and arrive at 1 unit = 1 stud. Roblox's importer turns every `.fbx` half a turn about the vertical axis, so the exporter turns the `.fbx` meshes the other way first (`FBX_TURN` in `build.py`); the `.obj` files and the break and parts data are unchanged. More screenshots are in `studio/`.
+
 ## Not verified yet
-- Nothing has been imported into Roblox Studio. The scale (1 unit = 1 stud; the `.fbx` is exported at 0.01) and the matte look need checking on the first import.
+- `run.py` is not repeatable across machines: on Windows it repaints five of the pieces differently from the committed textures, because the texture layout shifts with tiny rounding differences. To change only how the `.fbx` files are written, run `python3 rebundle.py`, which rewrites them from the `.obj` meshes and repaints nothing.
 - The weapons have no animations, sounds or firing code, and have not been seen in first person in Roblox.
 - The sockets and joints are positions and directions in a data file. Nothing has been rigged or attached with them yet.
-- No destruction code exists in the game yet. The shards and break data are ready for it, but removing shards, debris and falling unsupported shards are untested in Roblox.
+- Crates and barrels (`shatter` mode) have no destruction code yet. Walls and the door do, and were tested in Studio.
 - The preview is a Blender render with a sun and lavender ambient light set up to resemble the planned Roblox lighting. It is not Roblox.

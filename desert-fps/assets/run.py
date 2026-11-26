@@ -4,7 +4,8 @@
     python3 run.py crate barrel    # some pieces
 
 Per piece, out/<piece>/ gets: the whole mesh, a low-detail mesh, the breakable chunks
-(chunks/, jagged shards), one texture shared by all of them, <piece>.break.json and report.json.
+(chunks/, jagged shards), one texture shared by all of them, <piece>.break.json, report.json and
+<piece>.bundle.fbx (every mesh above in one file, for uploading the piece to Roblox in one go).
 """
 import json
 import os
@@ -16,7 +17,7 @@ from PIL import Image
 
 import chunks as chunker
 import config as C
-from build import Piece
+from build import Piece, export_bundle
 from paint import Painter
 from recipes import RECIPES
 
@@ -65,6 +66,8 @@ def make(name):
     manifest = chunker.manifest(piece, spec, pieces, files)
     with open(os.path.join(folder, f"{name}.{'parts' if sub == 'parts' else 'break'}.json"), "w") as fh:
         json.dump(manifest, fh, indent=1)
+    export_bundle(os.path.join(folder, name + ".bundle.fbx"),
+                  [(piece, name), (low, name + "_low")] + [(chunk, chunk.name) for _, chunk, _ in pieces], texture)
 
     report = {"piece": name, "triangles": tris, "triangles_low": low_tris, "strokes": painter.strokes,
               "px_per_stud": round(union.density, 1), "break_mode": spec["mode"], "chunks": len(pieces),

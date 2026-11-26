@@ -7,6 +7,7 @@ A file ending in .server.luau is a Script, .client.luau a LocalScript, anything 
 Data the game reads is packed as modules that return the decoded JSON:
     plan/out/plan.json, routes.json           ServerStorage/DesertFps/Plan/PlanData, RouteData
     assets/out/<piece>/<piece>.break.json     ServerStorage/DesertFps/Assets/BreakData (keyed by piece)
+    assets/out/<piece>/<piece>.parts.json     ServerStorage/DesertFps/Assets/PartsData (keyed by piece)
 
 Writes:
     01_install_modules.luau   paste into the Studio command bar to (re)install every script
@@ -24,6 +25,8 @@ PLAN_OUT = os.path.join(ROOT, "plan", "out")
 # plan/out JSON files packed as data modules under ServerStorage/DesertFps/Plan.
 PLAN_DATA = {"PlanData": "plan.json", "RouteData": "routes.json"}
 ASSETS_OUT = os.path.join(ROOT, "assets", "out")
+# assets/out/<piece>/<piece>.<kind>.json files packed as data modules under ServerStorage/DesertFps/Assets.
+ASSET_DATA = {"BreakData": "break", "PartsData": "parts"}
 OUT = os.path.join(HERE, "out")
 
 
@@ -51,11 +54,11 @@ def load(path):
         return json.load(f)
 
 
-def break_data():
-    """Every piece's break data, keyed by piece name."""
+def piece_data(kind):
+    """Every piece's <piece>.<kind>.json (break data, or a weapon's parts data), keyed by piece name."""
     pieces = {}
     for piece in sorted(os.listdir(ASSETS_OUT)):
-        path = os.path.join(ASSETS_OUT, piece, piece + ".break.json")
+        path = os.path.join(ASSETS_OUT, piece, f"{piece}.{kind}.json")
         if os.path.isfile(path):
             pieces[piece] = load(path)
     return pieces
@@ -80,8 +83,9 @@ def collect():
     for module, file_name in PLAN_DATA.items():
         source = data_module(load(os.path.join(PLAN_OUT, file_name)), "plan/out/" + file_name)
         scripts.append((["ServerStorage", "DesertFps", "Plan", module], "ModuleScript", source))
-    source = data_module(break_data(), "assets/out/<piece>/<piece>.break.json")
-    scripts.append((["ServerStorage", "DesertFps", "Assets", "BreakData"], "ModuleScript", source))
+    for module, kind in ASSET_DATA.items():
+        source = data_module(piece_data(kind), f"assets/out/<piece>/<piece>.{kind}.json")
+        scripts.append((["ServerStorage", "DesertFps", "Assets", module], "ModuleScript", source))
     return sorted(scripts)
 
 

@@ -68,11 +68,18 @@ function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Mode
 	local templates = meshTemplates(piece)
 	local template = templates and templates:FindFirstChild("Whole")
 
-	local lo, hi = pieceBounds(data)
-	local whole: BasePart = if template and template:IsA("BasePart") then template:Clone() else standIn(hi - lo)
+	local whole: BasePart, offset: Vector3
+	if template and template:IsA("BasePart") then
+		whole = template:Clone()
+		offset = template:GetAttribute("Offset") :: Vector3
+	else
+		local lo, hi = pieceBounds(data)
+		whole = standIn(hi - lo)
+		offset = (lo + hi) / 2
+	end
 	whole.Name = "Whole"
 	whole.Anchored = true
-	whole.CFrame = origin * CFrame.new((lo + hi) / 2)
+	whole.CFrame = origin * CFrame.new(offset)
 
 	local model = Instance.new("Model")
 	model.Name = piece
