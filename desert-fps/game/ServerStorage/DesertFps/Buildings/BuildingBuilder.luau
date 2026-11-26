@@ -5,6 +5,7 @@
 --   <parent>.<Name>.Structure   pieces that break (walls, floors, furniture), one Breakable model each
 --   <parent>.<Name>.Dressing    pieces that do not break (paving, rugs, banners, plants)
 --   <parent>.<Name>.Lamps       lanterns: the frame, the glowing glass and its light
+--   <parent>.<Name>.Fills       soft lights with no lamp to see
 -- Positions in the data are studs east, north and up from the building's north-west corner at street level.
 
 local DesertFps = script.Parent.Parent
@@ -94,6 +95,28 @@ function BuildingBuilder.build(name: string, origin: CFrame, parent: Instance?):
 		counts[piece] = (counts[piece] or 0) + 1
 		if index % BATCH == 0 then
 			task.wait()
+		end
+	end
+
+	if data.fills then
+		local fillFolder = folder("Fills", model)
+		for _, item in data.fills do
+			local holder = Instance.new("Part")
+			holder.Name = "Fill"
+			holder.Anchored = true
+			holder.CanCollide = false
+			holder.CanQuery = false
+			holder.CanTouch = false
+			holder.Transparency = 1
+			holder.Size = Vector3.new(0.4, 0.4, 0.4)
+			holder.CFrame = origin * CFrame.new(item.pos[1], item.pos[3], -item.pos[2])
+			local light = Instance.new("PointLight")
+			light.Color = Config.Fill.LightColor
+			light.Brightness = Config.Fill.Brightness
+			light.Range = Config.Fill.Range
+			light.Shadows = false
+			light.Parent = holder
+			holder.Parent = fillFolder
 		end
 	end
 

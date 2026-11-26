@@ -6,14 +6,22 @@ return {
 	PavingY = -0.49,
 
 	-- Lanterns really light up: the glass glows and carries a point light.
+	-- The lamps are what makes a room warm. Roblox's shade light leaks through walls and roofs this thin, so
+	-- without them a room takes the violet of the shade outside (Lighting.OutdoorAmbient), not Lighting.Ambient.
 	-- On low graphics the lamps cast no shadows and shine through walls, so every lamp in reach adds up.
 	-- Brightness and Range are set for that case: a lamp lights its own cell and little more.
 	Lamp = {
 		Pieces = { lantern = true, lantern_wall = true },
-		GlassColor = Color3.fromRGB(255, 206, 122),
-		LightColor = Color3.fromRGB(255, 190, 120),
-		Brightness = 0.3,
+		GlassColor = Color3.fromRGB(255, 186, 92),
+		LightColor = Color3.fromRGB(255, 176, 122),
+		Brightness = 0.62,
 		Range = 13,
 		Shadows = true,
+	},
+	-- A fill is a soft light with no lamp to see, where a recipe asks for one (daylight under a dome).
+	Fill = {
+		LightColor = Color3.fromRGB(255, 176, 122),
+		Brightness = 0.5,
+		Range = 22,
 	},
 }

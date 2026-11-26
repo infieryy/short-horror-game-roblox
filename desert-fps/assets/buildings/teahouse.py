@@ -134,6 +134,9 @@ def placements():
         put("lantern", x, y, 10.4)
     for c in range(3):                                                 # the porch
         put("lantern", (c + 0.5) * CELL, -28, 10.4)
+    # the atrium: a lantern on each arcade, hanging into the well
+    for x, y, turn in ((15.5, -8.5, 0), (15.5, -15.5, -90), (8.5, -15.5, 180), (8.5, -8.5, 90)):
+        put("lantern_wall", x, y, 8.8, turn)
     put("pot_tall", 9.2, -25.6)
     put("pot_round", 14.9, -25.4)
     put("sacks", 28, -4.2, 0, 90)
@@ -181,11 +184,16 @@ def placements():
     return out
 
 
+def fills():
+    """Soft warm lights with no lamp to see: the daylight a dome lets down into the atrium."""
+    return [{"pos": [12.0, -12.0, 19.0]}]
+
+
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     folder = os.path.join(here, "..", "out", "buildings")
     os.makedirs(folder, exist_ok=True)
-    data = {"name": "teahouse", "title": "TeaHouse", "size": [32, 32], "placements": placements()}
+    data = {"name": "teahouse", "title": "TeaHouse", "size": [32, 32], "placements": placements(), "fills": fills()}
     with open(os.path.join(folder, "teahouse.json"), "w") as fh:
         json.dump(data, fh, indent=1)
     counts = {}
