@@ -7,45 +7,66 @@
 ![The compact town](out/town.png)
 
 - **Size:** 40 x 40 cells of 8 studs, 320 studs across inside its wall. Plan v1 was 92 x 92.
-- **Layout:** a market square with the well in the middle, a landmark building on each side of it, and a quarter of four small houses in every corner.
-- **Source:** `plan/town.py`. You draw the north-west quarter; the other three are its mirror images. `python town.py` checks every arena, draws the pictures and exports the town for the game.
+- **Layout:** a market square in the middle, a landmark building on each side of it, a quarter of small houses in every corner. **Nothing is mirrored**: every block has its own shape.
+- **Source:** `plan/town.py`. The town is drawn row by row in `ROWS`. `python town.py` picks the spawns, checks every arena, draws the pictures and exports the town for the game.
 
 | | West | Middle | East |
 |---|---|---|---|
-| **North** | Watchtower Quarter | Tea House (the pilot building) | Potters' Quarter |
-| **Middle** | Courtyard House | Market Square | Dye Works |
-| **South** | Gate Quarter | Cistern Hall | Weavers' Quarter |
+| **North** | Watchtower Quarter: the tower, an L-shaped house, a small house | Tea House (the pilot building, at its real 4 x 4 cells), its walled garden behind | Potters' Quarter: a U of workshops round the kiln yard |
+| **Middle** | Courtyard House: rooms round a court | Market Square: the well, stalls, a kiosk, an arcade | Dye Works: an L of workshops round a yard of vats |
+| **South** | Gate Quarter: guard house, stable, gatehouse | Cistern Hall: a pillared hall, its overflow pool | Weavers' Quarter: three houses, a plank between two roofs |
+
+### The brief: a hunt
+The owner on the layout: no need for symmetry; "give each player (when they spawn) enough options that its actually a hunt to find the player and a little bit tense (valorant kind of but for duels)". An arena is judged on these, on top of the v1 checks:
+
+| Measure | Target | What it means |
+|---|---|---|
+| Places to be after 4 s | at least 3 per player | Separate places a player can have gone 4 seconds after spawning. Two spots with a wall between them are two places |
+| Places to be after 7 s | at least 4 per player | The same, further in. You cannot know which one the other player took |
+| Places to collide | at least 4 | Separate spots both players can reach at the same moment (within half a second). Yellow in the pictures |
+| Most one spot can see | at most 30% | Share of the arena's ground visible from the best vantage spot. Nowhere to stand and watch everything |
+| Even without a mirror | 44% to 56% | Share of the ground one player reaches first; and neither has more than one option more than the other |
+
+These targets are first guesses. They need a real duel to confirm them.
+
+Spawns are not drawn by hand. For each arena `town.py` tries every pair of spots in the two spawn yards and keeps the pair that splits the ground most evenly, with the most options, inside the meeting time.
 
 ### Arenas
-A duel still uses one part of town per round. An arena is a band three blocks long: two corner quarters with a landmark between them. The streets out of the band are closed for the round (the pink squares in the pictures). Bands overlap, so every building is fought over in two arenas.
+A duel uses one part of town per round. An arena is a band three blocks long: two corner quarters with a landmark between them. The streets out of the band are closed for the round (pink squares). Bands overlap, so every building is fought over in two arenas.
 
-| Arena | Spawns | Meet | First sight | Longest view (studs) | Lanes A to B (s) | Bots: routes passed | Bots vs plan |
-|---|---|---|---|---|---|---|---|
-| Tea House | west / east | 9.62 s | 6.0 s | 169 | 18.7 / 23.3 / 27.9 | 9 of 9 | within 2.8% |
-| Cistern Hall | west / east | 9.62 s | 6.0 s | 169 | 18.7 / 23.3 / 28.7 | 9 of 9 | within 2.1% |
-| Courtyard House | north / south | 9.41 s | 5.5 s | 186 | 18.3 / 22.7 / 29.7 | 7 of 7 | within 3.2% |
-| Dye Works | north / south | 9.41 s | 5.5 s | 186 | 18.3 / 22.7 / 29.7 | 7 of 7 | within 3.2% |
-| Market Square | west / east | 9.21 s | 7.7 s | 170 | 17.9 / 23.4 / 23.4 | 9 of 9 | within 3.0% |
+| Arena | Places after 4 s (A / B) | Places after 7 s (A / B) | Places to collide | Most one spot sees | Ground A reaches first | Meet | First sight | Longest view (studs) | Bots |
+|---|---|---|---|---|---|---|---|---|---|
+| Tea House | 4 / 4 | 5 / 5 | 4 | 23% | 50% | 9.71 s | 6.21 s | 170 | 8 of 8, within 4.3% |
+| Cistern Hall | 3 / 3 | 5 / 5 | 4 | 26% | 50% | 9.62 s | 4.91 s | 193 | 7 of 7, within 2.3% |
+| Courtyard House | 4 / 4 | 5 / 4 | 4 | 22% | 50% | 9.41 s | 5.21 s | 183 | 7 of 7, within 4.0% |
+| Dye Works | 5 / 4 | 5 / 4 | 6 | 24% | 49% | 9.62 s | 5.41 s | 185 | 7 of 7, within 3.4% |
+| Market Square | 4 / 4 | 8 / 5 | 4 | 18% | 47% | 9.62 s | 6.91 s | 177 | 6 of 6, within 3.5% |
 
-All five pass the same checks as v1 (meet in 6 to 10 s, no sight of the other team before 3.5 s, no view over 200 studs, three lanes, every cell reachable).
+All five pass every check.
 
 ![Tea House arena](out/town-teahouse.png)
+
+How it got there:
+- The first uneven draft failed nearly everything: views of 299 studs, a spot by the cistern that saw 40% of its arena, three places to collide.
+- **Views through buildings were the surprise.** A row of rooms with a window or a door at each end is a tunnel you can see through. Six of those were closed with a shelf or a blank wall.
+- **Wide streets count as one place.** Splitting them with a run of small buildings is what raised the options: a wall of houses down the street east of the Courtyard House, a garden wall behind the Tea House that leaves a one-cell alley, sheds in the south streets.
+- **Stairs are entered from the foot.** The planner used to treat a stairs cell as open ground; `town.py` corrects that, so routes and built flights agree.
 
 ### Built as gray boxes and walked by bots
 
 ![The gray-box town in Studio](out/graybox-town.png)
+![From a spawn: two alleys fork round the watchtower](out/graybox-town-spawn.png)
 
-`build/09_graybox_town.luau` builds it (`Workspace.Graybox_town`, 680 parts, west of the old town). `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 41 of 41 pass.
+`build/09_graybox_town.luau` builds it (`Workspace.Graybox_town`, 589 parts, west of the old town). `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 35 of 35 pass, within 4.3% of the planner's times.
 
-- **Fairness.** The two teams' runs to the meet point come out about 0.5 s apart in every arena (for example 9.0 s and 9.5 s). The town is an exact mirror, so this is the walking bots, not the map: the same gap shows up everywhere, on whichever side happens to turn a corner the awkward way. Players need to confirm it.
-- **Found by the bots:** a flight of stairs standing free in a street was walked onto from the side, and the bot got stuck. Stairs are now boxed in with cover on both sides, so they are entered from the foot.
-- **Long views** needed three rounds of fixes: a shed that pinches each outer lane, washing lines across the streets into the square, a tree in each yard. First drafts had views of 296 and 311 studs and one spawn that could see the other.
+- **Fairness is measured, not given.** The two players' runs to the meeting point were 0.1 to 0.5 s apart in the bot test. The mirrored first draft showed the same 0.5 s, so that gap is the bots, not the layout.
+- **The Tea House in the plan is the real building's footprint** (hall, wing, porch, outside stairs, the three doors). The planner cannot see its upper floor: it treats the roof as one flat level.
 
 ### Built for frame rate
 What the plan itself does for frame rate:
 
 - **Small.** 320 studs across instead of 736; an arena is 112 x 320 studs.
-- **Short views.** No view at eye level is longer than 186 studs, and none runs from one end of an arena to the other. Less of the town is on screen at once.
+- **Short views.** No view at eye level is longer than 193 studs, and no spot sees more than 26% of its arena. Less of the town is on screen at once.
 - **One arena per round.** Whatever lies outside the band can be drawn in low detail or not at all during a round. Not built yet.
 
 Budgets, from what the tea house costs (measured in a playtest with nothing else in the picture):
@@ -66,7 +87,6 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 
 ### Not done
 - Only the Tea House has a building recipe. The other four landmarks and the sixteen houses are boxes.
-- The tea house is 4 x 4 cells; its place in this plan is 10 x 6. The plan's Tea House block needs redrawing round the real building (or the building needs wings), and the arena re-checking.
 - Sight is still only checked at eye level on the ground, not from roofs.
 - Barriers that close an arena, rounds and team spawns are not built.
 
