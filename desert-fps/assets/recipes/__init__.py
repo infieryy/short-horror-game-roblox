@@ -17,6 +17,7 @@ RECIPES = {
     "parapet_corner": (parapet.build_corner, {}),
     "roof": (roof.build, {}),
     "stairs": (stairs.build, {}),
+    "stairs_narrow": (stairs.build, {"narrow": True}),
     "ladder": (ladder.build, {}),
     "plank": (plank.build, {}),
     "ground": (ground.build, {}),

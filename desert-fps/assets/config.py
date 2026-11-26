@@ -228,7 +228,7 @@ KIT = {
     "parapet": {"h": 2.6, "cap_h": 0.4, "cap_out": 0.16, "merlons": 3, "merlon_w": 1.4, "merlon_h": 1.3,
                 "post_out": 0.06, "post_up": 0.3},        # the corner post: a little wider and taller than the run
     "roof": {"t": 1.06, "beams": 3, "beam_r": 0.3, "beam_drop": 0.6},   # 0.06 proud of the wall tops it covers
-    "stairs": {"steps": 8, "tread_t": 0.12, "tread_over": 0.1, "tread_in": 0.05},
+    "stairs": {"steps": 8, "tread_t": 0.12, "tread_over": 0.1, "tread_in": 0.05, "narrow_w": 4.0},
     "ladder": {"h": 12.8, "w": 2.2, "rail": 0.3, "rung_gap": 1.4, "rung_h": 0.22},
     "plank": {"w": 6.0, "boards": 8, "board_t": 0.22, "joist": (0.36, 0.5), "joist_y": 2.2},
     "ground": {"t": 0.5, "stones": 4},
@@ -320,6 +320,7 @@ BREAK = {
         "parapet_corner": {"mode": "chunks", "shards": 2, "apart": 0.6},
         "roof": {"mode": "chunks", "shards": 7, "through": "z", "slant": 0.4, "apart": 0.55},
         "stairs": {"mode": "chunks", "shards": 6, "apart": 0.6},
+        "stairs_narrow": {"mode": "chunks", "shards": 6, "apart": 0.6, "seed": 4},
         "ladder": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "plank": {"mode": "shatter", "shards": 6, "apart": 0.5},
         "stall": {"mode": "shatter", "shards": 10, "apart": 0.5},

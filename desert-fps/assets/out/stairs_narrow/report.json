@@ -1,0 +1,12 @@
+{
+ "piece": "stairs_narrow",
+ "triangles": 420,
+ "triangles_low": 164,
+ "strokes": 15107,
+ "px_per_stud": 29.1,
+ "break_mode": "chunks",
+ "chunks": 6,
+ "chunk_triangles": 672,
+ "problems": [],
+ "seconds": 8.0
+}
