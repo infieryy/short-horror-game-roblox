@@ -2,11 +2,11 @@
  "piece": "dome",
  "triangles": 1356,
  "triangles_low": 768,
- "strokes": 44526,
- "px_per_stud": 20.3,
+ "strokes": 49882,
+ "px_per_stud": 17.3,
  "break_mode": "chunks",
  "chunks": 10,
- "chunk_triangles": 2660,
+ "chunk_triangles": 2496,
  "problems": [],
- "seconds": 16.6
+ "seconds": 17.1
 }

@@ -118,7 +118,8 @@ def placements():
         put("parapet_corner", x, y, 2 * STORY)
 
     # ---------------------------------------------------------------- dressing: ground floor
-    put("counter", 3.4, -12, FLOOR - 0.05, 90)                         # along the west wall, facing the room
+    # Furniture stays out of the lanes: door to door through the atrium, and round to both flights of stairs.
+    put("counter", 3.1, -12, FLOOR - 0.05, 90)                         # along the west wall, facing the room
     on_wall("shelf", 1, 0, "W", 5.2, along=-2.5)
     on_wall("shelf", 1, 0, "W", 5.2, along=2.5)
     against("divan", 0, 0, "W", 1.7)
@@ -127,7 +128,7 @@ def placements():
     against("divan", 2, 2, "E", 1.7)
     for x, y, turn in ((12, -12, 0), (4.6, -4.9, 90), (19.4, -4.6, 0), (19.2, -20, 90), (5.0, -20.4, 0)):
         put("rug", x, y, FLOOR - 0.05, turn)
-    for x, y in ((12, -12), (19.2, -4.4), (19.0, -20), (5.2, -20.2), (4.6, -5.2)):
+    for x, y in ((19.2, -4.4), (19.0, -20), (5.2, -20.2)):
         put("tea_table", x, y, FLOOR - 0.05, 20)
     for x, y in ((4, -4), (20, -4), (4, -20), (20, -20), (20, -12), (12, -20)):
         put("lantern", x, y, 10.4)
@@ -139,7 +140,7 @@ def placements():
     put("barrel", 26.2, -21.6)
     put("barrel", 28.6, -22.2)
     put("crate", 30, -20.6, 0, 15)
-    on_wall("shelf", 1, 3, "W", 5.2)
+    on_wall("shelf", 0, 3, "W", 5.2)                                  # in the wing, clear of its doors
 
     # ---------------------------------------------------------------- dressing: upper floor and terraces
     up = STORY + FLOOR
@@ -150,7 +151,7 @@ def placements():
     against("divan", 2, 2, "S", 1.7, up)
     for x, y, turn in ((4.8, -5.2, 0), (20, -12, 90), (12, -20.4, 0)):
         put("rug", x, y, up, turn)
-    for x, y in ((4.8, -5.4), (20, -12), (4.6, -20), (19.4, -20)):
+    for x, y in ((4.8, -5.4), (4.6, -20.4), (19.4, -20.4)):
         put("tea_table", x, y, up, 35)
     for x, y in ((4, -12), (20, -4), (4, -20), (20, -20)):
         put("lantern", x, y, 2 * STORY - 1.6)

@@ -276,7 +276,7 @@ KIT = {
     },
     "floor": {"t": 1.06, "planks_t": 0.2, "boards": 8, "beams": 3, "beam_w": 0.6, "beam_drop": 0.6},
     # Wider than its cell: the drum stands on the roof round the opening.
-    "dome": {"slab_t": 1.06, "r_in": 3.2, "r_out": 5.5, "drum_h": 2.6, "segments": 20, "cornice_h": 0.55, "cornice_out": 0.25,
+    "dome": {"slab_t": 1.06, "r_in": 3.2, "r_out": 5.5, "drum_h": 5.6, "segments": 20, "cornice_h": 0.55, "cornice_out": 0.25,
              "shell_r": 5.3, "shell_h": 5.2, "inner_h": 3.6, "hole": 0.4},
     "pergola": {"h": 8.2, "post": 0.4, "inset": 3.3, "slats": 6},
 }

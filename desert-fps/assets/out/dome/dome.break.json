@@ -8,25 +8,25 @@
    "id": "s00",
    "mesh": "chunks/dome_s00.fbx",
    "center": [
-    0.198,
-    2.686,
-    3.827
+    -0.135,
+    3.33,
+    3.188
    ],
    "size": [
-    5.878,
-    5.373,
-    3.846
+    7.008,
+    6.66,
+    4.871
    ],
    "material": "plaster",
-   "health": 455,
+   "health": 580,
    "collision": "Hull",
    "grounded": true,
    "touches": [],
-   "triangles": 204,
+   "triangles": 168,
    "neighbors": [
+    "s01",
     "s03",
     "s04",
-    "s06",
     "s07",
     "s08"
    ]
@@ -35,22 +35,23 @@
    "id": "s01",
    "mesh": "chunks/dome_s01.fbx",
    "center": [
-    -2.437,
-    1.999,
-    -2.281
+    -2.099,
+    2.617,
+    -2.209
    ],
    "size": [
-    6.626,
-    3.998,
-    6.438
+    6.802,
+    5.234,
+    6.582
    ],
    "material": "plaster",
-   "health": 585,
+   "health": 895,
    "collision": "Hull",
    "grounded": true,
    "touches": [],
-   "triangles": 200,
+   "triangles": 128,
    "neighbors": [
+    "s00",
     "s02",
     "s04",
     "s08",
@@ -61,21 +62,21 @@
    "id": "s02",
    "mesh": "chunks/dome_s02.fbx",
    "center": [
-    2.344,
-    4.789,
-    -3.301
+    2.405,
+    6.944,
+    -3.27
    ],
    "size": [
-    5.146,
-    7.458,
-    4.899
+    5.732,
+    8.983,
+    4.959
    ],
    "material": "plaster",
-   "health": 550,
+   "health": 750,
    "collision": "Hull",
    "grounded": false,
    "touches": [],
-   "triangles": 272,
+   "triangles": 274,
    "neighbors": [
     "s01",
     "s04",
@@ -88,21 +89,21 @@
    "id": "s03",
    "mesh": "chunks/dome_s03.fbx",
    "center": [
-    3.898,
-    1.999,
-    2.273
+    3.567,
+    2.662,
+    2.087
    ],
    "size": [
-    3.704,
-    3.997,
-    5.341
+    3.865,
+    5.324,
+    5.598
    ],
    "material": "plaster",
-   "health": 180,
+   "health": 250,
    "collision": "Hull",
    "grounded": true,
    "touches": [],
-   "triangles": 152,
+   "triangles": 64,
    "neighbors": [
     "s00",
     "s04",
@@ -113,21 +114,23 @@
    "id": "s04",
    "mesh": "chunks/dome_s04.fbx",
    "center": [
-    2.921,
     2.776,
-    -0.459
+    3.088,
+    -0.655
    ],
    "size": [
-    5.589,
-    5.552,
-    8.557
+    5.448,
+    6.177,
+    9.309
    ],
    "material": "plaster",
-   "health": 770,
+   "health": 1060,
    "collision": "Hull",
    "grounded": true,
-   "touches": [],
-   "triangles": 318,
+   "touches": [
+    "bottom"
+   ],
+   "triangles": 190,
    "neighbors": [
     "s00",
     "s01",
@@ -141,21 +144,21 @@
    "id": "s05",
    "mesh": "chunks/dome_s05.fbx",
    "center": [
-    -2.784,
-    6.741,
-    2.759
+    -2.596,
+    9.026,
+    2.852
    ],
    "size": [
-    3.837,
-    2.465,
-    3.57
+    4.851,
+    3.84,
+    4.613
    ],
    "material": "plaster",
-   "health": 75,
+   "health": 230,
    "collision": "Hull",
    "grounded": false,
    "touches": [],
-   "triangles": 54,
+   "triangles": 112,
    "neighbors": [
     "s06",
     "s08",
@@ -166,23 +169,22 @@
    "id": "s06",
    "mesh": "chunks/dome_s06.fbx",
    "center": [
-    0.376,
-    7.949,
-    1.602
+    0.448,
+    10.609,
+    1.556
    ],
    "size": [
-    6.296,
-    6.992,
-    6.744
+    6.864,
+    7.672,
+    7.306
    ],
    "material": "plaster",
-   "health": 620,
+   "health": 760,
    "collision": "Hull",
    "grounded": false,
    "touches": [],
-   "triangles": 562,
+   "triangles": 616,
    "neighbors": [
-    "s00",
     "s02",
     "s05",
     "s07",
@@ -194,53 +196,55 @@
    "id": "s07",
    "mesh": "chunks/dome_s07.fbx",
    "center": [
-    3.545,
-    5.607,
-    1.373
+    3.151,
+    7.594,
+    1.648
    ],
    "size": [
-    4.411,
-    3.996,
-    6.596
+    5.199,
+    5.242,
+    7.762
    ],
    "material": "plaster",
-   "health": 345,
+   "health": 685,
    "collision": "Hull",
    "grounded": false,
    "touches": [],
-   "triangles": 186,
+   "triangles": 284,
    "neighbors": [
     "s00",
     "s02",
     "s03",
     "s04",
-    "s06"
+    "s06",
+    "s08"
    ]
   },
   {
    "id": "s08",
    "mesh": "chunks/dome_s08.fbx",
    "center": [
-    -2.725,
-    3.119,
-    3.005
+    -2.167,
+    3.885,
+    3.025
    ],
    "size": [
-    5.816,
-    6.237,
-    5.223
+    6.837,
+    7.77,
+    5.45
    ],
    "material": "plaster",
-   "health": 710,
+   "health": 975,
    "collision": "Hull",
    "grounded": true,
    "touches": [],
-   "triangles": 268,
+   "triangles": 234,
    "neighbors": [
     "s00",
     "s01",
     "s05",
     "s06",
+    "s07",
     "s09"
    ]
   },
@@ -248,21 +252,21 @@
    "id": "s09",
    "mesh": "chunks/dome_s09.fbx",
    "center": [
-    -2.14,
-    5.092,
-    -2.101
+    -2.28,
+    7.376,
+    -1.977
    ],
    "size": [
-    6.285,
-    7.251,
-    7.253
+    6.94,
+    8.345,
+    7.476
    ],
    "material": "plaster",
-   "health": 970,
+   "health": 1295,
    "collision": "Hull",
    "grounded": false,
    "touches": [],
-   "triangles": 444,
+   "triangles": 426,
    "neighbors": [
     "s01",
     "s02",

@@ -46,7 +46,7 @@ return {
 	corner2_upper = { Model = 131089235133868, Texture = 72885029712175 },
 	parapet_pierced = { Model = 94689788233392, Texture = 114585211990741 },
 	floor = { Model = 89845704826371, Texture = 135568483461650 },
-	dome = { Model = 92275624113220, Texture = 82345400361931 },
+	dome = { Model = 122851216117111, Texture = 84961251959734 },
 	stairs_narrow = { Model = 108449498449682, Texture = 119584501687773 },
 	pergola = { Model = 128571672962067, Texture = 101707081121831 },
 	lantern = { Model = 139693528934893, Texture = 117343608069059 },

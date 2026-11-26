@@ -77,6 +77,7 @@ function BuildingBuilder.build(name: string, origin: CFrame, parent: Instance?):
 	local model = Instance.new("Model")
 	model.Name = data.title or name
 	model:SetAttribute("Building", name)
+	model:SetAttribute("Origin", origin)
 	local structure, dressing, lamps = folder("Structure", model), folder("Dressing", model), folder("Lamps", model)
 
 	local counts: { [string]: number } = {}

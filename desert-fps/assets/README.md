@@ -87,6 +87,30 @@ Each piece folder in `out/` holds:
 
 These are finished files. Importing them into Roblox later needs no rebuild.
 
+## Dressed pieces and buildings
+
+![The tea house in Studio](studio/teahouse-front.png)
+
+The plain kit above makes boxes. Buildings that are meant to be looked at use a second set of pieces, and a building is a recipe of its own.
+
+| Piece | What it is |
+|---|---|
+| `wall2_plain`, `wall2_door`, `wall2_window`, `wall2_arcade` | Ground-floor walls: plinth with the turquoise band, a stone course with a painted zigzag under the roof line, a wooden rail on the room side. Openings are round arches framed in cut stone; the arcade bay stands on two stone piers |
+| `wall2_upper`, `wall2_upper_door`, `wall2_upper_window` | The same for upper floors: no band, a plain cornice |
+| `corner2`, `corner2_upper` | Pilasters with a stone cap where two dressed walls meet |
+| `floor` | Upper floor or roof terrace: flagstones on top, planks on three beams underneath |
+| `dome` | A roof cell with a round opening, a drum with painted blind arches, a plaster dome and a brass finial. Wider than its cell. From the room below you look up into it |
+| `parapet_pierced` | Balustrade with a row of openings |
+| `pergola` | Posts, beams, slats and three lengths of cloth |
+| `lantern`, `lantern_wall` | Iron lanterns, hanging or on a wall arm. The glass is a part of its own, so the game makes it glow |
+| `rug`, `tea_table`, `divan`, `shelf`, `counter` | Furniture for the tea house |
+| `sign_tea`, `banner`, `bougainvillea` | What hangs outside |
+
+- **Painted patterns.** `p.mark(..., family="band")` paints a line in a second colour family instead of a darker tone: the zigzag on the stone course, the borders and diamonds on the rug, the tea glass on the sign. Still strokes written as numbers.
+- **Arched openings** are outlines pushed through the wall thickness (`p.extrude`). `chunks.py` now cuts such faces as triangles; cut as one face they came out with holes.
+- **A building is a recipe:** `buildings/teahouse.py` places pieces on the grid story by story, inside and out. `python buildings/teahouse.py` writes `out/buildings/teahouse.json`; `build/pack.py` packs it for the game (`BuildingData`), and `python preview.py teahouse teahouse-hall teahouse-gallery` renders the same list in Blender, lamps lit. Check a building in the render before uploading its pieces.
+- New colour families: `leaf`, `bloom`, `glow`. Paving is now pinker and paler than the walls, as in the concept.
+
 ## Destruction
 
 ![Blast damage](out/broken.png)

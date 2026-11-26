@@ -42,8 +42,16 @@ def dome(p):
     flat = frame_axes((0, 0, t / 2), (1, 0, 0), (0, 0, 1))            # the outline lies flat; thickness is up
     for s in (1, -1):
         p.extrude([(x, s * z) for x, z in half], t / 2, "paving", group="slab", frame=flat, extra=CUT)
-    p.lathe([(r_out, t), (r_out, t + h), (r_in, t + h), (r_in, t)], n, "plaster", closed=True, grain=None, group="drum",
-            smooth=True, extra={**CUT, "tone": 1})
+    drum = p.lathe([(r_out, t), (r_out, t + h), (r_in, t + h), (r_in, t)], n, "plaster", closed=True, grain=None,
+                   group="drum", smooth=True, extra={**CUT, "tone": 1})
+    # blind arches round the drum: painted, not cut
+    around, half, foot, spring = 2 * math.pi * r_out, 0.7, 1.2, h - D["cornice_h"] - 1.9
+    for k in range(8):
+        c = (k + 0.5) / 8
+        arch = [(c + half * math.cos(math.radians(a)) / around, spring + half * math.sin(math.radians(a)))
+                for a in range(180, -1, -30)]
+        p.mark(drum, "lathe", [(c - half / around, foot)] + arch + [(c + half / around, foot)], tone=-4, width=0.1,
+               closed=True)
     a, b = t + h - D["cornice_h"], t + h
     ring = p.lathe([(r_out + D["cornice_out"], a), (r_out + D["cornice_out"], b), (r_out, b), (r_out, a)], n, "stone",
                    closed=True, grain=None, group="cornice", extra=CUT)
