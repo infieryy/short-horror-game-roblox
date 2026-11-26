@@ -1,12 +1,12 @@
 {
  "piece": "pistol",
- "triangles": 868,
- "triangles_low": 416,
- "strokes": 9726,
- "px_per_stud": 454.9,
+ "triangles": 996,
+ "triangles_low": 476,
+ "strokes": 10103,
+ "px_per_stud": 453.5,
  "break_mode": "parts",
  "chunks": 8,
- "chunk_triangles": 868,
+ "chunk_triangles": 996,
  "problems": [],
- "seconds": 5.9
+ "seconds": 6.2
 }

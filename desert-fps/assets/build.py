@@ -412,7 +412,8 @@ class Piece:
                 continue
             if any(self.parts[f[self.l_part]].get("core") for f in e.link_faces):
                 continue                         # a break line is not an edge until the piece breaks
-            if all(f[self.l_kind] == 1 and self.parts[f[self.l_part]].get("smooth") for f in e.link_faces):
+            if angle < math.radians(50) and all(f[self.l_kind] == 1 and self.parts[f[self.l_part]].get("smooth")
+                                                for f in e.link_faces):
                 continue                         # facets of a round surface are not edges
             for f in e.link_faces:
                 loops = {l.vert: l for l in f.loops}
@@ -428,6 +429,9 @@ class Piece:
         part, kind = bm.faces.layers.int["part"], bm.faces.layers.int["kind"]
         for f in bm.faces:
             f.smooth = f[kind] == 1 and bool(self.parts[f[part]].get("smooth"))
+        for e in bm.edges:                       # a round surface stays round, but its rims stay crisp
+            if len(e.link_faces) == 2 and abs(e.calc_face_angle_signed(0.0)) > math.radians(50):
+                e.smooth = False
         bm.loops.layers.uv.remove(bm.loops.layers.uv["canvas"])
         bmesh.ops.triangulate(bm, faces=bm.faces[:])
         mesh = bpy.data.meshes.new(self.name)

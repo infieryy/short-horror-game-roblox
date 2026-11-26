@@ -43,6 +43,9 @@ PALETTE["brass"] = {"h": (36, 47), "l": (0.46, 0.68), "s": (0.46, 0.70), "step":
 PALETTE["cloth"] = {"h": (150, 172), "l": (0.44, 0.62), "s": (0.22, 0.40), "step": 0.02, "hue_step": -1.2,
                     "bases": [(163, 0.53, 0.32), (159, 0.55, 0.30)]}
 
+PALETTE["bore"] = {"h": (255, 285), "l": (0.05, 0.13), "s": (0.05, 0.16), "step": 0.012, "hue_step": 0.0,
+                   "bases": [(270, 0.085, 0.10)]}
+
 # what shows when a part is cut open
 PALETTE["adobe"] = {"h": (17, 27), "l": (0.44, 0.60), "s": (0.30, 0.48), "step": 0.02, "hue_step": 0.6,
                     "bases": [(22, 0.525, 0.40), (20, 0.54, 0.38)]}
@@ -108,6 +111,8 @@ PAINT["gunmetal"] = {
     ],
 }
 PAINT["brass"] = PAINT["iron"]
+PAINT["bore"] = {"lean": 0, "lean_jitter": 90,     # the dark inside of a barrel
+                 "layers": [{"per_stud2": 8.0, "len": (0.2, 0.5), "wid": (0.1, 0.2), "opacity": (0.4, 0.7), "round": 0.9}]}
 PAINT["cloth"] = {
     "lean": 80, "lean_jitter": 10,               # strokes run along the wraps
     "layers": [

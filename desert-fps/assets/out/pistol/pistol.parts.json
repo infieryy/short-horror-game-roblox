@@ -6,7 +6,7 @@
   {
    "name": "muzzle",
    "position": [
-    0.9037,
+    0.9113,
     0.1613,
     -0.0
    ],
@@ -183,16 +183,16 @@
    "id": "barrel",
    "mesh": "parts/pistol_barrel.fbx",
    "center": [
-    0.591,
+    0.594,
     0.191,
     -0.0
    ],
    "size": [
-    0.626,
+    0.634,
     0.142,
     0.129
    ],
-   "triangles": 164
+   "triangles": 292
   },
   {
    "id": "body",

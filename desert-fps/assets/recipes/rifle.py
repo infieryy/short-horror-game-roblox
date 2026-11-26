@@ -74,7 +74,7 @@ def build(p):
     for side in (-1, 1):
         g.plate("barrel", steel, [(572, 20), (570, 50), (576, 56), (590, 56), (595, 50), (592, 20)], side, 10, 3.2,
                 grain=None, sink=1.6)
-    g.tube("muzzle", steel, 640, 668, 0, 9.5, segments=12, profile=[(1.2, 0), (1.25, 20), (1.0, 28)])
+    g.muzzle("muzzle", steel, 640, 668, 0, 9.5, 5.0, 12, flare=1.22)
 
     # bolt carrier and charging handle on the right side (-Y); selector lever
     cover_half = g.half(30)

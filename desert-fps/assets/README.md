@@ -30,8 +30,8 @@ python3 preview.py
 | `door` | 688 | 216 | 6 shards | 1,412 | 6,771 | 62.5 px/stud |
 | `crate` | 1,468 | 588 | 8 shards (debris) | 1,660 | 22,890 | 47.0 px/stud |
 | `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
-| `rifle` | 1,676 | 708 | not breakable: 11 parts | 1,676 | 10,540 | 271.0 px/stud |
-| `pistol` | 868 | 416 | not breakable: 8 parts | 868 | 9,726 | 454.9 px/stud |
+| `rifle` | 1,772 | 756 | not breakable: 11 parts | 1,772 | 11,039 | 265.9 px/stud |
+| `pistol` | 996 | 476 | not breakable: 8 parts | 996 | 10,103 | 453.5 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -75,8 +75,8 @@ Both guns were built without concept art, from the proportions of real firearms,
 
 | Gun | Based on | Length | Triangles | Parts |
 |---|---|---|---|---|
-| `rifle` | a wooden-furniture, curved-magazine service rifle | 3.3 studs | 1,676 | body, cover, stock, grip, handguard, barrel, muzzle, magazine, bolt, trigger, selector |
-| `pistol` | the Desert Eagle | 1.1 studs | 868 | body, slide, barrel, grip, magazine, trigger, hammer, charm |
+| `rifle` | a wooden-furniture, curved-magazine service rifle | 3.3 studs | 1,772 | body, cover, stock, grip, handguard, barrel, muzzle, magazine, bolt, trigger, selector |
+| `pistol` | the Desert Eagle | 1.1 studs | 996 | body, slide, barrel, grip, magazine, trigger, hammer, charm |
 
 ### Every gun is modular
 
@@ -97,6 +97,7 @@ The piece origin is the top of the grip, where the hand goes, and the barrel poi
 ```python
 stock = g.shape("stock", "wood", [(2, 6), (2, -40), ...], 30, bevel=7, segments=2)
 g.tube("barrel", "gunmetal", 258, 640, 0, 9.5)
+g.muzzle("muzzle", "gunmetal", 640, 668, 0, 9.5, 5.0, 12)   # a ring with a dark bore, never a solid plug
 g.socket("muzzle", 668, 0)
 g.joint("bolt", "slide", 198, 19, (-1, 0, 0), 70)
 ```

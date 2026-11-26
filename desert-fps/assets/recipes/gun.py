@@ -64,6 +64,16 @@ class Gun:
         return self.p.lathe(points, segments, mat, smooth=smooth, extra=self._tags(part, tone),
                             frame=frame_axes((px, 0, pz), (0, 1, 0), (0, 0, 1)))
 
+    def muzzle(self, part, mat, x0, x1, z, radius, bore, depth, flare=1.0, tone=0):
+        """The open end of a barrel: a ring from x0 to x1 with a dark bore `depth` mm inside it."""
+        r, b, length = radius * MM * self.chunky, bore * MM * self.chunky, (x1 - x0) * MM
+        px, pz = self.pt(x0, z)
+        self.p.lathe([(b, 0), (r * flare, 0), (r * flare, length * 0.7), (r, length), (b, length)], 12, mat, closed=True,
+                     smooth=True, extra=self._tags(part, tone), frame=frame_axes((px, 0, pz), (0, 1, 0), (0, 0, 1)))
+        px, pz = self.pt(x1 - depth - 1.0, z)
+        self.p.lathe([(b * 1.03, 0), (b * 1.03, 1.0 * MM)], 12, "bore", grain=None, extra=self._tags(part, 0),
+                     frame=frame_axes((px, 0, pz), (0, 1, 0), (0, 0, 1)))
+
     def stud(self, part, mat, x, z, side, on, radius=3.6, height=1.6):
         """A rivet or screw head on one side of a part that is `on` mm wide."""
         px, pz = self.pt(x, z)

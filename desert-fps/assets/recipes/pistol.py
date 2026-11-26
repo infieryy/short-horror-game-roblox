@@ -33,11 +33,11 @@ def build(p):
     for side in (-1, 1):
         g.plate("slide", steel, [(14, 6), (14, -3), (34, -5), (41, 1), (31, 8)], side, 32, 3.0, tone=4)
 
-    # barrel: longer than the frame, wide below, narrow flat top, brass front sight, muzzle crown
+    # barrel: longer than the frame, wide below, narrow flat top, brass front sight, open muzzle
     lower = g.shape("barrel", steel, [(104, -12), (104, 8), (264, 8), (268, 4), (268, -9), (264, -12)], 30, bevel=3, tone=1)
     upper = g.shape("barrel", steel, [(104, 8), (104, 19), (262, 19), (266, 15), (266, 8)], 17, bevel=4, segments=2, tone=1)
     g.shape("barrel", "brass", [(249, 18), (252, 26), (260, 26), (264, 18)], 5, bevel=0.8)
-    g.tube("barrel", steel, 266, 271, -1, 8.5, segments=10, tone=2)
+    g.muzzle("barrel", steel, 262, 273, -1, 8.5, 5.2, 4.5, tone=2)
 
     # wooden grip panels with a brass screw; turquoise cloth tied round the grip
     panel = [(6, -48), (70, -56), (56, -124), (-10, -124), (-9, -94), (-3, -58)]
@@ -76,7 +76,7 @@ def build(p):
             g.line(pid, [(-12, z + 14), (72, z - 10)], sides=(facet,), width=1.2, tone=-3)
 
     # ---- attachment points and moving parts
-    g.socket("muzzle", 271, -1)
+    g.socket("muzzle", 273, -1)
     g.socket("optic", 180, 19)
     g.socket("underbarrel", 200, -40, up=(0, 0, -1))
     g.socket("magazine", 24, -132, forward=(-0.2, 0, -1))
