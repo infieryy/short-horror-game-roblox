@@ -6,28 +6,29 @@ from build import frame_axes  # build loads bpy before mathutils
 from mathutils import Vector
 
 K = C.KIT["door"]
+CUT = {"cut": True}        # sliced along the break lines
 
 
 def build(p):
     w, h, t = K["w"], K["h"], K["t"] / 2
     plank = w / K["planks"]
     for i in range(K["planks"]):
-        p.box((-w / 2 + i * plank, -t, 0), (-w / 2 + (i + 1) * plank, t, h), "darkwood", bevel=0.035, grain="z")
+        p.box((-w / 2 + i * plank, -t, 0), (-w / 2 + (i + 1) * plank, t, h), "darkwood", bevel=0.035, grain="z", extra=CUT)
     for z in K["strap_z"]:
-        p.box((-w / 2 + 0.05, -t - 0.05, z), (w / 2 - 0.05, -t + 0.02, z + K["strap_h"]), "iron")
+        p.box((-w / 2 + 0.05, -t - 0.05, z), (w / 2 - 0.05, -t, z + K["strap_h"]), "iron", extra=CUT)
         for i in range(K["planks"]):
             x = -w / 2 + (i + 0.5) * plank
             p.box((-0.06, -0.06, 0), (0.06, 0.06, 0.045), "iron", group="stud", detail=True,
                   frame=frame_axes((x, -t - 0.05, z + K["strap_h"] / 2), (1, 0, 0), (0, 0, 1)))
         p.box((-w / 2 + 0.1, t - 0.02, z - 0.1), (w / 2 - 0.1, t + 0.09, z + K["strap_h"] + 0.1), "darkwood",
-              bevel=0.025, grain="x")
+              bevel=0.025, grain="x", extra=CUT)
     # brace on the back, between the two ledgers
     a = Vector((-w / 2 + 0.35, 0, K["strap_z"][0] + K["strap_h"] + 0.1))
     b = Vector((w / 2 - 0.35, 0, K["strap_z"][1] - 0.1))
     d = (b - a).normalized()
     mid = (a + b) / 2
     half = (b - a).length / 2
-    p.box((-half, 0, -0.16), (half, 0.085, 0.16), "darkwood", grain="x",
+    p.box((-half, 0, -0.16), (half, 0.085, 0.16), "darkwood", grain="x", extra=CUT,
           frame=frame_axes((mid.x, t - 0.02, mid.z), d, (0, 1, 0)))
     # ring handle
     ring, tube, n = 0.3, 0.045, 6

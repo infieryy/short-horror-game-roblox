@@ -1,12 +1,13 @@
 """Render the finished pieces together and put the render next to the concept art.
 
-    python3 preview.py            # out/preview.png and out/compare.png
+    python3 preview.py            # out/preview.png, out/preview-close.png, out/compare.png, out/broken.png
 """
+import json
 import math
 import os
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 from PIL import Image
 
 import config as C
@@ -16,20 +17,33 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
 REF = os.path.join(HERE, "..", "reference")
 
-# piece, position (studs), rotation about Z (degrees)
-SCENE = [
-    ("wall_plain", (-8, 0, 0), 0), ("wall_window", (0, 0, 0), 0), ("wall_door", (8, 0, 0), 0),
-    ("door", (8 - 1.95 + 1.6, -1.15, 0), -42),
-    ("crate", (-6.5, -4.2, 0), 18), ("barrel", (-3.2, -3.4, 0), 0), ("barrel", (-9.6, -3.0, 0), 40),
-    ("crate", (2.6, -4.6, 0), -12),
-]
-CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "front": ((-4, -30, 6), (-4, 0, 6), 50),
-           "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35)}
+# piece, position (studs), rotation about Z (degrees), options
+#   {"blast": [(x, height, radius)]}  build the piece from its shards, minus those a blast would remove
+#   {"without": [shard ids]}          leave these out too
+#   {"explode": distance}             show the shards pushed apart
+SCENES = {
+    "whole": [
+        ("wall_plain", (-8, 0, 0), 0, {}), ("wall_window", (0, 0, 0), 0, {}), ("wall_door", (8, 0, 0), 0, {}),
+        ("door", (8 - 1.95 + 1.6, -1.15, 0), -42, {}),
+        ("crate", (-6.5, -4.2, 0), 18, {}), ("barrel", (-3.2, -3.4, 0), 0, {}), ("barrel", (-9.6, -3.0, 0), 40, {}),
+        ("crate", (2.6, -4.6, 0), -12, {}),
+    ],
+    "broken": [
+        ("wall_plain", (-8, 0, 0), 0, {"blast": [(0.5, 6.5, 3.0)]}),
+        ("wall_window", (0, 0, 0), 0, {"blast": [(3.2, 10.5, 2.4)], "without": ["window"]}),
+        ("wall_door", (8, 0, 0), 0, {"blast": [(-2.8, 10.0, 2.6)]}),
+        ("door", (8 - 1.95 + 1.6, -1.15, 0), -42, {"blast": [(0.3, 5.0, 1.5)]}),
+        ("crate", (-7.2, -4.6, 0), 18, {"explode": 0.55}), ("barrel", (-2.6, -4.0, 0), 0, {"explode": 0.5}),
+        ("crate", (3.0, -4.6, 0), -12, {}),
+    ],
+}
+CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
+           "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38)}
 
 
-def load(name):
+def load(name, mesh=None):
     folder = os.path.join(OUT, name)
-    bpy.ops.wm.obj_import(filepath=os.path.join(folder, name + ".obj"), forward_axis="NEGATIVE_Z", up_axis="Y")
+    bpy.ops.wm.obj_import(filepath=os.path.join(folder, (mesh or name) + ".obj"), forward_axis="NEGATIVE_Z", up_axis="Y")
     obj = bpy.context.selected_objects[0]
     bpy.context.view_layer.objects.active = obj
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)   # bake the importer's axis turn
@@ -38,12 +52,32 @@ def load(name):
     return obj
 
 
-def render(camera, path, size=(1600, 900), samples=48):
+def place(name, pos, rot, options):
+    turn = Matrix.Rotation(math.radians(rot), 4, "Z")
+    if not options:
+        objects = [(load(name), Vector((0, 0, 0)))]
+    else:
+        with open(os.path.join(OUT, name, name + ".break.json")) as fh:
+            chunks = json.load(fh)["chunks"]
+        middle = sum((Vector(c["center"]) for c in chunks), Vector()) / len(chunks)
+        objects = []
+        for c in chunks:
+            if c["id"] in options.get("without", []) or any(
+                    math.hypot(c["center"][0] - x, c["center"][1] - h) < r for x, h, r in options.get("blast", [])):
+                continue
+            away = Vector(c["center"]) - middle                      # manifest is in Roblox axes (Y up)
+            push = Vector((away.x, -away.z, max(away.y, 0))) * options.get("explode", 0.0)
+            objects.append((load(name, c["mesh"][:-4]), push))
+    for obj, push in objects:
+        obj.location = Vector(pos) + turn @ push
+        obj.rotation_euler = (0, 0, math.radians(rot))
+
+
+def render(scene_name, camera, path, size=(1600, 900), samples=48):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    for name, pos, rot in SCENE:
-        obj = load(name)
-        obj.location, obj.rotation_euler = pos, (0, 0, math.radians(rot))
+    for name, pos, rot, options in SCENES[scene_name]:
+        place(name, pos, rot, options)
     bpy.ops.mesh.primitive_plane_add(size=400)
     ground = bpy.data.materials.new("ground")
     ground.use_nodes = True
@@ -91,6 +125,7 @@ def compare(render_path, out_path):
 
 
 if __name__ == "__main__":
-    render("preview", os.path.join(OUT, "preview.png"))
-    render("close", os.path.join(OUT, "preview-close.png"))
+    render("whole", "preview", os.path.join(OUT, "preview.png"))
+    render("whole", "close", os.path.join(OUT, "preview-close.png"))
+    render("broken", "broken", os.path.join(OUT, "broken.png"))
     compare(os.path.join(OUT, "preview.png"), os.path.join(OUT, "compare.png"))

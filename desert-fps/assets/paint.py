@@ -39,6 +39,14 @@ class Painter:
         self.canvas = np.zeros((C.TEX, C.TEX, 3), np.float32)
         self.strokes = 0
         self.mixes = {}
+        # cut faces: paint the island's whole rectangle, so the low-detail shards (slightly different
+        # outlines) never reach an unpainted texel
+        for isl in piece.islands:
+            if isl["part"].get("core"):
+                x0, y0 = (int(v) - 2 for v in isl["origin_px"])
+                x1, y1 = (int(o + s * self.pps) + 3 for o, s in zip(isl["origin_px"], isl["size"]))
+                block = self.maps["island"][max(y0, 0):y1, max(x0, 0):x1]
+                block[block < 0] = isl["id"]
 
     def mix(self, group, family):
         """Every part gets its own mix of its family (pinker here, creamier there)."""

@@ -1,0 +1,158 @@
+{
+ "piece": "door",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/door_s00.fbx",
+   "center": [
+    0.0,
+    0.813,
+    0.002
+   ],
+   "size": [
+    3.9,
+    1.626,
+    0.465
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 268,
+   "neighbors": [
+    "s01",
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/door_s01.fbx",
+   "center": [
+    -0.356,
+    2.461,
+    0.002
+   ],
+   "size": [
+    3.187,
+    2.806,
+    0.465
+   ],
+   "material": "darkwood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 248,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/door_s02.fbx",
+   "center": [
+    -0.54,
+    4.731,
+    -0.032
+   ],
+   "size": [
+    2.82,
+    2.788,
+    0.345
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 148,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/door_s03.fbx",
+   "center": [
+    -0.742,
+    6.478,
+    0.002
+   ],
+   "size": [
+    2.415,
+    2.043,
+    0.465
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 224,
+   "neighbors": [
+    "s02",
+    "s05"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/door_s04.fbx",
+   "center": [
+    1.1,
+    3.066,
+    0.035
+   ],
+   "size": [
+    1.699,
+    3.762,
+    0.53
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 292,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s05"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/door_s05.fbx",
+   "center": [
+    0.807,
+    6.07,
+    0.002
+   ],
+   "size": [
+    2.285,
+    2.86,
+    0.465
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 232,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s04"
+   ]
+  }
+ ]
+}

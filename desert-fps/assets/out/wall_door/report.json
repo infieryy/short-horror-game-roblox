@@ -2,9 +2,11 @@
  "piece": "wall_door",
  "triangles": 700,
  "triangles_low": 316,
- "strokes": 11939,
- "px_per_stud": 45.0,
- "islands": 63,
+ "strokes": 10904,
+ "px_per_stud": 44.8,
+ "break_mode": "chunks",
+ "chunks": 12,
+ "chunk_triangles": 900,
  "problems": [],
- "seconds": 6.8
+ "seconds": 7.8
 }

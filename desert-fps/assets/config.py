@@ -33,6 +33,13 @@ PALETTE = {
     "iron":    {"h": (0, 14), "l": (0.28, 0.45), "s": (0.08, 0.20), "step": 0.02, "hue_step": 0.5,
                 "bases": [(5, 0.37, 0.14), (8, 0.40, 0.13)]},
 }
+# what shows when a part is cut open
+PALETTE["adobe"] = {"h": (17, 27), "l": (0.44, 0.60), "s": (0.30, 0.48), "step": 0.02, "hue_step": 0.6,
+                    "bases": [(22, 0.525, 0.40), (20, 0.54, 0.38)]}
+PALETTE["rawwood"] = {"h": (22, 32), "l": (0.62, 0.78), "s": (0.46, 0.66), "step": 0.02, "hue_step": 0.6,
+                      "bases": [(27, 0.70, 0.56), (25, 0.68, 0.54)]}
+CORE = {"plaster": "adobe", "stone": "adobe", "wood": "rawwood", "darkwood": "rawwood", "iron": "iron"}
+
 LAVENDER = (268, 0.66, 0.42)      # the only shade colour; never gray
 PALE = (30, 0.90, 0.85)           # light-catching glaze on protruding edges
 
@@ -83,6 +90,19 @@ PAINT = {
     },
 }
 PAINT["darkwood"] = PAINT["wood"]
+PAINT["adobe"] = {                              # mud brick: dabs, plus thin level lines for the brick courses
+    "lean": 0, "lean_jitter": 4,
+    "layers": [
+        {"per_stud2": 14.0, "len": (0.25, 0.6), "wid": (0.2, 0.42), "opacity": (0.5, 0.85), "round": 0.9, "jitter": 60},
+        {"per_stud2": 5.0, "len": (0.5, 1.4), "wid": (0.035, 0.07), "opacity": (0.5, 0.8), "round": 0.0},
+    ],
+}
+PAINT["rawwood"] = {                            # splintered wood: short strokes in every direction
+    "lean": 0, "lean_jitter": 90,
+    "layers": [
+        {"per_stud2": 30.0, "len": (0.12, 0.4), "wid": (0.05, 0.13), "opacity": (0.5, 0.85), "round": 0.5},
+    ],
+}
 
 GLAZE = {
     "shade_per_stud2": 260.0,  # dark glaze dabs per square stud of fully occluded surface
@@ -111,6 +131,29 @@ KIT = {
     "door": {"w": 3.9, "h": 7.5, "t": 0.28, "planks": 6, "strap_z": (1.3, 6.2), "strap_h": 0.36},
     "crate": {"size": 3.0, "frame_w": 0.42, "frame_out": 0.13, "planks": 3},
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
+}
+
+# ---------------------------------------------------------------- destruction
+# Pieces are pre-cut into jagged shards (see chunks.py).
+# mode "chunks":  every shard has its own health and stays until it is destroyed (walls, doors).
+# mode "shatter": the piece has one health; when it breaks it is swapped for its shards (props).
+# shards   how many pieces it cracks into
+# through  walls and doors: the cracks run through this axis (the thickness)
+# slant    studs: how far the break faces lean instead of cutting straight through
+# apart    0-1: higher = more even shard sizes, lower = a mix of big slabs and small bits
+# seed     change it to get a different crack pattern
+# Health numbers are placeholders until weapon damage exists.
+BREAK = {
+    "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30},
+    "hp_min": 10,
+    "pieces": {
+        "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall_window": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall_door": {"mode": "chunks", "shards": 11, "through": "y", "slant": 0.9, "apart": 0.55},
+        "door": {"mode": "chunks", "shards": 6, "through": "y", "slant": 0.25, "apart": 0.5},
+        "crate": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "barrel": {"mode": "shatter", "shards": 7, "apart": 0.5},
+    },
 }
 
 # ---------------------------------------------------------------- budgets (triangles)

@@ -18,20 +18,50 @@ python3 run.py
 python3 preview.py
 ```
 
-`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them together and puts the render next to the concept art.
+`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art.
 
 ## Pilot pieces
 
-| Piece | Triangles | Low-detail | Brush strokes | Texture density |
-|---|---|---|---|---|
-| `wall_plain` | 256 | 160 | 5,423 | 52.6 px/stud |
-| `wall_window` | 676 | 468 | 7,009 | 52.6 px/stud |
-| `wall_door` | 700 | 316 | 11,939 | 45.0 px/stud |
-| `door` | 688 | 216 | 6,096 | 70.2 px/stud |
-| `crate` | 1,468 | 588 | 20,082 | 52.2 px/stud |
-| `barrel` | 728 | 360 | 2,697 | 125.8 px/stud |
+| Piece | Triangles | Low-detail | Breaks into | Shard triangles (all) | Brush strokes | Texture density |
+|---|---|---|---|---|---|---|
+| `wall_plain` | 256 | 160 | 12 shards | 496 | 6,606 | 45.5 px/stud |
+| `wall_window` | 676 | 468 | 12 shards + lattice | 948 | 7,260 | 45.5 px/stud |
+| `wall_door` | 700 | 316 | 11 shards + lintel | 900 | 10,904 | 44.8 px/stud |
+| `door` | 688 | 216 | 6 shards | 1,412 | 6,771 | 62.5 px/stud |
+| `crate` | 1,468 | 588 | 8 shards (debris) | 1,660 | 22,890 | 47.0 px/stud |
+| `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
 
-Each piece folder in `out/` holds the mesh (`.fbx` and `.obj`), the low-detail mesh (`_low`), one 1024 px texture shared by both, and `report.json`.
+Each piece folder in `out/` holds:
+- the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
+- `chunks/`: one mesh per shard
+- one 1024 px texture shared by all of them
+- `<piece>.break.json`: the data the game needs to break it
+- `report.json`
+
+These are finished files. Importing them into Roblox later needs no rebuild.
+
+## Destruction
+
+![Blast damage](out/broken.png)
+
+Every piece is cut into jagged shards ahead of time, because cutting meshes live is too heavy for Roblox. Random points are scattered through the piece and each shard is the region closest to one point, so shards are angular, uneven in size, and their break faces lean through the wall. Every cut face is filled in and painted with what is inside: mud brick for walls, raw wood for boards.
+
+Two modes, set per piece in `config.py` under `BREAK`:
+
+| Mode | Used for | How it works |
+|---|---|---|
+| `chunks` | walls, doors | Each shard has its own health and stays until it is destroyed. A blast removes the shards it reaches and leaves a jagged hole. |
+| `shatter` | crates, barrels | The prop has one health. When it breaks, it is swapped for its shards as flying debris. These shards are cut from the low-detail mesh. |
+
+What rides along:
+- Beam ends, studs and jamb blocks stay whole and belong to the shard they sit in.
+- The window lattice and the door lintel break on their own, with their own health.
+
+`<piece>.break.json` lists, for every shard: its mesh, bounding-box centre and size (Roblox axes), main material, health, whether it stands on the ground, which piece edges it touches, and which shards it touches. That is enough for the game to drop anything left with no path to the ground.
+
+To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `slant` (how far the break faces lean), `apart` (even sizes vs a mix of slabs and bits), `seed` (a different crack pattern). Health values are placeholders until weapon damage exists.
+
+**Suggested use in the game:** show the single whole mesh until a piece is first damaged, then swap it for its shards. Undamaged walls then cost one part each, not twelve.
 
 ## Files
 
@@ -40,6 +70,7 @@ Each piece folder in `out/` holds the mesh (`.fbx` and `.obj`), the low-detail m
 | `config.py` | Every number: scale, texture size, palette, paint rules, piece sizes, triangle budgets |
 | `recipes/` | One file per kind of piece |
 | `build.py` | Builds closed solids, unwraps them, bakes the paint guides, checks and exports |
+| `chunks.py` | Cuts a piece into jagged shards, fills the cut faces, writes the break data |
 | `brush.py` | Flat-brush engine: each stroke is a centre, length, width, angle and colour |
 | `paint.py` | The look rules, applied stroke by stroke |
 | `run.py` | Runs recipes |
@@ -62,7 +93,11 @@ Each piece folder in `out/` holds the mesh (`.fbx` and `.obj`), the low-detail m
 - No two parts show the same plane in the same place (would flicker in Roblox).
 - Under Roblox's 20,000 triangle limit and under the piece's own budget.
 - Wall pieces all share one base colour and get no edge highlight where they meet, so neighbours join without a seam.
+- Every shard is checked the same way as a whole piece.
+- Contact shading is only painted between parts of the same shard, so a destroyed shard leaves no shadow behind on the wall.
+- Break lines get no edge highlight, so cracks are invisible until the piece breaks.
 
 ## Not verified yet
 - Nothing has been imported into Roblox Studio. The scale (1 unit = 1 stud; the `.fbx` is exported at 0.01) and the matte look need checking on the first import.
+- No destruction code exists in the game yet. The shards and break data are ready for it, but removing shards, debris and falling unsupported shards are untested in Roblox.
 - The preview is a Blender render with a sun and lavender ambient light set up to resemble the planned Roblox lighting. It is not Roblox.

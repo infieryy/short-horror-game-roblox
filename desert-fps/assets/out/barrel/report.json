@@ -2,9 +2,11 @@
  "piece": "barrel",
  "triangles": 728,
  "triangles_low": 360,
- "strokes": 2697,
- "px_per_stud": 125.8,
- "islands": 5,
+ "strokes": 4828,
+ "px_per_stud": 75.7,
+ "break_mode": "shatter",
+ "chunks": 7,
+ "chunk_triangles": 828,
  "problems": [],
- "seconds": 5.8
+ "seconds": 4.6
 }

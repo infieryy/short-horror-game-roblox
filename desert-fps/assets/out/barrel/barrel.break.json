@@ -1,0 +1,192 @@
+{
+ "piece": "barrel",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 115,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/barrel_s00.fbx",
+   "center": [
+    0.417,
+    1.553,
+    -0.678
+   ],
+   "size": [
+    1.586,
+    1.402,
+    1.224
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 62,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04",
+    "s06"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/barrel_s01.fbx",
+   "center": [
+    0.642,
+    2.589,
+    0.473
+   ],
+   "size": [
+    1.295,
+    2.023,
+    1.634
+   ],
+   "material": "wood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 164,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/barrel_s02.fbx",
+   "center": [
+    0.268,
+    2.768,
+    -0.681
+   ],
+   "size": [
+    1.702,
+    1.664,
+    1.034
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 96,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/barrel_s03.fbx",
+   "center": [
+    -0.28,
+    2.7,
+    0.16
+   ],
+   "size": [
+    1.803,
+    1.8,
+    2.26
+   ],
+   "material": "wood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 158,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/barrel_s04.fbx",
+   "center": [
+    -0.492,
+    1.514,
+    0.074
+   ],
+   "size": [
+    1.596,
+    3.028,
+    2.432
+   ],
+   "material": "wood",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 170,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/barrel_s05.fbx",
+   "center": [
+    0.195,
+    0.861,
+    0.613
+   ],
+   "size": [
+    1.93,
+    1.722,
+    1.34
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 76,
+   "neighbors": [
+    "s01",
+    "s04",
+    "s06"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/barrel_s06.fbx",
+   "center": [
+    0.277,
+    0.943,
+    -0.313
+   ],
+   "size": [
+    2.027,
+    1.885,
+    1.738
+   ],
+   "material": "wood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 102,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s05"
+   ]
+  }
+ ]
+}

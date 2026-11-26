@@ -2,9 +2,11 @@
  "piece": "door",
  "triangles": 688,
  "triangles_low": 216,
- "strokes": 6096,
- "px_per_stud": 70.2,
- "islands": 79,
+ "strokes": 6771,
+ "px_per_stud": 62.5,
+ "break_mode": "chunks",
+ "chunks": 6,
+ "chunk_triangles": 1412,
  "problems": [],
- "seconds": 5.6
+ "seconds": 5.1
 }

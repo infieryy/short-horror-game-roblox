@@ -47,6 +47,7 @@ class Piece:
         self.bm = bmesh.new()
         self.l_part = self.bm.faces.layers.int.new("part")
         self.l_kind = self.bm.faces.layers.int.new("kind")       # 1 = canvas coords stored on the loops
+        self.l_chunk = self.bm.faces.layers.int.new("chunk")     # which breakable chunk a face belongs to
         self.l_cuv = self.bm.loops.layers.uv.new("canvas")
         self.parts = []
         self.serial = 0          # counts every part a recipe asks for, so names match in the low-detail build
@@ -124,10 +125,10 @@ class Piece:
             tb.faces.new(rings[-1])
         self._merge(tb, pid, explicit=True)
 
-    def wall(self, xs, zs, yf, yb, holes=(), mat="plaster", group="wall", band=True):
+    def wall(self, xs, zs, yf, yb, holes=(), mat="plaster", group="wall", band=True, extra=None):
         """One closed wall shell on a grid of x/z break lines. yf(z), yb(z) give the front and back
         surface; `holes` are grid cells (i, j) left open (windows, doorways)."""
-        pid = self._part(mat, group, None, None, band)
+        pid = self._part(mat, group, None, None, band, extra)
         tb = bmesh.new()
         F = [[tb.verts.new((x, yf(z), z)) for x in xs] for z in zs]
         B = [[tb.verts.new((x, yb(z), z)) for x in xs] for z in zs]
@@ -285,6 +286,7 @@ class Piece:
         island = np.full((T, T), -1, np.int32)
         pos = np.zeros((T, T, 3), np.float32)
         nrm = np.zeros((T, T, 3), np.float32)
+        chunk = np.zeros((T, T), np.int32)
         for tri in bm.calc_loop_triangles():
             f = tri[0].face
             p = np.array([tri[k][uv].uv for k in range(3)], np.float64) * T
@@ -307,11 +309,24 @@ class Piece:
             island[sel][inside] = self.face_island[f.index]
             pos[sel][inside] = (bary[0][..., None] * w[0] + bary[1][..., None] * w[1] + bary[2][..., None] * w[2])[inside]
             nrm[sel][inside] = np.array(f.normal)
-        return {"island": island, "pos": pos, "ao": self._contact_shade(island, pos, nrm), "edges": self._edges()}
+            chunk[sel][inside] = f[self.l_chunk]
+        shade = self._contact_shade(island, pos, nrm, chunk)
+        for isl in self.islands:
+            if isl["part"].get("core"):          # cut faces are open air once exposed
+                shade[island == isl["id"]] = 0.0
+        return {"island": island, "pos": pos, "ao": shade, "edges": self._edges()}
 
-    def _contact_shade(self, island, pos, nrm):
+    def _contact_shade(self, island, pos, nrm, chunk):
+        """Shade where surfaces meet. Only parts of the same chunk shade each other: a neighbouring
+        chunk can be destroyed, and must not leave its shadow painted on the wall."""
         T, step = C.TEX, C.AO_STEP
-        tree = BVHTree.FromBMesh(self.bm)
+        groups, trees = {}, {}
+        for f in self.bm.faces:
+            groups.setdefault(f[self.l_chunk], []).append(f)
+        for cid, faces in groups.items():
+            verts = list({v for f in faces for v in f.verts})
+            index = {v: k for k, v in enumerate(verts)}
+            trees[cid] = BVHTree.FromPolygons([v.co.copy() for v in verts], [[index[v] for v in f.verts] for f in faces])
         rng = np.random.default_rng(1)
         # cosine-weighted hemisphere directions in tangent space
         u, v = (np.arange(C.AO_RAYS) + 0.5) / C.AO_RAYS, rng.permutation(C.AO_RAYS) / C.AO_RAYS
@@ -326,10 +341,11 @@ class Piece:
         dirs = hemi[None, :, 0:1] * Tn[:, None] + hemi[None, :, 1:2] * Bn[:, None] + hemi[None, :, 2:3] * N[:, None]
         origins = (P + N * 0.012).tolist()
         dirs = dirs.tolist()
+        owner = chunk[::step, ::step][ys, xs].tolist()
         occ = np.zeros(len(origins), np.float32)
-        D, cast = C.AO_DIST, tree.ray_cast
+        D = C.AO_DIST
         for i, o in enumerate(origins):
-            total = 0.0
+            total, cast = 0.0, trees[owner[i]].ray_cast
             for d in dirs[i]:
                 hit = cast(o, d, D)
                 if hit[0] is not None:
@@ -349,6 +365,8 @@ class Piece:
                 continue
             if any(all(abs(v.co[axis] - value) < 1e-4 for v in e.verts) for axis, value in self.seams):
                 continue
+            if any(self.parts[f[self.l_part]].get("core") for f in e.link_faces):
+                continue                         # a break line is not an edge until the piece breaks
             for f in e.link_faces:
                 loops = {l.vert: l for l in f.loops}
                 a, b = loops[e.verts[0]][uv].uv, loops[e.verts[1]][uv].uv

@@ -2,9 +2,11 @@
  "piece": "wall_plain",
  "triangles": 256,
  "triangles_low": 160,
- "strokes": 5423,
- "px_per_stud": 52.6,
- "islands": 9,
+ "strokes": 6606,
+ "px_per_stud": 45.5,
+ "break_mode": "chunks",
+ "chunks": 12,
+ "chunk_triangles": 496,
  "problems": [],
- "seconds": 5.6
+ "seconds": 5.5
 }

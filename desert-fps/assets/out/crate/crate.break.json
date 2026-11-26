@@ -1,0 +1,228 @@
+{
+ "piece": "crate",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 185,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/crate_s00.fbx",
+   "center": [
+    -0.603,
+    0.757,
+    0.333
+   ],
+   "size": [
+    1.795,
+    1.514,
+    2.333
+   ],
+   "material": "darkwood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 156,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/crate_s01.fbx",
+   "center": [
+    -0.474,
+    1.804,
+    0.581
+   ],
+   "size": [
+    2.051,
+    2.393,
+    1.839
+   ],
+   "material": "darkwood",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 264,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/crate_s02.fbx",
+   "center": [
+    -0.515,
+    1.813,
+    -0.641
+   ],
+   "size": [
+    1.97,
+    2.373,
+    1.719
+   ],
+   "material": "darkwood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 256,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s04",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/crate_s03.fbx",
+   "center": [
+    0.0,
+    1.039,
+    -0.48
+   ],
+   "size": [
+    3.0,
+    2.078,
+    2.041
+   ],
+   "material": "darkwood",
+   "health": 35,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 212,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s04",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/crate_s04.fbx",
+   "center": [
+    0.376,
+    2.248,
+    -0.012
+   ],
+   "size": [
+    1.908,
+    1.505,
+    2.827
+   ],
+   "material": "darkwood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 140,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s05",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/crate_s05.fbx",
+   "center": [
+    0.464,
+    1.006,
+    0.242
+   ],
+   "size": [
+    2.072,
+    2.012,
+    2.515
+   ],
+   "material": "darkwood",
+   "health": 35,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 184,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/crate_s06.fbx",
+   "center": [
+    0.843,
+    1.572,
+    -0.368
+   ],
+   "size": [
+    1.315,
+    2.856,
+    2.264
+   ],
+   "material": "darkwood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 252,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/crate_s07.fbx",
+   "center": [
+    0.792,
+    2.097,
+    0.544
+   ],
+   "size": [
+    1.416,
+    1.806,
+    1.912
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 196,
+   "neighbors": [
+    "s01",
+    "s04",
+    "s05",
+    "s06"
+   ]
+  }
+ ]
+}
