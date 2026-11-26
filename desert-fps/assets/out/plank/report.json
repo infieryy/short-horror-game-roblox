@@ -1,0 +1,12 @@
+{
+ "piece": "plank",
+ "triangles": 376,
+ "triangles_low": 120,
+ "strokes": 8396,
+ "px_per_stud": 57.6,
+ "break_mode": "shatter",
+ "chunks": 6,
+ "chunk_triangles": 388,
+ "problems": [],
+ "seconds": 6.9
+}

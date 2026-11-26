@@ -1,0 +1,12 @@
+{
+ "piece": "cloth",
+ "triangles": 400,
+ "triangles_low": 336,
+ "strokes": 3553,
+ "px_per_stud": 59.2,
+ "break_mode": "shatter",
+ "chunks": 4,
+ "chunk_triangles": 616,
+ "problems": [],
+ "seconds": 6.1
+}

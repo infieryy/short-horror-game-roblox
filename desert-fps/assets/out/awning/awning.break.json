@@ -1,0 +1,136 @@
+{
+ "piece": "awning",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 50,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/awning_s00.fbx",
+   "center": [
+    -0.016,
+    1.875,
+    0.516
+   ],
+   "size": [
+    6.351,
+    3.75,
+    1.033
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 68,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/awning_s01.fbx",
+   "center": [
+    -3.045,
+    1.84,
+    0.982
+   ],
+   "size": [
+    0.81,
+    3.681,
+    1.964
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 60,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/awning_s02.fbx",
+   "center": [
+    1.27,
+    1.833,
+    2.307
+   ],
+   "size": [
+    4.359,
+    2.582,
+    2.956
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 312,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/awning_s03.fbx",
+   "center": [
+    -1.908,
+    2.343,
+    2.067
+   ],
+   "size": [
+    3.083,
+    2.641,
+    3.436
+   ],
+   "material": "canvas",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 256,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/awning_s04.fbx",
+   "center": [
+    0.08,
+    2.622,
+    1.169
+   ],
+   "size": [
+    6.74,
+    2.256,
+    2.337
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 292,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,132 @@
+{
+ "piece": "pillar",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/pillar_s00.fbx",
+   "center": [
+    0.0,
+    1.415,
+    -0.0
+   ],
+   "size": [
+    2.5,
+    2.829,
+    2.5
+   ],
+   "material": "stone",
+   "health": 180,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 116,
+   "neighbors": [
+    "s02"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/pillar_s01.fbx",
+   "center": [
+    0.0,
+    10.957,
+    -0.0
+   ],
+   "size": [
+    2.3,
+    2.087,
+    2.3
+   ],
+   "material": "stone",
+   "health": 110,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 124,
+   "neighbors": [
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/pillar_s02.fbx",
+   "center": [
+    -0.002,
+    4.375,
+    0.001
+   ],
+   "size": [
+    1.688,
+    4.491,
+    1.688
+   ],
+   "material": "stone",
+   "health": 110,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 32,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/pillar_s03.fbx",
+   "center": [
+    0.012,
+    7.248,
+    -0.0
+   ],
+   "size": [
+    1.627,
+    3.596,
+    1.642
+   ],
+   "material": "stone",
+   "health": 55,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 28,
+   "neighbors": [
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/pillar_s04.fbx",
+   "center": [
+    -0.021,
+    8.697,
+    0.072
+   ],
+   "size": [
+    1.858,
+    4.289,
+    1.756
+   ],
+   "material": "stone",
+   "health": 75,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 52,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  }
+ ]
+}

@@ -1,6 +1,7 @@
 """Render the finished pieces together and put the render next to the concept art.
 
     python3 preview.py            # out/preview.png, out/preview-close.png, out/compare.png, out/broken.png
+    python3 preview.py building props   # out/preview-building.png, out/preview-props.png (any camera name)
 """
 import json
 import math
@@ -37,10 +38,41 @@ SCENES = {
         ("crate", (3.0, -4.6, 0), -12, {}),
     ],
 }
+
+
+
+def _cell(walls, cx=0.0, cy=0.0, z=0.0):
+    """Four wall pieces round one grid cell: (south, east, north, west), fronts facing out."""
+    spots = (((cx, cy - 4, z), 0), ((cx + 4, cy, z), 90), ((cx, cy + 4, z), 180), ((cx - 4, cy, z), -90))
+    return [(name, pos, rot, {}) for name, (pos, rot) in zip(walls, spots) if name]
+
+
+# One room built from the kit, to check that the pieces fit each other: ground, walls, corner posts,
+# roof slab, parapets, stairs up one side, a ladder up the other, a pillar and a plank bridge beside it.
+SCENES["building"] = (
+    [("ground", (8 * i, 8 * j, -0.49), 0, {}) for i in range(-2, 3) for j in range(-2, 2)]
+    + _cell(("wall_door", "wall_window", "wall_plain", "wall_window"))
+    + [("corner", (x, y, 0), 0, {}) for x in (-4, 4) for y in (-4, 4)]
+    + [("roof", (0, 0, 12 - C.KIT["roof"]["t"] + 0.06), 0, {})]
+    + _cell(("parapet_crenel", "parapet_plain", "parapet_plain", "parapet_crenel"), z=12)
+    + [("parapet_corner", (x, y, 12), 0, {}) for x in (-4, 4) for y in (-4, 4)]
+    + [("stairs", (8, 0, 0), 90, {}), ("ladder", (-4.9, 1.5, 0), -90, {}),
+       ("pillar", (-12, -9, 0), 0, {}), ("pillar", (-12, 1, 0), 0, {}),
+       ("plank", (-12, -4, 12), 90, {})]
+)
+# The cover pieces and props in a row.
+SCENES["props"] = [
+    ("stall", (-11, 0, 0), 0, {}), ("awning", (-2.5, 2, 3.5), 0, {}), ("wall_plain", (-2.5, 2.5, 0), 0, {}),
+    ("cloth", (6, 1, 0), 0, {}), ("well", (14.5, 0, 0), 0, {}),
+    ("sacks", (-9, -7, 0), 0, {}), ("pot_tall", (-3.5, -6, 0), 0, {}), ("pot_round", (-0.5, -6.5, 0), 0, {}),
+    ("vase", (2, -6, 0), 0, {}), ("crate", (6, -6.5, 0), 20, {}), ("barrel", (10, -6, 0), 0, {}),
+]
 # guns: (centre x, centre height, span) in studs, used to frame the camera
 GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7), "knife": (0.15, -0.14, 1.45), "smoke": (0.02, 0.07, 1.6)}
 CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
-           "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38)}
+           "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38),
+           "building": ((24, -34, 21), (0.5, -1, 6.5), 38), "building-back": ((-26, 30, 19), (-1, 0, 6.5), 38),
+           "props": ((3, -30, 9), (2, -2, 3.6), 38), "props-close": ((-6, -19, 5), (-5, -3, 2.6), 38)}
 
 
 def render_gun(name):
@@ -145,6 +177,11 @@ def compare(render_path, out_path):
 
 if __name__ == "__main__":
     import sys
+    scenes = [name for name in sys.argv[1:] if name in CAMERAS and name.split("-")[0] in SCENES]
+    if scenes:                                  # python3 preview.py building building-back props
+        for name in scenes:
+            render(name.split("-")[0], name, os.path.join(OUT, f"preview-{name}.png"))
+        sys.exit()
     guns = [name for name in sys.argv[1:] if name in GUNS]
     if guns:
         for name in guns:

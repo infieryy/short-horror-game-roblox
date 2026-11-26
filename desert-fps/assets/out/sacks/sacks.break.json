@@ -1,0 +1,164 @@
+{
+ "piece": "sacks",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 85,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/sacks_s00.fbx",
+   "center": [
+    1.537,
+    1.262,
+    -0.543
+   ],
+   "size": [
+    3.15,
+    2.477,
+    2.95
+   ],
+   "material": "burlap",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 190,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/sacks_s01.fbx",
+   "center": [
+    -0.358,
+    0.815,
+    -1.079
+   ],
+   "size": [
+    3.168,
+    1.583,
+    1.768
+   ],
+   "material": "burlap",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 164,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/sacks_s02.fbx",
+   "center": [
+    1.106,
+    1.272,
+    0.606
+   ],
+   "size": [
+    3.807,
+    2.498,
+    2.617
+   ],
+   "material": "burlap",
+   "health": 25,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 280,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s05"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/sacks_s03.fbx",
+   "center": [
+    -1.824,
+    0.693,
+    0.591
+   ],
+   "size": [
+    2.438,
+    1.339,
+    2.739
+   ],
+   "material": "burlap",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 114,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/sacks_s04.fbx",
+   "center": [
+    -2.189,
+    0.449,
+    -1.196
+   ],
+   "size": [
+    1.551,
+    0.851,
+    1.519
+   ],
+   "material": "burlap",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 42,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s05"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/sacks_s05.fbx",
+   "center": [
+    -0.948,
+    1.298,
+    0.368
+   ],
+   "size": [
+    2.044,
+    2.446,
+    2.727
+   ],
+   "material": "burlap",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 190,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  }
+ ]
+}

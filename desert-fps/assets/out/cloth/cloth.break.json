@@ -1,0 +1,110 @@
+{
+ "piece": "cloth",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 40,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/cloth_s00.fbx",
+   "center": [
+    0.0,
+    2.875,
+    0.26
+   ],
+   "size": [
+    6.6,
+    3.351,
+    0.37
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 220,
+   "neighbors": [
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/cloth_s01.fbx",
+   "center": [
+    0.801,
+    6.033,
+    0.26
+   ],
+   "size": [
+    4.999,
+    5.498,
+    0.37
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 84,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/cloth_s02.fbx",
+   "center": [
+    1.349,
+    8.717,
+    0.081
+   ],
+   "size": [
+    5.302,
+    2.336,
+    0.729
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 180,
+   "neighbors": [
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/cloth_s03.fbx",
+   "center": [
+    -2.193,
+    6.881,
+    0.081
+   ],
+   "size": [
+    3.614,
+    6.009,
+    0.729
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 132,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

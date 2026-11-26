@@ -1,0 +1,12 @@
+{
+ "piece": "vase",
+ "triangles": 380,
+ "triangles_low": 184,
+ "strokes": 2914,
+ "px_per_stud": 158.5,
+ "break_mode": "shatter",
+ "chunks": 4,
+ "chunk_triangles": 392,
+ "problems": [],
+ "seconds": 5.5
+}

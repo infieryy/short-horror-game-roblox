@@ -167,8 +167,8 @@ Renders for reference: `assets/out/preview.png`, `compare.png` (next to the conc
 - Whether beam ends go on every wall or only at the roofline.
 
 **Not built yet**
-- Most of the kit: corners, parapets, roofs, floors, stairs, ladders, awnings, arches, the remaining props.
-- Buildings, set dressing, map edge (wall, sky, background cards, sandstorm).
+- Kit pieces still missing: arched doorways and arcades, the dome, a tower roof, pierced and round-topped parapets, curved and walled stairs, the other ladder styles, palm trees, dye vats, the cart, lantern, rug, baskets, banners.
+- Buildings (recipes that place kit pieces on the plan), set dressing, map edge (wall, sky, background cards, sandstorm).
 - Attachments, more weapons, armor, the frag and flash grenades.
 
 ## 6. What to do next
@@ -199,6 +199,17 @@ The owner asked for: rifles destroy walls, crates and barrels shatter, and nothi
 - Checked in a playtest: `assets/studio/rifle-crumble.mp4`, and `build/tests/break_wall.luau` (11 checks, all pass).
 - Not built: reload and ammo, sounds, muzzle flash, hit marks, dust, damage to players, other players seeing the shooter's weapon or tracers, the other three weapons.
 - Not checked: a real person aiming with the mouse (the test aimed the camera by script and held the trigger with simulated input), more than one player, phone or gamepad.
+
+### The rest of the kit (same session)
+
+The owner asked whether every map asset was built and imported. It was not, so 18 more pieces were built with the recipe pipeline, uploaded and imported: `corner`, `pillar`, `parapet_plain`, `parapet_crenel`, `parapet_corner`, `roof`, `stairs`, `ladder`, `plank`, `ground`, `stall`, `awning`, `cloth`, `sacks`, `well`, `pot_tall`, `pot_round`, `vase`. `assets/README.md` has the renders, the table and how the pieces fit together.
+
+- All 28 pieces (236 meshes) are in `ServerStorage.DesertFps.Meshes`. 36 more uploads (18 models, 18 textures), all approved; ids in `AssetIds.luau`.
+- `Workspace.KitShowcase` now also has one room built from the structural pieces and a row of the props (`assets/studio/kit-room.jpg`, `kit-props.jpg`).
+- Every breakable piece was cracked and crumbled once on the server without errors.
+- These pieces have not been judged by the owner yet. They were checked against the reference sheets by eye only.
+- The map itself is still the gray Market Square graybox. Replacing gray boxes with kit pieces needs building recipes that read the plan; that is the next stage.
+- Not checked: walking up the stairs, the collision of the stall, awning and well, how any of it looks from a player's eye level in a playtest.
 
 Notes for the next session:
 - `Lighting.Technology` cannot be set by script any more. "Future" is now `LightingStyle = Realistic` with `PrioritizeLightingQuality = true`.

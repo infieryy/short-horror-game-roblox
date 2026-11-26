@@ -1,0 +1,12 @@
+{
+ "piece": "pot_tall",
+ "triangles": 456,
+ "triangles_low": 222,
+ "strokes": 5248,
+ "px_per_stud": 114.2,
+ "break_mode": "shatter",
+ "chunks": 5,
+ "chunk_triangles": 410,
+ "problems": [],
+ "seconds": 6.6
+}

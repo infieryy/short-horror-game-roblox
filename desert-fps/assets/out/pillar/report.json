@@ -1,0 +1,12 @@
+{
+ "piece": "pillar",
+ "triangles": 204,
+ "triangles_low": 68,
+ "strokes": 3452,
+ "px_per_stud": 66.3,
+ "break_mode": "chunks",
+ "chunks": 5,
+ "chunk_triangles": 352,
+ "problems": [],
+ "seconds": 6.5
+}

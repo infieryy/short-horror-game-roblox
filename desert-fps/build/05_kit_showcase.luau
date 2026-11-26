@@ -6,6 +6,8 @@
 -- are placed through Breakable, so they break in a playtest. Two default characters stand by the plain wall
 -- and in the doorway for scale, the weapons sit in the air to the right, and players spawn on the pad in
 -- front (DevConfig.SpawnPath).
+-- Further right stand the rest of the kit: one room built from the structural pieces (the "building" scene
+-- in assets/preview.py), then the cover pieces and props in a row (its "props" scene).
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
@@ -38,9 +40,61 @@ local LAYOUT = {
 	{ "knife", Vector3.new(17, 2, 0.5), 0 },
 	{ "smoke", Vector3.new(21.5, 2, 0.5), 0 },
 }
+
+-- Four wall pieces round one grid cell, fronts facing out: south (towards the spawn), east, north, west.
+local function cell(pieces: { string }, centre: Vector3)
+	local sides = { { Vector3.new(0, 0, 4), 0 }, { Vector3.new(4, 0, 0), 90 }, { Vector3.new(0, 0, -4), 180 },
+		{ Vector3.new(-4, 0, 0), -90 } }
+	for index, piece in pieces do
+		table.insert(LAYOUT, { piece, centre + sides[index][1], sides[index][2] })
+	end
+end
+
+-- One room built from the structural pieces, to see that they fit each other.
+local ROOM = Vector3.new(46, 0, 0)
+local ROOF_TOP = 12 -- one story
+for i = -2, 2 do
+	for j = -2, 1 do
+		table.insert(LAYOUT, { "ground", ROOM + Vector3.new(8 * i, 0.01 - 0.5, 8 * j), 0 })
+	end
+end
+cell({ "wall_door", "wall_window", "wall_plain", "wall_window" }, ROOM)
+cell({ "parapet_crenel", "parapet_plain", "parapet_plain", "parapet_crenel" }, ROOM + Vector3.new(0, ROOF_TOP, 0))
+for _, x in { -4, 4 } do
+	for _, z in { -4, 4 } do
+		table.insert(LAYOUT, { "corner", ROOM + Vector3.new(x, 0, z), 0 })
+		table.insert(LAYOUT, { "parapet_corner", ROOM + Vector3.new(x, ROOF_TOP, z), 0 })
+	end
+end
+for _, entry in {
+	{ "roof", Vector3.new(0, ROOF_TOP - 1, 0), 0 }, -- its top stands 0.06 above the wall tops it covers
+	{ "stairs", Vector3.new(8, 0, 0), 90 },
+	{ "ladder", Vector3.new(-4.9, 0, -2.4), -90 },
+	{ "pillar", Vector3.new(-12, 0, 9), 0 },
+	{ "pillar", Vector3.new(-12, 0, -1), 0 },
+	{ "plank", Vector3.new(-12, ROOF_TOP, 4), 90 },
+} do
+	table.insert(LAYOUT, { entry[1], ROOM + entry[2], entry[3] })
+end
+
+-- The cover pieces and props in a row.
+local PROPS = Vector3.new(84, 0, 0)
+for _, entry in {
+	{ "stall", Vector3.new(-11, 0, 0), 0 },
+	{ "wall_plain", Vector3.new(-2.5, 0, -2.5), 0 },
+	{ "awning", Vector3.new(-2.5, 3.5, -2), 0 }, -- on the face of that wall, above its plinth
+	{ "cloth", Vector3.new(6, 0, -1), 0 },
+	{ "well", Vector3.new(14.5, 0, 0), 0 },
+	{ "sacks", Vector3.new(-9, 0, 7), 0 },
+	{ "pot_tall", Vector3.new(-3.5, 0, 6), 0 },
+	{ "pot_round", Vector3.new(-0.5, 0, 6.5), 0 },
+	{ "vase", Vector3.new(2, 0, 6), 0 },
+} do
+	table.insert(LAYOUT, { entry[1], PROPS + entry[2], entry[3] })
+end
 -- Where the characters stand: beside the plain wall, and in the doorway (4 x 7.6 studs).
 local CHARACTERS = { Vector3.new(-13.5, 0, 0.5), Vector3.new(8.05, 0, 0) }
-local GROUND = { Size = Vector3.new(72, 1, 44), Centre = Vector3.new(0, 0, 6), Color = Color3.fromRGB(237, 191, 170) }
+local GROUND = { Size = Vector3.new(146, 1, 44), Centre = Vector3.new(37, 0, 6), Color = Color3.fromRGB(237, 191, 170) }
 local SPAWN = { Position = Vector3.new(0, 0, 20), Size = Vector3.new(6, 0.2, 6) }
 local SKIN = Color3.fromRGB(163, 162, 165)
 

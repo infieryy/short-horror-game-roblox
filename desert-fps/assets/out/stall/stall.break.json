@@ -1,0 +1,268 @@
+{
+ "piece": "stall",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 120,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/stall_s00.fbx",
+   "center": [
+    2.38,
+    0.938,
+    -0.0
+   ],
+   "size": [
+    1.96,
+    1.876,
+    4.72
+   ],
+   "material": "stone",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 68,
+   "neighbors": [
+    "s03",
+    "s09"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/stall_s01.fbx",
+   "center": [
+    1.618,
+    5.332,
+    0.111
+   ],
+   "size": [
+    3.865,
+    4.343,
+    4.947
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 316,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s06",
+    "s07",
+    "s08"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/stall_s02.fbx",
+   "center": [
+    -1.887,
+    4.729,
+    0.111
+   ],
+   "size": [
+    3.327,
+    5.548,
+    4.947
+   ],
+   "material": "wood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 352,
+   "neighbors": [
+    "s01",
+    "s04",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/stall_s03.fbx",
+   "center": [
+    2.6,
+    1.799,
+    -0.0
+   ],
+   "size": [
+    1.521,
+    3.598,
+    4.72
+   ],
+   "material": "wood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 104,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/stall_s04.fbx",
+   "center": [
+    -1.658,
+    1.692,
+    -1.169
+   ],
+   "size": [
+    3.084,
+    2.416,
+    2.382
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s02",
+    "s05",
+    "s07",
+    "s08"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/stall_s05.fbx",
+   "center": [
+    -2.059,
+    0.621,
+    -0.0
+   ],
+   "size": [
+    2.602,
+    1.243,
+    4.72
+   ],
+   "material": "stone",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 92,
+   "neighbors": [
+    "s04",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/stall_s06.fbx",
+   "center": [
+    1.56,
+    6.02,
+    0.749
+   ],
+   "size": [
+    3.98,
+    2.113,
+    3.671
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 256,
+   "neighbors": [
+    "s01",
+    "s02"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/stall_s07.fbx",
+   "center": [
+    -1.305,
+    3.003,
+    1.232
+   ],
+   "size": [
+    4.11,
+    5.413,
+    2.705
+   ],
+   "material": "wood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 160,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04",
+    "s05",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s08",
+   "mesh": "chunks/stall_s08.fbx",
+   "center": [
+    1.317,
+    2.596,
+    -0.129
+   ],
+   "size": [
+    3.316,
+    1.331,
+    4.143
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 96,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s04",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s09",
+   "mesh": "chunks/stall_s09.fbx",
+   "center": [
+    0.393,
+    1.386,
+    1.74
+   ],
+   "size": [
+    3.175,
+    2.531,
+    0.42
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 88,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s05",
+    "s07",
+    "s08"
+   ]
+  }
+ ]
+}

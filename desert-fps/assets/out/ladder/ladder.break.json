@@ -1,0 +1,128 @@
+{
+ "piece": "ladder",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 50,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/ladder_s00.fbx",
+   "center": [
+    0.0,
+    6.604,
+    0.1
+   ],
+   "size": [
+    2.44,
+    4.271,
+    0.453
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 104,
+   "neighbors": [
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/ladder_s01.fbx",
+   "center": [
+    0.252,
+    1.798,
+    0.093
+   ],
+   "size": [
+    1.937,
+    3.596,
+    0.466
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 72,
+   "neighbors": [
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/ladder_s02.fbx",
+   "center": [
+    -0.709,
+    1.496,
+    0.093
+   ],
+   "size": [
+    1.022,
+    2.992,
+    0.466
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 72,
+   "neighbors": [
+    "s01",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/ladder_s03.fbx",
+   "center": [
+    0.0,
+    10.471,
+    0.101
+   ],
+   "size": [
+    2.44,
+    4.657,
+    0.449
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 124,
+   "neighbors": [
+    "s00"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/ladder_s04.fbx",
+   "center": [
+    0.0,
+    4.248,
+    0.099
+   ],
+   "size": [
+    2.44,
+    2.694,
+    0.454
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 80,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

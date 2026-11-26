@@ -1,0 +1,108 @@
+{
+ "piece": "vase",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 40,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/vase_s00.fbx",
+   "center": [
+    -0.047,
+    0.763,
+    -0.442
+   ],
+   "size": [
+    1.384,
+    1.525,
+    0.714
+   ],
+   "material": "band",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 88,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/vase_s01.fbx",
+   "center": [
+    0.263,
+    1.339,
+    -0.071
+   ],
+   "size": [
+    1.113,
+    1.921,
+    1.081
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 124,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/vase_s02.fbx",
+   "center": [
+    -0.438,
+    1.645,
+    -0.028
+   ],
+   "size": [
+    0.57,
+    1.31,
+    0.733
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 62,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/vase_s03.fbx",
+   "center": [
+    -0.012,
+    0.932,
+    0.253
+   ],
+   "size": [
+    1.453,
+    1.864,
+    1.093
+   ],
+   "material": "band",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 118,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

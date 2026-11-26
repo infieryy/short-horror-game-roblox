@@ -1,0 +1,12 @@
+{
+ "piece": "parapet_corner",
+ "triangles": 44,
+ "triangles_low": 12,
+ "strokes": 580,
+ "px_per_stud": 175.9,
+ "break_mode": "chunks",
+ "chunks": 2,
+ "chunk_triangles": 72,
+ "problems": [],
+ "seconds": 5.7
+}

@@ -1,0 +1,168 @@
+{
+ "piece": "plank",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 105,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/plank_s00.fbx",
+   "center": [
+    -2.536,
+    0.375,
+    -0.784
+   ],
+   "size": [
+    2.927,
+    0.75,
+    2.708
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 52,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/plank_s01.fbx",
+   "center": [
+    1.435,
+    0.375,
+    0.03
+   ],
+   "size": [
+    5.129,
+    0.75,
+    6.18
+   ],
+   "material": "wood",
+   "health": 45,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right"
+   ],
+   "triangles": 104,
+   "neighbors": [
+    "s00",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/plank_s02.fbx",
+   "center": [
+    -2.327,
+    0.375,
+    1.814
+   ],
+   "size": [
+    3.347,
+    0.75,
+    2.613
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 64,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/plank_s03.fbx",
+   "center": [
+    -3.214,
+    0.62,
+    0.21
+   ],
+   "size": [
+    1.512,
+    0.26,
+    3.228
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 20,
+   "neighbors": [
+    "s00",
+    "s02"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/plank_s04.fbx",
+   "center": [
+    -0.289,
+    0.375,
+    1.249
+   ],
+   "size": [
+    3.959,
+    0.75,
+    3.742
+   ],
+   "material": "wood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 72,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/plank_s05.fbx",
+   "center": [
+    -1.56,
+    0.375,
+    -2.035
+   ],
+   "size": [
+    4.88,
+    0.75,
+    2.05
+   ],
+   "material": "wood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 76,
+   "neighbors": [
+    "s00",
+    "s01"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "sacks",
+ "triangles": 1484,
+ "triangles_low": 476,
+ "strokes": 8034,
+ "px_per_stud": 70.0,
+ "break_mode": "shatter",
+ "chunks": 6,
+ "chunk_triangles": 980,
+ "problems": [],
+ "seconds": 8.7
+}

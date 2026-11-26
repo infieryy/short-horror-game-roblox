@@ -1,0 +1,12 @@
+{
+ "piece": "parapet_crenel",
+ "triangles": 156,
+ "triangles_low": 60,
+ "strokes": 3658,
+ "px_per_stud": 61.7,
+ "break_mode": "chunks",
+ "chunks": 5,
+ "chunk_triangles": 328,
+ "problems": [],
+ "seconds": 5.7
+}

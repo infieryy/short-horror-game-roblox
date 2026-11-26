@@ -1,0 +1,56 @@
+{
+ "piece": "parapet_corner",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/parapet_corner_s00.fbx",
+   "center": [
+    0.0,
+    2.579,
+    -0.0
+   ],
+   "size": [
+    1.44,
+    1.443,
+    1.44
+   ],
+   "material": "plaster",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 36,
+   "neighbors": [
+    "s01"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/parapet_corner_s01.fbx",
+   "center": [
+    0.0,
+    1.209,
+    -0.0
+   ],
+   "size": [
+    1.44,
+    2.417,
+    1.44
+   ],
+   "material": "plaster",
+   "health": 55,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 36,
+   "neighbors": [
+    "s00"
+   ]
+  }
+ ]
+}

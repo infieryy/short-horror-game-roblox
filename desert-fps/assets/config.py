@@ -13,6 +13,8 @@ GUN_MM = 3.3 / 880.0  # studs per millimetre for every gun: an 880 mm rifle is 3
 # ---------------------------------------------------------------- texture
 TEX = 1024            # px, texture size per piece (phone-friendly)
 PAD = 6               # px of padding around every UV island
+DENSITY_MIN = 24      # px per stud: run.py fails a piece whose texture is coarser than this...
+DENSITY_MIN_PIECE = {"stairs": 22}    # ...except the biggest solid in the kit, which just misses it
 AO_STEP = 2           # compute contact shade on every Nth texel
 AO_RAYS = 16
 AO_DIST = 0.45        # studs: only close contact darkens ("corners and cracks")
@@ -54,6 +56,22 @@ PALETTE["adobe"] = {"h": (17, 27), "l": (0.44, 0.60), "s": (0.30, 0.48), "step":
 PALETTE["rawwood"] = {"h": (22, 32), "l": (0.62, 0.78), "s": (0.46, 0.66), "step": 0.02, "hue_step": 0.6,
                       "bases": [(27, 0.70, 0.56), (25, 0.68, 0.54)]}
 CORE = {"plaster": "adobe", "stone": "adobe", "wood": "rawwood", "darkwood": "rawwood", "iron": "iron"}
+
+# map props, measured from reference/props and reference/kit/awnings
+PALETTE["canvas"] = {"h": (30, 38), "l": (0.77, 0.89), "s": (0.72, 0.98), "step": 0.014, "hue_step": 0.5,
+                     "bases": [(34, 0.855, 0.94), (33, 0.84, 0.90)]}
+PALETTE["redcloth"] = {"h": (3, 12), "l": (0.55, 0.74), "s": (0.60, 0.90), "step": 0.018, "hue_step": 0.5,
+                       "bases": [(9, 0.655, 0.76), (6, 0.64, 0.70)]}
+PALETTE["burlap"] = {"h": (22, 32), "l": (0.58, 0.78), "s": (0.48, 0.86), "step": 0.02, "hue_step": 0.6,
+                     "bases": [(28, 0.71, 0.72), (26, 0.69, 0.66)]}
+PALETTE["clay"] = {"h": (13, 24), "l": (0.55, 0.74), "s": (0.64, 0.92), "step": 0.018, "hue_step": 0.8,
+                   "bases": [(17, 0.66, 0.78), (20, 0.68, 0.84)]}
+PALETTE["rope"] = {"h": (24, 31), "l": (0.60, 0.80), "s": (0.52, 0.80), "step": 0.02, "hue_step": 0.4,
+                   "bases": [(27, 0.72, 0.72)]}
+PALETTE["paving"] = {"h": (14, 28), "l": (0.73, 0.85), "s": (0.68, 0.95), "step": 0.014, "hue_step": 0.8,
+                     "bases": [(24, 0.80, 0.88), (19, 0.78, 0.85), (26, 0.815, 0.90)]}
+CORE.update({"canvas": "canvas", "redcloth": "redcloth", "burlap": "burlap", "clay": "clay", "rope": "rope",
+             "paving": "adobe", "band": "adobe"})
 
 LAVENDER = (268, 0.66, 0.42)      # the only shade colour; never gray
 PALE = (30, 0.90, 0.85)           # light-catching glaze on protruding edges
@@ -136,6 +154,42 @@ PAINT["rawwood"] = {                            # splintered wood: short strokes
     ],
 }
 
+PAINT["canvas"] = {                             # cloth: long soft strokes along the drape, then thin fold lines
+    "lean_jitter": 5,
+    "layers": [
+        {"per_stud2": 3.0, "len": (1.2, 3.0), "wid": (0.25, 0.55), "opacity": (0.35, 0.6), "round": 0.3},
+        {"per_stud2": 7.0, "len": (0.6, 1.8), "wid": (0.05, 0.11), "opacity": (0.4, 0.7), "round": 0.1},
+    ],
+}
+PAINT["redcloth"] = PAINT["canvas"]
+PAINT["burlap"] = {                             # sacking: short dabs both ways, like a coarse weave
+    "lean": 10, "lean_jitter": 80,
+    "layers": [
+        {"per_stud2": 10.0, "len": (0.3, 0.8), "wid": (0.2, 0.42), "opacity": (0.45, 0.8), "round": 0.9},
+        {"per_stud2": 14.0, "len": (0.25, 0.7), "wid": (0.04, 0.09), "opacity": (0.45, 0.8), "round": 0.1},
+    ],
+}
+PAINT["clay"] = {                               # thrown pots: strokes run round the pot
+    "lean": 3, "lean_jitter": 6,
+    "layers": [
+        {"per_stud2": 8.0, "len": (0.5, 1.6), "wid": (0.2, 0.45), "opacity": (0.45, 0.8), "round": 0.5},
+        {"per_stud2": 10.0, "len": (0.4, 1.2), "wid": (0.05, 0.1), "opacity": (0.45, 0.8), "round": 0.1},
+    ],
+}
+PAINT["rope"] = {                               # short slanted dabs: the twist of the strands
+    "lean": 55, "lean_jitter": 8,
+    "layers": [
+        {"per_stud2": 40.0, "len": (0.12, 0.3), "wid": (0.05, 0.1), "opacity": (0.5, 0.85), "round": 0.4},
+    ],
+}
+PAINT["paving"] = {                             # flagstones: flat dabs, no lean
+    "lean": 20, "lean_jitter": 70,
+    "layers": [
+        {"per_stud2": 6.0, "len": (0.4, 1.1), "wid": (0.3, 0.7), "opacity": (0.4, 0.75), "round": 0.9},
+        {"per_stud2": 5.0, "len": (0.3, 0.9), "wid": (0.06, 0.14), "opacity": (0.45, 0.75), "round": 0.1},
+    ],
+}
+
 GLAZE = {
     "shade_per_stud2": 260.0,  # dark glaze dabs per square stud of fully occluded surface
     "shade_size": (0.05, 0.16),
@@ -168,12 +222,30 @@ KIT = {
     "knife": {"chunky": 1.3},
     "smoke": {"chunky": 1.0},
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
+    # --- the rest of the building kit. Everything snaps to the 8-stud cell and the 12-stud story.
+    "corner": {"half": 0.75},                       # post that closes the notch where two walls meet
+    "pillar": {"base": 1.25, "base_h": 1.3, "shaft_r": 0.85, "cap": 1.15, "cap_h": 0.9, "segments": 8},
+    "parapet": {"h": 2.6, "cap_h": 0.4, "cap_out": 0.16, "merlons": 3, "merlon_w": 1.4, "merlon_h": 1.3,
+                "post_out": 0.06, "post_up": 0.3},        # the corner post: a little wider and taller than the run
+    "roof": {"t": 1.06, "beams": 3, "beam_r": 0.3, "beam_drop": 0.6},   # 0.06 proud of the wall tops it covers
+    "stairs": {"steps": 8, "tread_t": 0.12, "tread_over": 0.1, "tread_in": 0.05},
+    "ladder": {"h": 12.8, "w": 2.2, "rail": 0.3, "rung_gap": 1.4, "rung_h": 0.22},
+    "plank": {"w": 6.0, "boards": 8, "board_t": 0.22, "joist": (0.36, 0.5), "joist_y": 2.2},
+    "ground": {"t": 0.5, "stones": 4},
+    # --- cover and props
+    "stall": {"w": 6.4, "d": 4.4, "front_h": 6.0, "back_h": 7.2, "post": 0.4, "stripes": 8, "valance": 0.75,
+              "counter_h": 2.9, "counter_d": 1.7},
+    "awning": {"w": 6.4, "out": 3.4, "top": 3.4, "drop": 1.5, "stripes": 8, "valance": 0.7},
+    "cloth": {"w": 6.6, "pole_z": 9.6, "drop": 8.4, "t": 0.07, "folds": 9, "fold_out": 0.3},
+    "sacks": {"len": 3.0, "w": 1.9, "h": 1.0},
+    "well": {"r_in": 1.75, "r_out": 2.45, "h": 2.5, "segments": 16, "post_h": 4.6, "beam_z": 6.5},
 }
 
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
-DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1}
+DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
+                "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "stall": 0.7, "awning": 0.7}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -212,6 +284,10 @@ STYLE["knife"] = {**STYLE["rifle"], "extra_layers": {**STYLE["rifle"]["extra_lay
 
 STYLE["smoke"] = STYLE["knife"]
 
+# Pale cloth and sacking show the dark corner glaze as stains, so they get much less of it.
+STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
+STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
+
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).
 # mode "chunks":  every shard has its own health and stays until it is destroyed (walls, doors).
@@ -223,7 +299,8 @@ STYLE["smoke"] = STYLE["knife"]
 # seed     change it to get a different crack pattern
 # Health numbers are placeholders until weapon damage exists.
 BREAK = {
-    "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30},
+    "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30,
+                     "canvas": 2, "redcloth": 2, "burlap": 4, "clay": 6, "rope": 3, "paving": 16, "band": 6},
     "hp_min": 10,
     "pieces": {
         "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
@@ -232,7 +309,25 @@ BREAK = {
         "door": {"mode": "chunks", "shards": 6, "through": "y", "slant": 0.25, "apart": 0.5},
         "crate": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "barrel": {"mode": "shatter", "shards": 7, "apart": 0.5},
+        "corner": {"mode": "chunks", "shards": 4, "apart": 0.6},
+        "pillar": {"mode": "chunks", "shards": 5, "apart": 0.6},
+        "parapet_plain": {"mode": "chunks", "shards": 5, "through": "y", "slant": 0.4, "apart": 0.55},
+        "parapet_crenel": {"mode": "chunks", "shards": 5, "through": "y", "slant": 0.4, "apart": 0.55},
+        "parapet_corner": {"mode": "chunks", "shards": 2, "apart": 0.6},
+        "roof": {"mode": "chunks", "shards": 7, "through": "z", "slant": 0.4, "apart": 0.55},
+        "stairs": {"mode": "chunks", "shards": 6, "apart": 0.6},
+        "ladder": {"mode": "shatter", "shards": 5, "apart": 0.5},
+        "plank": {"mode": "shatter", "shards": 6, "apart": 0.5},
+        "stall": {"mode": "shatter", "shards": 10, "apart": 0.5},
+        "awning": {"mode": "shatter", "shards": 5, "apart": 0.5},
+        "cloth": {"mode": "shatter", "shards": 4, "apart": 0.5},
+        "sacks": {"mode": "shatter", "shards": 6, "apart": 0.5},
+        "well": {"mode": "shatter", "shards": 10, "apart": 0.5},
+        "pot_tall": {"mode": "shatter", "shards": 5, "apart": 0.5},
+        "pot_round": {"mode": "shatter", "shards": 5, "apart": 0.5},
+        "vase": {"mode": "shatter", "shards": 4, "apart": 0.5},
         # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
+        "ground": {"mode": "parts"},
         "rifle": {"mode": "parts"},
         "pistol": {"mode": "parts"},
         "knife": {"mode": "parts"},

@@ -1,11 +1,30 @@
 """Recipe registry: piece name -> (build function, options)."""
-from . import barrel, crate, door, knife, pistol, rifle, smoke, wall
+from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
+from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
     "wall_window": (wall.build, {"opening": "window"}),
     "wall_door": (wall.build, {"opening": "door"}),
     "door": (door.build, {}),
+    "corner": (corner.build, {}),
+    "pillar": (pillar.build, {}),
+    "parapet_plain": (parapet.build, {}),
+    "parapet_crenel": (parapet.build, {"merlons": True}),
+    "parapet_corner": (parapet.build_corner, {}),
+    "roof": (roof.build, {}),
+    "stairs": (stairs.build, {}),
+    "ladder": (ladder.build, {}),
+    "plank": (plank.build, {}),
+    "ground": (ground.build, {}),
+    "stall": (stall.build, {}),
+    "awning": (awning.build, {}),
+    "cloth": (cloth.build, {}),
+    "sacks": (sacks.build, {}),
+    "well": (well.build, {}),
+    "pot_tall": (pot.tall, {}),
+    "pot_round": (pot.round_, {}),
+    "vase": (pot.vase, {}),
     "crate": (crate.build, {}),
     "barrel": (barrel.build, {}),
     "rifle": (rifle.build, {}),

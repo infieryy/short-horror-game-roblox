@@ -1,0 +1,174 @@
+{
+ "piece": "stairs",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/stairs_s00.fbx",
+   "center": [
+    -2.104,
+    2.315,
+    1.898
+   ],
+   "size": [
+    3.791,
+    4.629,
+    4.404
+   ],
+   "material": "plaster",
+   "health": 410,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 154,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/stairs_s01.fbx",
+   "center": [
+    0.0,
+    4.042,
+    -1.99
+   ],
+   "size": [
+    8.0,
+    8.083,
+    4.019
+   ],
+   "material": "plaster",
+   "health": 1340,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 24,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/stairs_s02.fbx",
+   "center": [
+    0.887,
+    9.355,
+    -1.95
+   ],
+   "size": [
+    6.225,
+    5.53,
+    4.1
+   ],
+   "material": "plaster",
+   "health": 445,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 192,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/stairs_s03.fbx",
+   "center": [
+    -0.206,
+    6.548,
+    -0.145
+   ],
+   "size": [
+    7.589,
+    5.144,
+    4.49
+   ],
+   "material": "plaster",
+   "health": 250,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 156,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/stairs_s04.fbx",
+   "center": [
+    0.668,
+    3.42,
+    0.052
+   ],
+   "size": [
+    6.664,
+    6.839,
+    8.096
+   ],
+   "material": "plaster",
+   "health": 1805,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 196,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s05"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/stairs_s05.fbx",
+   "center": [
+    -0.815,
+    7.42,
+    -1.489
+   ],
+   "size": [
+    6.371,
+    9.399,
+    5.022
+   ],
+   "material": "plaster",
+   "health": 1065,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 234,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  }
+ ]
+}

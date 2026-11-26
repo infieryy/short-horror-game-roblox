@@ -1,0 +1,202 @@
+{
+ "piece": "roof",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/roof_s00.fbx",
+   "center": [
+    0.894,
+    0.237,
+    -2.544
+   ],
+   "size": [
+    6.212,
+    1.645,
+    2.912
+   ],
+   "material": "plaster",
+   "health": 160,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right",
+    "top"
+   ],
+   "triangles": 88,
+   "neighbors": [
+    "s02",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/roof_s01.fbx",
+   "center": [
+    0.347,
+    0.237,
+    2.678
+   ],
+   "size": [
+    3.618,
+    1.645,
+    2.643
+   ],
+   "material": "plaster",
+   "health": 75,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "bottom"
+   ],
+   "triangles": 56,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/roof_s02.fbx",
+   "center": [
+    -1.59,
+    0.237,
+    -0.552
+   ],
+   "size": [
+    4.441,
+    1.645,
+    4.182
+   ],
+   "material": "plaster",
+   "health": 145,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 92,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/roof_s03.fbx",
+   "center": [
+    -2.185,
+    0.237,
+    2.276
+   ],
+   "size": [
+    3.631,
+    1.645,
+    3.448
+   ],
+   "material": "plaster",
+   "health": 125,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left",
+    "bottom"
+   ],
+   "triangles": 52,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/roof_s04.fbx",
+   "center": [
+    -2.846,
+    0.237,
+    -1.64
+   ],
+   "size": [
+    2.308,
+    1.645,
+    4.719
+   ],
+   "material": "plaster",
+   "health": 90,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left",
+    "top"
+   ],
+   "triangles": 52,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/roof_s05.fbx",
+   "center": [
+    1.969,
+    0.237,
+    -0.361
+   ],
+   "size": [
+    4.062,
+    1.645,
+    4.892
+   ],
+   "material": "plaster",
+   "health": 165,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right"
+   ],
+   "triangles": 72,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s06"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/roof_s06.fbx",
+   "center": [
+    2.498,
+    0.237,
+    2.234
+   ],
+   "size": [
+    3.004,
+    1.645,
+    3.532
+   ],
+   "material": "plaster",
+   "health": 90,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right",
+    "bottom"
+   ],
+   "triangles": 48,
+   "neighbors": [
+    "s01",
+    "s05"
+   ]
+  }
+ ]
+}

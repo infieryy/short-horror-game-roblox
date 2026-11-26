@@ -1,0 +1,12 @@
+{
+ "piece": "roof",
+ "triangles": 120,
+ "triangles_low": 72,
+ "strokes": 8710,
+ "px_per_stud": 48.8,
+ "break_mode": "chunks",
+ "chunks": 7,
+ "chunk_triangles": 460,
+ "problems": [],
+ "seconds": 7.3
+}

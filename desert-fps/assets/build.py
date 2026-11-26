@@ -125,13 +125,15 @@ class Piece:
         self._merge(tb, pid)
         return pid
 
-    def loft(self, rings, mat, group=None, grain=None, frame=None, band=False, detail=False, extra=None):
+    def loft(self, rings, mat, group=None, grain=None, frame=None, band=False, detail=False, extra=None,
+             soft=False):
         """Skin a row of rings (each the same number of 3D points) into one closed shell, capped at
-        both ends. For shapes whose cross-section changes along their length, like a blade."""
+        both ends. For shapes whose cross-section changes along their length, like a blade.
+        `soft` shades the whole shell as one rounded surface (a sack) instead of flat facets."""
         self.serial += 1
         if detail and self.lod:
             return
-        pid = self._part(mat, group, grain, frame, band, extra)
+        pid = self._part(mat, group, grain, frame, band, {**(extra or {}), "soft": soft})
         tb = bmesh.new()
         rows = [[tb.verts.new(q) for q in ring] for ring in rings]
         count = len(rings[0])
@@ -346,7 +348,9 @@ class Piece:
                                               tuple(round(c, 2) for c in spots[0])))
         if flicker:
             problems.append(f"{flicker} overlapping coplanar faces (would flicker)")
-        if self.density < 24:
+        floor = next((v for k, v in C.DENSITY_MIN_PIECE.items() if self.name == k or self.name.startswith(k + "_")),
+                     C.DENSITY_MIN)
+        if self.density < floor:
             problems.append(f"texture density only {self.density:.0f} px per stud")
         return tris, problems
 
@@ -440,8 +444,9 @@ class Piece:
                 continue
             if any(self.parts[f[self.l_part]].get("core") for f in e.link_faces):
                 continue                         # a break line is not an edge until the piece breaks
-            if angle < math.radians(50) and all(f[self.l_kind] == 1 and self.parts[f[self.l_part]].get("smooth")
-                                                for f in e.link_faces):
+            if angle < math.radians(50) and all(
+                    (f[self.l_kind] == 1 and self.parts[f[self.l_part]].get("smooth")) or self.parts[f[self.l_part]].get("soft")
+                    for f in e.link_faces):
                 continue                         # facets of a round surface are not edges
             for f in e.link_faces:
                 loops = {l.vert: l for l in f.loops}
@@ -456,7 +461,7 @@ class Piece:
         bm = self.bm.copy()
         part, kind = bm.faces.layers.int["part"], bm.faces.layers.int["kind"]
         for f in bm.faces:
-            f.smooth = f[kind] == 1 and bool(self.parts[f[part]].get("smooth"))
+            f.smooth = (f[kind] == 1 and bool(self.parts[f[part]].get("smooth"))) or bool(self.parts[f[part]].get("soft"))
         for e in bm.edges:                       # a round surface stays round, but its rims stay crisp
             if len(e.link_faces) == 2 and abs(e.calc_face_angle_signed(0.0)) > math.radians(50):
                 e.smooth = False

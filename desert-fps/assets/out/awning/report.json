@@ -1,0 +1,12 @@
+{
+ "piece": "awning",
+ "triangles": 712,
+ "triangles_low": 632,
+ "strokes": 10421,
+ "px_per_stud": 46.2,
+ "break_mode": "shatter",
+ "chunks": 5,
+ "chunk_triangles": 988,
+ "problems": [],
+ "seconds": 6.1
+}

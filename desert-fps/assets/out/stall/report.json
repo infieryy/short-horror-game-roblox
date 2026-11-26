@@ -1,0 +1,12 @@
+{
+ "piece": "stall",
+ "triangles": 1196,
+ "triangles_low": 828,
+ "strokes": 30218,
+ "px_per_stud": 33.4,
+ "break_mode": "shatter",
+ "chunks": 10,
+ "chunk_triangles": 1556,
+ "problems": [],
+ "seconds": 13.1
+}

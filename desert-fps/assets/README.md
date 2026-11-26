@@ -35,6 +35,48 @@ python3 preview.py
 | `knife` | 1,328 | 560 | not breakable: 4 parts | 1,328 | 3,973 | 1,094.4 px/stud |
 | `smoke` | 632 | 348 | not breakable: 4 parts | 632 | 3,634 | 931.5 px/stud |
 
+## The rest of the kit
+
+![One room built from the structural pieces](out/preview-building.png)
+
+![The same room from behind](out/preview-building-back.png)
+
+![Cover pieces and props](out/preview-props.png)
+
+Built on the PC session, with the same rules. Everything snaps to the 8-stud cell and the 12-stud story.
+
+| Piece | Triangles | Low-detail | Breaks into | Brush strokes | Texture density |
+|---|---|---|---|---|---|
+| `corner` | 28 | 44 | 4 shards | 2,628 | 69.5 px/stud |
+| `pillar` | 204 | 68 | 5 shards | 3,452 | 66.3 px/stud |
+| `parapet_plain` | 24 | 24 | 5 shards | 2,618 | 65.2 px/stud |
+| `parapet_crenel` | 156 | 60 | 5 shards | 3,658 | 61.7 px/stud |
+| `parapet_corner` | 44 | 12 | 2 shards | 580 | 175.9 px/stud |
+| `roof` | 120 | 72 | 7 shards | 8,710 | 48.8 px/stud |
+| `stairs` | 420 | 164 | 6 shards | 30,444 | 23.5 px/stud |
+| `ladder` | 984 | 248 | 5 shards (debris) | 8,643 | 64.8 px/stud |
+| `plank` | 376 | 120 | 6 shards (debris) | 8,396 | 57.6 px/stud |
+| `ground` | 12 | 12 | not breakable | 1,750 | 61.7 px/stud |
+| `stall` | 1,196 | 828 | 10 shards (debris) | 30,218 | 33.4 px/stud |
+| `awning` | 712 | 632 | 5 shards (debris) | 10,421 | 46.2 px/stud |
+| `cloth` | 400 | 336 | 4 shards (debris) | 3,553 | 59.2 px/stud |
+| `sacks` | 1,484 | 476 | 6 shards (debris) | 8,034 | 70.0 px/stud |
+| `well` | 804 | 408 | 10 shards (debris) | 22,387 | 52.2 px/stud |
+| `pot_tall` | 456 | 222 | 5 shards (debris) | 5,248 | 114.2 px/stud |
+| `pot_round` | 300 | 146 | 5 shards (debris) | 3,596 | 132.6 px/stud |
+| `vase` | 380 | 184 | 4 shards (debris) | 2,914 | 158.5 px/stud |
+
+How they fit together:
+- **Walls stand on the cell edges.** Where two walls meet, a `corner` post closes the notch between them. A `parapet_corner` does the same for parapets.
+- **A `roof` slab fills a cell** at the top of the story. Its top is 0.06 studs above the wall tops, so it covers the inner half of them without flickering. Its three beams line up with the beam ends on the wall pieces.
+- **Parapets stand on top of the walls.** They have no plinth and no turquoise band; the band belongs at the foot of the ground floor.
+- **`stairs` fill one cell** and climb one story towards the building (8 steps, 1.5 studs each). In Roblox they collide as one ramp.
+- **A `ladder` is only the look.** It needs a TrussPart beside it to be climbed.
+- **`cloth` spans one cell** between two walls and does not block players.
+- **`ground` is one cell of paving.** Its top is 0.5 studs above its origin.
+
+New materials, measured from `reference/props` and `reference/kit/awnings`: `canvas` and `redcloth` (awnings, stall roofs, hanging cloth), `burlap` (sacks), `clay` (pots), `rope`, `paving`. Patterns follow the same rule as the crate boards: stripes are separate strips of cloth in two colours, and a pot's glaze is its own solid. Nothing is painted as a picture. The zigzag on the tall jar, the diamonds on the vase, the well's block joints and the paving joints are painted detail lines.
+
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
 - `<piece>.bundle.fbx`: every mesh of the piece as separate objects in one file, so a piece is one upload to Roblox
@@ -140,13 +182,14 @@ A can with rolled rims, a brass fuze, a steel safety lever bent over the fuze an
 | File | What it does |
 |---|---|
 | `config.py` | Every number: scale, texture size, palette, paint rules, piece sizes, triangle budgets |
-| `recipes/` | One file per kind of piece. `gun.py` is the shared toolkit for firearms. |
+| `recipes/` | One file per kind of piece. `gun.py` is the shared toolkit for firearms, `drape.py` for cloth. |
 | `build.py` | Builds closed solids, unwraps them, bakes the paint guides, checks and exports |
 | `chunks.py` | Cuts a piece into jagged shards, fills the cut faces, writes the break data. Also splits off moving parts (weapons). |
 | `brush.py` | Flat-brush engine: each stroke is a centre, length, width, angle and colour |
 | `paint.py` | The look rules, applied stroke by stroke |
 | `run.py` | Runs recipes |
-| `preview.py` | Renders the pieces and the comparison sheet |
+| `preview.py` | Renders the pieces and the comparison sheet. `python3 preview.py building props` renders the kit scenes. |
+| `rebundle.py` | Rewrites the `.fbx` files from the `.obj` meshes without repainting |
 
 ## Rules built into the scripts
 
@@ -168,6 +211,9 @@ A can with rolled rims, a brass fuze, a steel safety lever bent over the fuze an
 - Every shard is checked the same way as a whole piece.
 - Contact shading is only painted between parts of the same shard, so a destroyed shard leaves no shadow behind on the wall.
 - Break lines get no edge highlight, so cracks are invisible until the piece breaks.
+- Parts that are cut into shards may not run through each other (a cloth through its pole, a post into its foot): their cut faces would land on top of each other and flicker. They touch, or keep a gap.
+- Texture density is at least 24 px per stud (`DENSITY_MIN`). The stairs, the biggest solid in the kit, are allowed 22.
+- Pale cloth and sacking get much less of the dark corner glaze, which reads as stains on them (`STYLE`).
 
 ## In Roblox Studio
 

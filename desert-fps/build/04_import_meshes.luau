@@ -1,8 +1,8 @@
--- Loads the uploaded kit pieces into ServerStorage.DesertFps.Meshes, where Breakable (and later the weapons)
+-- Loads the uploaded kit pieces into ServerStorage.DesertFps.Meshes, where Breakable and the weapons
 -- pick them up. Run in Studio in edit mode, after 01_install_modules.luau. Safe to re-run: each piece is replaced.
 --   Meshes.<piece>.Whole, .Low          the whole mesh and its low-detail version
---   Meshes.<piece>.Shards.<shard id>    pieces that break (walls, door, crate, barrel)
---   Meshes.<piece>.Parts.<part id>      weapons
+--   Meshes.<piece>.Shards.<shard id>    pieces that break (walls, stairs, props, ...)
+--   Meshes.<piece>.Parts.<part id>      pieces that do not break (weapons, the ground)
 -- Every mesh gets the piece's texture as a SurfaceAppearance colour map, and an "Offset" attribute:
 -- where its centre sits relative to the piece origin. The script stops if a mesh is not where its data says.
 local ServerStorage = game:GetService("ServerStorage")
@@ -14,8 +14,19 @@ local PartsData = require(DesertFps.Assets.PartsData)
 
 -- Studs a mesh may sit from the centre its data gives.
 local TOLERANCE = 0.01
--- Whole walls with an opening need collision that leaves the opening open.
-local PRECISE = { wall_door = true, wall_window = true }
+-- Collision of the whole and low-detail mesh, where the default (a rough set of blocks) will not do.
+local PRECISE, HULL = Enum.CollisionFidelity.PreciseConvexDecomposition, Enum.CollisionFidelity.Hull
+local FIDELITY = {
+	wall_door = PRECISE, -- the opening has to stay open
+	wall_window = PRECISE,
+	well = PRECISE,
+	stall = PRECISE,
+	awning = PRECISE,
+	stairs = HULL, -- one smooth ramp to walk up
+}
+-- Pieces players pass straight through. Shots still hit them.
+-- (A ladder is climbed on a TrussPart that the building assembly puts with it.)
+local WALK_THROUGH = { cloth = true, ladder = true }
 
 local meshes = DesertFps:FindFirstChild("Meshes")
 if not meshes then
@@ -26,7 +37,7 @@ end
 
 local report = {}
 for piece, ids in AssetIds do
-	local isWeapon = PartsData[piece] ~= nil
+	local fixed = PartsData[piece] ~= nil -- does not break
 	local data = BreakData[piece] or PartsData[piece]
 	assert(data, `no break or parts data for "{piece}"`)
 	local entries = data.chunks or data.parts
@@ -41,7 +52,7 @@ for piece, ids in AssetIds do
 	local folder = Instance.new("Folder")
 	folder.Name = piece
 	local group = Instance.new("Folder")
-	group.Name = if isWeapon then "Parts" else "Shards"
+	group.Name = if fixed then "Parts" else "Shards"
 	group.Parent = folder
 
 	local worst = 0
@@ -60,17 +71,15 @@ for piece, ids in AssetIds do
 		appearance.Parent = part
 
 		if part.Name == piece or part.Name == piece .. "_low" then
-			part.CollisionFidelity = if isWeapon
-				then Enum.CollisionFidelity.Box
-				elseif PRECISE[piece] then Enum.CollisionFidelity.PreciseConvexDecomposition
-				else Enum.CollisionFidelity.Default
+			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else FIDELITY[piece] or Enum.CollisionFidelity.Default
+			part.CanCollide = not WALK_THROUGH[piece]
 			part.Name = if part.Name == piece then "Whole" else "Low"
 			part.Parent = folder
 		else
 			local id = part.Name:sub(#piece + 2)
 			assert(centres[id], `{part.Name} is not in the data for "{piece}"`)
 			worst = math.max(worst, (offset.Position - centres[id]).Magnitude)
-			part.CollisionFidelity = if isWeapon then Enum.CollisionFidelity.Box else Enum.CollisionFidelity.Hull
+			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else HULL
 			part.Name = id
 			part.Parent = group
 		end

@@ -1,0 +1,136 @@
+{
+ "piece": "pot_round",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 50,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/pot_round_s00.fbx",
+   "center": [
+    -0.35,
+    1.195,
+    0.047
+   ],
+   "size": [
+    1.462,
+    1.771,
+    1.798
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 102,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/pot_round_s01.fbx",
+   "center": [
+    0.199,
+    1.07,
+    -0.576
+   ],
+   "size": [
+    1.877,
+    2.021,
+    1.188
+   ],
+   "material": "band",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 82,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/pot_round_s02.fbx",
+   "center": [
+    0.183,
+    1.47,
+    0.651
+   ],
+   "size": [
+    1.463,
+    1.22,
+    1.037
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 66,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/pot_round_s03.fbx",
+   "center": [
+    0.093,
+    0.478,
+    0.257
+   ],
+   "size": [
+    2.119,
+    0.957,
+    1.778
+   ],
+   "material": "band",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 60,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/pot_round_s04.fbx",
+   "center": [
+    0.66,
+    1.399,
+    0.095
+   ],
+   "size": [
+    1.08,
+    1.362,
+    1.202
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 72,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03"
+   ]
+  }
+ ]
+}

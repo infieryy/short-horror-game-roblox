@@ -1,0 +1,12 @@
+{
+ "piece": "ladder",
+ "triangles": 984,
+ "triangles_low": 248,
+ "strokes": 8643,
+ "px_per_stud": 64.8,
+ "break_mode": "shatter",
+ "chunks": 5,
+ "chunk_triangles": 452,
+ "problems": [],
+ "seconds": 5.4
+}

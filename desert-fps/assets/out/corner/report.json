@@ -1,0 +1,12 @@
+{
+ "piece": "corner",
+ "triangles": 28,
+ "triangles_low": 44,
+ "strokes": 2628,
+ "px_per_stud": 69.5,
+ "break_mode": "chunks",
+ "chunks": 4,
+ "chunk_triangles": 96,
+ "problems": [],
+ "seconds": 5.4
+}
