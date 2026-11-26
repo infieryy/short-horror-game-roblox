@@ -2,11 +2,11 @@
  "piece": "rifle",
  "triangles": 1676,
  "triangles_low": 708,
- "strokes": 12639,
+ "strokes": 10540,
  "px_per_stud": 271.0,
  "break_mode": "parts",
- "chunks": 4,
+ "chunks": 11,
  "chunk_triangles": 1676,
  "problems": [],
- "seconds": 6.5
+ "seconds": 6.4
 }

@@ -1,5 +1,5 @@
 """Recipe registry: piece name -> (build function, options)."""
-from . import barrel, crate, door, rifle, wall
+from . import barrel, crate, door, pistol, rifle, wall
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
@@ -9,4 +9,5 @@ RECIPES = {
     "crate": (crate.build, {}),
     "barrel": (barrel.build, {}),
     "rifle": (rifle.build, {}),
+    "pistol": (pistol.build, {}),
 }

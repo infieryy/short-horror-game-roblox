@@ -1,22 +1,231 @@
 {
  "piece": "rifle",
  "mode": "parts",
- "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre.",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [
+  {
+   "name": "muzzle",
+   "position": [
+    2.2988,
+    0.1687,
+    -0.0
+   ],
+   "forward": [
+    1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "optic",
+   "position": [
+    0.2812,
+    0.3037,
+    -0.0
+   ],
+   "forward": [
+    1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "underbarrel",
+   "position": [
+    1.0687,
+    0.0037,
+    -0.0
+   ],
+   "forward": [
+    1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "magazine",
+   "position": [
+    0.4763,
+    0.0,
+    -0.0
+   ],
+   "forward": [
+    0.2,
+    -1,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "stock",
+   "position": [
+    -0.2062,
+    0.1012,
+    -0.0
+   ],
+   "forward": [
+    -1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "aim_rear",
+   "position": [
+    0.8812,
+    0.3412,
+    -0.0
+   ],
+   "forward": [
+    1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "aim_front",
+   "position": [
+    1.9762,
+    0.3412,
+    -0.0
+   ],
+   "forward": [
+    1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "part": "bolt",
+   "type": "slide",
+   "pivot": [
+    0.5363,
+    0.24,
+    -0.0
+   ],
+   "axis": [
+    -1,
+    0,
+    0
+   ],
+   "amount": 0.2625,
+   "unit": "studs"
+  },
+  {
+   "part": "trigger",
+   "type": "hinge",
+   "pivot": [
+    0.2137,
+    0.0037,
+    -0.0
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "amount": 15,
+   "unit": "degrees"
+  },
+  {
+   "part": "selector",
+   "type": "hinge",
+   "pivot": [
+    0.6937,
+    0.1237,
+    -0.0
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "amount": 20,
+   "unit": "degrees"
+  },
+  {
+   "part": "magazine",
+   "type": "detach",
+   "pivot": [
+    0.4763,
+    0.0,
+    -0.0
+   ],
+   "axis": [
+    0.35,
+    -1,
+    0
+   ],
+   "amount": 0,
+   "unit": "direction"
+  }
+ ],
  "parts": [
+  {
+   "id": "barrel",
+   "mesh": "parts/rifle_barrel.fbx",
+   "center": [
+    1.477,
+    0.238,
+    -0.0
+   ],
+   "size": [
+    1.432,
+    0.282,
+    0.09
+   ],
+   "triangles": 232
+  },
   {
    "id": "body",
    "mesh": "parts/rifle_body.fbx",
    "center": [
-    0.57,
-    -0.008,
+    0.364,
+    0.097,
     -0.0
    ],
    "size": [
-    3.457,
-    0.773,
-    0.223
+    1.14,
+    0.502,
+    0.16
    ],
-   "triangles": 1336
+   "triangles": 308
   },
   {
    "id": "bolt",
@@ -34,6 +243,51 @@
    "triangles": 56
   },
   {
+   "id": "cover",
+   "mesh": "parts/rifle_cover.fbx",
+   "center": [
+    0.278,
+    0.258,
+    -0.0
+   ],
+   "size": [
+    0.877,
+    0.088,
+    0.135
+   ],
+   "triangles": 152
+  },
+  {
+   "id": "grip",
+   "mesh": "parts/rifle_grip.fbx",
+   "center": [
+    -0.011,
+    -0.193,
+    -0.0
+   ],
+   "size": [
+    0.24,
+    0.401,
+    0.117
+   ],
+   "triangles": 80
+  },
+  {
+   "id": "handguard",
+   "mesh": "parts/rifle_handguard.fbx",
+   "center": [
+    1.065,
+    0.069,
+    -0.0
+   ],
+   "size": [
+    0.585,
+    0.491,
+    0.223
+   ],
+   "triangles": 348
+  },
+  {
    "id": "magazine",
    "mesh": "parts/rifle_magazine.fbx",
    "center": [
@@ -47,6 +301,51 @@
     0.138
    ],
    "triangles": 264
+  },
+  {
+   "id": "muzzle",
+   "mesh": "parts/rifle_muzzle.fbx",
+   "center": [
+    2.246,
+    0.169,
+    -0.0
+   ],
+   "size": [
+    0.105,
+    0.107,
+    0.107
+   ],
+   "triangles": 68
+  },
+  {
+   "id": "selector",
+   "mesh": "parts/rifle_selector.fbx",
+   "center": [
+    0.548,
+    0.112,
+    0.08
+   ],
+   "size": [
+    0.382,
+    0.067,
+    0.012
+   ],
+   "triangles": 16
+  },
+  {
+   "id": "stock",
+   "mesh": "parts/rifle_stock.fbx",
+   "center": [
+    -0.679,
+    -0.049,
+    -0.0
+   ],
+   "size": [
+    0.96,
+    0.48,
+    0.14
+   ],
+   "triangles": 132
   },
   {
    "id": "trigger",

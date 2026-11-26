@@ -201,10 +201,16 @@ def manifest(piece, spec, shards, files):
         return [round(v.x, 3), round(v.z, 3), round(-v.y, 3)]
 
     rules, out = C.BREAK, []
-    if spec["mode"] == "parts":           # not breakable: just where each separate (moving) part sits
+    if spec["mode"] == "parts":           # not breakable: separate parts, attachment points, moving parts
+        turn = lambda v: [round(v[0], 4), round(v[2], 4), round(-v[1], 4)]
         return {
             "piece": piece.name, "mode": "parts",
-            "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre.",
+            "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. "
+                      "The barrel points along +X.",
+            "sockets": [{"name": s["name"], "position": turn(s["position"]), "forward": turn(s["forward"]),
+                         "up": turn(s["up"])} for s in piece.sockets],
+            "joints": [{"part": j["part"], "type": j["type"], "pivot": turn(j["pivot"]), "axis": turn(j["axis"]),
+                        "amount": round(j["amount"], 4), "unit": j["unit"]} for j in piece.joints],
             "parts": [{"id": key, "mesh": file, "center": roblox((info["lo"] + info["hi"]) / 2),
                        "size": [round(e, 3) for e in ((info["hi"] - info["lo"]).x, (info["hi"] - info["lo"]).z,
                                                       (info["hi"] - info["lo"]).y)], "triangles": tris}

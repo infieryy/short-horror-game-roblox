@@ -8,6 +8,8 @@ CELL = 8.0            # studs, plan grid cell = width of one wall piece
 STORY = 12.0          # studs, height of one story
 WALL_T = 1.0          # studs, wall thickness
 
+GUN_MM = 3.3 / 880.0  # studs per millimetre for every gun: an 880 mm rifle is 3.3 studs long
+
 # ---------------------------------------------------------------- texture
 TEX = 1024            # px, texture size per piece (phone-friendly)
 PAD = 6               # px of padding around every UV island
@@ -152,15 +154,16 @@ KIT = {
     },
     "door": {"w": 3.9, "h": 7.5, "t": 0.28, "planks": 6, "strap_z": (1.3, 6.2), "strap_h": 0.36},
     "crate": {"size": 3.0, "frame_w": 0.42, "frame_out": 0.13, "planks": 3},
-    # length in studs; `chunky` thickens it a little over the real proportions so it reads on screen
-    "rifle": {"length": 3.3, "chunky": 1.2},
+    # guns: `chunky` thickens one a little over the real widths so it reads on screen
+    "rifle": {"chunky": 1.2},
+    "pistol": {"chunky": 1.15},
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
 }
 
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
-DETAIL_SCALE = {"rifle": 0.2}
+DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -193,6 +196,8 @@ STYLE = {
     },
 }
 
+STYLE["pistol"] = STYLE["rifle"]
+
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).
 # mode "chunks":  every shard has its own health and stays until it is destroyed (walls, doors).
@@ -215,10 +220,11 @@ BREAK = {
         "barrel": {"mode": "shatter", "shards": 7, "apart": 0.5},
         # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
         "rifle": {"mode": "parts"},
+        "pistol": {"mode": "parts"},
     },
 }
 
 # ---------------------------------------------------------------- budgets (triangles)
 TRI_LIMIT = 20000      # Roblox hard limit per mesh
 TRI_BUDGET = {"wall_plain": 400, "wall_window": 1200, "wall_door": 800, "door": 1200, "crate": 1600, "barrel": 900,
-              "rifle": 6000}
+              "rifle": 6000, "pistol": 3000}

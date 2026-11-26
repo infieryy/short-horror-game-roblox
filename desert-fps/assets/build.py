@@ -55,6 +55,7 @@ class Piece:
         self.layout = None
         self.seams = []          # (axis, value): planes where this piece meets its neighbours; no edge highlight there
         self.marks = []          # painted detail lines, see mark()
+        self.sockets, self.joints = [], []      # attachment points and moving parts (guns)
         self.scale = C.DETAIL_SCALE.get(name.split("_")[0], C.DETAIL_SCALE.get(name, 1.0))   # 1 = building-sized
 
     # ------------------------------------------------------------ parts

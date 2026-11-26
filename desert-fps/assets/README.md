@@ -18,7 +18,7 @@ python3 run.py
 python3 preview.py
 ```
 
-`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle` renders the rifle.
+`run.py` builds every piece (or the ones you name, e.g. `python3 run.py crate barrel`). `preview.py` renders them whole, renders a blast-damage scene, and puts the render next to the concept art. `python3 preview.py rifle pistol` renders the guns.
 
 ## Pilot pieces
 
@@ -30,7 +30,8 @@ python3 preview.py
 | `door` | 688 | 216 | 6 shards | 1,412 | 6,771 | 62.5 px/stud |
 | `crate` | 1,468 | 588 | 8 shards (debris) | 1,660 | 22,890 | 47.0 px/stud |
 | `barrel` | 728 | 360 | 7 shards (debris) | 828 | 4,828 | 75.7 px/stud |
-| `rifle` | 1,676 | 708 | not breakable: 4 moving parts | 1,676 | 12,639 | 271.0 px/stud |
+| `rifle` | 1,676 | 708 | not breakable: 11 parts | 1,676 | 10,540 | 271.0 px/stud |
+| `pistol` | 868 | 416 | not breakable: 8 parts | 868 | 9,726 | 454.9 px/stud |
 
 Each piece folder in `out/` holds:
 - the whole mesh (`.fbx` and `.obj`) and a low-detail mesh (`_low`)
@@ -68,26 +69,53 @@ To change how a piece breaks, edit its line in `BREAK`: `shards` (how many), `sl
 
 ![Rifle, right side](out/rifle-side.png)
 
-![Rifle, three-quarter view](out/rifle-front.png)
+![Pistol, right side](out/pistol-side.png)
 
-The assault rifle was built without concept art, from the proportions of a real wooden-furniture, curved-magazine service rifle (about 880 mm long), thickened by 20% so it reads on screen, then painted with the same brush rules as the map.
+Both guns were built without concept art, from the proportions of real firearms, then painted with the same brush rules as the map. They share one scale (`GUN_MM` in `config.py`: an 880 mm rifle is 3.3 studs), so they are in proportion to each other.
 
-- **Size:** 3.3 studs long. The barrel points along +X and the origin is the top of the pistol grip.
-- **Not breakable.** It splits into four separate meshes so it can be animated: `body`, `magazine`, `bolt` (carrier and charging handle) and `trigger`. `rifle.parts.json` gives where each one sits.
-- **Finer brush.** Small objects use the map's paint rules at one fifth the brush size (`DETAIL_SCALE` in `config.py`).
+| Gun | Based on | Length | Triangles | Parts |
+|---|---|---|---|---|
+| `rifle` | a wooden-furniture, curved-magazine service rifle | 3.3 studs | 1,676 | body, cover, stock, grip, handguard, barrel, muzzle, magazine, bolt, trigger, selector |
+| `pistol` | the Desert Eagle | 1.1 studs | 868 | body, slide, barrel, grip, magazine, trigger, hammer, charm |
+
+### Every gun is modular
+
+![Pistol parts](out/pistol-parts.png)
+
+Guns are not breakable. They are built from named parts, and each part is its own mesh in `out/<gun>/parts/`, all sharing the gun's one texture. That is what animation, rigging and attachments need:
+
+- **Animate:** the slide or bolt, trigger, hammer, selector and magazine are separate.
+- **Swap:** a stock, grip, handguard, barrel, muzzle or dust cover can be replaced by an attachment built to the same socket.
+- **Sockets** (`<gun>.parts.json`): named points with a position and direction for `muzzle`, `optic`, `underbarrel`, `magazine` (and `stock` on the rifle), plus `aim_rear` and `aim_front` so the sights can be lined up when aiming.
+- **Joints** (`<gun>.parts.json`): how each moving part moves. `slide` gives a direction and distance, `hinge` a pivot, axis and angle, `detach` the direction a magazine pulls out.
+
+The piece origin is the top of the grip, where the hand goes, and the barrel points along +X.
+
+### How a gun is written
+`recipes/gun.py` is the shared toolkit. A gun recipe is a list of side-view outlines in millimetres, each given a part name, a material and a real width:
+
+```python
+stock = g.shape("stock", "wood", [(2, 6), (2, -40), ...], 30, bevel=7, segments=2)
+g.tube("barrel", "gunmetal", 258, 640, 0, 9.5)
+g.socket("muzzle", 668, 0)
+g.joint("bolt", "slide", 198, 19, (-1, 0, 0), 70)
+```
+
+### Paint
+- **Finer brush.** Small objects use the map's paint rules with a smaller brush (`DETAIL_SCALE` in `config.py`).
 - **Extra hand-painted detail** (`STYLE` in `config.py`), only on pieces seen up close:
   - every sharp edge gets a brushed highlight in the material's own colour, with a thin dark stroke just inside it
   - wood gets dark grain lines and pale scuffs; metal gets grime dabs and bright scratches; the cloth gets folds
-  - the round barrel gets a brushed highlight along its length
-  - detail lines painted where modelling isn't worth it (`p.mark` in the recipe): ejection port, panel lines, pins, magazine seams, sling slot, grip hatching, handguard grooves
-- **Shape language.** Every part is a side-view outline in millimetres in `recipes/rifle.py`, pushed through its thickness and rounded. Change a number and run it again.
+  - round barrels get a brushed highlight along their length
+  - detail lines are painted where modelling isn't worth it: ejection ports, panel lines, pins, slide serrations, magazine seams, grip checkering
+- **No shading between parts.** Contact shading is only painted within a part, so a swapped or removed part leaves no shadow behind.
 
 ## Files
 
 | File | What it does |
 |---|---|
 | `config.py` | Every number: scale, texture size, palette, paint rules, piece sizes, triangle budgets |
-| `recipes/` | One file per kind of piece |
+| `recipes/` | One file per kind of piece. `gun.py` is the shared toolkit for firearms. |
 | `build.py` | Builds closed solids, unwraps them, bakes the paint guides, checks and exports |
 | `chunks.py` | Cuts a piece into jagged shards, fills the cut faces, writes the break data. Also splits off moving parts (weapons). |
 | `brush.py` | Flat-brush engine: each stroke is a centre, length, width, angle and colour |
@@ -118,6 +146,7 @@ The assault rifle was built without concept art, from the proportions of a real 
 
 ## Not verified yet
 - Nothing has been imported into Roblox Studio. The scale (1 unit = 1 stud; the `.fbx` is exported at 0.01) and the matte look need checking on the first import.
-- The rifle has no animations, sounds or firing code, and has not been seen in first person in Roblox.
+- The guns have no animations, sounds or firing code, and have not been seen in first person in Roblox.
+- The sockets and joints are positions and directions in a data file. Nothing has been rigged or attached with them yet.
 - No destruction code exists in the game yet. The shards and break data are ready for it, but removing shards, debris and falling unsupported shards are untested in Roblox.
 - The preview is a Blender render with a sun and lavender ambient light set up to resemble the planned Roblox lighting. It is not Roblox.
