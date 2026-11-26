@@ -1,6 +1,7 @@
 """Recipe registry: piece name -> (build function, options)."""
 from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
 from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
+from . import floor, furnish, hangings, lantern, pergola, wall2
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
@@ -16,6 +17,30 @@ RECIPES = {
     "parapet_crenel": (parapet.build, {"merlons": True}),
     "parapet_corner": (parapet.build_corner, {}),
     "roof": (roof.build, {}),
+    # dressed pieces, for buildings built to be looked at (the tea house)
+    "wall2_plain": (wall2.build, {}),
+    "wall2_door": (wall2.build, {"opening": "door"}),
+    "wall2_window": (wall2.build, {"opening": "window"}),
+    "wall2_arcade": (wall2.arcade, {}),
+    "wall2_upper": (wall2.build, {"upper": True}),
+    "wall2_upper_door": (wall2.build, {"opening": "door", "upper": True}),
+    "wall2_upper_window": (wall2.build, {"opening": "window", "upper": True}),
+    "corner2": (wall2.corner, {}),
+    "corner2_upper": (wall2.corner, {"upper": True}),
+    "parapet_pierced": (parapet.pierced, {}),
+    "floor": (floor.build, {}),
+    "dome": (floor.dome, {}),
+    "pergola": (pergola.build, {}),
+    "lantern": (lantern.build, {}),
+    "lantern_wall": (lantern.build, {"wall": True}),
+    "rug": (furnish.rug, {}),
+    "tea_table": (furnish.tea_table, {}),
+    "divan": (furnish.divan, {}),
+    "shelf": (furnish.shelf, {}),
+    "counter": (furnish.counter, {}),
+    "sign_tea": (hangings.sign, {}),
+    "banner": (hangings.banner, {}),
+    "bougainvillea": (hangings.bougainvillea, {}),
     "stairs": (stairs.build, {}),
     "stairs_narrow": (stairs.build, {"narrow": True}),
     "ladder": (ladder.build, {}),

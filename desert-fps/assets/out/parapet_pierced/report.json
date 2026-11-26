@@ -1,0 +1,12 @@
+{
+ "piece": "parapet_pierced",
+ "triangles": 220,
+ "triangles_low": 220,
+ "strokes": 2212,
+ "px_per_stud": 83.0,
+ "break_mode": "chunks",
+ "chunks": 5,
+ "chunk_triangles": 412,
+ "problems": [],
+ "seconds": 6.2
+}

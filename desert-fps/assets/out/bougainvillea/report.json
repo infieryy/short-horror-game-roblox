@@ -1,0 +1,12 @@
+{
+ "piece": "bougainvillea",
+ "triangles": 4864,
+ "triangles_low": 3584,
+ "strokes": 25301,
+ "px_per_stud": 56.4,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 4864,
+ "problems": [],
+ "seconds": 15.8
+}

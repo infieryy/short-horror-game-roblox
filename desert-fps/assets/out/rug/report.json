@@ -1,0 +1,12 @@
+{
+ "piece": "rug",
+ "triangles": 300,
+ "triangles_low": 12,
+ "strokes": 1854,
+ "px_per_stud": 79.1,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 300,
+ "problems": [],
+ "seconds": 4.7
+}

@@ -87,6 +87,9 @@ def _slice(shell, planes, core_pid, touched):
     planes: (neighbour index, point on plane, normal pointing out of the region)."""
     tb = shell.copy()
     lp, lk, _ = _layers(tb)
+    # an outline with a notch in it (an arched opening) is not cut reliably as one face: cut triangles instead
+    tb.normal_update()
+    bmesh.ops.triangulate(tb, faces=[f for f in tb.faces if len(f.verts) > 4])
     for other, co, no in planes:
         if not tb.faces:
             break

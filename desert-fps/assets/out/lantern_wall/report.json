@@ -1,0 +1,12 @@
+{
+ "piece": "lantern_wall",
+ "triangles": 272,
+ "triangles_low": 256,
+ "strokes": 3321,
+ "px_per_stud": 172.1,
+ "break_mode": "parts",
+ "chunks": 2,
+ "chunk_triangles": 272,
+ "problems": [],
+ "seconds": 5.0
+}

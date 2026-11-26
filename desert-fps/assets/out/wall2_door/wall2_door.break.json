@@ -1,0 +1,308 @@
+{
+ "piece": "wall2_door",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/wall2_door_s00.fbx",
+   "center": [
+    2.513,
+    3.726,
+    -0.0
+   ],
+   "size": [
+    0.627,
+    1.018,
+    1.28
+   ],
+   "material": "stone",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s05",
+    "s09"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/wall2_door_s01.fbx",
+   "center": [
+    -3.049,
+    4.852,
+    -0.0
+   ],
+   "size": [
+    1.902,
+    3.333,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 48,
+   "neighbors": [
+    "s02",
+    "s10"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/wall2_door_s02.fbx",
+   "center": [
+    -2.428,
+    7.72,
+    -0.0
+   ],
+   "size": [
+    3.144,
+    3.784,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 105,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 100,
+   "neighbors": [
+    "s01",
+    "s04",
+    "s06",
+    "s08",
+    "s10"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/wall2_door_s03.fbx",
+   "center": [
+    2.502,
+    10.988,
+    0.11
+   ],
+   "size": [
+    2.996,
+    2.024,
+    1.22
+   ],
+   "material": "plaster",
+   "health": 55,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right",
+    "top"
+   ],
+   "triangles": 56,
+   "neighbors": [
+    "s06",
+    "s07",
+    "s08"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/wall2_door_s04.fbx",
+   "center": [
+    -2.32,
+    10.674,
+    0.11
+   ],
+   "size": [
+    3.361,
+    2.653,
+    1.22
+   ],
+   "material": "plaster",
+   "health": 85,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left",
+    "top"
+   ],
+   "triangles": 48,
+   "neighbors": [
+    "s02",
+    "s06"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/wall2_door_s05.fbx",
+   "center": [
+    0.868,
+    1.933,
+    -0.0
+   ],
+   "size": [
+    6.265,
+    3.865,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 100,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right",
+    "bottom"
+   ],
+   "triangles": 70,
+   "neighbors": [
+    "s00",
+    "s09",
+    "s10"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/wall2_door_s06.fbx",
+   "center": [
+    -0.039,
+    9.78,
+    0.04
+   ],
+   "size": [
+    4.13,
+    4.44,
+    1.36
+   ],
+   "material": "plaster",
+   "health": 120,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "top"
+   ],
+   "triangles": 82,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s04",
+    "s08"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/wall2_door_s07.fbx",
+   "center": [
+    3.048,
+    9.076,
+    0.11
+   ],
+   "size": [
+    1.905,
+    3.877,
+    1.22
+   ],
+   "material": "plaster",
+   "health": 35,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 56,
+   "neighbors": [
+    "s03",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s08",
+   "mesh": "chunks/wall2_door_s08.fbx",
+   "center": [
+    1.403,
+    8.961,
+    -0.0
+   ],
+   "size": [
+    4.768,
+    3.539,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 100,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 136,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s06",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s09",
+   "mesh": "chunks/wall2_door_s09.fbx",
+   "center": [
+    2.612,
+    5.547,
+    -0.0
+   ],
+   "size": [
+    2.776,
+    4.028,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 100,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 102,
+   "neighbors": [
+    "s00",
+    "s05",
+    "s07",
+    "s08"
+   ]
+  },
+  {
+   "id": "s10",
+   "mesh": "chunks/wall2_door_s10.fbx",
+   "center": [
+    -3.057,
+    3.071,
+    -0.0
+   ],
+   "size": [
+    1.886,
+    6.141,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 135,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left",
+    "bottom"
+   ],
+   "triangles": 82,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s05"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,110 @@
+{
+ "piece": "corner2_upper",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/corner2_upper_s00.fbx",
+   "center": [
+    -0.315,
+    9.427,
+    -0.0
+   ],
+   "size": [
+    1.25,
+    5.146,
+    1.88
+   ],
+   "material": "plaster",
+   "health": 60,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 24,
+   "neighbors": [
+    "s01",
+    "s02"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/corner2_upper_s01.fbx",
+   "center": [
+    0.096,
+    9.3,
+    -0.0
+   ],
+   "size": [
+    1.689,
+    5.4,
+    1.88
+   ],
+   "material": "plaster",
+   "health": 110,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 24,
+   "neighbors": [
+    "s00",
+    "s02"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/corner2_upper_s02.fbx",
+   "center": [
+    0.0,
+    5.657,
+    -0.0
+   ],
+   "size": [
+    1.6,
+    3.67,
+    1.6
+   ],
+   "material": "plaster",
+   "health": 95,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/corner2_upper_s03.fbx",
+   "center": [
+    0.0,
+    2.04,
+    -0.0
+   ],
+   "size": [
+    1.6,
+    4.081,
+    1.6
+   ],
+   "material": "plaster",
+   "health": 120,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left"
+   ],
+   "triangles": 12,
+   "neighbors": [
+    "s02"
+   ]
+  }
+ ]
+}

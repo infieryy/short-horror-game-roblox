@@ -1,0 +1,184 @@
+{
+ "piece": "divan",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 300,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/divan_s00.fbx",
+   "center": [
+    -2.84,
+    0.625,
+    0.035
+   ],
+   "size": [
+    2.121,
+    1.25,
+    2.47
+   ],
+   "material": "plaster",
+   "health": 60,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/divan_s01.fbx",
+   "center": [
+    2.698,
+    0.625,
+    0.82
+   ],
+   "size": [
+    2.403,
+    1.25,
+    0.901
+   ],
+   "material": "plaster",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 32,
+   "neighbors": [
+    "s03",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/divan_s02.fbx",
+   "center": [
+    2.223,
+    0.625,
+    -0.763
+   ],
+   "size": [
+    3.353,
+    1.25,
+    0.874
+   ],
+   "material": "plaster",
+   "health": 25,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s04",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/divan_s03.fbx",
+   "center": [
+    1.365,
+    0.55,
+    0.453
+   ],
+   "size": [
+    1.996,
+    1.1,
+    1.634
+   ],
+   "material": "plaster",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s01",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/divan_s04.fbx",
+   "center": [
+    0.0,
+    1.441,
+    0.035
+   ],
+   "size": [
+    7.5,
+    2.881,
+    2.47
+   ],
+   "material": "plaster",
+   "health": 100,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 256,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s05"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/divan_s05.fbx",
+   "center": [
+    0.615,
+    1.441,
+    0.035
+   ],
+   "size": [
+    2.371,
+    2.881,
+    2.47
+   ],
+   "material": "plaster",
+   "health": 40,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 116,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s06"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/divan_s06.fbx",
+   "center": [
+    2.37,
+    1.441,
+    -0.156
+   ],
+   "size": [
+    3.059,
+    2.881,
+    1.817
+   ],
+   "material": "plaster",
+   "health": 45,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 92,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s05"
+   ]
+  }
+ ]
+}

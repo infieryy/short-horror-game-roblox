@@ -1,0 +1,141 @@
+{
+ "piece": "parapet_pierced",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/parapet_pierced_s00.fbx",
+   "center": [
+    -2.266,
+    0.703,
+    -0.0
+   ],
+   "size": [
+    3.467,
+    1.406,
+    1.0
+   ],
+   "material": "plaster",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left",
+    "bottom"
+   ],
+   "triangles": 60,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/parapet_pierced_s01.fbx",
+   "center": [
+    0.22,
+    1.5,
+    -0.0
+   ],
+   "size": [
+    3.454,
+    3.0,
+    1.32
+   ],
+   "material": "plaster",
+   "health": 90,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "bottom"
+   ],
+   "triangles": 108,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/parapet_pierced_s02.fbx",
+   "center": [
+    -3.218,
+    1.5,
+    -0.0
+   ],
+   "size": [
+    1.564,
+    3.0,
+    1.32
+   ],
+   "material": "plaster",
+   "health": 35,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left",
+    "bottom"
+   ],
+   "triangles": 80,
+   "neighbors": [
+    "s00",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/parapet_pierced_s03.fbx",
+   "center": [
+    2.699,
+    1.5,
+    -0.0
+   ],
+   "size": [
+    2.602,
+    3.0,
+    1.32
+   ],
+   "material": "plaster",
+   "health": 80,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right",
+    "bottom"
+   ],
+   "triangles": 92,
+   "neighbors": [
+    "s01"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/parapet_pierced_s04.fbx",
+   "center": [
+    -1.589,
+    1.961,
+    -0.0
+   ],
+   "size": [
+    2.529,
+    2.078,
+    1.32
+   ],
+   "material": "plaster",
+   "health": 35,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 72,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

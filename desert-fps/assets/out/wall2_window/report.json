@@ -1,0 +1,12 @@
+{
+ "piece": "wall2_window",
+ "triangles": 608,
+ "triangles_low": 512,
+ "strokes": 9430,
+ "px_per_stud": 42.3,
+ "break_mode": "chunks",
+ "chunks": 13,
+ "chunk_triangles": 1412,
+ "problems": [],
+ "seconds": 9.0
+}

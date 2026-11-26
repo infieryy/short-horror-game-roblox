@@ -1,0 +1,12 @@
+{
+ "piece": "lantern",
+ "triangles": 236,
+ "triangles_low": 220,
+ "strokes": 2881,
+ "px_per_stud": 172.1,
+ "break_mode": "parts",
+ "chunks": 2,
+ "chunk_triangles": 236,
+ "problems": [],
+ "seconds": 4.4
+}

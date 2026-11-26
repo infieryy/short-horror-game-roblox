@@ -1,0 +1,24 @@
+{
+ "piece": "bougainvillea",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [],
+ "joints": [],
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/bougainvillea_body.fbx",
+   "center": [
+    -0.01,
+    -1.512,
+    0.208
+   ],
+   "size": [
+    6.757,
+    4.598,
+    2.035
+   ],
+   "triangles": 4864
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "pergola",
+ "triangles": 492,
+ "triangles_low": 300,
+ "strokes": 27652,
+ "px_per_stud": 31.1,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 596,
+ "problems": [],
+ "seconds": 9.9
+}

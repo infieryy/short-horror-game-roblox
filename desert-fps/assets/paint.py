@@ -220,6 +220,14 @@ class Painter:
                     a, b = k / pieces, (k + 1) / pieces
                     cx, cy = x0 + (x1 - x0) * (a + b) / 2, y0 + (y1 - y0) * (a + b) / 2
                     under = self.canvas[min(max(int(cy), 0), C.TEX - 1), min(max(int(cx), 0), C.TEX - 1)]
+                    if m.get("family"):                   # a pattern line in its own colour
+                        other = C.PALETTE[m["family"]]
+                        color = step(self.mix(part["group"] + "/pattern", m["family"]), int(rng.integers(-1, 2)), other)
+                        brush.stroke(self.canvas, clip, cx, cy, length * (b - a) * 1.1 + width * 0.6,
+                                     width * rng.uniform(0.9, 1.15), angle + rng.uniform(-0.03, 0.03), color,
+                                     rng.uniform(0.85, 0.97), rng, rag=0.06, round_=0.3)
+                        self.strokes += 1
+                        continue
                     seg = length * (b - a) * 1.25 + width
                     brush.stroke(self.canvas, clip, cx, cy, seg, width * rng.uniform(0.85, 1.2), angle + rng.uniform(-0.03, 0.03),
                                  step(under, m["tone"], fam, self.gain), rng.uniform(0.75, 0.95), rng, rag=0.08)

@@ -13,6 +13,7 @@ from PIL import Image
 
 import config as C
 from build import matte_material
+from buildings import teahouse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
@@ -67,12 +68,17 @@ SCENES["props"] = [
     ("sacks", (-9, -7, 0), 0, {}), ("pot_tall", (-3.5, -6, 0), 0, {}), ("pot_round", (-0.5, -6.5, 0), 0, {}),
     ("vase", (2, -6, 0), 0, {}), ("crate", (6, -6.5, 0), 20, {}), ("barrel", (10, -6, 0), 0, {}),
 ]
+# The pilot building, from its own recipe (buildings/teahouse.py).
+SCENES["teahouse"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in teahouse.placements()]
 # guns: (centre x, centre height, span) in studs, used to frame the camera
 GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7), "knife": (0.15, -0.14, 1.45), "smoke": (0.02, 0.07, 1.6)}
 CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
            "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38),
            "building": ((24, -34, 21), (0.5, -1, 6.5), 38), "building-back": ((-26, 30, 19), (-1, 0, 6.5), 38),
-           "props": ((3, -30, 9), (2, -2, 3.6), 38), "props-close": ((-6, -19, 5), (-5, -3, 2.6), 38)}
+           "props": ((3, -30, 9), (2, -2, 3.6), 38), "props-close": ((-6, -19, 5), (-5, -3, 2.6), 38),
+           "teahouse": ((60, -96, 36), (15, -16, 11.5), 38), "teahouse-street": ((-6, -52, 5.5), (16, -22, 11), 24),
+           "teahouse-back": ((-34, 34, 30), (14, -12, 10), 38), "teahouse-hall": ((12, -22.6, 5.2), (12, -9, 9.5), 14),
+           "teahouse-gallery": ((3.4, -21, 17.4), (15, -9, 17.5), 14), "teahouse-terrace": ((31, -1.5, 17.6), (22, -22, 14), 16)}
 
 
 def render_gun(name):
@@ -129,6 +135,12 @@ def render(scene_name, camera, path, size=(1600, 900), samples=48):
     scene = bpy.context.scene
     for name, pos, rot, options in SCENES[scene_name]:
         place(name, pos, rot, options)
+        if name.startswith("lantern"):                              # lamps really light up
+            turn = Matrix.Rotation(math.radians(rot), 4, "Z")
+            at = Vector(pos) + turn @ Vector((0, -1.15, -2.7) if name == "lantern_wall" else (0, 0, -3.7))
+            bpy.ops.object.light_add(type="POINT", location=at)
+            lamp = bpy.context.object.data
+            lamp.energy, lamp.color, lamp.shadow_soft_size = 350.0, (1.0, 0.72, 0.42), 0.5
     bpy.ops.mesh.primitive_plane_add(size=400)
     ground = bpy.data.materials.new("ground")
     ground.use_nodes = True

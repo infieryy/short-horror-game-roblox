@@ -1,0 +1,12 @@
+{
+ "piece": "banner",
+ "triangles": 100,
+ "triangles_low": 68,
+ "strokes": 1104,
+ "px_per_stud": 152.6,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 100,
+ "problems": [],
+ "seconds": 4.8
+}

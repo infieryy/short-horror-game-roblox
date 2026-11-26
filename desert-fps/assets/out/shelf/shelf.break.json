@@ -1,0 +1,134 @@
+{
+ "piece": "shelf",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 50,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/shelf_s00.fbx",
+   "center": [
+    -1.686,
+    0.945,
+    0.437
+   ],
+   "size": [
+    1.427,
+    1.89,
+    0.875
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 92,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/shelf_s01.fbx",
+   "center": [
+    -0.008,
+    1.359,
+    0.45
+   ],
+   "size": [
+    2.425,
+    2.718,
+    0.9
+   ],
+   "material": "band",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 140,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/shelf_s02.fbx",
+   "center": [
+    -0.476,
+    0.17,
+    0.45
+   ],
+   "size": [
+    3.684,
+    1.34,
+    0.9
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 176,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/shelf_s03.fbx",
+   "center": [
+    -1.562,
+    1.095,
+    0.468
+   ],
+   "size": [
+    1.676,
+    2.19,
+    0.864
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 68,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/shelf_s04.fbx",
+   "center": [
+    1.276,
+    1.045,
+    0.45
+   ],
+   "size": [
+    2.248,
+    3.09,
+    0.9
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 252,
+   "neighbors": [
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

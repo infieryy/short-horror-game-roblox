@@ -1,0 +1,382 @@
+{
+ "piece": "wall2_upper_window",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/wall2_upper_window_s00.fbx",
+   "center": [
+    -0.881,
+    7.376,
+    -0.0
+   ],
+   "size": [
+    4.956,
+    3.734,
+    1.28
+   ],
+   "material": "plaster",
+   "health": 90,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 214,
+   "neighbors": [
+    "s01",
+    "s04",
+    "s06",
+    "s07",
+    "s09",
+    "s11",
+    "window"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/wall2_upper_window_s01.fbx",
+   "center": [
+    2.731,
+    5.673,
+    -0.07
+   ],
+   "size": [
+    2.538,
+    4.557,
+    1.14
+   ],
+   "material": "plaster",
+   "health": 95,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 62,
+   "neighbors": [
+    "s00",
+    "s05",
+    "s08",
+    "s09",
+    "s11",
+    "window"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/wall2_upper_window_s02.fbx",
+   "center": [
+    -2.209,
+    1.849,
+    -0.06
+   ],
+   "size": [
+    3.583,
+    3.698,
+    1.12
+   ],
+   "material": "plaster",
+   "health": 115,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "left",
+    "bottom"
+   ],
+   "triangles": 48,
+   "neighbors": [
+    "s04",
+    "s07",
+    "s10"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/wall2_upper_window_s03.fbx",
+   "center": [
+    0.467,
+    10.887,
+    0.475
+   ],
+   "size": [
+    3.79,
+    2.226,
+    1.95
+   ],
+   "material": "plaster",
+   "health": 60,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "top"
+   ],
+   "triangles": 132,
+   "neighbors": [
+    "s05",
+    "s06",
+    "s11"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/wall2_upper_window_s04.fbx",
+   "center": [
+    -0.971,
+    3.891,
+    0.08
+   ],
+   "size": [
+    3.573,
+    3.35,
+    1.44
+   ],
+   "material": "plaster",
+   "health": 75,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 88,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s07",
+    "s09",
+    "s10",
+    "window"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/wall2_upper_window_s05.fbx",
+   "center": [
+    2.838,
+    9.933,
+    0.11
+   ],
+   "size": [
+    2.324,
+    4.135,
+    1.22
+   ],
+   "material": "plaster",
+   "health": 70,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right",
+    "top"
+   ],
+   "triangles": 48,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s11"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/wall2_upper_window_s06.fbx",
+   "center": [
+    -2.33,
+    10.04,
+    0.475
+   ],
+   "size": [
+    3.34,
+    3.921,
+    1.95
+   ],
+   "material": "plaster",
+   "health": 135,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left",
+    "top"
+   ],
+   "triangles": 124,
+   "neighbors": [
+    "s00",
+    "s03",
+    "s07",
+    "s11",
+    "window"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/wall2_upper_window_s07.fbx",
+   "center": [
+    -2.739,
+    5.771,
+    -0.07
+   ],
+   "size": [
+    2.521,
+    5.137,
+    1.14
+   ],
+   "material": "plaster",
+   "health": 95,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 32,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s04",
+    "s06",
+    "window"
+   ]
+  },
+  {
+   "id": "s08",
+   "mesh": "chunks/wall2_upper_window_s08.fbx",
+   "center": [
+    2.594,
+    2.05,
+    -0.06
+   ],
+   "size": [
+    2.811,
+    4.101,
+    1.12
+   ],
+   "material": "plaster",
+   "health": 95,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "right",
+    "bottom"
+   ],
+   "triangles": 40,
+   "neighbors": [
+    "s01",
+    "s09",
+    "s10",
+    "window"
+   ]
+  },
+  {
+   "id": "s09",
+   "mesh": "chunks/wall2_upper_window_s09.fbx",
+   "center": [
+    1.36,
+    4.998,
+    0.08
+   ],
+   "size": [
+    2.315,
+    4.729,
+    1.44
+   ],
+   "material": "plaster",
+   "health": 65,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 110,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s08",
+    "s10",
+    "s11",
+    "window"
+   ]
+  },
+  {
+   "id": "s10",
+   "mesh": "chunks/wall2_upper_window_s10.fbx",
+   "center": [
+    0.502,
+    1.485,
+    -0.06
+   ],
+   "size": [
+    4.574,
+    2.97,
+    1.12
+   ],
+   "material": "plaster",
+   "health": 95,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [
+    "bottom"
+   ],
+   "triangles": 52,
+   "neighbors": [
+    "s02",
+    "s04",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s11",
+   "mesh": "chunks/wall2_upper_window_s11.fbx",
+   "center": [
+    1.499,
+    9.512,
+    0.405
+   ],
+   "size": [
+    4.716,
+    4.392,
+    2.09
+   ],
+   "material": "plaster",
+   "health": 130,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 222,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s05",
+    "s06",
+    "s09",
+    "window"
+   ]
+  },
+  {
+   "id": "window",
+   "mesh": "chunks/wall2_upper_window_window.fbx",
+   "center": [
+    0.0,
+    6.05,
+    0.06
+   ],
+   "size": [
+    2.92,
+    3.981,
+    0.31
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 144,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s11"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "piece": "lantern_wall",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [],
+ "joints": [],
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/lantern_wall_body.fbx",
+   "center": [
+    0.0,
+    -1.195,
+    0.851
+   ],
+   "size": [
+    1.103,
+    2.89,
+    1.702
+   ],
+   "triangles": 260
+  },
+  {
+   "id": "glass",
+   "mesh": "parts/lantern_wall_glass.fbx",
+   "center": [
+    0.0,
+    -1.565,
+    1.15
+   ],
+   "size": [
+    0.84,
+    1.15,
+    0.84
+   ],
+   "triangles": 12
+  }
+ ]
+}

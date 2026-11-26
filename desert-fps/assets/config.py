@@ -14,7 +14,7 @@ GUN_MM = 3.3 / 880.0  # studs per millimetre for every gun: an 880 mm rifle is 3
 TEX = 1024            # px, texture size per piece (phone-friendly)
 PAD = 6               # px of padding around every UV island
 DENSITY_MIN = 24      # px per stud: run.py fails a piece whose texture is coarser than this...
-DENSITY_MIN_PIECE = {"stairs": 22}    # ...except the biggest solid in the kit, which just misses it
+DENSITY_MIN_PIECE = {"stairs": 22, "dome": 17}    # ...except the biggest solids in the kit
 AO_STEP = 2           # compute contact shade on every Nth texel
 AO_RAYS = 16
 AO_DIST = 0.45        # studs: only close contact darkens ("corners and cracks")
@@ -68,10 +68,18 @@ PALETTE["clay"] = {"h": (13, 24), "l": (0.55, 0.74), "s": (0.64, 0.92), "step": 
                    "bases": [(17, 0.66, 0.78), (20, 0.68, 0.84)]}
 PALETTE["rope"] = {"h": (24, 31), "l": (0.60, 0.80), "s": (0.52, 0.80), "step": 0.02, "hue_step": 0.4,
                    "bases": [(27, 0.72, 0.72)]}
-PALETTE["paving"] = {"h": (14, 28), "l": (0.73, 0.85), "s": (0.68, 0.95), "step": 0.014, "hue_step": 0.8,
-                     "bases": [(24, 0.80, 0.88), (19, 0.78, 0.85), (26, 0.815, 0.90)]}
+# Paving is pinker and paler than the walls (concept: walls 252/184/131, paving 247/182/161).
+PALETTE["paving"] = {"h": (8, 21), "l": (0.74, 0.86), "s": (0.62, 0.92), "step": 0.014, "hue_step": 0.8,
+                     "bases": [(14, 0.80, 0.84), (11, 0.785, 0.80), (17, 0.815, 0.86)]}
+# plants and lamp glass
+PALETTE["leaf"] = {"h": (80, 122), "l": (0.30, 0.52), "s": (0.30, 0.52), "step": 0.022, "hue_step": -1.5,
+                   "bases": [(100, 0.40, 0.40), (92, 0.44, 0.42)]}
+PALETTE["bloom"] = {"h": (318, 344), "l": (0.48, 0.72), "s": (0.50, 0.80), "step": 0.022, "hue_step": 0.8,
+                    "bases": [(330, 0.58, 0.64), (336, 0.62, 0.60)]}
+PALETTE["glow"] = {"h": (36, 48), "l": (0.72, 0.90), "s": (0.85, 1.0), "step": 0.016, "hue_step": 0.5,
+                   "bases": [(43, 0.82, 0.95)]}
 CORE.update({"canvas": "canvas", "redcloth": "redcloth", "burlap": "burlap", "clay": "clay", "rope": "rope",
-             "paving": "adobe", "band": "adobe"})
+             "paving": "adobe", "band": "adobe", "brass": "brass", "leaf": "leaf", "bloom": "bloom", "glow": "glow"})
 
 LAVENDER = (268, 0.66, 0.42)      # the only shade colour; never gray
 PALE = (30, 0.90, 0.85)           # light-catching glaze on protruding edges
@@ -190,6 +198,17 @@ PAINT["paving"] = {                             # flagstones: flat dabs, no lean
     ],
 }
 
+PAINT["leaf"] = {                               # foliage: round dabs every way
+    "lean": 30, "lean_jitter": 90,
+    "layers": [
+        {"per_stud2": 16.0, "len": (0.25, 0.6), "wid": (0.16, 0.34), "opacity": (0.5, 0.85), "round": 0.9},
+        {"per_stud2": 10.0, "len": (0.2, 0.5), "wid": (0.06, 0.12), "opacity": (0.5, 0.8), "round": 0.5},
+    ],
+}
+PAINT["bloom"] = PAINT["leaf"]
+PAINT["glow"] = {"lean": 80, "lean_jitter": 10,
+                 "layers": [{"per_stud2": 6.0, "len": (0.3, 0.8), "wid": (0.1, 0.2), "opacity": (0.3, 0.5), "round": 0.4}]}
+
 GLAZE = {
     "shade_per_stud2": 260.0,  # dark glaze dabs per square stud of fully occluded surface
     "shade_size": (0.05, 0.16),
@@ -240,13 +259,36 @@ KIT = {
     "sacks": {"len": 3.0, "w": 1.9, "h": 1.0},
     "well": {"r_in": 1.75, "r_out": 2.45, "h": 2.5, "segments": 16, "post_h": 4.6, "beam_z": 6.5},
     "vat": {"r_in": 2.75, "r_out": 3.35, "h": 1.7, "segments": 16},
+    # --- dressed pieces (the tea house)
+    "wall2": {
+        "plinth_out": 0.14, "plinth_h": 2.0, "rail_z": 2.3, "rail_h": 0.26, "rail_out": 0.12,
+        "frieze": (10.9, 11.5), "cornice": (11.35, 12.0), "course_out": 0.22, "teeth": 8,
+        "trim_out": 0.14, "voussoirs": 9, "jamb_course": 1.4, "sill_h": 0.45, "sill_out": 0.3,
+        "bar": 0.13, "bar_gap": 0.6, "bar_inset": 0.35,
+        "corner_half": 0.8, "corner_cap": 0.14,
+        "openings": {
+            "door": {"w": 4.4, "spring": 5.6, "trim": 0.5},
+            "window": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
+            "arcade": {"w": 6.0, "spring": 6.4, "trim": 0.45, "pier_out": 0.2, "cap_h": 0.5},
+            "upper_door": {"w": 4.0, "spring": 5.8, "trim": 0.45},
+            "upper_window": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
+        },
+    },
+    "floor": {"t": 1.06, "planks_t": 0.2, "boards": 8, "beams": 3, "beam_w": 0.6, "beam_drop": 0.6},
+    # Wider than its cell: the drum stands on the roof round the opening.
+    "dome": {"slab_t": 1.06, "r_in": 3.2, "r_out": 5.5, "drum_h": 2.6, "segments": 20, "cornice_h": 0.55, "cornice_out": 0.25,
+             "shell_r": 5.3, "shell_h": 5.2, "inner_h": 3.6, "hole": 0.4},
+    "pergola": {"h": 8.2, "post": 0.4, "inset": 3.3, "slats": 6},
 }
+KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
 DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
-                "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7}
+                "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7,
+                "lantern": 0.3, "tea": 0.4, "rug": 0.6, "divan": 0.7, "shelf": 0.4, "counter": 0.6, "sign": 0.4,
+                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -288,6 +330,8 @@ STYLE["smoke"] = STYLE["knife"]
 # Pale cloth and sacking show the dark corner glaze as stains, so they get much less of it.
 STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
 STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
+for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola"):
+    STYLE[_soft] = {"glaze": {"shade_per_stud2": 60.0, "shade_mix": 0.1}}
 
 # ---------------------------------------------------------------- destruction
 # Pieces are pre-cut into jagged shards (see chunks.py).
@@ -301,7 +345,8 @@ STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
 # Health numbers are placeholders until weapon damage exists.
 BREAK = {
     "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30,
-                     "canvas": 2, "redcloth": 2, "burlap": 4, "clay": 6, "rope": 3, "paving": 16, "band": 6},
+                     "canvas": 2, "redcloth": 2, "burlap": 4, "clay": 6, "rope": 3, "paving": 16, "band": 6,
+                     "brass": 20, "leaf": 2, "bloom": 2, "glow": 4, "cloth": 2},
     "hp_min": 10,
     "pieces": {
         "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
@@ -332,7 +377,30 @@ BREAK = {
         "pot_tall": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "pot_round": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "vase": {"mode": "shatter", "shards": 4, "apart": 0.5},
+        "wall2_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_door": {"mode": "chunks", "shards": 11, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_window": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_arcade": {"mode": "chunks", "shards": 10, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_upper": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_upper_door": {"mode": "chunks", "shards": 11, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_upper_window": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "corner2": {"mode": "chunks", "shards": 4, "apart": 0.6},
+        "corner2_upper": {"mode": "chunks", "shards": 4, "apart": 0.6},
+        "parapet_pierced": {"mode": "chunks", "shards": 5, "through": "y", "slant": 0.4, "apart": 0.55},
+        "floor": {"mode": "chunks", "shards": 7, "through": "z", "slant": 0.4, "apart": 0.55},
+        "dome": {"mode": "chunks", "shards": 10, "apart": 0.55},
+        "pergola": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "tea_table": {"mode": "shatter", "shards": 5, "apart": 0.5},
+        "divan": {"mode": "shatter", "shards": 7, "apart": 0.5},
+        "shelf": {"mode": "shatter", "shards": 5, "apart": 0.5},
+        "counter": {"mode": "shatter", "shards": 8, "apart": 0.5},
         # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
+        "lantern": {"mode": "parts"},
+        "lantern_wall": {"mode": "parts"},
+        "rug": {"mode": "parts"},
+        "sign_tea": {"mode": "parts"},
+        "banner": {"mode": "parts"},
+        "bougainvillea": {"mode": "parts"},
         "ground": {"mode": "parts"},
         "rifle": {"mode": "parts"},
         "pistol": {"mode": "parts"},

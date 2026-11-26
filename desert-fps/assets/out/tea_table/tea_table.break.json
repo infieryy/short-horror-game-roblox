@@ -1,0 +1,134 @@
+{
+ "piece": "tea_table",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 50,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/tea_table_s00.fbx",
+   "center": [
+    0.329,
+    0.69,
+    0.408
+   ],
+   "size": [
+    0.996,
+    1.38,
+    1.437
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 132,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/tea_table_s01.fbx",
+   "center": [
+    -0.347,
+    0.58,
+    -0.15
+   ],
+   "size": [
+    1.576,
+    1.16,
+    1.953
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 116,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/tea_table_s02.fbx",
+   "center": [
+    -0.239,
+    1.049,
+    0.94
+   ],
+   "size": [
+    0.309,
+    0.197,
+    0.372
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/tea_table_s03.fbx",
+   "center": [
+    -0.55,
+    1.455,
+    0.34
+   ],
+   "size": [
+    1.5,
+    1.01,
+    1.572
+   ],
+   "material": "brass",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 134,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/tea_table_s04.fbx",
+   "center": [
+    0.2,
+    1.277,
+    -0.099
+   ],
+   "size": [
+    2.2,
+    0.917,
+    2.054
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 198,
+   "neighbors": [
+    "s00",
+    "s01"
+   ]
+  }
+ ]
+}

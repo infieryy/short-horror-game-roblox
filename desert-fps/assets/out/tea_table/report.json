@@ -1,0 +1,12 @@
+{
+ "piece": "tea_table",
+ "triangles": 568,
+ "triangles_low": 380,
+ "strokes": 4617,
+ "px_per_stud": 122.4,
+ "break_mode": "shatter",
+ "chunks": 5,
+ "chunk_triangles": 596,
+ "problems": [],
+ "seconds": 4.7
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "wall2_arcade",
+ "triangles": 428,
+ "triangles_low": 332,
+ "strokes": 6388,
+ "px_per_stud": 43.6,
+ "break_mode": "chunks",
+ "chunks": 9,
+ "chunk_triangles": 772,
+ "problems": [],
+ "seconds": 6.9
+}

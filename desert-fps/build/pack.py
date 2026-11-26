@@ -8,6 +8,7 @@ Data the game reads is packed as modules that return the decoded JSON:
     plan/out/plan.json, routes.json           ServerStorage/DesertFps/Plan/PlanData, RouteData
     assets/out/<piece>/<piece>.break.json     ServerStorage/DesertFps/Assets/BreakData (keyed by piece)
     assets/out/<piece>/<piece>.parts.json     ServerStorage/DesertFps/Assets/PartsData (keyed by piece)
+    assets/out/buildings/<name>.json          ServerStorage/DesertFps/Buildings/BuildingData (keyed by building)
 
 Writes:
     01_install_modules.luau   paste into the Studio command bar to (re)install every script
@@ -27,6 +28,7 @@ PLAN_DATA = {"PlanData": "plan.json", "RouteData": "routes.json"}
 ASSETS_OUT = os.path.join(ROOT, "assets", "out")
 # assets/out/<piece>/<piece>.<kind>.json files packed as data modules under ServerStorage/DesertFps/Assets.
 ASSET_DATA = {"BreakData": "break", "PartsData": "parts"}
+BUILDINGS_OUT = os.path.join(ASSETS_OUT, "buildings")
 OUT = os.path.join(HERE, "out")
 # Services whose scripts go in a child of the service: how many path parts name the place to import into.
 CONTAINERS = {"StarterPlayer": 2}
@@ -88,6 +90,10 @@ def collect():
     for module, kind in ASSET_DATA.items():
         source = data_module(piece_data(kind), f"assets/out/<piece>/<piece>.{kind}.json")
         scripts.append((["ServerStorage", "DesertFps", "Assets", module], "ModuleScript", source))
+    buildings = {name[:-5]: load(os.path.join(BUILDINGS_OUT, name)) for name in sorted(os.listdir(BUILDINGS_OUT))
+                 if name.endswith(".json")}
+    scripts.append((["ServerStorage", "DesertFps", "Buildings", "BuildingData"], "ModuleScript",
+                    data_module(buildings, "assets/out/buildings/<name>.json")))
     return sorted(scripts)
 
 

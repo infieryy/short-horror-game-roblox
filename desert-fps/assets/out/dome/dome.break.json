@@ -1,0 +1,276 @@
+{
+ "piece": "dome",
+ "mode": "chunks",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": null,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/dome_s00.fbx",
+   "center": [
+    0.198,
+    2.686,
+    3.827
+   ],
+   "size": [
+    5.878,
+    5.373,
+    3.846
+   ],
+   "material": "plaster",
+   "health": 455,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 204,
+   "neighbors": [
+    "s03",
+    "s04",
+    "s06",
+    "s07",
+    "s08"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/dome_s01.fbx",
+   "center": [
+    -2.437,
+    1.999,
+    -2.281
+   ],
+   "size": [
+    6.626,
+    3.998,
+    6.438
+   ],
+   "material": "plaster",
+   "health": 585,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 200,
+   "neighbors": [
+    "s02",
+    "s04",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/dome_s02.fbx",
+   "center": [
+    2.344,
+    4.789,
+    -3.301
+   ],
+   "size": [
+    5.146,
+    7.458,
+    4.899
+   ],
+   "material": "plaster",
+   "health": 550,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 272,
+   "neighbors": [
+    "s01",
+    "s04",
+    "s06",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/dome_s03.fbx",
+   "center": [
+    3.898,
+    1.999,
+    2.273
+   ],
+   "size": [
+    3.704,
+    3.997,
+    5.341
+   ],
+   "material": "plaster",
+   "health": 180,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 152,
+   "neighbors": [
+    "s00",
+    "s04",
+    "s07"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/dome_s04.fbx",
+   "center": [
+    2.921,
+    2.776,
+    -0.459
+   ],
+   "size": [
+    5.589,
+    5.552,
+    8.557
+   ],
+   "material": "plaster",
+   "health": 770,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 318,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/dome_s05.fbx",
+   "center": [
+    -2.784,
+    6.741,
+    2.759
+   ],
+   "size": [
+    3.837,
+    2.465,
+    3.57
+   ],
+   "material": "plaster",
+   "health": 75,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 54,
+   "neighbors": [
+    "s06",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/dome_s06.fbx",
+   "center": [
+    0.376,
+    7.949,
+    1.602
+   ],
+   "size": [
+    6.296,
+    6.992,
+    6.744
+   ],
+   "material": "plaster",
+   "health": 620,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 562,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s05",
+    "s07",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/dome_s07.fbx",
+   "center": [
+    3.545,
+    5.607,
+    1.373
+   ],
+   "size": [
+    4.411,
+    3.996,
+    6.596
+   ],
+   "material": "plaster",
+   "health": 345,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 186,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s06"
+   ]
+  },
+  {
+   "id": "s08",
+   "mesh": "chunks/dome_s08.fbx",
+   "center": [
+    -2.725,
+    3.119,
+    3.005
+   ],
+   "size": [
+    5.816,
+    6.237,
+    5.223
+   ],
+   "material": "plaster",
+   "health": 710,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 268,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s05",
+    "s06",
+    "s09"
+   ]
+  },
+  {
+   "id": "s09",
+   "mesh": "chunks/dome_s09.fbx",
+   "center": [
+    -2.14,
+    5.092,
+    -2.101
+   ],
+   "size": [
+    6.285,
+    7.251,
+    7.253
+   ],
+   "material": "plaster",
+   "health": 970,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 444,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04",
+    "s05",
+    "s06",
+    "s08"
+   ]
+  }
+ ]
+}

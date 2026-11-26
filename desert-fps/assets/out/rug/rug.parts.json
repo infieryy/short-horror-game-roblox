@@ -1,0 +1,24 @@
+{
+ "piece": "rug",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [],
+ "joints": [],
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/rug_body.fbx",
+   "center": [
+    0.0,
+    0.035,
+    -0.0
+   ],
+   "size": [
+    6.48,
+    0.07,
+    4.0
+   ],
+   "triangles": 300
+  }
+ ]
+}

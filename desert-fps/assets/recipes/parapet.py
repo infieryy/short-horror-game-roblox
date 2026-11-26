@@ -26,3 +26,17 @@ def build_corner(p):
     p.box((-a, -a, 0), (a, a, K["h"] + K["cap_h"] + K["post_up"]), "plaster", bevel=0.07, group="wall",
           extra=CUT)
     p.seams = [(2, 0.0)]
+
+
+def pierced(p):
+    """A terrace balustrade: the same low wall with a row of small openings to look and shoot through."""
+    h, cap, o = K["h"], K["cap_h"], K["pierced"]
+    xs, holes = [-HALF], []
+    for i in range(o["count"]):
+        x = -HALF + (i + 0.5) * C.CELL / o["count"]
+        xs += [x - o["w"] / 2, x + o["w"] / 2]
+        holes.append((2 * i + 1, 1))
+    xs.append(HALF)
+    p.wall(xs, [0.0, o["z0"], o["z1"], h], lambda z: -T, lambda z: T, holes, band=False, extra=CUT)
+    p.box((-HALF, -T - K["cap_out"], h), (HALF, T + K["cap_out"], h + cap), "stone", group="coping", extra=CUT)
+    p.seams = [(0, -HALF), (0, HALF), (2, 0.0)]

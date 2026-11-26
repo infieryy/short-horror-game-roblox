@@ -27,10 +27,19 @@ local FIDELITY = {
 	stall = PRECISE,
 	awning = PRECISE,
 	stairs = HULL, -- one smooth ramp to walk up
+	stairs_narrow = HULL,
+	wall2_door = PRECISE,
+	wall2_window = PRECISE,
+	wall2_arcade = PRECISE,
+	wall2_upper_door = PRECISE,
+	wall2_upper_window = PRECISE,
+	parapet_pierced = PRECISE,
+	dome = PRECISE, -- open underneath: you look up into it
+	pergola = PRECISE,
 }
 -- Pieces players pass straight through. Shots still hit them.
 -- (A ladder is climbed on the TrussPart the map builder stands with it.)
-local WALK_THROUGH = { cloth = true, ladder = true }
+local WALK_THROUGH = { cloth = true, ladder = true, rug = true, banner = true, sign_tea = true, bougainvillea = true }
 
 local function import(piece: string, ids: { Model: number, Texture: number }, meshes: Instance): { meshes: number, worstOffset: number }
 	local fixed = PartsData[piece] ~= nil -- does not break

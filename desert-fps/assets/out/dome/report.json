@@ -1,0 +1,12 @@
+{
+ "piece": "dome",
+ "triangles": 1356,
+ "triangles_low": 768,
+ "strokes": 44526,
+ "px_per_stud": 20.3,
+ "break_mode": "chunks",
+ "chunks": 10,
+ "chunk_triangles": 2660,
+ "problems": [],
+ "seconds": 16.6
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "counter",
+ "triangles": 736,
+ "triangles_low": 452,
+ "strokes": 12546,
+ "px_per_stud": 67.4,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 676,
+ "problems": [],
+ "seconds": 8.8
+}

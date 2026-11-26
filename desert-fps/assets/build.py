@@ -210,13 +210,15 @@ class Piece:
         self._merge(tb, pid)
         return pid
 
-    def mark(self, pid, facet, points, tone=-3, width=0.01, closed=False):
+    def mark(self, pid, facet, points, tone=-3, width=0.01, closed=False, family=None):
         """Paint a detail line on one face of a part (a panel line, a slot, an engraving).
         points are world positions; the line is drawn on the part's `facet` ("-y", "+z", ...).
         On the round side of a lathed part use facet "lathe" and points (turn 0..1, distance along
-        the profile in studs)."""
+        the profile in studs).
+        With `family` the line is painted in that colour family instead of a darker tone of the paint
+        under it: a pattern (a zigzag on a stone course, the border of a rug)."""
         if pid is not None:
-            self.marks.append({"pid": pid, "facet": facet, "tone": tone,
+            self.marks.append({"pid": pid, "facet": facet, "tone": tone, "family": family,
                                "points": [q if facet == "lathe" else Vector(q) for q in points],
                                "width": width, "closed": closed})
 

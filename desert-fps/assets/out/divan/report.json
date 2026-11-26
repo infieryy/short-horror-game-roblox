@@ -1,0 +1,12 @@
+{
+ "piece": "divan",
+ "triangles": 876,
+ "triangles_low": 404,
+ "strokes": 5440,
+ "px_per_stud": 65.7,
+ "break_mode": "shatter",
+ "chunks": 7,
+ "chunk_triangles": 552,
+ "problems": [],
+ "seconds": 7.2
+}

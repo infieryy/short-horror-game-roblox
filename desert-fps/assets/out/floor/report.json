@@ -1,0 +1,12 @@
+{
+ "piece": "floor",
+ "triangles": 60,
+ "triangles_low": 60,
+ "strokes": 11943,
+ "px_per_stud": 40.7,
+ "break_mode": "chunks",
+ "chunks": 7,
+ "chunk_triangles": 332,
+ "problems": [],
+ "seconds": 8.0
+}
