@@ -1,0 +1,12 @@
+{
+ "piece": "stack_crates",
+ "triangles": 132,
+ "triangles_low": 36,
+ "strokes": 15115,
+ "px_per_stud": 53.1,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 240,
+ "problems": [],
+ "seconds": 9.0
+}

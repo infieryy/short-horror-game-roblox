@@ -7,6 +7,17 @@ import math
 from build import frame_axes  # build loads bpy before mathutils
 
 DYES = ("redcloth", "saffron", "plum", "indigo", "canvas", "band")
+GOODS = ("saffron", "redcloth", "leaf")
+
+
+def baskets(p):
+    """Three baskets of goods in a row: spice, dried peppers, greens. For a stall counter or a doorstep."""
+    from mathutils import Matrix
+    for i, x in enumerate((-1.25, 0.0, 1.25)):
+        frame = Matrix.Translation((x, 0.12 * (i - 1), 0.0))
+        p.lathe([(0.36, 0.0), (0.56, 0.5), (0.6, 0.62), (0.5, 0.62), (0.47, 0.5)], 10, "rope", grain=None, group=f"basket{i}",
+                frame=frame, extra={"cut": True})
+        p.lathe([(0.5, 0.5), (0.36, 0.78), (0.14, 0.95)], 8, GOODS[i], grain=None, group=f"heap{i}", frame=frame, smooth=True)
 
 
 def bolts(p):

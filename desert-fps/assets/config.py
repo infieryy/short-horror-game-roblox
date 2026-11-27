@@ -14,7 +14,7 @@ GUN_MM = 3.3 / 880.0  # studs per millimetre for every gun: an 880 mm rifle is 3
 TEX = 1024            # px, texture size per piece (phone-friendly)
 PAD = 6               # px of padding around every UV island
 DENSITY_MIN = 24      # px per stud: run.py fails a piece whose texture is coarser than this...
-DENSITY_MIN_PIECE = {"stairs": 22, "dome": 17}    # ...except the biggest solids in the kit
+DENSITY_MIN_PIECE = {"stairs": 22, "dome": 17, "townwall_tower": 16, "townwall": 20, "towngate": 20}    # ...except the biggest solids in the kit
 AO_STEP = 2           # compute contact shade on every Nth texel
 AO_RAYS = 16
 AO_DIST = 0.45        # studs: only close contact darkens ("corners and cracks")
@@ -210,6 +210,7 @@ CORE.update({"saffron": "saffron", "plum": "plum", "indigo": "indigo"})
 PALETTE["sand"] = {"h": (22, 30), "l": (0.68, 0.80), "s": (0.80, 0.98), "step": 0.014, "hue_step": 0.5,
                    "bases": [(26, 0.745, 0.95), (24, 0.76, 0.92)]}
 CORE["sand"] = "sand"
+CORE["adobe"] = "adobe"
 # water in the cistern (reference/zones/cistern.webp): turquoise, a little greener than the wall band
 PALETTE["water"] = {"h": (164, 182), "l": (0.58, 0.82), "s": (0.38, 0.62), "step": 0.022, "hue_step": -0.8,
                     "bases": [(173, 0.69, 0.52), (170, 0.67, 0.50)]}
@@ -299,6 +300,7 @@ KIT = {
             "arcade": {"w": 6.0, "spring": 6.4, "trim": 0.45, "pier_out": 0.2, "cap_h": 0.5},
             "upper_door": {"w": 4.0, "spring": 5.8, "trim": 0.45},
             "upper_window": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
+            "upper_shutter": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
         },
     },
     "floor": {"t": 1.06, "planks_t": 0.2, "boards": 8, "beams": 3, "beam_w": 0.6, "beam_drop": 0.6},
@@ -306,6 +308,8 @@ KIT = {
     "dome": {"slab_t": 1.06, "r_in": 3.2, "r_out": 5.5, "drum_h": 5.6, "segments": 20, "cornice_h": 0.55, "cornice_out": 0.25,
              "shell_r": 5.3, "shell_h": 5.2, "inner_h": 3.6, "hole": 0.4},
     "pergola": {"h": 8.2, "post": 0.4, "inset": 3.3, "slats": 6},
+    "townwall": {"t": 3.0, "h": 24.0, "cap_h": 0.6, "cap_out": 0.25, "merlon_w": 1.4, "merlon_h": 2.2, "course_z": 15.0,
+                 "tower_h": 28.0, "tower_half": 3.3, "gate_w": 6.0, "gate_spring": 9.0},
 }
 KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 
@@ -315,7 +319,9 @@ KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
                 "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7,
                 "lantern": 0.3, "tea": 0.4, "rug": 0.6, "divan": 0.7, "shelf": 0.4, "counter": 0.6, "sign": 0.4,
-                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7, "bolts": 0.7, "spout": 0.5}
+                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7, "bolts": 0.7, "spout": 0.5,
+                "door2": 0.7, "stack": 0.8, "cart": 0.6, "kiln": 0.8, "loom": 0.6, "cypress": 0.8, "palm": 0.7, "potted": 0.4,
+                "baskets": 0.35}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -358,7 +364,8 @@ STYLE["smoke"] = STYLE["knife"]
 STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
 STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
 STYLE["rack"] = STYLE["cloth"]
-for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree", "bolts", "sand"):
+for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree", "bolts", "sand", "cypress", "palm", "potted",
+              "baskets", "cart", "loom"):
     STYLE[_soft] = {"glaze": {"shade_per_stud2": 60.0, "shade_mix": 0.1}}
 
 # ---------------------------------------------------------------- destruction
@@ -426,6 +433,21 @@ BREAK = {
         "counter": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "tree": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "spout": {"mode": "shatter", "shards": 6, "apart": 0.5},
+        "townwall": {"mode": "chunks", "shards": 14, "through": "y", "slant": 1.2, "apart": 0.55},
+        "townwall_tower": {"mode": "chunks", "shards": 14, "apart": 0.6},
+        "towngate": {"mode": "chunks", "shards": 14, "through": "y", "slant": 1.2, "apart": 0.55},
+        "door2_wood": {"mode": "chunks", "shards": 6, "through": "y", "slant": 0.1, "apart": 0.5},
+        "door2_teal": {"mode": "chunks", "shards": 6, "through": "y", "slant": 0.1, "apart": 0.5},
+        "wall2_upper_shutter": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "stack_crates": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "cart": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "kiln": {"mode": "shatter", "shards": 10, "apart": 0.5},
+        "pot_rack": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "loom": {"mode": "shatter", "shards": 6, "apart": 0.5},
+        "cypress": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "palm_bed": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "potted_plant": {"mode": "shatter", "shards": 4, "apart": 0.5},
+        "baskets": {"mode": "shatter", "shards": 3, "apart": 0.5},
         "rack_red": {"mode": "shatter", "shards": 4, "apart": 0.5},
         "rack_saffron": {"mode": "shatter", "shards": 4, "apart": 0.5},
         "rack_plum": {"mode": "shatter", "shards": 4, "apart": 0.5},
@@ -439,6 +461,10 @@ BREAK = {
         "rug": {"mode": "parts"},
         "sign_tea": {"mode": "parts"},
         "sign_dye": {"mode": "parts"},
+        "sign_pot": {"mode": "parts"},
+        "sign_cloth": {"mode": "parts"},
+        "sign_drop": {"mode": "parts"},
+        "sign_bread": {"mode": "parts"},
         "paving_a": {"mode": "parts"},
         "paving_b": {"mode": "parts"},
         "paving_c": {"mode": "parts"},

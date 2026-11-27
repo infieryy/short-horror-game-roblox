@@ -42,6 +42,14 @@ local FIDELITY = {
 	parapet_pierced = PRECISE,
 	dome = PRECISE, -- open underneath: you look up into it
 	pergola = PRECISE,
+	wall2_upper_shutter = PRECISE,
+	-- open frames and things you walk under: shots and players pass where the eye says they can
+	pot_rack = PRECISE,
+	loom = PRECISE,
+	cart = PRECISE,
+	palm_bed = PRECISE,
+	cypress = PRECISE,
+	kiln = PRECISE,
 }
 -- Pieces players pass straight through. Shots still hit them.
 -- (A ladder is climbed on the TrussPart the map builder stands with it.)
@@ -55,6 +63,10 @@ local WALK_THROUGH = {
 	banner = true,
 	sign_tea = true,
 	sign_dye = true,
+	sign_pot = true,
+	sign_cloth = true,
+	sign_drop = true,
+	sign_bread = true,
 	bougainvillea = true,
 	sand_drift = true,
 }

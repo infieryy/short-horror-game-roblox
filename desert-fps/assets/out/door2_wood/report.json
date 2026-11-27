@@ -1,0 +1,12 @@
+{
+ "piece": "door2_wood",
+ "triangles": 84,
+ "triangles_low": 72,
+ "strokes": 6119,
+ "px_per_stud": 94.9,
+ "break_mode": "chunks",
+ "chunks": 6,
+ "chunk_triangles": 240,
+ "problems": [],
+ "seconds": 6.9
+}

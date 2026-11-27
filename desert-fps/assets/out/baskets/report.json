@@ -1,0 +1,12 @@
+{
+ "piece": "baskets",
+ "triangles": 420,
+ "triangles_low": 264,
+ "strokes": 5548,
+ "px_per_stud": 183.4,
+ "break_mode": "shatter",
+ "chunks": 3,
+ "chunk_triangles": 428,
+ "problems": [],
+ "seconds": 7.0
+}

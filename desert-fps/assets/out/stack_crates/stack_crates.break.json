@@ -1,0 +1,216 @@
+{
+ "piece": "stack_crates",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 570,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/stack_crates_s00.fbx",
+   "center": [
+    1.55,
+    1.08,
+    0.219
+   ],
+   "size": [
+    3.153,
+    2.161,
+    3.015
+   ],
+   "material": "wood",
+   "health": 45,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s02",
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/stack_crates_s01.fbx",
+   "center": [
+    -0.904,
+    4.355,
+    0.16
+   ],
+   "size": [
+    1.629,
+    2.507,
+    3.317
+   ],
+   "material": "wood",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s02",
+    "s04",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/stack_crates_s02.fbx",
+   "center": [
+    1.033,
+    3.0,
+    -0.079
+   ],
+   "size": [
+    3.605,
+    6.0,
+    3.478
+   ],
+   "material": "wood",
+   "health": 125,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 60,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s05",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/stack_crates_s03.fbx",
+   "center": [
+    -2.222,
+    1.5,
+    -0.469
+   ],
+   "size": [
+    1.959,
+    3.0,
+    2.32
+   ],
+   "material": "wood",
+   "health": 40,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 12,
+   "neighbors": [
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/stack_crates_s04.fbx",
+   "center": [
+    -1.777,
+    1.581,
+    0.12
+   ],
+   "size": [
+    2.848,
+    3.163,
+    3.396
+   ],
+   "material": "wood",
+   "health": 80,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 36,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s05"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/stack_crates_s05.fbx",
+   "center": [
+    0.11,
+    1.826,
+    -0.056
+   ],
+   "size": [
+    3.584,
+    3.653,
+    3.29
+   ],
+   "material": "wood",
+   "health": 105,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 48,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s07"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/stack_crates_s06.fbx",
+   "center": [
+    -0.394,
+    4.837,
+    0.127
+   ],
+   "size": [
+    2.649,
+    2.326,
+    3.382
+   ],
+   "material": "wood",
+   "health": 50,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s07"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/stack_crates_s07.fbx",
+   "center": [
+    1.553,
+    3.039,
+    0.209
+   ],
+   "size": [
+    3.146,
+    5.921,
+    3.034
+   ],
+   "material": "wood",
+   "health": 95,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 28,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s05",
+    "s06"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "palm_bed",
+ "triangles": 1260,
+ "triangles_low": 992,
+ "strokes": 32193,
+ "px_per_stud": 31.3,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 1216,
+ "problems": [],
+ "seconds": 15.0
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "townwall_tower",
+ "triangles": 376,
+ "triangles_low": 120,
+ "strokes": 39363,
+ "px_per_stud": 16.8,
+ "break_mode": "chunks",
+ "chunks": 14,
+ "chunk_triangles": 828,
+ "problems": [],
+ "seconds": 14.2
+}

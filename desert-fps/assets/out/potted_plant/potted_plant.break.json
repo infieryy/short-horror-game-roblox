@@ -1,0 +1,106 @@
+{
+ "piece": "potted_plant",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 40,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/potted_plant_s00.fbx",
+   "center": [
+    0.142,
+    0.625,
+    -0.305
+   ],
+   "size": [
+    1.298,
+    1.25,
+    0.88
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 54,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/potted_plant_s01.fbx",
+   "center": [
+    -0.236,
+    1.488,
+    0.348
+   ],
+   "size": [
+    1.627,
+    2.976,
+    1.251
+   ],
+   "material": "leaf",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 168,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/potted_plant_s02.fbx",
+   "center": [
+    0.104,
+    1.784,
+    -0.015
+   ],
+   "size": [
+    1.806,
+    3.074,
+    1.669
+   ],
+   "material": "leaf",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 254,
+   "neighbors": [
+    "s00",
+    "s01"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/potted_plant_s03.fbx",
+   "center": [
+    0.278,
+    0.625,
+    0.313
+   ],
+   "size": [
+    1.165,
+    1.25,
+    0.864
+   ],
+   "material": "clay",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 60,
+   "neighbors": [
+    "s00",
+    "s01"
+   ]
+  }
+ ]
+}

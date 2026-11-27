@@ -1,0 +1,80 @@
+{
+ "piece": "baskets",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 30,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/baskets_s00.fbx",
+   "center": [
+    0.728,
+    0.31,
+    0.29
+   ],
+   "size": [
+    1.943,
+    0.62,
+    0.459
+   ],
+   "material": "rope",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 86,
+   "neighbors": [
+    "s01",
+    "s02"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/baskets_s01.fbx",
+   "center": [
+    0.74,
+    0.475,
+    -0.163
+   ],
+   "size": [
+    2.219,
+    0.95,
+    0.953
+   ],
+   "material": "rope",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 154,
+   "neighbors": [
+    "s00",
+    "s02"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/baskets_s02.fbx",
+   "center": [
+    -0.641,
+    0.475,
+    0.103
+   ],
+   "size": [
+    2.418,
+    0.95,
+    1.073
+   ],
+   "material": "rope",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 188,
+   "neighbors": [
+    "s00",
+    "s01"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "piece": "sign_cloth",
+ "triangles": 128,
+ "triangles_low": 96,
+ "strokes": 9417,
+ "px_per_stud": 135.3,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 128,
+ "problems": [],
+ "seconds": 6.7
+}

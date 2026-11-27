@@ -1,0 +1,12 @@
+{
+ "piece": "loom",
+ "triangles": 284,
+ "triangles_low": 172,
+ "strokes": 7256,
+ "px_per_stud": 65.0,
+ "break_mode": "shatter",
+ "chunks": 6,
+ "chunk_triangles": 220,
+ "problems": [],
+ "seconds": 6.5
+}

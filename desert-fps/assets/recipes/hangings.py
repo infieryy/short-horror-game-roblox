@@ -38,6 +38,56 @@ def sign(p):
             line([(cy + dy, -1.1), (cy + dy + 0.1, -0.98), (cy + dy - 0.04, -0.86), (cy + dy + 0.08, -0.74)], "band", 0.07)
 
 
+def _board(p):
+    """The hanging board every trade sign shares: iron arm and brace, two links, a wooden board square to the
+    wall with a canvas face on each side. Returns [(face part, facet, x of the face)]."""
+    p.box((-0.3, -0.06, -0.55), (0.3, 0.0, 0.3), "iron", group="plate")
+    p.box((-0.05, -2.9, -0.02), (0.05, -0.06, 0.08), "iron", group="arm")
+    a, b = (-0.06, -0.5), (-0.9, -0.02)
+    length = math.hypot(b[0] - a[0], b[1] - a[1])
+    p.box((-length / 2, -0.035, -0.035), (length / 2, 0.035, 0.035), "iron", group="brace",
+          frame=frame_axes((0, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2), (0, b[0] - a[0], b[1] - a[1]), (1, 0, 0)))
+    for y in (-2.4, -1.0):
+        p.box((-0.03, y - 0.03, -0.45), (0.03, y + 0.03, -0.02), "iron", group="link")
+    p.box((-0.09, -2.75, -2.6), (0.09, -0.65, -0.45), "wood", bevel=0.03, grain="y", group="board")
+    faces = []
+    for sx in (-1, 1):
+        xa, xb = sorted((sx * 0.09, sx * 0.12))
+        face = p.box((xa, -2.6, -2.45), (xb, -0.8, -0.6), "canvas", group=f"face{sx}")
+        faces.append((face, "+x" if sx > 0 else "-x", xb if sx > 0 else xa))
+    return faces
+
+
+EMBLEMS = {
+    # each: (points as (y, z) round the board's middle at (-1.7, -1.5), colour family, line width, closed)
+    "pot": [([(-0.42, 0.55), (-0.3, 0.3), (-0.62, -0.1), (-0.5, -0.6), (0.5, -0.6), (0.62, -0.1), (0.3, 0.3), (0.42, 0.55)],
+             "redcloth", 0.11, True),
+            ([(-0.5, -0.05), (-0.25, 0.1), (0.0, -0.05), (0.25, 0.1), (0.5, -0.05)], "band", 0.08, False),
+            ([(-0.55, -0.75), (0.55, -0.75)], "redcloth", 0.09, False)],
+    "cloth": [([(-0.65, 0.55), (0.65, 0.55)], "redcloth", 0.12, False),
+              ([(-0.55, 0.45), (-0.55, -0.7), (0.55, -0.7), (0.55, 0.45)], "indigo", 0.1, False),
+              ([(-0.55, 0.1), (-0.28, -0.1), (0.0, 0.1), (0.28, -0.1), (0.55, 0.1)], "saffron", 0.09, False),
+              ([(-0.55, -0.3), (-0.28, -0.5), (0.0, -0.3), (0.28, -0.5), (0.55, -0.3)], "redcloth", 0.09, False)],
+    "drop": [([(0.0, 0.7), (0.36, 0.05), (0.42, -0.3), (0.26, -0.6), (0.0, -0.7), (-0.26, -0.6), (-0.42, -0.3), (-0.36, 0.05)],
+              "indigo", 0.12, True),
+             ([(0.0, 0.25), (0.16, -0.25), (0.0, -0.42), (-0.16, -0.25)], "band", 0.14, True),
+             ([(-0.6, -0.85), (-0.3, -0.75), (0.0, -0.85), (0.3, -0.75), (0.6, -0.85)], "indigo", 0.08, False)],
+    "bread": [([(-0.62, -0.15), (-0.45, 0.3), (0.0, 0.48), (0.45, 0.3), (0.62, -0.15), (0.45, -0.5), (-0.45, -0.5)],
+               "saffron", 0.12, True),
+              ([(-0.3, 0.25), (-0.15, -0.3)], "redcloth", 0.08, False), ([(0.0, 0.32), (0.1, -0.3)], "redcloth", 0.08, False),
+              ([(0.3, 0.25), (0.35, -0.25)], "redcloth", 0.08, False)],
+}
+
+
+def sign(p, emblem):
+    """A trade sign: the hanging board with one emblem painted on both faces (a pot, a cloth, a drop, a loaf).
+    The origin is on the wall face at the arm."""
+    cy, cz = -1.7, -1.52
+    for face, facet, x in _board(p):
+        for points, family, width, closed in EMBLEMS[emblem]:
+            p.mark(face, facet, [(x, cy + y, cz + z) for y, z in points], width=width, closed=closed, family=family)
+
+
 def sign_dye(p):
     """The dyers' sign: a framed panel flat on a wall with three hanging flasks of dye painted on it, as on the
     concept's Dye Works. The origin is on the wall face, at the middle of the panel."""

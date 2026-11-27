@@ -1771,6 +1771,105 @@
    "turn": 0.0
   },
   {
+   "piece": "wall2_arcade",
+   "pos": [
+    12.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    12.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    20.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    20.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    28.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    28.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    36.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    36.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    44.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_arcade",
+   "pos": [
+    44.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "sign_drop",
+   "pos": [
+    25.0,
+    0.5,
+    9.6
+   ],
+   "turn": 180
+  },
+  {
    "piece": "spout",
    "pos": [
     20.0,

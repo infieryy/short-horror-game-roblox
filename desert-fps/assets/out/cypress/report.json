@@ -1,0 +1,12 @@
+{
+ "piece": "cypress",
+ "triangles": 1036,
+ "triangles_low": 696,
+ "strokes": 22251,
+ "px_per_stud": 37.3,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 916,
+ "problems": [],
+ "seconds": 11.7
+}

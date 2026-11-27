@@ -1,0 +1,310 @@
+{
+ "piece": "kiln",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 1685,
+ "chunks": [
+  {
+   "id": "fire",
+   "mesh": "chunks/kiln_fire.fbx",
+   "center": [
+    0.0,
+    1.065,
+    2.95
+   ],
+   "size": [
+    1.5,
+    2.05,
+    0.6
+   ],
+   "material": "glow",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 40,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s09"
+   ]
+  },
+  {
+   "id": "s00",
+   "mesh": "chunks/kiln_s00.fbx",
+   "center": [
+    -1.446,
+    3.481,
+    0.967
+   ],
+   "size": [
+    2.604,
+    5.017,
+    3.956
+   ],
+   "material": "adobe",
+   "health": 175,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 40,
+   "neighbors": [
+    "fire",
+    "s01",
+    "s02",
+    "s05",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/kiln_s01.fbx",
+   "center": [
+    -0.112,
+    1.245,
+    1.287
+   ],
+   "size": [
+    5.271,
+    2.49,
+    6.026
+   ],
+   "material": "adobe",
+   "health": 330,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 142,
+   "neighbors": [
+    "fire",
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s09"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/kiln_s02.fbx",
+   "center": [
+    -0.761,
+    2.499,
+    -1.548
+   ],
+   "size": [
+    3.974,
+    4.997,
+    2.851
+   ],
+   "material": "adobe",
+   "health": 290,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 48,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s04",
+    "s05",
+    "s09"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/kiln_s03.fbx",
+   "center": [
+    1.485,
+    0.733,
+    -0.809
+   ],
+   "size": [
+    3.129,
+    1.466,
+    3.814
+   ],
+   "material": "adobe",
+   "health": 80,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 30,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/kiln_s04.fbx",
+   "center": [
+    1.835,
+    2.713,
+    -0.62
+   ],
+   "size": [
+    2.43,
+    3.057,
+    3.818
+   ],
+   "material": "adobe",
+   "health": 125,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 40,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s05",
+    "s06",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/kiln_s05.fbx",
+   "center": [
+    -0.312,
+    6.092,
+    -0.956
+   ],
+   "size": [
+    3.811,
+    4.416,
+    3.211
+   ],
+   "material": "adobe",
+   "health": 125,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 112,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s04",
+    "s06",
+    "s07",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/kiln_s06.fbx",
+   "center": [
+    1.769,
+    5.49,
+    -1.056
+   ],
+   "size": [
+    1.789,
+    2.798,
+    2.097
+   ],
+   "material": "adobe",
+   "health": 25,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 20,
+   "neighbors": [
+    "s04",
+    "s05",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/kiln_s07.fbx",
+   "center": [
+    -0.06,
+    5.137,
+    1.106
+   ],
+   "size": [
+    3.513,
+    3.926,
+    3.291
+   ],
+   "material": "adobe",
+   "health": 130,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 44,
+   "neighbors": [
+    "s00",
+    "s05",
+    "s08",
+    "s09"
+   ]
+  },
+  {
+   "id": "s08",
+   "mesh": "chunks/kiln_s08.fbx",
+   "center": [
+    1.21,
+    5.142,
+    0.674
+   ],
+   "size": [
+    3.033,
+    3.917,
+    3.137
+   ],
+   "material": "adobe",
+   "health": 110,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 54,
+   "neighbors": [
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s09"
+   ]
+  },
+  {
+   "id": "s09",
+   "mesh": "chunks/kiln_s09.fbx",
+   "center": [
+    0.28,
+    3.246,
+    0.858
+   ],
+   "size": [
+    4.362,
+    3.421,
+    4.15
+   ],
+   "material": "adobe",
+   "health": 285,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 34,
+   "neighbors": [
+    "fire",
+    "s00",
+    "s01",
+    "s02",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08"
+   ]
+  }
+ ]
+}

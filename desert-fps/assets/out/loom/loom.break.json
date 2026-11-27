@@ -1,0 +1,148 @@
+{
+ "piece": "loom",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 60,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/loom_s00.fbx",
+   "center": [
+    -0.25,
+    4.697,
+    -0.0
+   ],
+   "size": [
+    5.3,
+    3.407,
+    0.4
+   ],
+   "material": "canvas",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/loom_s01.fbx",
+   "center": [
+    2.06,
+    2.738,
+    0.45
+   ],
+   "size": [
+    1.72,
+    5.476,
+    2.9
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 36,
+   "neighbors": [
+    "s02"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/loom_s02.fbx",
+   "center": [
+    0.0,
+    3.37,
+    0.9
+   ],
+   "size": [
+    5.9,
+    5.287,
+    2.2
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 80,
+   "neighbors": [
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/loom_s03.fbx",
+   "center": [
+    0.0,
+    6.42,
+    -0.0
+   ],
+   "size": [
+    5.9,
+    1.16,
+    0.4
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 32,
+   "neighbors": [
+    "s02"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/loom_s04.fbx",
+   "center": [
+    -2.7,
+    6.137,
+    -0.0
+   ],
+   "size": [
+    0.4,
+    1.726,
+    0.4
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 12,
+   "neighbors": [
+    "s00"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/loom_s05.fbx",
+   "center": [
+    -2.06,
+    1.576,
+    0.45
+   ],
+   "size": [
+    1.72,
+    3.153,
+    2.9
+   ],
+   "material": "darkwood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 36,
+   "neighbors": [
+    "s00"
+   ]
+  }
+ ]
+}

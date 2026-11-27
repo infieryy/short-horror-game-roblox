@@ -1,0 +1,12 @@
+{
+ "piece": "towngate",
+ "triangles": 412,
+ "triangles_low": 316,
+ "strokes": 29738,
+ "px_per_stud": 20.3,
+ "break_mode": "chunks",
+ "chunks": 14,
+ "chunk_triangles": 1472,
+ "problems": [],
+ "seconds": 13.5
+}

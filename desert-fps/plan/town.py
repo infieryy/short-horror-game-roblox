@@ -124,6 +124,7 @@ ARENAS = {
 # Grid corners (row, column of the cell south-east of the corner) where a pier stands in an open arcade.
 PIERS = {(11, 17), (11, 18), (11, 19), (11, 20),          # the Tea House porch
          (8, 18), (8, 19), (9, 18), (9, 19)}              # its atrium
+PIERS |= {(row, column) for row in (30, 31) for column in range(18, 24)}   # the Cistern Hall's two arcades
 
 TARGETS = {
     "options_4s_min": 3,          # separate places a player can be 4 s after spawning

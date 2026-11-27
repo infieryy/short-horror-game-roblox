@@ -54,6 +54,12 @@ def placements():
                 lay.at("well", r, c, G)
             elif ch == "c":                                             # outside: the trough for animals
                 lay.at("vat_indigo", r, c, G)
+    # Arcades along both sides of the middle walk, their arches over the water (as on the concept).
+    # The piers stand at the cell corners; plan/town.py knows them (PIERS).
+    for c in range(1, 6):
+        lay.edge("wall2_arcade", 2, c, "N")
+        lay.edge("wall2_arcade", 2, c, "S")
+    lay.on_wall("sign_drop", 0, 3, "N", 9.6, along=3.0, outside=True)   # the water sellers' sign, by the north door
     for c in (2, 4):                                                    # spouts in the north wall feed the channels
         lay.on_wall("spout", 0, c, "N", G)
     for dx, piece in ((-2.5, "pot_tall"), (0.0, "pot_round"), (2.4, "pot_tall")):     # jars waiting to be filled

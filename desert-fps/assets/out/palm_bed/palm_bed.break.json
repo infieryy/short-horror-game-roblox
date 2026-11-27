@@ -1,0 +1,210 @@
+{
+ "piece": "palm_bed",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 1190,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/palm_bed_s00.fbx",
+   "center": [
+    -2.02,
+    0.9,
+    2.046
+   ],
+   "size": [
+    2.241,
+    1.8,
+    2.189
+   ],
+   "material": "stone",
+   "health": 45,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s01",
+    "s06"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/palm_bed_s01.fbx",
+   "center": [
+    -2.202,
+    0.9,
+    0.687
+   ],
+   "size": [
+    1.877,
+    1.8,
+    2.72
+   ],
+   "material": "stone",
+   "health": 30,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s00",
+    "s04",
+    "s06"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/palm_bed_s02.fbx",
+   "center": [
+    2.589,
+    5.417,
+    0.75
+   ],
+   "size": [
+    3.686,
+    10.834,
+    4.78
+   ],
+   "material": "stone",
+   "health": 120,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 68,
+   "neighbors": [
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/palm_bed_s03.fbx",
+   "center": [
+    -0.639,
+    0.9,
+    -1.728
+   ],
+   "size": [
+    4.975,
+    1.8,
+    2.824
+   ],
+   "material": "stone",
+   "health": 200,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s04",
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/palm_bed_s04.fbx",
+   "center": [
+    -1.599,
+    1.963,
+    -0.897
+   ],
+   "size": [
+    3.082,
+    3.925,
+    4.487
+   ],
+   "material": "stone",
+   "health": 210,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 152,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/palm_bed_s05.fbx",
+   "center": [
+    2.061,
+    5.423,
+    -2.949
+   ],
+   "size": [
+    7.243,
+    10.845,
+    6.528
+   ],
+   "material": "leaf",
+   "health": 100,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 328,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s07"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/palm_bed_s06.fbx",
+   "center": [
+    -1.178,
+    5.414,
+    0.685
+   ],
+   "size": [
+    5.95,
+    10.828,
+    7.966
+   ],
+   "material": "stone",
+   "health": 155,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 328,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s07"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/palm_bed_s07.fbx",
+   "center": [
+    0.202,
+    3.965,
+    0.281
+   ],
+   "size": [
+    5.604,
+    7.93,
+    5.763
+   ],
+   "material": "stone",
+   "health": 330,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 268,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06"
+   ]
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 """Recipe registry: piece name -> (build function, options)."""
 from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
 from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
-from . import floor, furnish, hangings, lantern, paving, pergola, stores, tree, wall2, water
+from . import floor, furnish, hangings, lantern, paving, pergola, plants, stores, town, tree, wall2, water
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
@@ -63,6 +63,26 @@ RECIPES = {
     "paving_channel": (paving.channel, {}),
     "paving_pool": (paving.pool, {}),
     "spout": (water.spout, {}),
+    # the town itself: wall, tower, gate, house doors, the trades' gear, plants, goods, signs
+    "townwall": (town.wall, {}),
+    "townwall_tower": (town.tower, {}),
+    "towngate": (town.gate, {}),
+    "door2_wood": (town.door, {}),
+    "door2_teal": (town.door, {"paint": "band"}),
+    "wall2_upper_shutter": (wall2.build, {"opening": "shutter", "upper": True}),
+    "stack_crates": (town.crates, {}),
+    "cart": (town.cart, {}),
+    "kiln": (town.kiln, {}),
+    "pot_rack": (town.pot_rack, {}),
+    "loom": (town.loom, {}),
+    "cypress": (plants.cypress, {}),
+    "palm_bed": (plants.palm_bed, {}),
+    "potted_plant": (plants.potted, {}),
+    "baskets": (stores.baskets, {}),
+    "sign_pot": (hangings.sign, {"emblem": "pot"}),
+    "sign_cloth": (hangings.sign, {"emblem": "cloth"}),
+    "sign_drop": (hangings.sign, {"emblem": "drop"}),
+    "sign_bread": (hangings.sign, {"emblem": "bread"}),
     "stairs": (stairs.build, {}),
     "stairs_narrow": (stairs.build, {"narrow": True}),
     "ladder": (ladder.build, {}),

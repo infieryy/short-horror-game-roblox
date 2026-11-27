@@ -1,0 +1,12 @@
+{
+ "piece": "door2_teal",
+ "triangles": 84,
+ "triangles_low": 72,
+ "strokes": 4467,
+ "px_per_stud": 94.9,
+ "break_mode": "chunks",
+ "chunks": 6,
+ "chunk_triangles": 264,
+ "problems": [],
+ "seconds": 7.0
+}

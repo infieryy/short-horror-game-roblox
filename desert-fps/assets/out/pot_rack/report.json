@@ -1,0 +1,12 @@
+{
+ "piece": "pot_rack",
+ "triangles": 1176,
+ "triangles_low": 888,
+ "strokes": 24541,
+ "px_per_stud": 49.2,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 1040,
+ "problems": [],
+ "seconds": 9.8
+}

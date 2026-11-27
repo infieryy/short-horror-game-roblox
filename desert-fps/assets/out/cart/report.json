@@ -1,0 +1,12 @@
+{
+ "piece": "cart",
+ "triangles": 1044,
+ "triangles_low": 500,
+ "strokes": 16217,
+ "px_per_stud": 51.0,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 992,
+ "problems": [],
+ "seconds": 10.3
+}

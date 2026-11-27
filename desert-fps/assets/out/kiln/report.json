@@ -1,0 +1,12 @@
+{
+ "piece": "kiln",
+ "triangles": 396,
+ "triangles_low": 264,
+ "strokes": 13813,
+ "px_per_stud": 41.5,
+ "break_mode": "shatter",
+ "chunks": 11,
+ "chunk_triangles": 604,
+ "problems": [],
+ "seconds": 9.3
+}

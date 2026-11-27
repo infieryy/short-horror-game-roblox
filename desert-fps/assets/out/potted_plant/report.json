@@ -1,0 +1,12 @@
+{
+ "piece": "potted_plant",
+ "triangles": 572,
+ "triangles_low": 404,
+ "strokes": 6609,
+ "px_per_stud": 120.5,
+ "break_mode": "shatter",
+ "chunks": 4,
+ "chunk_triangles": 536,
+ "problems": [],
+ "seconds": 7.0
+}

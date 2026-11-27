@@ -1,0 +1,216 @@
+{
+ "piece": "cart",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 100,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/cart_s00.fbx",
+   "center": [
+    -1.912,
+    2.471,
+    0.015
+   ],
+   "size": [
+    1.377,
+    1.143,
+    2.63
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 60,
+   "neighbors": [
+    "s02",
+    "s06"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/cart_s01.fbx",
+   "center": [
+    0.225,
+    2.453,
+    -0.05
+   ],
+   "size": [
+    3.225,
+    1.107,
+    1.994
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 64,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s05",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/cart_s02.fbx",
+   "center": [
+    -0.497,
+    2.871,
+    0.415
+   ],
+   "size": [
+    2.193,
+    1.943,
+    1.831
+   ],
+   "material": "burlap",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 164,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s05",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/cart_s03.fbx",
+   "center": [
+    0.0,
+    1.967,
+    -1.118
+   ],
+   "size": [
+    5.2,
+    3.572,
+    1.405
+   ],
+   "material": "darkwood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 168,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/cart_s04.fbx",
+   "center": [
+    -1.518,
+    3.452,
+    0.563
+   ],
+   "size": [
+    0.167,
+    0.079,
+    0.216
+   ],
+   "material": "burlap",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 4,
+   "neighbors": [
+    "s06"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/cart_s05.fbx",
+   "center": [
+    2.93,
+    2.584,
+    -0.1
+   ],
+   "size": [
+    5.899,
+    2.448,
+    2.4
+   ],
+   "material": "burlap",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 124,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/cart_s06.fbx",
+   "center": [
+    -0.7,
+    4.075,
+    -0.0
+   ],
+   "size": [
+    3.8,
+    4.35,
+    2.84
+   ],
+   "material": "canvas",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 222,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/cart_s07.fbx",
+   "center": [
+    1.64,
+    1.943,
+    0.866
+   ],
+   "size": [
+    8.48,
+    3.525,
+    1.907
+   ],
+   "material": "wood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 186,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s05"
+   ]
+  }
+ ]
+}
