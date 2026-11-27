@@ -15,7 +15,7 @@ local Ballistics = require(Shared.Weapons:WaitForChild("Ballistics"))
 local CombatConfig = require(Shared:WaitForChild("Combat"):WaitForChild("CombatConfig"))
 local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"))
 local Hud = require(Shared.Client:WaitForChild("Hud"))
-local CharacterAnimator = require(Shared.Client:WaitForChild("CharacterAnimator"))
+local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
 
 local function remote(name: string): RemoteEvent
@@ -42,9 +42,14 @@ local effects = Instance.new("Folder")
 effects.Name = "WeaponEffects"
 effects.Parent = camera
 
-local viewmodel = Viewmodel.new(Shared:WaitForChild("WeaponModels"), effects)
+local viewmodel = Viewmodel.new(Shared:WaitForChild("WeaponModels"), Shared:WaitForChild("ViewArms") :: Model, effects)
 local hud = Hud.new(player:WaitForChild("PlayerGui"), camera)
-local animator: any = nil -- the animations of the body the player has now
+local animator: any = nil -- the animations of the body the player has now, which everyone else sees
+-- What a body does with each weapon, to fetch when the body is made.
+local bodySets = {}
+for _, each in WeaponConfig.Weapons :: { [string]: any } do
+	table.insert(bodySets, each.Animations)
+end
 
 type Slot = { weapon: string, magazine: number, reserve: number }
 local slots: { [string]: Slot } = {}
@@ -56,12 +61,11 @@ local aimHeld, walkHeld = false, false
 local drawnAt = 0
 local lastShot = 0
 local reloadFrom: number? = nil
-local slashFrom: number? = nil
 local spray = 0 -- shots fired in the spray so far
 local recoilUp, recoilRight = 0, 0 -- where the spray has pushed the shots, in degrees off the aim
 local viewUp, viewRight = 0, 0 -- how much of that the view has climbed
 local kicked = CFrame.identity -- that climb as it was last put on the camera
-local kick = 0 -- 1 right after a shot, settling to 0: the weapon's own jolt
+local kick = 0 -- 1 right after a shot, settling to 0: the bolt
 local aim = 0 -- 0 at the hip, 1 at the eye
 local walked = 0
 local stanceTold = ""
@@ -98,12 +102,12 @@ local function take(slotName: string)
 	current = slotName
 	weapon = (WeaponConfig.Weapons :: any)[slots[slotName].weapon]
 	drawnAt = os.clock()
-	reloadFrom, slashFrom = nil, nil
+	reloadFrom = nil
 	spray, recoilUp, recoilRight = 0, 0, 0
 	viewmodel:show(slots[slotName].weapon)
 	hud:setCrosshair(true)
 	if animator then
-		animator:hold(weapon.Animations)
+		animator:switch(weapon.Animations, "Hold")
 	end
 	refresh()
 end
@@ -123,6 +127,7 @@ local function reload()
 	if slot.magazine < weapon.Magazine and slot.reserve > 0 then
 		reloadFrom = os.clock()
 		remote("Reload"):FireServer()
+		viewmodel:play("Reload")
 		if animator then
 			animator:play("Reload")
 		end
@@ -189,6 +194,7 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 	spray += 1
 	recoilUp, recoilRight = up, right
 	kick = 1
+	viewmodel:play("Fire")
 	if animator then
 		animator:play("Fire")
 	end
@@ -200,7 +206,7 @@ local function slash(character: Model)
 	local origin, direction = camera.CFrame.Position, camera.CFrame.LookVector
 	local _, target, part = claim(character, origin, direction, weapon.Range, CombatConfig.MeleeMargin)
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
-	slashFrom = os.clock()
+	viewmodel:play("Fire")
 	if animator then
 		animator:play("Fire")
 	end
@@ -295,19 +301,16 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 	if humanoid.FloorMaterial ~= Enum.Material.Air then
 		walked += speed * dt
 	end
-	kick *= math.exp(-(weapon.View.Recover or 16) * dt)
-	if slashFrom and now - slashFrom >= weapon.View.SlashTime then
-		slashFrom = nil
-	end
+	kick *= math.exp(-WeaponConfig.ViewArms.BoltReturn * dt)
 	viewmodel:update({
 		camera = camera.CFrame,
+		dt = dt,
 		aim = aim,
 		kick = kick,
-		draw = math.clamp((now - drawnAt) / weapon.EquipTime, 0, 1),
 		reload = if reloadFrom then (now - reloadFrom) / weapon.ReloadTime else nil,
-		slash = if slashFrom then (now - slashFrom) / weapon.View.SlashTime else nil,
 		walked = walked,
 		moving = speed / weapon.RunSpeed,
+		sideways = root.CFrame.RightVector:Dot(velocity) / weapon.RunSpeed,
 	})
 
 	hud:setVitals(humanoid.Health, (character:GetAttribute("Armor") :: number?) or 0)
@@ -392,10 +395,20 @@ end
 local function onCharacter(character: Model)
 	hideHeld(character)
 	local humanoid = character:WaitForChild("Humanoid") :: Humanoid
-	animator = CharacterAnimator.new(character)
+	animator = AnimationPlayer.new(humanoid:WaitForChild("Animator") :: Animator, bodySets)
 	if current then
-		animator:hold(weapon.Animations) -- the weapon was in hand before the body was ready
+		animator:switch(weapon.Animations, "Hold") -- the weapon was in hand before the body was ready
 	end
+	-- The arms wear what the body wears, once the body has it on.
+	viewmodel:wear(character)
+	task.spawn(function()
+		if not player:HasAppearanceLoaded() then
+			player.CharacterAppearanceLoaded:Wait()
+		end
+		if player.Character == character then
+			viewmodel:wear(character)
+		end
+	end)
 	humanoid.Died:Once(function()
 		animator = nil
 		current = nil

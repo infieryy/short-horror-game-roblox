@@ -1,38 +1,36 @@
 --!strict
--- The weapon in front of the camera. It is posed part by part every frame: where it sits from the hip or at
--- the eye, how a shot kicks it, how it comes up when drawn, how the magazine leaves and returns in a reload,
--- how a knife swings. The models come from the server (ReplicatedStorage.DesertFps.WeaponModels).
+-- The arms and the weapon in front of the camera. Only the player sees them.
+-- The arms are a character rig of their own (ReplicatedStorage.DesertFps.ViewArms, made by the server) hung
+-- off the camera: forearms and hands show, in the player's own skin and shirt, the rest is unseen. The weapon
+-- sits in its right hand exactly as it does on the character everyone else sees. What the arms do with it
+-- (hold, draw, fire, reload, slash) is animation, made in Blender through a camera where the player's eye is.
+-- On top of the animation this adds what depends on the moment: aiming down the sights, the bob of walking,
+-- the weapon lagging a turn of the head, the bolt and the magazine.
 
 local WeaponConfig = require(script.Parent.Parent.Weapons.WeaponConfig)
+local AnimationPlayer = require(script.Parent.AnimationPlayer)
 
 local Viewmodel = {}
 Viewmodel.__index = Viewmodel
 
--- Weapons are modelled pointing along +X; the camera looks along -Z.
+local Arms = WeaponConfig.ViewArms
+
+-- Weapons are modelled pointing along +X; a hand holds a tool pointing along -Z.
 local AIM = CFrame.Angles(0, math.pi / 2, 0)
+local SHOWN = { LeftLowerArm = true, LeftHand = true, RightLowerArm = true, RightHand = true }
 
--- How a weapon that is not ready hangs below the view: studs down, degrees tipped forward.
-local DRAW_DROP, DRAW_TIP = 0.9, 40
--- A reload: the weapon dips (studs), tips up and rolls over (degrees) at its middle; the magazine travels
--- this far out along its own way out, between these shares of the reload, and back between those.
-local RELOAD_DIP, RELOAD_TIP, RELOAD_ROLL = 0.18, 14, 24
-local MAGAZINE_TRAVEL = 1.4
-local MAGAZINE_OUT, MAGAZINE_IN = { 0.1, 0.35 }, { 0.5, 0.8 }
--- Walking makes the weapon bob this far (studs) at this many swings a stud.
-local BOB, BOB_RATE = 0.03, 0.55
-
-type Piece = { part: BasePart, offset: Vector3, slide: Vector3, detach: Vector3 }
-type Held = { model: Model, pieces: { Piece }, sockets: { [string]: Vector3 }, config: any }
+type Piece = { weld: Weld, home: CFrame, offset: Vector3, slide: Vector3, magazine: boolean }
+type Held = { model: Model, handle: BasePart, pieces: { Piece }, sockets: { [string]: Vector3 }, config: any }
 
 export type Pose = {
 	camera: CFrame,
+	dt: number,
 	aim: number, -- 0 at the hip, 1 at the eye
-	kick: number, -- 1 right after a shot, settling to 0
-	draw: number, -- 0 just drawn, 1 ready
+	kick: number, -- 1 right after a shot, settling to 0: the bolt
 	reload: number?, -- how far through a reload, 0 to 1
-	slash: number?, -- how far through a knife slash, 0 to 1
 	walked: number, -- studs walked, for the bob
 	moving: number, -- how fast, as a share of the run speed
+	sideways: number, -- how much of that is to the right (-1 to 1)
 }
 
 local function ease(x: number): number
@@ -40,26 +38,76 @@ local function ease(x: number): number
 	return x * x * (3 - 2 * x)
 end
 
-local function between(x: number, range: { number }): number
-	return ease((x - range[1]) / (range[2] - range[1]))
+local function unseen(part: BasePart)
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+	part.Massless = true
 end
 
-function Viewmodel.new(models: Instance, parent: Instance)
+-- `models`: the weapons (WeaponModels). `arms`: the rig to copy (ViewArms). Both come from the server.
+function Viewmodel.new(models: Instance, arms: Model, parent: Instance)
 	local self = setmetatable({}, Viewmodel)
-	self.parent = parent
+	local rig = arms:Clone()
+	local humanoid = rig:FindFirstChildOfClass("Humanoid") :: Humanoid
+	-- It is a body only so that it can wear a shirt and be animated: it never stands, falls or shows a name.
+	humanoid.EvaluateStateMachine = false
+	humanoid.AutomaticScalingEnabled = false -- or it puts the forearms back to a body's thickness
+	humanoid.RequiresNeck = false
+	humanoid.BreakJointsOnDeath = false
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+	for _, part in rig:GetDescendants() do
+		if part:IsA("BasePart") then
+			unseen(part)
+			part.Anchored = false
+			if SHOWN[part.Name] then
+				part.Size = Vector3.new(Arms.Thickness, part.Size.Y, Arms.Thickness)
+			else
+				part.Transparency = 1
+			end
+		end
+	end
+	local root = rig:FindFirstChild("HumanoidRootPart") :: BasePart
+	root.Anchored = true
+	self.rig, self.root = rig, root
+	self.rightHand = rig:FindFirstChild("RightHand") :: BasePart
+	self.leftHand = rig:FindFirstChild("LeftHand") :: BasePart
+	local grip = self.rightHand:FindFirstChild("RightGripAttachment") :: Attachment
+
+	local sets = {}
 	self.held = {} :: { [string]: Held }
 	self.current = nil :: Held?
-	self.frame = CFrame.identity
 	for _, source in models:GetChildren() do
+		local config = (WeaponConfig.Weapons :: any)[source.Name]
 		local model = source:Clone() :: Model
+		-- The weapon's own origin, held where a Tool's handle would be.
+		local handle = Instance.new("Part")
+		handle.Name = "Handle"
+		handle.Size = Vector3.one * 0.2
+		handle.Transparency = 1
+		unseen(handle)
+		local hold = Instance.new("Weld")
+		hold.Part0, hold.Part1 = self.rightHand, handle
+		hold.C0, hold.C1 = grip.CFrame, config.Hand
+		hold.Parent = handle
 		local pieces, sockets = {}, {}
 		for _, part in model:GetChildren() do
 			if part:IsA("BasePart") then
+				part.Anchored = false
+				unseen(part)
+				local offset = part:GetAttribute("Offset") :: Vector3
+				local weld = Instance.new("Weld")
+				weld.Part0, weld.Part1 = handle, part
+				weld.C0 = AIM * CFrame.new(offset)
+				weld.Parent = part
 				table.insert(pieces, {
-					part = part,
-					offset = part:GetAttribute("Offset") :: Vector3,
+					weld = weld,
+					home = weld.C0,
+					offset = offset,
 					slide = (part:GetAttribute("Slide") :: Vector3?) or Vector3.zero,
-					detach = (part:GetAttribute("Detach") :: Vector3?) or Vector3.zero,
+					magazine = part:GetAttribute("Detach") ~= nil,
 				})
 			end
 		end
@@ -68,20 +116,63 @@ function Viewmodel.new(models: Instance, parent: Instance)
 				sockets[string.sub(name, 8)] = value :: Vector3
 			end
 		end
-		self.held[model.Name] = { model = model, pieces = pieces, sockets = sockets, config = (WeaponConfig.Weapons :: any)[model.Name] }
+		handle.Parent = model
+		self.held[model.Name] = { model = model, handle = handle, pieces = pieces, sockets = sockets, config = config }
+		table.insert(sets, config.View.Animations)
 	end
+
+	rig.Parent = parent
+	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+	self.animations = AnimationPlayer.new(animator, sets)
+	self.magazineOut = false
+	self.look = nil :: CFrame?
+	self.lagYaw, self.lagPitch, self.lean = 0, 0, 0
 	return self
 end
 
--- Shows the weapon of that name, or nothing.
+-- The arms take the skin and the shirt of the player's own body. (A body is coloured through its BodyColors:
+-- colouring its parts one by one does nothing.)
+function Viewmodel.wear(self: any, character: Model)
+	for _, kind in { "BodyColors", "Shirt" } do
+		local old = self.rig:FindFirstChildOfClass(kind)
+		if old then
+			old:Destroy()
+		end
+		local theirs = character:FindFirstChildOfClass(kind)
+		if theirs then
+			theirs:Clone().Parent = self.rig
+		end
+	end
+end
+
+-- Puts the weapon of that name in the hands and draws it, or shows nothing.
 function Viewmodel.show(self: any, name: string?)
 	if self.current then
 		self.current.model.Parent = nil
 	end
 	self.current = if name then self.held[name] else nil
-	if self.current then
-		self.current.model.Parent = self.parent
+	self.magazineOut = false
+	local held: Held? = self.current
+	for _, part in self.rig:GetChildren() do
+		if part:IsA("BasePart") and SHOWN[part.Name] then
+			part.LocalTransparencyModifier = if held then 0 else 1
+		end
 	end
+	if held then
+		for _, piece in held.pieces do
+			piece.weld.Part0, piece.weld.C0 = held.handle, piece.home
+		end
+		held.model.Parent = self.rig
+		self.animations:switch(held.config.View.Animations, "Idle")
+		self.animations:play("Equip", 0)
+	else
+		self.animations:switch(nil, "Idle")
+	end
+end
+
+-- Plays an action of the weapon in hand: "Fire", "Reload".
+function Viewmodel.play(self: any, action: string)
+	self.animations:play(action)
 end
 
 function Viewmodel.update(self: any, pose: Pose)
@@ -90,54 +181,66 @@ function Viewmodel.update(self: any, pose: Pose)
 		return
 	end
 	local view = held.config.View
+	local steady = 1 - 0.8 * ease(pose.aim)
 
-	-- At the eye, the rear sight sits SightDistance ahead, SightDrop under the line of sight.
-	local place = view.Offset
+	-- Aiming: the whole of it moves until the rear sight is SightDistance ahead, SightDrop under the line of sight.
+	local shift = Vector3.zero
 	local sight = held.sockets.aim_rear
 	if sight and view.SightDistance then
 		local eye = Vector3.new(-sight.Z, -sight.Y - (view.SightDrop or 0), sight.X - view.SightDistance)
-		place = place:Lerp(eye, ease(pose.aim))
+		shift = (eye - view.Offset) * ease(pose.aim)
 	end
-	local steady = 1 - 0.8 * pose.aim
-	local bob = Vector3.new(
-		math.sin(pose.walked * BOB_RATE * math.pi) * BOB,
-		-math.abs(math.cos(pose.walked * BOB_RATE * math.pi)) * BOB,
-		0
-	) * math.min(pose.moving, 1) * steady
+	local stride = pose.walked * Arms.BobRate * math.pi
+	local bob = Vector3.new(math.sin(stride), -math.abs(math.cos(stride)), 0) * Arms.Bob * math.min(pose.moving, 1) * steady
 
-	local frame = pose.camera
-		* CFrame.new(place + bob + Vector3.new(0, 0, (view.KickBack or 0) * pose.kick))
-		* CFrame.Angles(math.rad((view.KickPitch or 0) * pose.kick * steady), 0, 0)
+	-- A turn of the head leaves the weapon a little behind, and a step to the side leans it that way.
+	local look = self.look or pose.camera
+	local turned = look:ToObjectSpace(pose.camera).LookVector
+	self.look = pose.camera
+	local settle = 1 - math.exp(-Arms.LagSettle * pose.dt)
+	local most = math.rad(Arms.LagMost)
+	self.lagYaw = math.clamp(self.lagYaw + turned.X * Arms.Lag, -most, most) * (1 - settle)
+	self.lagPitch = math.clamp(self.lagPitch - turned.Y * Arms.Lag, -most, most) * (1 - settle)
+	self.lean += (math.rad(-Arms.Lean) * pose.sideways - self.lean) * settle
 
-	local down = 1 - ease(pose.draw)
-	if down > 0 then
-		frame *= CFrame.new(0, -DRAW_DROP * down, 0) * CFrame.Angles(math.rad(-DRAW_TIP * down), 0, 0)
-	end
-	local magazine = 0
+	self.root.CFrame = pose.camera
+		* CFrame.new(shift + bob)
+		* CFrame.Angles(self.lagPitch * steady, self.lagYaw * steady, self.lean * steady)
+		* Arms.Rig
+
+	-- The bolt goes back with a shot and with the pull that ends a reload; the magazine leaves with the left
+	-- hand and a full one comes back in it.
+	local pull = 0
+	local out = false
 	if pose.reload then
-		local middle = math.sin(math.pi * pose.reload)
-		frame *= CFrame.new(0, -RELOAD_DIP * middle, 0)
-			* CFrame.Angles(math.rad(RELOAD_TIP * middle), 0, math.rad(RELOAD_ROLL * middle))
-		magazine = (between(pose.reload, MAGAZINE_OUT) - between(pose.reload, MAGAZINE_IN)) * MAGAZINE_TRAVEL
+		local bolt, magazine = view.Bolt, view.Magazine
+		if bolt then
+			local through = (pose.reload - bolt.From) / (bolt.To - bolt.From)
+			pull = if through > 0 and through < 1 then math.sin(math.pi * through) else 0
+		end
+		out = magazine ~= nil and pose.reload >= magazine.Out and pose.reload < magazine.In
 	end
-	if pose.slash then
-		local swing = math.sin(math.pi * pose.slash)
-		frame *= CFrame.new(-0.5 * swing, 0, -view.SlashReach * swing)
-			* CFrame.Angles(0, math.rad(view.SlashAngle * swing), math.rad(-20 * swing))
-	end
-
-	frame *= AIM
-	self.frame = frame
+	local back = math.max(pose.kick, pull)
 	for _, piece in held.pieces do
-		piece.part.CFrame = frame * CFrame.new(piece.offset + piece.slide * pose.kick + piece.detach * magazine)
+		if piece.magazine then
+			if out and not self.magazineOut then
+				piece.weld.Part0 = self.leftHand
+				piece.weld.C0 = self.leftHand.CFrame:ToObjectSpace((piece.weld.Part1 :: BasePart).CFrame)
+			elseif self.magazineOut and not out then
+				piece.weld.Part0, piece.weld.C0 = held.handle, piece.home
+			end
+		elseif piece.slide ~= Vector3.zero then
+			piece.weld.C0 = AIM * CFrame.new(piece.offset + piece.slide * back)
+		end
 	end
+	self.magazineOut = out
 end
 
 -- Where a socket of the weapon in hand is in the world (the muzzle, for a tracer).
 function Viewmodel.socket(self: any, name: string): Vector3?
 	local held: Held? = self.current
 	local at = held and held.sockets[name]
-	return if at then self.frame * at else nil
+	return if held and at then held.handle.CFrame * AIM * at else nil
 end
 
 return Viewmodel

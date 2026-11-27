@@ -562,7 +562,7 @@ The owner: "Can we start the actual fps system now. I want it to feel tactical l
 - The animations are uploaded (the owner said yes; eight assets, all approved; ids in `AnimationConfig` and `animations/README.md`). They load from those ids in a Studio playtest. Not checked in a published game.
 - No sound at all: no shots, no footsteps.
 - No crouch. No wall penetration: a banner or a cloth stops a bullet.
-- No arms in first person, only the weapon. The knife reads small in first person.
+- (Arms in first person were added the same day; see the next section.)
 - The server trusts the direction a client sends, so a cheat could send shots with no stray. It does check everything else.
 - Hit boxes are the avatar's own parts, so a player with a small avatar is a smaller target. Not decided: one standard body for everyone.
 - Touch controls are not designed. A fire and a reload button appear on a phone; aiming and walking do not.
@@ -579,6 +579,40 @@ Notes for the next session:
 - An Animator in edit mode only moves joints after `StepAnimations` with a time above zero.
 - `ReplicatedStorage.DesertFpsAnimations` is not part of the `DesertFps` folder on purpose: installing the scripts replaces that folder.
 - Blender's animation of a rig overrides a pose set by hand as soon as the action has keys. Solve poses with no action assigned, then key them.
+
+### Arms in first person (2026-11-27)
+
+The owner, on the third-person animations: "this third person animation looks good but we need better first person viewmodel. Copy valorant's animation style for viewmodel arms". Asked which arms, the owner chose **the player's own avatar arms** over a painted glove and sleeve, and said yes to uploading the new animations.
+
+**The outcome.** First person now shows two arms holding the weapon, and what they do is animation: a draw for each weapon, a jolt per shot, a reload with the left hand taking the magazine away and bringing one back, two knife slashes that alternate. Twelve new animations, uploaded and approved. Picture: the owner picked the rifle's framing from a Blender render (left forearm in from the bottom left to under the handguard); the game matches it.
+
+**How it works** (`Client/Viewmodel`, `WeaponConfig.ViewArms`, `animations/README.md`):
+- The arms are a plain R15 body of their own, one copy per client, hung off the camera. Only forearms and hands show, 0.6 studs thick. So they are the same size for every player and the animations fit; each client gives its copy the player's own skin (BodyColors) and shirt.
+- The weapon is in its right hand with the same grip as on the character, so the same weapon model and the same numbers serve both.
+- On top of the animation, code adds what depends on the moment: aiming down the sights (the whole rig moves until the sights are at the eye), the bob of walking, the weapon trailing a turn of the head, a lean when stepping sideways, the bolt, and the magazine changing hands during a reload.
+- `Client/AnimationPlayer` plays animations on any Animator: the character's and the arms'. It replaced `CharacterAnimator`.
+
+**Tested in a playtest.** All twelve load from their asset ids at the right lengths. The weapon in the idle sits 0.48 right, 0.44 down and 1.07 ahead of the camera, pointing dead ahead (the Blender figures were 0.55, 0.52, 1.0; Roblox's default body is not quite the kit's). `test_weapons.luau` was not run again; the same six things were seen to work in the recorded run (every target died as planned, the wall came down in 6.8 s).
+
+**A bug found on the way.** A body makes its own torso and head solid whatever it is told. The arms' body hangs where the player's own is, and it threw the player a hundred studs across the town. The arms are now in a collision group that touches nothing (`ViewArms`).
+
+**Decisions made here.**
+- "The player's avatar arms" was built as the player's skin and shirt on standard arms, not the avatar's own arm meshes. Avatars come in very different arm lengths and shapes, and the animations only fit one.
+- Arms are thinned to 0.6 studs. At full size they filled the bottom of the view.
+- The old way (the weapon alone, moved by code) is gone, not kept as an option.
+
+**Not done, not verified.**
+- The owner has seen one Blender still and the recorded playtest, nothing in person.
+- How a shirt looks on the arms is unchecked: this account's shirt did not show on the forearms.
+- No inspect animation. No arms on a phone layout check. Layered clothing does not carry over to the arms.
+- The right hand is mostly below the view with the rifle; only the left arm reads clearly.
+- The knife's slashes reach a little further left than the arm can, so the hand stops short of two keys.
+
+Notes for the next session:
+- A Humanoid body is coloured through its BodyColors. Setting the colour of its parts does nothing.
+- A new R15 body has AnimationConstraints where Motor6Ds used to be. Animations play on it all the same.
+- `Humanoid.AutomaticScalingEnabled` has to be off before a body's parts are resized, or it puts them back.
+- A second video is in `Documents/desert-fps/recordings/` (58 s), the same run as the first, with the arms.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

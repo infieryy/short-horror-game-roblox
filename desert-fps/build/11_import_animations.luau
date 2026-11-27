@@ -1,7 +1,8 @@
--- Loads the characters' weapon animations into ReplicatedStorage.DesertFpsAnimations, as KeyframeSequences.
+-- Loads the weapon animations into ReplicatedStorage.DesertFpsAnimations, as KeyframeSequences: the
+-- characters' ("fps_") and the first-person arms' ("fpv_").
 -- Run in Studio in edit mode. Safe to re-run: each sequence is replaced.
 -- Studio can only load files from its own content folder, so copy them there first:
---   from  desert-fps/animations/fps_*.rbxmx
+--   from  desert-fps/animations/*.rbxmx
 --   to    %LOCALAPPDATA%\Roblox\Versions\<the version with RobloxStudioBeta.exe>\content\claude_anim\
 -- (A Studio update makes a new version folder, and the copy has to be made again.)
 -- The animations were made in Blender with the "Roblox Animation Kit" (animations/README.md).
@@ -17,6 +18,18 @@ local FILES = {
 	"fps_pistol_reload",
 	"fps_knife_hold",
 	"fps_knife_slash",
+	"fpv_rifle_idle",
+	"fpv_rifle_equip",
+	"fpv_rifle_fire",
+	"fpv_rifle_reload",
+	"fpv_pistol_idle",
+	"fpv_pistol_equip",
+	"fpv_pistol_fire",
+	"fpv_pistol_reload",
+	"fpv_knife_idle",
+	"fpv_knife_equip",
+	"fpv_knife_slash_a",
+	"fpv_knife_slash_b",
 }
 
 local folder = ReplicatedStorage:FindFirstChild(FOLDER)

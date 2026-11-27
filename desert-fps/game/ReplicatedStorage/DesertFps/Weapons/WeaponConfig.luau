@@ -25,6 +25,28 @@ return {
 	-- The field of view from the hip (degrees, top to bottom).
 	FieldOfView = 70,
 
+	-- The arms in front of the camera (Client/Viewmodel). What they do with each weapon is animation, made in
+	-- Blender through a camera where the player's eye is (animations/README.md).
+	ViewArms = {
+		-- Where the arms' root sits from the camera: the animations' camera was 1.1 studs above it.
+		Rig = CFrame.new(0, -1.1, 0),
+		-- The collision group the arms are in. It collides with nothing.
+		Group = "ViewArms",
+		-- Studs a forearm and a hand are thick. A body's are a full stud, which at arm's length fills the view.
+		Thickness = 0.6,
+		-- Walking makes the weapon bob this far (studs), at this many swings a stud.
+		Bob = 0.03,
+		BobRate = 0.55,
+		-- Turning the head leaves the weapon Lag of the turn behind, by LagMost degrees at most, and it
+		-- catches up at LagSettle a second. A step to the side leans it Lean degrees.
+		Lag = 0.6,
+		LagMost = 4,
+		LagSettle = 10,
+		Lean = 2.5,
+		-- How fast a weapon's bolt comes forward again after a shot (per second).
+		BoltReturn = 16,
+	},
+
 	Weapons = {
 		-- The standard rifle. One shot to the head kills through any armor, at any range. The first shot goes
 		-- where it is aimed if the shooter stands still; a spray climbs, then swings from side to side.
@@ -82,18 +104,20 @@ return {
 			Hand = CFrame.new(0, -0.18, 0.05, 0.46297, 0.7368, 0.49273, -0.47555, 0.67559, -0.56341, -0.748, 0.02653, 0.66316),
 			Animations = { Hold = "FPS Rifle Hold", Fire = "FPS Rifle Fire", Reload = "FPS Rifle Reload" },
 
-			-- How it sits and moves in first person.
+			-- In first person.
 			View = {
-				-- Where the weapon origin (top of the grip) sits from the camera: right, up, back.
-				Offset = Vector3.new(0.55, -0.5, -0.9),
+				-- What the arms do with it (AnimationConfig).
+				Animations = { Idle = "FPV Rifle Idle", Equip = "FPV Rifle Equip", Fire = "FPV Rifle Fire", Reload = "FPV Rifle Reload" },
+				-- Where the weapon origin (top of the grip) is from the camera in the idle animation: right, up, back.
+				Offset = Vector3.new(0.55, -0.52, -1.0),
 				-- Aiming: how far in front of the eye the rear sight sits, and how far below the line of
 				-- sight, so the sights frame the target instead of covering it.
 				SightDistance = 1.3,
 				SightDrop = 0.1,
-				-- Each shot pushes the weapon back (studs) and tips it up (degrees); Recover is how fast it settles.
-				KickBack = 0.1,
-				KickPitch = 1.6,
-				Recover = 16,
+				-- In the reload animation, as shares of its length: when the magazine leaves with the left
+				-- hand and when a full one is back in, and when the bolt is pulled.
+				Magazine = { Out = 0.187, In = 0.56 },
+				Bolt = { From = 0.69, To = 0.77 },
 				-- The line from the muzzle to the hit: seconds it stays, width, colour.
 				TracerTime = 0.05,
 				TracerWidth = 0.04,
@@ -132,10 +156,8 @@ return {
 			Animations = { Hold = "FPS Pistol Hold", Fire = "FPS Pistol Fire", Reload = "FPS Pistol Reload" },
 
 			View = {
-				Offset = Vector3.new(0.45, -0.42, -1.25),
-				KickBack = 0.08,
-				KickPitch = 4,
-				Recover = 18,
+				Animations = { Idle = "FPV Pistol Idle", Equip = "FPV Pistol Equip", Fire = "FPV Pistol Fire", Reload = "FPV Pistol Reload" },
+				Magazine = { Out = 0.18, In = 0.6 },
 				TracerTime = 0.05,
 				TracerWidth = 0.03,
 				TracerColor = Color3.fromRGB(255, 222, 168),
@@ -158,11 +180,8 @@ return {
 			Animations = { Hold = "FPS Knife Hold", Fire = "FPS Knife Slash" },
 
 			View = {
-				Offset = Vector3.new(0.55, -0.45, -1.1),
-				-- A slash swings the knife across (degrees) and forward (studs) over SlashTime.
-				SlashAngle = 70,
-				SlashReach = 0.5,
-				SlashTime = 0.28,
+				-- It slashes one way, then back the other.
+				Animations = { Idle = "FPV Knife Idle", Equip = "FPV Knife Equip", Fire = { "FPV Knife Slash A", "FPV Knife Slash B" } },
 			},
 		},
 	},

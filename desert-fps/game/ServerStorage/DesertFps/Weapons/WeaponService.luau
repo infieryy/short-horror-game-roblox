@@ -4,6 +4,7 @@
 -- each claim against what the player holds, the fire rate, the ammunition and where the shooter stands, and
 -- decides the hit itself: on a character through Hitboxes, on the town through Breakable.
 
+local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -353,6 +354,30 @@ local function onPlayer(player: Player)
 	end
 end
 
+-- The body every client copies for the arms in front of its camera (Client/Viewmodel): a plain R15 one, so
+-- the arms are the same size and shape for everyone and the animations fit. Each client gives its copy its own
+-- skin and shirt.
+local function viewArms(parent: Instance)
+	-- A body makes its own torso and head solid whatever they are told, and these arms hang where the player's
+	-- own body is: they would throw it across the town. So they are in a group that touches nothing.
+	local group = WeaponConfig.ViewArms.Group
+	PhysicsService:RegisterCollisionGroup(group)
+	for _, other in PhysicsService:GetRegisteredCollisionGroups() do
+		PhysicsService:CollisionGroupSetCollidable(group, other.name, false)
+	end
+
+	local arms = Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
+	arms.Name = "ViewArms"
+	for _, each in arms:GetDescendants() do
+		if each:IsA("LuaSourceContainer") or each:IsA("Decal") then
+			each:Destroy()
+		elseif each:IsA("BasePart") then
+			each.CollisionGroup = group
+		end
+	end
+	arms.Parent = parent
+end
+
 function WeaponService.start()
 	local models = Instance.new("Folder")
 	models.Name = "WeaponModels"
@@ -360,6 +385,7 @@ function WeaponService.start()
 		viewModel(name, models)
 	end
 	models.Parent = Shared
+	task.spawn(viewArms, Shared)
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Remotes"
