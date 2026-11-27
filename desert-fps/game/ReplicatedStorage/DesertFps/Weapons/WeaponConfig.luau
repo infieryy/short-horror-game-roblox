@@ -45,6 +45,10 @@ return {
 		Lean = 2.5,
 		-- How fast a weapon's bolt comes forward again after a shot (per second).
 		BoltReturn = 16,
+		-- Aiming needs to know where the weapon rests in the hands. It is measured once the arms have done
+		-- nothing but hold it for Settle seconds, and followed from then on at RestFollow a second.
+		Settle = 0.3,
+		RestFollow = 2,
 	},
 
 	Weapons = {
@@ -108,8 +112,6 @@ return {
 			View = {
 				-- What the arms do with it (AnimationConfig).
 				Animations = { Idle = "FPV Rifle Idle", Equip = "FPV Rifle Equip", Fire = "FPV Rifle Fire", Reload = "FPV Rifle Reload" },
-				-- Where the weapon origin (top of the grip) is from the camera in the idle animation: right, up, back.
-				Offset = Vector3.new(0.55, -0.52, -1.0),
 				-- Aiming: how far in front of the eye the rear sight sits, and how far below the line of
 				-- sight, so the sights frame the target instead of covering it.
 				SightDistance = 1.3,

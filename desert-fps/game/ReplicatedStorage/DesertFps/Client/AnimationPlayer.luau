@@ -114,4 +114,22 @@ function AnimationPlayer.play(self: any, action: string, fade: number?)
 	end
 end
 
+-- Whether the weapon in hand is doing nothing but its `loop`: that one is loaded and playing at full weight,
+-- and no action is.
+function AnimationPlayer.resting(self: any, loop: string): boolean
+	local set: Set? = self.set
+	local held = set and self.tracks[set[loop] :: string]
+	if not (set and held and held.IsPlaying and held.Length > 0 and held.WeightCurrent > 0.99) then
+		return false
+	end
+	local still = true
+	each(set, function(name)
+		local track = self.tracks[name]
+		if track and track ~= held and track.IsPlaying then
+			still = false
+		end
+	end)
+	return still
+end
+
 return AnimationPlayer

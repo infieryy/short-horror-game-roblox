@@ -20,7 +20,14 @@ local AIM = CFrame.Angles(0, math.pi / 2, 0)
 local SHOWN = { LeftLowerArm = true, LeftHand = true, RightLowerArm = true, RightHand = true }
 
 type Piece = { weld: Weld, home: CFrame, offset: Vector3, slide: Vector3, magazine: boolean }
-type Held = { model: Model, handle: BasePart, pieces: { Piece }, sockets: { [string]: Vector3 }, config: any }
+type Held = {
+	model: Model,
+	handle: BasePart,
+	pieces: { Piece },
+	sockets: { [string]: Vector3 },
+	config: any,
+	rest: Vector3?, -- where the rear sight is from the camera with the weapon at rest in the hands
+}
 
 export type Pose = {
 	camera: CFrame,
@@ -125,6 +132,7 @@ function Viewmodel.new(models: Instance, arms: Model, parent: Instance)
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
 	self.animations = AnimationPlayer.new(animator, sets)
 	self.magazineOut = false
+	self.rested = 0 -- seconds the arms have done nothing but hold the weapon
 	self.look = nil :: CFrame?
 	self.lagYaw, self.lagPitch, self.lean = 0, 0, 0
 	return self
@@ -184,11 +192,21 @@ function Viewmodel.update(self: any, pose: Pose)
 	local steady = 1 - 0.8 * ease(pose.aim)
 
 	-- Aiming: the whole of it moves until the rear sight is SightDistance ahead, SightDrop under the line of sight.
+	-- Where the sight starts from is measured, with the weapon at rest, not taken from where the animation
+	-- was meant to hold it: the body Roblox makes is not quite the one the animations were made on, and a
+	-- weapon a twentieth of a stud out of place aims visibly off centre. It goes on being measured while the
+	-- weapon rests, slowly, so the breath of the idle evens out.
 	local shift = Vector3.zero
 	local sight = held.sockets.aim_rear
+	self.rested = if self.animations:resting("Idle") then self.rested + pose.dt else 0
 	if sight and view.SightDistance then
-		local eye = Vector3.new(-sight.Z, -sight.Y - (view.SightDrop or 0), sight.X - view.SightDistance)
-		shift = (eye - view.Offset) * ease(pose.aim)
+		if self.rested >= Arms.Settle then
+			local now = (Arms.Rig * self.root.CFrame:ToObjectSpace(held.handle.CFrame * AIM * CFrame.new(sight))).Position
+			held.rest = if held.rest then held.rest:Lerp(now, 1 - math.exp(-Arms.RestFollow * pose.dt)) else now
+		end
+		if held.rest then
+			shift = (Vector3.new(0, -(view.SightDrop or 0), -view.SightDistance) - held.rest) * ease(pose.aim)
+		end
 	end
 	local stride = pose.walked * Arms.BobRate * math.pi
 	local bob = Vector3.new(math.sin(stride), -math.abs(math.cos(stride)), 0) * Arms.Bob * math.min(pose.moving, 1) * steady

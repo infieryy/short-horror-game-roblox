@@ -594,6 +594,10 @@ The owner, on the third-person animations: "this third person animation looks go
 
 **Tested in a playtest.** All twelve load from their asset ids at the right lengths. The weapon in the idle sits 0.48 right, 0.44 down and 1.07 ahead of the camera, pointing dead ahead (the Blender figures were 0.55, 0.52, 1.0; Roblox's default body is not quite the kit's). `test_weapons.luau` was not run again; the same six things were seen to work in the recorded run (every target died as planned, the wall came down in 6.8 s).
 
+**Aiming was off centre** (the owner: "The ADS is off cennter"). Aiming moved the weapon from where the animation was meant to hold it, and on Roblox's body it rests 0.07 studs to the left of that and 0.08 higher, so the sights landed that far out. Now where the rear sight rests is measured in the game, once the arms have done nothing but hold the weapon for 0.3 s, and followed slowly from then on (`WeaponConfig.ViewArms.Settle`, `RestFollow`). Measured after the fix: both sights 0.001 studs off the centre line, the rear sight 0.108 below the line of sight and 1.30 ahead, the same after shots, a reload and a change of weapon. The sights sit a little under the crosshair on purpose (`SightDrop`), so they frame the target instead of covering it. Picture: `assets/studio/fps-rifle-aiming.jpg`.
+
+**The owner on the animations:** "Anims ok for now".
+
 **A bug found on the way.** A body makes its own torso and head solid whatever it is told. The arms' body hangs where the player's own is, and it threw the player a hundred studs across the town. The arms are now in a collision group that touches nothing (`ViewArms`).
 
 **Decisions made here.**
