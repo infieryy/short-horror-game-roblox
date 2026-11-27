@@ -484,7 +484,8 @@
     -4.0,
     22.4
    ],
-   "turn": 0.0
+   "turn": 0.0,
+   "shadow": false
   },
   {
    "piece": "lantern",
@@ -493,7 +494,8 @@
     -4.0,
     22.4
    ],
-   "turn": 0.0
+   "turn": 0.0,
+   "shadow": false
   },
   {
    "piece": "corner2_upper",

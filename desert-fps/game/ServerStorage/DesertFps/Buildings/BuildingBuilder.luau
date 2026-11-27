@@ -16,7 +16,7 @@ local Config = require(script.Parent.BuildingConfig)
 
 local BuildingBuilder = {}
 
-type Placement = { piece: string, pos: { number }, turn: number, tint: { number }? }
+type Placement = { piece: string, pos: { number }, turn: number, tint: { number }?, shadow: boolean? }
 
 -- Pieces placed between two yields, so Studio stays responsive.
 local BATCH = 60
@@ -44,7 +44,8 @@ local function copy(template: BasePart, cf: CFrame, name: string, parent: Instan
 end
 
 -- A lantern is two meshes: the iron frame, and the glass, which glows and carries the light.
-local function standLamp(piece: string, cf: CFrame, parent: Instance)
+-- `shadows` false: this one casts none, whatever its kind does (a lamp behind a window nobody can reach).
+local function standLamp(piece: string, cf: CFrame, parent: Instance, shadows: boolean?)
 	local parts = meshes(piece):FindFirstChild("Parts") :: Instance
 	local lamp = Instance.new("Model")
 	lamp.Name = piece
@@ -63,7 +64,7 @@ local function standLamp(piece: string, cf: CFrame, parent: Instance)
 	light.Color = Config.Lamp.LightColor
 	light.Brightness = Config.Lamp.Brightness
 	light.Range = Config.Lamp.Range
-	light.Shadows = Config.Lamp.Shadows[piece]
+	light.Shadows = shadows ~= false and Config.Lamp.Shadows[piece]
 	light.Parent = glass
 	lamp.PrimaryPart = body
 	lamp.Parent = parent
@@ -86,7 +87,7 @@ function BuildingBuilder.build(name: string, origin: CFrame, parent: Instance?):
 		local piece = item.piece
 		local cf = origin * CFrame.new(item.pos[1], item.pos[3], -item.pos[2]) * CFrame.Angles(0, math.rad(item.turn), 0)
 		if Config.Lamp.Pieces[piece] then
-			standLamp(piece, cf, lamps)
+			standLamp(piece, cf, lamps, item.shadow)
 		elseif BreakData[piece] then
 			local tint = item.tint and Color3.fromRGB(item.tint[1], item.tint[2], item.tint[3])
 			local placed = Breakable.place(piece, cf, structure, tint)

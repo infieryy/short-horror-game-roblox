@@ -351,6 +351,7 @@ class House:
                 lay.edge("wall2_upper" + kind, *edge, z)
             for r, c, _ in lit:
                 lay.at("lantern", r, c, z + 10.4)
+                lay.items[-1]["shadow"] = False                         # nobody gets in there: its light is all that shows
             for y, x in self.corners(edges):
                 lay.put("corner2_upper", x * CELL, -y * CELL, z)
             if story == tallest - 1:
