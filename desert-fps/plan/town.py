@@ -18,8 +18,11 @@ hunt to find the player and a little bit tense (valorant kind of but for duels)"
 Without a mirror, fairness is measured: each side reaches about half the ground first, has as many options,
 and the spawns are picked by search (the pair of spots that balances the arena best).
 
-It uses the v1 planner's legend, walking model and checks (planner.py, zones.py), with one correction:
-a flight of stairs is entered from its foot only, the way a real flight is.
+It uses the v1 planner's legend, walking model and checks (planner.py, zones.py), corrected where the real
+buildings showed it wrong (bots walked the plan's routes through them):
+  - a flight of stairs is entered from its foot only, and nobody cuts across its corner;
+  - nobody walks slantwise through a doorway: a door is in the middle of its wall, not at the corner;
+  - nobody cuts the corner where a pier stands (PIERS: the arcades of the Tea House).
 """
 import json
 import math
@@ -50,16 +53,16 @@ ROWS = [
     ("..", "......222", "T.", "......s....", "...", "22......", "T.."),
     ("..", "222.T....", "..", ".T......kk.", "...", "22..c.11", "..."),
     # street
-    ("..", "....11...", "..", "..........C", "...", "...C....", "..."),
-    ("T.", "....k....", ".k", "......T....", ".Ck", "........", "..."),
+    ("..", "....11...", "..", "..........C", "...", "1..C....", "..."),
+    ("T.", "....k....", ".k", "......T....", ".Ck", "1.......", "..."),
     # Courtyard House | Market Square | Dye Works
     ("..", "..C.....1", "..", "11....C....", "...", "........", "..."),
     ("..", "iidiiiW.1", "..", "11s.C....C.", "...", "k.diiiiW", "..."),
     (".C", "iiidiii.1", "..", ".......C...", "...", "k.iiQiii", ".C."),
     ("..", "ii...id.1", "k.", ".C.c......k", ".C.", "..WidiQi", "..."),
-    ("..", "Wi.T.ii.1", "..", ".....Cw.C.k", "...", "w..k.dii", "..."),
-    ("..", "id.c.di.1", "..", "k.C........", "...", "..w..iqW", "1.."),
-    ("..", "ii...iWCT", ".c", "k...C.c..C.", "...", ".w..kiii", "1.."),
+    ("..", "Wi.T.ii.1", "..", ".....Cw.C.k", "...", "C..k.iii", "..."),
+    ("..", "id.c.di.1", "..", "k.C........", "...", "C.w..iqW", "1.."),
+    ("..", "ii...iWCT", ".c", "k...C.c..C.", "...", "Cw..kiii", "1.."),
     ("..", "diT..ii..", "..", ".......C...", "c..", "...k.iid", "..."),
     ("1.", "iiidiid..", "..", ".C..T....11", "...", "k.c..dii", "..."),
     ("1.", "Widiiii.c", "..", "...C..C..11", "..T", "k....idi", "..C"),
@@ -110,6 +113,10 @@ ARENAS = {
                "yard_a": (12, 1, 27, 2), "yard_b": (12, 36, 27, 38)},
 }
 
+# Grid corners (row, column of the cell south-east of the corner) where a pier stands in an open arcade.
+PIERS = {(11, 17), (11, 18), (11, 19), (11, 20),          # the Tea House porch
+         (8, 18), (8, 19), (9, 18), (9, 19)}              # its atrium
+
 TARGETS = {
     "options_4s_min": 3,          # separate places a player can be 4 s after spawning
     "options_7s_min": 4,
@@ -157,6 +164,10 @@ def neighbors(g, node):
                 continue
             if g[r][c] == "s" and stairs_ends(g, r, c)[1] != (nr, nc):
                 continue
+            if nr != r and nc != c:                              # a slantwise step: across the corner of four cells
+                four = (g[r][c], g[nr][nc], g[nr][c], g[r][nc])
+                if "s" in four or len({ch in P.ROOM for ch in four}) > 1 or (max(r, nr), max(c, nc)) in PIERS:
+                    continue
         elif layer == 0 and g[r][c] == "s" and stairs_ends(g, r, c)[0] != (nr, nc):
             continue
         elif nl == 0 and g[nr][nc] == "s" and stairs_ends(g, nr, nc)[0] != (r, c):

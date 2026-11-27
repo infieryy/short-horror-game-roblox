@@ -34,13 +34,13 @@ Spawns are not drawn by hand. For each arena `town.py` tries every pair of spots
 ### Arenas
 A duel uses one part of town per round. An arena is a band three blocks long: two corner quarters with a landmark between them. The streets out of the band are closed for the round (pink squares). Bands overlap, so every building is fought over in two arenas.
 
-| Arena | Places after 4 s (A / B) | Places after 7 s (A / B) | Places to collide | Most one spot sees | Ground A reaches first | Meet | First sight | Longest view (studs) | Bots |
-|---|---|---|---|---|---|---|---|---|---|
-| Tea House | 4 / 4 | 5 / 5 | 4 | 23% | 50% | 9.71 s | 6.21 s | 170 | 8 of 8, within 4.3% |
-| Cistern Hall | 3 / 3 | 5 / 5 | 4 | 26% | 50% | 9.62 s | 4.91 s | 193 | 7 of 7, within 2.3% |
-| Courtyard House | 4 / 4 | 5 / 4 | 4 | 22% | 50% | 9.41 s | 5.21 s | 183 | 7 of 7, within 4.0% |
-| Dye Works | 5 / 4 | 5 / 4 | 6 | 24% | 49% | 9.62 s | 5.41 s | 185 | 7 of 7, within 3.4% |
-| Market Square | 4 / 4 | 8 / 5 | 4 | 18% | 47% | 9.62 s | 6.91 s | 177 | 6 of 6, within 3.5% |
+| Arena | Places after 4 s (A / B) | Places after 7 s (A / B) | Places to collide | Most one spot sees | Ground A reaches first | Meet | First sight | Longest view (studs) |
+|---|---|---|---|---|---|---|---|---|
+| Tea House | 4 / 4 | 5 / 5 | 4 | 23% | 50% | 9.41 s | 6.21 s | 170 |
+| Cistern Hall | 3 / 3 | 5 / 5 | 4 | 26% | 49% | 9.62 s | 4.91 s | 193 |
+| Courtyard House | 4 / 4 | 5 / 4 | 4 | 22% | 50% | 9.41 s | 5.21 s | 183 |
+| Dye Works | 5 / 4 | 4 / 4 | 5 | 21% | 48% | 9.62 s | 5.41 s | 185 |
+| Market Square | 4 / 4 | 8 / 7 | 4 | 17% | 48% | 9.62 s | 7.12 s | 177 |
 
 All five pass every check.
 
@@ -51,13 +51,23 @@ How it got there:
 - **Views through buildings were the surprise.** A row of rooms with a window or a door at each end is a tunnel you can see through. Six of those were closed with a shelf or a blank wall.
 - **Wide streets count as one place.** Splitting them with a run of small buildings is what raised the options: a wall of houses down the street east of the Courtyard House, a garden wall behind the Tea House that leaves a one-cell alley, sheds in the south streets.
 - **Stairs are entered from the foot.** The planner used to treat a stairs cell as open ground; `town.py` corrects that, so routes and built flights agree.
+- **The real buildings corrected the planner twice more.** With the Tea House and the Courtyard House standing in the town, bots failed two routes: the plan let them step slantwise across the corner of the Tea House porch, where a pier stands, and slantwise through doorways. `town.py` now forbids both. That moved the timings enough to fail the Dye Works arena, which was fixed by fencing its vat yard from the street and moving one workshop door.
 
 ### Built as gray boxes and walked by bots
 
 ![The gray-box town in Studio](out/graybox-town.png)
 ![From a spawn: two alleys fork round the watchtower](out/graybox-town-spawn.png)
 
-`build/09_graybox_town.luau` builds it (`Workspace.Graybox_town`, 589 parts, west of the old town). `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 35 of 35 pass, within 4.3% of the planner's times.
+`build/09_graybox_town.luau` builds it all as gray boxes; `build/10_build_town.luau` builds it with the real buildings standing in their places (see below). `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 35 of 35 pass. On gray boxes alone the bots were within 4.3% of the planner's times.
+
+### Real buildings in the town
+
+![The Courtyard House and the Tea House in the gray-box town](../assets/studio/town-two-buildings.png)
+
+`game/ServerStorage/DesertFps/Town/TownConfig.luau` lists the buildings that have a recipe; `TownBuilder` stands them at their plan cells and leaves the rest as gray boxes. So far: the Tea House and the Courtyard House.
+
+- The bots walk the same routes straight through the real buildings: **35 of 35 pass**.
+- **Five routes run 10% to 16% slower than planned**, all of them through a real building (door frames and furniture to brush past): two Market Square lanes and one Tea House lane, and the two climbs up outside stairs. The planner still times a building as open floor.
 
 - **Fairness is measured, not given.** The two players' runs to the meeting point were 0.1 to 0.5 s apart in the bot test. The mirrored first draft showed the same 0.5 s, so that gap is the bots, not the layout.
 - **The Tea House in the plan is the real building's footprint** (hall, wing, porch, outside stairs, the three doors). The planner cannot see its upper floor: it treats the roof as one flat level.
@@ -77,7 +87,7 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 | Inside its hall | 31,000 | 36 |
 | Inside its gallery | 37,000 | 37 |
 
-- **Landmark building** (5 of them): up to 75,000 triangles in all, up to 12 lamps that cast shadows.
+- **Landmark building** (5 of them): about 1,500 triangles per plan cell, up to 12 lamps that cast shadows. The Tea House (16 cells, two stories) is 72,000; the Courtyard House (63 cells) is 90,000. The first budget here said 75,000 for any landmark; that was set from the Tea House alone and does not fit a building four times its footprint.
 - **Small house** (16 of them): up to 15,000 triangles, 2 lamps that cast shadows.
 - **Whole town:** about 700,000 triangles and 6,000 pieces. The source video's town is about 2,000,000 triangles.
 - **Any view in a round:** aim for under 150,000 triangles.
@@ -86,7 +96,7 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 **Frame rate itself is not measured.** This Studio session draws 16 frames a second whether the whole tea house or an empty sky is on screen, so it says nothing. It needs a run on a phone and on an ordinary PC.
 
 ### Not done
-- Only the Tea House has a building recipe. The other four landmarks and the sixteen houses are boxes.
+- The Tea House and the Courtyard House are built. The other three landmarks and all the small houses are boxes.
 - Sight is still only checked at eye level on the ground, not from roofs.
 - Barriers that close an arena, rounds and team spawns are not built.
 

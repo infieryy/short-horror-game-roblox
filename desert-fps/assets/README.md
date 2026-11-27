@@ -109,6 +109,9 @@ The plain kit above makes boxes. Buildings that are meant to be looked at use a 
 - **Painted patterns.** `p.mark(..., family="band")` paints a line in a second colour family instead of a darker tone: the zigzag on the stone course, the borders and diamonds on the rug, the tea glass on the sign. Still strokes written as numbers.
 - **Arched openings** are outlines pushed through the wall thickness (`p.extrude`). `chunks.py` now cuts such faces as triangles; cut as one face they came out with holes.
 - **A building is a recipe:** `buildings/teahouse.py` places pieces on the grid story by story, inside and out. `python buildings/teahouse.py` writes `out/buildings/teahouse.json`; `build/pack.py` packs it for the game (`BuildingData`), and `python preview.py teahouse teahouse-hall teahouse-gallery` renders the same list in Blender, lamps lit. Check a building in the render before uploading its pieces.
+- **A building's walls come from the plan.** `buildings/layout.py` reads a building's cells from `plan/out/town.json` and stands a wall, door or window on every edge exactly as the planner has it (`shell`). A recipe may swap a blank wall for a shuttered window (`wall2_shutter`, same blocking) and add pilasters; it then adds roof, furniture and lamps by hand. `buildings/courtyard.py` is built this way; `teahouse.py` predates it and places its walls by hand.
+- **Furniture keeps to the walls.** The plan lets a player walk through every room cell, so nothing stands within a stud of a cell's middle.
+- Two more pieces: `wall2_shutter` (an arched window closed by painted turquoise shutters) and `tree` (an orange tree in a stone planter). 58 pieces in the kit.
 - New colour families: `leaf`, `bloom`, `glow`. Paving is now pinker and paler than the walls, as in the concept.
 
 ## Destruction

@@ -59,6 +59,8 @@ return {
 	sign_tea = { Model = 84988383060040, Texture = 115807192676586 },
 	banner = { Model = 84338427634909, Texture = 81316959099146 },
 	bougainvillea = { Model = 83906939320149, Texture = 99875833079690 },
+	tree = { Model = 132570403835455, Texture = 139426433969260 },
+	wall2_shutter = { Model = 91282229117878, Texture = 125982005474478 },
 	-- weapons
 	rifle = { Model = 118729713583609, Texture = 98441666077201 },
 	pistol = { Model = 87247004083333, Texture = 102072335700837 },

@@ -1,7 +1,7 @@
 """Recipe registry: piece name -> (build function, options)."""
 from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
 from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
-from . import floor, furnish, hangings, lantern, pergola, wall2
+from . import floor, furnish, hangings, lantern, pergola, tree, wall2
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
@@ -21,6 +21,7 @@ RECIPES = {
     "wall2_plain": (wall2.build, {}),
     "wall2_door": (wall2.build, {"opening": "door"}),
     "wall2_window": (wall2.build, {"opening": "window"}),
+    "wall2_shutter": (wall2.build, {"opening": "shutter"}),
     "wall2_arcade": (wall2.arcade, {}),
     "wall2_upper": (wall2.build, {"upper": True}),
     "wall2_upper_door": (wall2.build, {"opening": "door", "upper": True}),
@@ -41,6 +42,7 @@ RECIPES = {
     "sign_tea": (hangings.sign, {}),
     "banner": (hangings.banner, {}),
     "bougainvillea": (hangings.bougainvillea, {}),
+    "tree": (tree.build, {}),
     "stairs": (stairs.build, {}),
     "stairs_narrow": (stairs.build, {"narrow": True}),
     "ladder": (ladder.build, {}),

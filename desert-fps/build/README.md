@@ -10,9 +10,10 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 | 4 | `04_import_meshes.luau` | Loads the uploaded kit into `ServerStorage.DesertFps.Meshes` and checks every mesh against its data |
 | 5 | `05_kit_showcase.luau` | Stands the kit, two characters and the weapons outside the town wall in `Workspace.KitShowcase`. It is also a firing range |
 | 6 | `06_build_map.luau` | Builds the whole town out of kit pieces in `Workspace.Map`: nine districts, ring road, town wall (about 20,800 pieces, 7 seconds) |
-| 7 | `07_build_teahouse.luau` | Stands the pilot building, the tea house, on its own paved yard outside the south wall: `Workspace.Buildings.TeaHouse` (197 pieces). Players spawn in front of it |
+| 7 | `07_build_teahouse.luau` | Optional. Stands the tea house alone on a paved yard outside the old town's south wall, for looking at it. Step 10 moves it into the town |
 | 8 | `08_sky.luau` | Sets the painted sky (six faces cut from one painting by `assets/sky.py`) |
 | 9 | `09_graybox_town.luau` | Builds the compact town (plan v2) as gray boxes in `Workspace.Graybox_town`, west of the old town |
+| 10 | `10_build_town.luau` | Builds the compact town with its real buildings (Tea House, Courtyard House) in `Workspace.Buildings` and gray boxes for the rest. Players spawn in front of the Tea House |
 
 `tests/time_market_routes.luau` runs on the server during a playtest. It walks bots along the planner's Market Square routes and writes the timings to the `RouteTiming` attribute on Workspace. `tests/time_all_routes.luau` does the same for every zone and writes a summary to `RouteSummary`.
 

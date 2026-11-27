@@ -1,0 +1,12 @@
+{
+ "piece": "tree",
+ "triangles": 2764,
+ "triangles_low": 1796,
+ "strokes": 43061,
+ "px_per_stud": 30.4,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 1976,
+ "problems": [],
+ "seconds": 19.2
+}

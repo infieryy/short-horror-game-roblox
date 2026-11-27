@@ -264,11 +264,12 @@ KIT = {
         "plinth_out": 0.14, "plinth_h": 2.0, "rail_z": 2.3, "rail_h": 0.26, "rail_out": 0.12,
         "frieze": (10.9, 11.5), "cornice": (11.35, 12.0), "course_out": 0.22, "teeth": 8,
         "trim_out": 0.14, "voussoirs": 9, "jamb_course": 1.4, "sill_h": 0.45, "sill_out": 0.3,
-        "bar": 0.13, "bar_gap": 0.6, "bar_inset": 0.35,
+        "bar": 0.13, "bar_gap": 0.6, "bar_inset": 0.35, "shutter_in": 0.16,
         "corner_half": 0.8, "corner_cap": 0.14,
         "openings": {
             "door": {"w": 4.4, "spring": 5.6, "trim": 0.5},
             "window": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
+            "shutter": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
             "arcade": {"w": 6.0, "spring": 6.4, "trim": 0.45, "pier_out": 0.2, "cap_h": 0.5},
             "upper_door": {"w": 4.0, "spring": 5.8, "trim": 0.45},
             "upper_window": {"w": 2.6, "sill": 4.2, "spring": 6.6, "trim": 0.4},
@@ -288,7 +289,7 @@ KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
                 "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7,
                 "lantern": 0.3, "tea": 0.4, "rug": 0.6, "divan": 0.7, "shelf": 0.4, "counter": 0.6, "sign": 0.4,
-                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7}
+                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -330,7 +331,7 @@ STYLE["smoke"] = STYLE["knife"]
 # Pale cloth and sacking show the dark corner glaze as stains, so they get much less of it.
 STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
 STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
-for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola"):
+for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree"):
     STYLE[_soft] = {"glaze": {"shade_per_stud2": 60.0, "shade_mix": 0.1}}
 
 # ---------------------------------------------------------------- destruction
@@ -380,6 +381,7 @@ BREAK = {
         "wall2_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall2_door": {"mode": "chunks", "shards": 11, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall2_window": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
+        "wall2_shutter": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall2_arcade": {"mode": "chunks", "shards": 10, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall2_upper": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
         "wall2_upper_door": {"mode": "chunks", "shards": 11, "through": "y", "slant": 0.9, "apart": 0.55},
@@ -394,6 +396,7 @@ BREAK = {
         "divan": {"mode": "shatter", "shards": 7, "apart": 0.5},
         "shelf": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "counter": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "tree": {"mode": "shatter", "shards": 8, "apart": 0.5},
         # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
         "lantern": {"mode": "parts"},
         "lantern_wall": {"mode": "parts"},

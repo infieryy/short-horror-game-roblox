@@ -15,15 +15,15 @@
   "21.111.c.222..2..WdWQ..11C..22.T.11....2",
   "2........222T.......s.......22......T..2",
   "2..222.T.......T......kk....22..c.11...2",
-  "2......11...............C......C.......2",
-  "2T.....k.....k......T.....Ck...........2",
+  "2......11...............C...1..C.......2",
+  "2T.....k.....k......T.....Ck1..........2",
   "2....C.....1..11....C..................2",
   "2..iidiiiW.1..11s.C....C....k.diiiiW...2",
   "2.Ciiidiii.1.........C......k.iiQiii.C.2",
   "2..ii...id.1k..C.c......k.C...WidiQi...2",
-  "2..Wi.T.ii.1.......Cw.C.k...w..k.dii...2",
-  "2..id.c.di.1..k.C.............w..iqW1..2",
-  "2..ii...iWCT.ck...C.c..C.....w..kiii1..2",
+  "2..Wi.T.ii.1.......Cw.C.k...C..k.iii...2",
+  "2..id.c.di.1..k.C...........C.w..iqW1..2",
+  "2..ii...iWCT.ck...C.c..C....Cw..kiii1..2",
   "2..diT..ii...........C...c.....k.iid...2",
   "21.iiidiid.....C..T....11...k.c..dii...2",
   "21.Widiiii.c.....C..C..11..Tk....idi..C2",
@@ -169,11 +169,11 @@
    ],
    "spawn_b": [
     [
-     2,
-     38
+     1,
+     37
     ],
     [
-     3,
+     1,
      38
     ]
    ],
@@ -260,10 +260,6 @@
     ],
     [
      14,
-     28
-    ],
-    [
-     14,
      29
     ],
     [
@@ -307,7 +303,7 @@
     "key": "town_teahouse",
     "name": "Tea House",
     "spawns": "west / east",
-    "meet_s": 9.71,
+    "meet_s": 9.41,
     "meet_cell": [
      3,
      19,
@@ -321,7 +317,7 @@
      ],
      [
       8,
-      29
+      30
      ]
     ],
     "longest_sightline_studs": 170,
@@ -337,15 +333,15 @@
     ],
     "lanes": [
      {
-      "time_s": 19.12,
+      "time_s": 18.83,
       "uses_roofs": false
      },
      {
-      "time_s": 22.36,
+      "time_s": 23.36,
       "uses_roofs": false
      },
      {
-      "time_s": 28.45,
+      "time_s": 26.45,
       "uses_roofs": false
      }
     ],
@@ -400,18 +396,22 @@
      [
       12,
       21
+     ],
+     [
+      13,
+      21
      ]
     ],
-    "front_spread_studs": 74,
-    "seen_mean": 0.12,
-    "seen_max": 0.227,
+    "front_spread_studs": 82,
+    "seen_mean": 0.119,
+    "seen_max": 0.228,
     "seen_max_cell": [
      9,
      16
     ],
-    "loose_ends": 2,
+    "loose_ends": 3,
     "first_share_a": 0.5,
-    "walkable_cells": 376
+    "walkable_cells": 374
    }
   },
   "cistern": {
@@ -425,8 +425,8 @@
    ],
    "spawn_a": [
     [
-     37,
-     2
+     38,
+     1
     ],
     [
      38,
@@ -571,11 +571,11 @@
       "uses_roofs": false
      },
      {
-      "time_s": 23.99,
+      "time_s": 24.99,
       "uses_roofs": false
      },
      {
-      "time_s": 27.86,
+      "time_s": 28.16,
       "uses_roofs": false
      }
     ],
@@ -616,12 +616,12 @@
       19
      ],
      [
-      29,
+      28,
       19
      ],
      [
       29,
-      20
+      19
      ],
      [
       30,
@@ -630,10 +630,6 @@
      [
       31,
       19
-     ],
-     [
-      31,
-      20
      ],
      [
       32,
@@ -672,7 +668,7 @@
      23
     ],
     "loose_ends": 3,
-    "first_share_a": 0.5,
+    "first_share_a": 0.493,
     "walkable_cells": 408
    }
   },
@@ -954,11 +950,11 @@
    "spawn_a": [
     [
      2,
-     29
+     28
     ],
     [
      2,
-     30
+     29
     ]
    ],
    "spawn_b": [
@@ -1107,21 +1103,21 @@
     ],
     "lanes": [
      {
-      "time_s": 19.24,
+      "time_s": 19.04,
       "uses_roofs": false
      },
      {
-      "time_s": 22.95,
+      "time_s": 23.45,
       "uses_roofs": false
      },
      {
-      "time_s": 26.66,
+      "time_s": 26.45,
       "uses_roofs": false
      }
     ],
     "unreachable_cells": 0,
     "cover_low": 7,
-    "cover_high": 14,
+    "cover_high": 17,
     "cloth": 12,
     "ladders": 2,
     "stairs": 0,
@@ -1139,13 +1135,13 @@
     },
     "options_a": [
      5,
-     5
+     4
     ],
     "options_b": [
      4,
      4
     ],
-    "fronts": 6,
+    "fronts": 5,
     "front_cells": [
      [
       18,
@@ -1153,7 +1149,11 @@
      ],
      [
       18,
-      31
+      32
+     ],
+     [
+      18,
+      35
      ],
      [
       19,
@@ -1169,7 +1169,7 @@
      ],
      [
       19,
-      29
+      31
      ],
      [
       19,
@@ -1181,27 +1181,27 @@
      ],
      [
       19,
-      35
-     ],
-     [
-      19,
       37
      ],
      [
       19,
       38
+     ],
+     [
+      20,
+      25
      ]
     ],
     "front_spread_studs": 104,
-    "seen_mean": 0.121,
-    "seen_max": 0.239,
+    "seen_mean": 0.11,
+    "seen_max": 0.209,
     "seen_max_cell": [
-     13,
-     27
+     14,
+     38
     ],
-    "loose_ends": 3,
-    "first_share_a": 0.49,
-    "walkable_cells": 445
+    "loose_ends": 4,
+    "first_share_a": 0.483,
+    "walkable_cells": 441
    }
   },
   "market": {
@@ -1445,15 +1445,15 @@
      20,
      0
     ],
-    "first_sight_s": 6.91,
+    "first_sight_s": 7.12,
     "first_sight_pair": [
      [
       18,
-      12
+      13
      ],
      [
       20,
-      30
+      27
      ]
     ],
     "longest_sightline_studs": 177,
@@ -1477,13 +1477,13 @@
       "uses_roofs": false
      },
      {
-      "time_s": 24.62,
+      "time_s": 26.74,
       "uses_roofs": false
      }
     ],
     "unreachable_cells": 0,
     "cover_low": 7,
-    "cover_high": 27,
+    "cover_high": 30,
     "cloth": 17,
     "ladders": 0,
     "stairs": 1,
@@ -1505,7 +1505,7 @@
     ],
     "options_b": [
      4,
-     5
+     7
     ],
     "fronts": 4,
     "front_cells": [
@@ -1535,15 +1535,15 @@
      ]
     ],
     "front_spread_studs": 80,
-    "seen_mean": 0.098,
-    "seen_max": 0.182,
+    "seen_mean": 0.089,
+    "seen_max": 0.166,
     "seen_max_cell": [
-     14,
-     25
+     27,
+     26
     ],
-    "loose_ends": 5,
-    "first_share_a": 0.471,
-    "walkable_cells": 518
+    "loose_ends": 6,
+    "first_share_a": 0.475,
+    "walkable_cells": 514
    }
   }
  }

@@ -30,7 +30,9 @@ local LOOK = {
 	EnvironmentSpecularScale = 0,
 	ExposureCompensation = 0,
 	ShadowSoftness = 0.25,
-	GeographicLatitude = 30,
+	-- A high latitude swings the afternoon sun round to the south-west, so the fronts that face south (the
+	-- Tea House porch) and west are both in the light. At 30 the sun stood due west and south fronts were dark.
+	GeographicLatitude = 58,
 }
 local SUN_ELEVATION_DEGREES = 38 -- afternoon side
 local SAND = Color3.fromRGB(240, 172, 128)

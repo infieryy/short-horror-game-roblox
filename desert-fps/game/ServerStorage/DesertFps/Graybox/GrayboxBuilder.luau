@@ -401,8 +401,14 @@ end
 
 -- Builds (or rebuilds) a zone under `parent`. Returns the model and how many parts of each kind it made.
 -- The key is one of the plan's duel zones, or a whole town (the compact town is "town"). `origin` is where
--- its middle goes; left out, it is the graybox origin in GrayboxConfig.
-function GrayboxBuilder.build(zoneKey: string, parent: Instance?, origin: CFrame?): (Model, { [string]: number })
+-- its middle goes; left out, it is the graybox origin in GrayboxConfig. `blank` lists rectangles of cells
+-- ({ row0, column0, row1, column1 }, from 0, inclusive) left as bare ground: where a real building stands.
+function GrayboxBuilder.build(
+	zoneKey: string,
+	parent: Instance?,
+	origin: CFrame?,
+	blank: { { number } }?
+): (Model, { [string]: number })
 	local zone = PlanData.zones[zoneKey] or (PlanData.towns and PlanData.towns[zoneKey])
 	assert(zone, `no zone or town "{zoneKey}" in the plan`)
 	local middle = origin or Config.Origin
@@ -422,9 +428,20 @@ function GrayboxBuilder.build(zoneKey: string, parent: Instance?, origin: CFrame
 	model:SetAttribute("CellStuds", PlanData.cell_studs)
 	model:SetAttribute("StoryStuds", PlanData.story_studs)
 
+	local grid: { string } = zone.grid
+	if blank then
+		grid = table.clone(grid)
+		for _, rect in blank do
+			for r = rect[1], rect[3] do
+				local row = grid[r + 1]
+				grid[r + 1] = string.sub(row, 1, rect[2]) .. string.rep(".", rect[4] - rect[2] + 1) .. string.sub(row, rect[4] + 2)
+			end
+		end
+	end
+
 	local ctx: Ctx = {
-		grid = zone.grid,
-		n = #zone.grid,
+		grid = grid,
+		n = #grid,
 		cell = PlanData.cell_studs,
 		story = PlanData.story_studs,
 		origin = middle,

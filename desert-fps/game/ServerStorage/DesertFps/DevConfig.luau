@@ -3,7 +3,7 @@
 return {
 	-- Every player spawns on this SpawnLocation (a path under Workspace) if it exists.
 	-- { "KitShowcase", "Spawn" } is the firing range; { "Map", "Zones", "market", "SpawnA" } is the old town.
-	SpawnPath = { "Buildings", "TeaHouse", "Spawn" } :: { string }?,
+	SpawnPath = { "Buildings", "Spawn" } :: { string }?,
 	-- Seconds after a breakable piece is completely destroyed before it is stood up again.
 	RebuildSeconds = 30 :: number?,
 }

@@ -80,7 +80,7 @@ def placements():
         put("corner2", x, y)
     # stairs: inside against the north wall, climbing east; outside against the porch, climbing north to the wing roof
     put("stairs_narrow", 12, -2.5, 0, -90)
-    put("stairs_narrow", 30, -28, 0, 0)
+    put("stairs", 28, -28, 0, 0)                                       # the full flight: it fills its cell, as the plan has it
 
     # ---------------------------------------------------------------- upper floor
     for r, c in HALL + PORCH + WING:

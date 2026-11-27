@@ -3,7 +3,8 @@
 Street side: a plinth with the turquoise band, a stone course under the roof line with a painted zigzag
 (ground floor) or a plain cornice (upper floors), and round-arched openings framed in cut stone.
 Room side: a wooden rail at dado height.
-Openings: a doorway, a window with a lattice, or an arcade bay that stands on two stone piers."""
+Openings: a doorway, a window with a lattice, a window closed by painted shutters (it lets nobody see
+through, so it can go where the plan has a blank wall), or an arcade bay that stands on two stone piers."""
 import math
 
 import config as C
@@ -94,6 +95,19 @@ def _lattice(p, r, z0, spring):
             k += 1
 
 
+def _shutters(p, r, z0, spring):
+    """Two painted leaves filling the arch, set back inside the stone frame. The boards and the battens are painted."""
+    back = T - K["shutter_in"]
+    pid = p.extrude([(-r, z0)] + _arc(r, spring, 180, 0) + [(r, z0)], back, "band", group="shutter", extra=CUT)
+    top = spring + r
+    for y, facet in ((-back, "-y"), (back, "+y")):
+        p.mark(pid, facet, [(0, y, z0 + 0.05), (0, y, top - 0.05)], tone=-4, width=0.07)            # where the leaves meet
+        for x in (-r * 0.5, r * 0.5):
+            p.mark(pid, facet, [(x, y, z0 + 0.1), (x, y, spring + r * 0.8)], tone=-2, width=0.04)
+        for z in (z0 + 0.55, spring - 0.1):                                                       # battens
+            p.mark(pid, facet, [(-r + 0.12, y, z), (r - 0.12, y, z)], tone=3, width=0.16)
+
+
 def build(p, opening=None, upper=False, beams=True):
     band = not upper
     p.seams = [(0, -HALF), (0, HALF), (2, 0.0), (2, C.STORY)]
@@ -119,7 +133,10 @@ def build(p, opening=None, upper=False, beams=True):
             p.seams.append((0, 0.0))
             p.box((-R, -T - K["sill_out"], sill - sill_h), (R, T + 0.1, sill), "stone", group="sill", extra=STONE)
             _stone_arch(p, r, R, sill, spring, False)
-            _lattice(p, r, sill, spring)
+            if opening == "shutter":
+                _shutters(p, r, sill, spring)
+            else:
+                _lattice(p, r, sill, spring)
             _courses(p, upper)
     if beams and opening != "door":
         plain_wall._beams(p)

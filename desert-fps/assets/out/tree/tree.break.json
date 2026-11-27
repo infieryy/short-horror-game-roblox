@@ -1,0 +1,200 @@
+{
+ "piece": "tree",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 660,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/tree_s00.fbx",
+   "center": [
+    -1.008,
+    8.426,
+    0.499
+   ],
+   "size": [
+    5.762,
+    5.038,
+    6.531
+   ],
+   "material": "leaf",
+   "health": 130,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 808,
+   "neighbors": []
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/tree_s01.fbx",
+   "center": [
+    -0.19,
+    0.932,
+    0.206
+   ],
+   "size": [
+    3.261,
+    1.863,
+    3.228
+   ],
+   "material": "stone",
+   "health": 105,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s06"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/tree_s02.fbx",
+   "center": [
+    -0.131,
+    1.598,
+    -0.0
+   ],
+   "size": [
+    3.378,
+    3.196,
+    3.64
+   ],
+   "material": "stone",
+   "health": 165,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 72,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/tree_s03.fbx",
+   "center": [
+    -0.013,
+    2.732,
+    0.768
+   ],
+   "size": [
+    0.838,
+    1.78,
+    2.105
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 40,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/tree_s04.fbx",
+   "center": [
+    1.196,
+    6.555,
+    1.103
+   ],
+   "size": [
+    3.083,
+    3.368,
+    2.812
+   ],
+   "material": "leaf",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 86,
+   "neighbors": [
+    "s05"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/tree_s05.fbx",
+   "center": [
+    0.002,
+    4.25,
+    -0.011
+   ],
+   "size": [
+    0.795,
+    2.526,
+    0.696
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 42,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/tree_s06.fbx",
+   "center": [
+    0.76,
+    1.561,
+    -0.0
+   ],
+   "size": [
+    2.12,
+    3.122,
+    3.64
+   ],
+   "material": "stone",
+   "health": 105,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 52,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/tree_s07.fbx",
+   "center": [
+    1.106,
+    8.239,
+    -0.82
+   ],
+   "size": [
+    5.576,
+    5.483,
+    5.94
+   ],
+   "material": "leaf",
+   "health": 125,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 852,
+   "neighbors": []
+  }
+ ]
+}

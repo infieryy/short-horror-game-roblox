@@ -13,7 +13,7 @@ from PIL import Image
 
 import config as C
 from build import matte_material
-from buildings import teahouse
+from buildings import courtyard, teahouse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
@@ -70,6 +70,7 @@ SCENES["props"] = [
 ]
 # The pilot building, from its own recipe (buildings/teahouse.py).
 SCENES["teahouse"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in teahouse.placements()]
+SCENES["courtyard"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in courtyard.placements()]
 # guns: (centre x, centre height, span) in studs, used to frame the camera
 GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7), "knife": (0.15, -0.14, 1.45), "smoke": (0.02, 0.07, 1.6)}
 CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
@@ -78,7 +79,9 @@ CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11
            "props": ((3, -30, 9), (2, -2, 3.6), 38), "props-close": ((-6, -19, 5), (-5, -3, 2.6), 38),
            "teahouse": ((60, -96, 36), (15, -16, 11.5), 38), "teahouse-street": ((-6, -52, 5.5), (16, -22, 11), 24),
            "teahouse-back": ((-34, 34, 30), (14, -12, 10), 38), "teahouse-hall": ((12, -22.6, 5.2), (12, -9, 9.5), 14),
-           "teahouse-gallery": ((3.4, -21, 17.4), (15, -9, 17.5), 14), "teahouse-terrace": ((31, -1.5, 17.6), (22, -22, 14), 16)}
+           "teahouse-gallery": ((3.4, -21, 17.4), (15, -9, 17.5), 14), "teahouse-terrace": ((31, -1.5, 17.6), (22, -22, 14), 16),
+           "courtyard": ((120, -150, 75), (28, -34, 6), 38), "courtyard-court": ((27, -52.5, 5.2), (30, -22, 7.5), 14),
+           "courtyard-room": ((3.6, -12.5, 5.2), (40, -5, 5.5), 14)}
 
 
 def render_gun(name):

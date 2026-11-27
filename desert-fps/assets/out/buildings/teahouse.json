@@ -493,9 +493,9 @@
    "turn": -90
   },
   {
-   "piece": "stairs_narrow",
+   "piece": "stairs",
    "pos": [
-    30,
+    28,
     -28,
     0
    ],
