@@ -562,12 +562,13 @@ function Hud.hurt(self: any)
 	TweenService:Create(self.hurtTint, TweenInfo.new(Config.HurtTime), { BackgroundTransparency = 1 }):Play()
 end
 
-function Hud.killed(self: any, killer: string, victim: string, weapon: string, head: boolean)
+-- A kill, for the list: who, whom, with what, whether to the head, whether through something (a wallbang).
+function Hud.killed(self: any, killer: string, victim: string, weapon: string, head: boolean, through: boolean?)
 	local line = label(self.feed, Config.Small, Config.CaptionFont, Enum.TextXAlignment.Right)
 	line.RichText = true
 	self.feedCount += 1
 	line.LayoutOrder = self.feedCount
-	local how = if head then `{string.upper(weapon)}, HEAD` else string.upper(weapon)
+	local how = string.upper(weapon) .. (if head then ", HEAD" else "") .. (if through then ", THROUGH WALL" else "")
 	local dim = Config.Ink:Lerp(Config.Shade, Config.Dim):ToHex()
 	line.Text = `<b>{killer}</b>  <font color="#{dim}">{how}</font>  <b>{victim}</b>`
 	task.delay(Config.FeedTime, line.Destroy, line)
@@ -2078,6 +2079,202 @@ end
 
 return Ballistics
 ]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Weapons", "Penetration" }, class = "ModuleScript", source = [=[
+--!strict
+-- The path of a shot through the town: what it goes through, how much force it has left after each thing, and
+-- where it ends. Worked out the same way by the client (to show the shot and to say whom it thinks it hit) and
+-- by the server (to decide). PenetrationConfig says what can be gone through.
+
+local Config = require(script.Parent.PenetrationConfig)
+
+local Penetration = {}
+
+-- Something the shot went through: the part, how far along the shot it was entered and left, where it was
+-- entered, and the share of its force the shot had before and after.
+export type Pierced = { part: BasePart, enter: number, leave: number, at: Vector3, before: number, left: number }
+export type Path = {
+	finish: Vector3, -- where the shot ends
+	reach: number, -- how far that is along it
+	pierced: { Pierced },
+	stopped: RaycastResult?, -- what it ended in; nil if it ran out of range, or met a body
+	force: number, -- the share of its force it had where it ended
+	body: RaycastResult?, -- the body it met, if bodies are not left out of the cast
+}
+
+-- The kit piece a part belongs to: a piece that breaks is a model that says so; dressing that does not is a
+-- part, or is in a model, named after its piece.
+local function materialOf(part: Instance): { Loss: number }?
+	local names = { part.Name, if part.Parent then part.Parent.Name else "" }
+	local model = part:FindFirstAncestorWhichIsA("Model")
+	while model do
+		local piece = model:GetAttribute("Piece")
+		if typeof(piece) == "string" then
+			names = { piece }
+			break
+		end
+		model = model:FindFirstAncestorWhichIsA("Model")
+	end
+	for _, name in names do
+		local material = (Config.Pieces :: any)[name] or (Config.Pieces :: any)[string.match(name, "^[^_]+") or name]
+		if material then
+			return (Config.Materials :: any)[material]
+		end
+	end
+	return nil
+end
+
+local function isBody(part: Instance): boolean
+	local model = part:FindFirstAncestorWhichIsA("Model")
+	while model do
+		if model:FindFirstChildOfClass("Humanoid") then
+			return true
+		end
+		model = model:FindFirstAncestorWhichIsA("Model")
+	end
+	return false
+end
+
+-- How thick `hit.Instance` is along the shot, if it is no thicker than `most`: found by looking back at it from
+-- that far on. A look that starts inside the part sees nothing of it, and then it is too thick.
+local function thickness(hit: RaycastResult, direction: Vector3, most: number): number?
+	local only = RaycastParams.new()
+	only.FilterType = Enum.RaycastFilterType.Include
+	only.FilterDescendantsInstances = { hit.Instance }
+	local reach = most + 0.02
+	local back = workspace:Raycast(hit.Position + direction * reach, -direction * reach, only)
+	return if back then (back.Position - hit.Position).Magnitude else nil
+end
+
+-- The path of a shot from `origin` along `direction` (a unit vector), `range` studs at most, from a weapon
+-- with that `pierce`. `params` says what the shot does not meet at all (the shooter; on the server, every
+-- body, which it tests for itself).
+function Penetration.trace(origin: Vector3, direction: Vector3, range: number, pierce: number, params: RaycastParams): Path
+	local mine = RaycastParams.new()
+	mine.FilterType = params.FilterType
+	local ignore = table.clone(params.FilterDescendantsInstances)
+	mine.FilterDescendantsInstances = ignore
+	local pierced: { Pierced } = {}
+	local from, travelled, force = origin, 0, 1
+	while true do
+		local hit = workspace:Raycast(from, direction * (range - travelled), mine)
+		if not hit then
+			break
+		end
+		local enter = travelled + hit.Distance
+		if isBody(hit.Instance) then
+			return { finish = hit.Position, reach = enter, pierced = pierced, force = force, body = hit }
+		end
+		local material = if pierce > 0 and #pierced < Config.Most then materialOf(hit.Instance) else nil
+		local most = if material then (force - Config.Least) * pierce / material.Loss else 0
+		local thick = if material and most > 0 then thickness(hit, direction, most) else nil
+		if not (material and thick) then
+			return { finish = hit.Position, reach = enter, pierced = pierced, force = force, stopped = hit }
+		end
+		local left = force - material.Loss * thick / pierce
+		table.insert(pierced, {
+			part = hit.Instance :: BasePart,
+			enter = enter,
+			leave = enter + thick,
+			at = hit.Position,
+			before = force,
+			left = left,
+		})
+		force = left
+		-- On from just inside it, and no longer meeting it: something that overlaps it is met at its own face.
+		table.insert(ignore, hit.Instance)
+		mine.FilterDescendantsInstances = ignore
+		from, travelled = hit.Position + direction * 0.01, enter + 0.01
+	end
+	return { finish = origin + direction * range, reach = range, pierced = pierced, force = force }
+end
+
+-- The share of its force the shot has `distance` along its path.
+function Penetration.left(path: Path, distance: number): number
+	local force = 1
+	for _, each in path.pierced do
+		if each.enter < distance then
+			force = each.left
+		end
+	end
+	return force
+end
+
+return Penetration
+]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Weapons", "PenetrationConfig" }, class = "ModuleScript", source = [=[
+--!strict
+-- What a shot goes through, and what that costs it.
+-- A shot starts with all its force (1). Going through something takes Loss of it for every stud of thickness,
+-- divided by the weapon's Pierce (WeaponConfig): the rifle's is 1, the pistol's under a half, so the pistol
+-- loses twice as much in the same plank and is stopped by half the thickness. What is left is the share of
+-- its damage the shot still does, to a body or to the next thing in its way. A shot that would come out with
+-- less than Least left does not come out.
+--
+-- With these numbers the rifle goes through:
+--   cloth, a market stall, a door (0.3 studs of wood)      and keeps nine tenths or more
+--   a barrel, a counter, a crate (3 studs of wood)          and keeps a quarter to two thirds
+--   one house wall (1 stud of plaster)                      and keeps 0.45: a shot to the head does 72
+--   a door frame (1.3 studs of plaster)                     and keeps 0.3
+-- and is stopped by a corner post (1.6 studs), a second wall, a floor, a roof and the town wall.
+-- The pistol goes through cloth, stalls and doors, and nothing thicker.
+return {
+	Least = 0.15,
+	-- A shot goes through this many things at most.
+	Most = 8,
+
+	Materials = {
+		cloth = { Loss = 0.06 }, -- and leaves: a tree's crown is no cover
+		wood = { Loss = 0.25 }, -- and fired clay: pots, vases
+		plaster = { Loss = 0.55 }, -- the houses' walls
+	},
+
+	-- What each kit piece is made of. A piece is looked up by its name, then by the part of its name before the
+	-- first "_" (wall2_shutter under wall2). Anything not listed stops every shot: floors, roofs, stairs, the
+	-- ground, the town wall, the well.
+	Pieces = {
+		awning = "cloth",
+		cloth = "cloth",
+		banner = "cloth",
+		rug = "cloth",
+		rack = "cloth",
+		bolts = "cloth",
+		bougainvillea = "cloth",
+		baskets = "cloth",
+		divan = "cloth",
+		tree = "cloth",
+		cypress = "cloth",
+		palm = "cloth",
+		potted = "cloth",
+
+		door = "wood",
+		door2 = "wood",
+		crate = "wood",
+		stack = "wood",
+		barrel = "wood",
+		stall = "wood",
+		counter = "wood",
+		shelf = "wood",
+		plank = "wood",
+		ladder = "wood",
+		pergola = "wood",
+		cart = "wood",
+		loom = "wood",
+		tea = "wood",
+		sign = "wood",
+		lantern = "wood",
+		pot = "wood",
+		vase = "wood",
+		sacks = "wood",
+
+		wall = "plaster",
+		wall2 = "plaster",
+		corner = "plaster",
+		corner2 = "plaster",
+		pillar = "plaster",
+		parapet = "plaster",
+	},
+}
+]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Weapons", "WeaponConfig" }, class = "ModuleScript", source = [=[
 --!strict
 -- Weapon numbers, read by the server (what a shot does) and the client (how it feels).
@@ -2154,6 +2351,9 @@ return {
 			Falloff = {},
 			-- What a shot does to walls and props.
 			WallDamage = 30,
+			-- How well a shot goes through things (PenetrationConfig): 1 goes through a house wall and keeps
+			-- under half its damage.
+			Pierce = 1,
 			RunSpeed = 16,
 
 			-- How far a shot may stray from where it is sent: standing still, walking (Shift), running, in the
@@ -2228,6 +2428,8 @@ return {
 			Damage = { head = 78, body = 26, legs = 22 },
 			Falloff = { { 100, 0.85 } },
 			WallDamage = 12,
+			-- Through a door or a market stall, and no wall.
+			Pierce = 0.45,
 			RunSpeed = 17,
 
 			Spread = { Still = 0.35, Walk = 0.6, Run = 2, Air = 5, Spray = 0.3, SprayMost = 1.5 },
@@ -3014,7 +3216,8 @@ local Hitboxes = require(script.Parent.Hitboxes)
 
 local Combat = {}
 
-export type Hit = { attacker: Player?, weapon: string, zone: string, from: Vector3 }
+-- through: the shot came through something on its way (a wallbang).
+export type Hit = { attacker: Player?, weapon: string, zone: string, from: Vector3, through: boolean? }
 
 -- Called with every hit that does damage, and with every death a hit causes.
 Combat.Hurt = {} :: { (victim: Model, amount: number, hit: Hit) -> () }
@@ -6323,6 +6526,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared.Weapons.WeaponConfig)
 local Ballistics = require(Shared.Weapons.Ballistics)
+local Penetration = require(Shared.Weapons.Penetration)
 local AttachmentConfig = require(Shared.Weapons.AttachmentConfig)
 local Attachments = require(Shared.Weapons.Attachments)
 local CombatConfig = require(Shared.Combat.CombatConfig)
@@ -6573,9 +6777,9 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 	if gun then
 		slot.magazine -= 1
 	end
-	local wall = workspace:Raycast(origin, direction * weapon.Range, world)
-	local reach = if wall then wall.Distance else weapon.Range
-	local finish = origin + direction * reach
+	-- The shot's way through the town: what it goes through, what stops it. Bodies are tested apart.
+	local path = Penetration.trace(origin, direction, weapon.Range, weapon.Pierce or 0, world)
+	local finish, ends = path.finish, path.reach
 
 	local part: string?, distance: number?
 	if typeof(target) == "Instance" and target ~= character and Combat.is(target) then
@@ -6583,7 +6787,7 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			target :: Model,
 			origin,
 			direction,
-			reach,
+			path.reach,
 			now - CombatConfig.Rewind.Reach,
 			if typeof(claimed) == "string" then claimed else nil,
 			if gun then nil else CombatConfig.MeleeMargin
@@ -6592,24 +6796,42 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 	if part and distance then
 		local victim = target :: Model
 		local zone = (CombatConfig.Zones :: any)[part]
+		-- What the shot went through on its way has taken some of its force.
+		local force = Penetration.left(path, distance)
 		local amount = if gun
-			then Ballistics.damage(weapon, zone, distance)
+			then Ballistics.damage(weapon, zone, distance) * force
 			elseif fromBehind(victim, direction) then weapon.BackDamage
 			else weapon.Damage
-		local dealt, killed = Combat.damage(victim, amount, { attacker = player, weapon = slot.weapon, zone = zone, from = origin })
-		finish = origin + direction * distance
+		local dealt, killed = Combat.damage(
+			victim,
+			amount,
+			{ attacker = player, weapon = slot.weapon, zone = zone, from = origin, through = force < 1 }
+		)
+		finish, ends = origin + direction * distance, distance
 		remotes.Hit:FireClient(player, zone, dealt, killed)
-	elseif wall and wall.Instance:IsA("BasePart") then
-		local taken = false
-		for _, struck in WeaponService.Struck do
-			taken = struck(wall.Instance, player)
-			if taken then
-				break
+	end
+	-- Everything it went through before it ended is struck, and whatever stopped it, each with the force the
+	-- shot still had there.
+	local function strike(struck: Instance, force: number, at: Vector3)
+		if not struck:IsA("BasePart") then
+			return
+		end
+		for _, taker in WeaponService.Struck do
+			if taker(struck, player) then
+				return
 			end
 		end
-		if not taken and not Breakable.damage(wall.Instance, weapon.WallDamage, wall.Position, direction) then
-			Structure.knock(wall.Instance) -- a lantern, a sign, a banner: shot down
+		if not Breakable.damage(struck, weapon.WallDamage * force, at, direction) then
+			Structure.knock(struck) -- a lantern, a sign, a banner: shot down
 		end
+	end
+	for _, each in path.pierced do
+		if each.enter < ends then
+			strike(each.part, each.before, each.at)
+		end
+	end
+	if path.stopped and path.reach <= ends then
+		strike(path.stopped.Instance, path.force, path.stopped.Position)
 	end
 	-- Everyone else sees the shot, unless the weapon hides it.
 	if not weapon.Silent then
@@ -6818,7 +7040,8 @@ function WeaponService.start()
 			if hit.attacker then hit.attacker.DisplayName else "",
 			if dead then dead.DisplayName elseif humanoid then humanoid.DisplayName else victim.Name,
 			(WeaponConfig.Weapons :: any)[hit.weapon].Title,
-			hit.zone == "head"
+			hit.zone == "head",
+			hit.through == true
 		)
 	end)
 
@@ -6859,6 +7082,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared:WaitForChild("Weapons"):WaitForChild("WeaponConfig"))
 local Ballistics = require(Shared.Weapons:WaitForChild("Ballistics"))
+local Penetration = require(Shared.Weapons:WaitForChild("Penetration"))
 local AttachmentConfig = require(Shared.Weapons:WaitForChild("AttachmentConfig"))
 local Attachments = require(Shared.Weapons:WaitForChild("Attachments"))
 local CombatConfig = require(Shared:WaitForChild("Combat"):WaitForChild("CombatConfig"))
@@ -7044,22 +7268,17 @@ local function tracer(from: Vector3, to: Vector3, view: any)
 	task.delay(view.TracerTime, line.Destroy, line)
 end
 
--- What a shot from `origin` along `direction` looks to have hit from here, and whose body if anyone's. A knife
--- sweeps a ball of `radius` along the line instead. The server's own test is the one that counts.
-local function claim(character: Model, origin: Vector3, direction: Vector3, range: number, radius: number?): (RaycastResult?, Model?, string?)
-	local params = sightline(character)
-	local hit = if radius
-		then workspace:Spherecast(origin, radius, direction * range, params)
-		else workspace:Raycast(origin, direction * range, params)
+-- Whose body a cast met, if anyone's, and which part of it. This is what the client tells the server it
+-- thinks it hit; the server's own test is the one that counts.
+local function struck(hit: RaycastResult?): (Model?, string?)
 	if not hit then
-		return nil, nil, nil
+		return nil, nil
 	end
 	local model = hit.Instance:FindFirstAncestorOfClass("Model")
 	while model and not model:FindFirstChildOfClass("Humanoid") do
 		model = model:FindFirstAncestorOfClass("Model")
 	end
-	local part = if model and (CombatConfig.Zones :: any)[hit.Instance.Name] then hit.Instance.Name else nil
-	return hit, model, part
+	return model, if model and (CombatConfig.Zones :: any)[hit.Instance.Name] then hit.Instance.Name else nil
 end
 
 local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
@@ -7077,7 +7296,10 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 	-- The camera is the bare aim here: the view's climb is put on it after this, each frame.
 	local origin = camera.CFrame.Position
 	local direction = Ballistics.direction(camera.CFrame, up, right, lastStray, random)
-	local hit, target, part = claim(character, origin, direction, weapon.Range)
+	-- The shot's way through the town, as the server will work it out: it may go through a door or a wall and
+	-- meet someone behind it.
+	local path = Penetration.trace(origin, direction, weapon.Range, weapon.Pierce or 0, sightline(character))
+	local target, part = struck(path.body)
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
 
 	slot.magazine -= 1
@@ -7088,13 +7310,15 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 	if animator then
 		animator:play("Fire")
 	end
-	tracer(viewmodel:socket("muzzle") or origin, if hit then hit.Position else origin + direction * weapon.Range, weapon.View)
+	tracer(viewmodel:socket("muzzle") or origin, path.finish, weapon.View)
 	refresh()
 end
 
 local function slash(character: Model)
 	local origin, direction = camera.CFrame.Position, camera.CFrame.LookVector
-	local _, target, part = claim(character, origin, direction, weapon.Range, CombatConfig.MeleeMargin)
+	-- A knife sweeps a ball along its reach, and goes through nothing.
+	local reach = direction * weapon.Range
+	local target, part = struck(workspace:Spherecast(origin, CombatConfig.MeleeMargin, reach, sightline(character)))
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
 	viewmodel:play("Fire")
 	if animator then
@@ -7314,8 +7538,8 @@ end)
 remote("Hurt").OnClientEvent:Connect(function()
 	hud:hurt()
 end)
-remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean)
-	hud:killed(killer, victim, weaponTitle, head)
+remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean, through: boolean)
+	hud:killed(killer, victim, weaponTitle, head, through)
 end)
 -- Someone else's shot: a line from the weapon in their hand to where it ended.
 remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: string, origin: Vector3, finish: Vector3)

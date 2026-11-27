@@ -11,7 +11,8 @@ local Hitboxes = require(script.Parent.Hitboxes)
 
 local Combat = {}
 
-export type Hit = { attacker: Player?, weapon: string, zone: string, from: Vector3 }
+-- through: the shot came through something on its way (a wallbang).
+export type Hit = { attacker: Player?, weapon: string, zone: string, from: Vector3, through: boolean? }
 
 -- Called with every hit that does damage, and with every death a hit causes.
 Combat.Hurt = {} :: { (victim: Model, amount: number, hit: Hit) -> () }

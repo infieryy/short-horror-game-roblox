@@ -13,6 +13,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared.Weapons.WeaponConfig)
 local Ballistics = require(Shared.Weapons.Ballistics)
+local Penetration = require(Shared.Weapons.Penetration)
 local AttachmentConfig = require(Shared.Weapons.AttachmentConfig)
 local Attachments = require(Shared.Weapons.Attachments)
 local CombatConfig = require(Shared.Combat.CombatConfig)
@@ -263,9 +264,9 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 	if gun then
 		slot.magazine -= 1
 	end
-	local wall = workspace:Raycast(origin, direction * weapon.Range, world)
-	local reach = if wall then wall.Distance else weapon.Range
-	local finish = origin + direction * reach
+	-- The shot's way through the town: what it goes through, what stops it. Bodies are tested apart.
+	local path = Penetration.trace(origin, direction, weapon.Range, weapon.Pierce or 0, world)
+	local finish, ends = path.finish, path.reach
 
 	local part: string?, distance: number?
 	if typeof(target) == "Instance" and target ~= character and Combat.is(target) then
@@ -273,7 +274,7 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			target :: Model,
 			origin,
 			direction,
-			reach,
+			path.reach,
 			now - CombatConfig.Rewind.Reach,
 			if typeof(claimed) == "string" then claimed else nil,
 			if gun then nil else CombatConfig.MeleeMargin
@@ -282,24 +283,42 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 	if part and distance then
 		local victim = target :: Model
 		local zone = (CombatConfig.Zones :: any)[part]
+		-- What the shot went through on its way has taken some of its force.
+		local force = Penetration.left(path, distance)
 		local amount = if gun
-			then Ballistics.damage(weapon, zone, distance)
+			then Ballistics.damage(weapon, zone, distance) * force
 			elseif fromBehind(victim, direction) then weapon.BackDamage
 			else weapon.Damage
-		local dealt, killed = Combat.damage(victim, amount, { attacker = player, weapon = slot.weapon, zone = zone, from = origin })
-		finish = origin + direction * distance
+		local dealt, killed = Combat.damage(
+			victim,
+			amount,
+			{ attacker = player, weapon = slot.weapon, zone = zone, from = origin, through = force < 1 }
+		)
+		finish, ends = origin + direction * distance, distance
 		remotes.Hit:FireClient(player, zone, dealt, killed)
-	elseif wall and wall.Instance:IsA("BasePart") then
-		local taken = false
-		for _, struck in WeaponService.Struck do
-			taken = struck(wall.Instance, player)
-			if taken then
-				break
+	end
+	-- Everything it went through before it ended is struck, and whatever stopped it, each with the force the
+	-- shot still had there.
+	local function strike(struck: Instance, force: number, at: Vector3)
+		if not struck:IsA("BasePart") then
+			return
+		end
+		for _, taker in WeaponService.Struck do
+			if taker(struck, player) then
+				return
 			end
 		end
-		if not taken and not Breakable.damage(wall.Instance, weapon.WallDamage, wall.Position, direction) then
-			Structure.knock(wall.Instance) -- a lantern, a sign, a banner: shot down
+		if not Breakable.damage(struck, weapon.WallDamage * force, at, direction) then
+			Structure.knock(struck) -- a lantern, a sign, a banner: shot down
 		end
+	end
+	for _, each in path.pierced do
+		if each.enter < ends then
+			strike(each.part, each.before, each.at)
+		end
+	end
+	if path.stopped and path.reach <= ends then
+		strike(path.stopped.Instance, path.force, path.stopped.Position)
 	end
 	-- Everyone else sees the shot, unless the weapon hides it.
 	if not weapon.Silent then
@@ -508,7 +527,8 @@ function WeaponService.start()
 			if hit.attacker then hit.attacker.DisplayName else "",
 			if dead then dead.DisplayName elseif humanoid then humanoid.DisplayName else victim.Name,
 			(WeaponConfig.Weapons :: any)[hit.weapon].Title,
-			hit.zone == "head"
+			hit.zone == "head",
+			hit.through == true
 		)
 	end)
 

@@ -73,6 +73,9 @@ return {
 			Falloff = {},
 			-- What a shot does to walls and props.
 			WallDamage = 30,
+			-- How well a shot goes through things (PenetrationConfig): 1 goes through a house wall and keeps
+			-- under half its damage.
+			Pierce = 1,
 			RunSpeed = 16,
 
 			-- How far a shot may stray from where it is sent: standing still, walking (Shift), running, in the
@@ -147,6 +150,8 @@ return {
 			Damage = { head = 78, body = 26, legs = 22 },
 			Falloff = { { 100, 0.85 } },
 			WallDamage = 12,
+			-- Through a door or a market stall, and no wall.
+			Pierce = 0.45,
 			RunSpeed = 17,
 
 			Spread = { Still = 0.35, Walk = 0.6, Run = 2, Air = 5, Spray = 0.3, SprayMost = 1.5 },

@@ -13,6 +13,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared:WaitForChild("Weapons"):WaitForChild("WeaponConfig"))
 local Ballistics = require(Shared.Weapons:WaitForChild("Ballistics"))
+local Penetration = require(Shared.Weapons:WaitForChild("Penetration"))
 local AttachmentConfig = require(Shared.Weapons:WaitForChild("AttachmentConfig"))
 local Attachments = require(Shared.Weapons:WaitForChild("Attachments"))
 local CombatConfig = require(Shared:WaitForChild("Combat"):WaitForChild("CombatConfig"))
@@ -198,22 +199,17 @@ local function tracer(from: Vector3, to: Vector3, view: any)
 	task.delay(view.TracerTime, line.Destroy, line)
 end
 
--- What a shot from `origin` along `direction` looks to have hit from here, and whose body if anyone's. A knife
--- sweeps a ball of `radius` along the line instead. The server's own test is the one that counts.
-local function claim(character: Model, origin: Vector3, direction: Vector3, range: number, radius: number?): (RaycastResult?, Model?, string?)
-	local params = sightline(character)
-	local hit = if radius
-		then workspace:Spherecast(origin, radius, direction * range, params)
-		else workspace:Raycast(origin, direction * range, params)
+-- Whose body a cast met, if anyone's, and which part of it. This is what the client tells the server it
+-- thinks it hit; the server's own test is the one that counts.
+local function struck(hit: RaycastResult?): (Model?, string?)
 	if not hit then
-		return nil, nil, nil
+		return nil, nil
 	end
 	local model = hit.Instance:FindFirstAncestorOfClass("Model")
 	while model and not model:FindFirstChildOfClass("Humanoid") do
 		model = model:FindFirstAncestorOfClass("Model")
 	end
-	local part = if model and (CombatConfig.Zones :: any)[hit.Instance.Name] then hit.Instance.Name else nil
-	return hit, model, part
+	return model, if model and (CombatConfig.Zones :: any)[hit.Instance.Name] then hit.Instance.Name else nil
 end
 
 local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
@@ -231,7 +227,10 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 	-- The camera is the bare aim here: the view's climb is put on it after this, each frame.
 	local origin = camera.CFrame.Position
 	local direction = Ballistics.direction(camera.CFrame, up, right, lastStray, random)
-	local hit, target, part = claim(character, origin, direction, weapon.Range)
+	-- The shot's way through the town, as the server will work it out: it may go through a door or a wall and
+	-- meet someone behind it.
+	local path = Penetration.trace(origin, direction, weapon.Range, weapon.Pierce or 0, sightline(character))
+	local target, part = struck(path.body)
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
 
 	slot.magazine -= 1
@@ -242,13 +241,15 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 	if animator then
 		animator:play("Fire")
 	end
-	tracer(viewmodel:socket("muzzle") or origin, if hit then hit.Position else origin + direction * weapon.Range, weapon.View)
+	tracer(viewmodel:socket("muzzle") or origin, path.finish, weapon.View)
 	refresh()
 end
 
 local function slash(character: Model)
 	local origin, direction = camera.CFrame.Position, camera.CFrame.LookVector
-	local _, target, part = claim(character, origin, direction, weapon.Range, CombatConfig.MeleeMargin)
+	-- A knife sweeps a ball along its reach, and goes through nothing.
+	local reach = direction * weapon.Range
+	local target, part = struck(workspace:Spherecast(origin, CombatConfig.MeleeMargin, reach, sightline(character)))
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
 	viewmodel:play("Fire")
 	if animator then
@@ -468,8 +469,8 @@ end)
 remote("Hurt").OnClientEvent:Connect(function()
 	hud:hurt()
 end)
-remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean)
-	hud:killed(killer, victim, weaponTitle, head)
+remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean, through: boolean)
+	hud:killed(killer, victim, weaponTitle, head, through)
 end)
 -- Someone else's shot: a line from the weapon in their hand to where it ended.
 remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: string, origin: Vector3, finish: Vector3)

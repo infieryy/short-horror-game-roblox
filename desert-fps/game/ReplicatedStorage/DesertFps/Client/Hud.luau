@@ -420,12 +420,13 @@ function Hud.hurt(self: any)
 	TweenService:Create(self.hurtTint, TweenInfo.new(Config.HurtTime), { BackgroundTransparency = 1 }):Play()
 end
 
-function Hud.killed(self: any, killer: string, victim: string, weapon: string, head: boolean)
+-- A kill, for the list: who, whom, with what, whether to the head, whether through something (a wallbang).
+function Hud.killed(self: any, killer: string, victim: string, weapon: string, head: boolean, through: boolean?)
 	local line = label(self.feed, Config.Small, Config.CaptionFont, Enum.TextXAlignment.Right)
 	line.RichText = true
 	self.feedCount += 1
 	line.LayoutOrder = self.feedCount
-	local how = if head then `{string.upper(weapon)}, HEAD` else string.upper(weapon)
+	local how = string.upper(weapon) .. (if head then ", HEAD" else "") .. (if through then ", THROUGH WALL" else "")
 	local dim = Config.Ink:Lerp(Config.Shade, Config.Dim):ToHex()
 	line.Text = `<b>{killer}</b>  <font color="#{dim}">{how}</font>  <b>{victim}</b>`
 	task.delay(Config.FeedTime, line.Destroy, line)
