@@ -10,10 +10,16 @@ local DevConfig = require(DesertFps.DevConfig)
 local DestructionConfig = require(DesertFps.Destruction.DestructionConfig)
 local Breakable = require(DesertFps.Destruction.Breakable)
 local Structure = require(DesertFps.Destruction.Structure)
+local Combat = require(DesertFps.Combat.Combat)
+local Dummies = require(DesertFps.Combat.Dummies)
 local TownConfig = require(DesertFps.Town.TownConfig)
 local WeaponService = require(DesertFps.Weapons.WeaponService)
 
+Combat.start()
 WeaponService.start()
+if DevConfig.Dummies then
+	Dummies.start(DevConfig.Dummies)
+end
 
 -- Buildings come down when what holds them up is destroyed.
 Structure.start(DevConfig.RebuildSeconds)
@@ -36,6 +42,8 @@ if DevConfig.TestHooks then
 		return Breakable.damage(part, amount, part.Position, Vector3.new(0, -1, 0)) or Structure.knock(part)
 	end
 	damage.Parent = DesertFps
+	-- The client makes its own hook when it sees this (WeaponClient).
+	ReplicatedStorage:WaitForChild("DesertFps"):SetAttribute("TestHooks", true)
 end
 
 -- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by

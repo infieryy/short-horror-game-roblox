@@ -150,7 +150,7 @@ Renders for reference: `assets/out/preview.png`, `compare.png` (next to the conc
 ## 5. Known flaws and open decisions
 
 **Not verified anywhere**
-- Game code so far: the graybox builder, destruction, and the rifle in first person (fire only). No reload, no damage to players, no round logic, no shop.
+- Game code so far: the graybox builder, destruction, and the shooting for rifle, pistol and knife (see "The shooting, and the weapon animations"). No round logic, no shop.
 - `assets/run.py` does not repaint identically on another machine (see the status notes below).
 
 **Flaws**
@@ -510,6 +510,71 @@ Notes for the next session:
 - Run `time_town_routes.luau` once per playtest. A second run in the same playtest comes out about 30% slow on every route.
 - A Studio plugin (Elttob Reclass) costs about 9 ms of every frame in a playtest. It is not part of the game.
 - After a collapse the dev rebuild sometimes takes two rounds: a few pieces stand up before what holds them and fall again.
+
+### The shooting, and the weapon animations (2026-11-27)
+
+The owner: "Can we start the actual fps system now. I want it to feel tactical like valorant. Players can trick out their guns and get util to find enemies on the map and shoot them. Different weapons do different things but a standard rifle can one tap to the head." Then, part way through: "also make animations in this pass: r15 anim skill".
+
+**The outcome.** The shooting itself is built and tested, for the three weapons that have models: rifle, pistol, knife. A character holds, fires, reloads and slashes with animations made on the owner's animation kit. Attachments, the utility that finds enemies, the shop and rounds are not started.
+
+**What a player has now.** Rifle (1), pistol (2), knife (3), heavy armor. Left mouse fires, right mouse aims down the sights, R reloads, Shift walks.
+
+| | Rifle | Pistol | Knife |
+|---|---|---|---|
+| Head / body / legs | 160 / 40 / 34 | 78 / 26 / 22 (85% past 100 studs) | 50, or 100 from behind |
+| Fires | held down, 600 a minute | one shot a pull | a slash every 0.55 s, 6.5 studs |
+| Magazine, reserve, reload | 25, 75, 2.5 s | 12, 36, 1.75 s | |
+| Runs at | 16 | 17 | 18 |
+| Shot strays (degrees): still / walking / running / in the air | 0.2 / 0.66 / 5 / 8 | 0.35 / 0.45 / 2 / 5 | |
+
+- **Health 100, armor 25 or 50.** Armor is a second bar that takes damage first. A rifle shot to the head kills through any armor at any range.
+- **Recoil is a pattern, the same every time** (`WeaponConfig`, `Recoil.Pattern`): the rifle climbs 7.6 degrees over ten shots, then swings 2.2 degrees from side to side. The view climbs half of it and comes back by itself. A pause of 0.35 s ends the spray, so taps have to be that far apart to stay first shots.
+- **Aiming down the sights** (rifle only): 1.25 times closer, shots stray three quarters as far, the player moves at three quarters speed.
+
+**How a hit is decided.** The client works out where a shot goes and what it looks to have hit, and says so. The server checks the fire rate, the rounds left, that the shot starts at the shooter's head with nothing in between, and then tests the shot itself:
+- against the town with a ray (walls still take damage and crumble);
+- against the target's body as boxes of its own, at every moment of the last 0.35 s (`Combat/Hitboxes`), because a shooter sees everyone else a little in the past. The part the client named counts if the shot really crossed it; otherwise whatever part the shot did cross.
+
+**Where it is.**
+- Numbers: `ReplicatedStorage/DesertFps/Weapons/WeaponConfig`, `Combat/CombatConfig`, `Client/HudConfig`, `Weapons/AnimationConfig`.
+- Shared sums (stray, recoil, damage, pace): `Weapons/Ballistics`.
+- Server: `ServerStorage/DesertFps/Combat/Combat` (who can be hurt, armor then health), `Combat/Hitboxes`, `Combat/Dummies`, `Weapons/WeaponService` (what each player carries; fire, reload, switch, stance).
+- Client: `StarterPlayerScripts/DesertFps/WeaponClient` (keys, the shot, recoil on the view, aiming), `Client/Viewmodel` (the weapon in front of the camera), `Client/Hud`, `Client/CharacterAnimator`.
+- Three target dummies stand in the market while there are no opponents (`DevConfig.Dummies`): one unarmored, one in heavy armor, one in heavy armor pacing 24 studs.
+
+**Tested in a playtest** (`build/tests/test_weapons.luau`, six checks, all ok, and by hand through the same hook):
+- Rifle: one to the head kills with no armor (24 studs) and through heavy armor (57 studs); four to the body through heavy armor; three to the legs with none.
+- Pistol: two to the head through heavy armor; four to the body with none. Knife: 50 from the front, a kill from behind, nothing from 11 studs.
+- Twenty rounds in two seconds held down. A reload moves the right rounds. A dummy walking at 16 studs a second is hit when tracked.
+- The server refused or corrected every false claim tried: 20 shots sent in one frame (2 landed), a shot starting beside the target, a leg shot claimed as a head shot (34 damage, not 160), a shot at the sky claimed as a hit, nonsense arguments.
+
+**The animations** (`animations/README.md`): eight, R15, chest and arms only so the legs keep walking. Made in Blender with the kit on the Desktop ("Roblox Animation Kit"), the real weapon models in the rig's hand. Checked on a standard R15 character in Studio: the rifle comes out level and pointing dead ahead, the left hand 0.17 studs from the handguard. All eight play on the live character at the right moments. Pictures: `assets/studio/fps-rifle-hold-third-person.jpg`, `fps-pistol-hold-third-person.jpg`, `fps-rifle-aiming.jpg`, `fps-hud-rifle.jpg`, `fps-rifle-reload-frames.png`.
+
+**Decisions made here.**
+- Valorant's numbers were taken as the starting point (damage, armor, fire rate, magazine). Run speed stays 16 so the plan's route times hold.
+- Armor is a plain second bar. Valorant's absorbs two thirds of each hit instead; the rifle's one shot to the head kills either way.
+- The weapon everyone else sees is a Roblox Tool in the right hand, with the backpack bar switched off.
+- Dummies are one flat lavender-gray.
+- The chest turns 32 degrees in the rifle hold, because a blocky arm cannot reach the handguard otherwise.
+
+**Not done, not verified.**
+- **No second player has been in it.** Seeing another player's shots, being hit, the kill feed between players and whether another client sees the animations are untested. (This PC had about 300 MB of memory free with Studio and Blender open.)
+- **The animations only play in Studio.** A published game needs them uploaded to Roblox and their ids put in `AnimationConfig`.
+- No sound at all: no shots, no footsteps.
+- No crouch. No wall penetration: a banner or a cloth stops a bullet.
+- No arms in first person, only the weapon. The knife reads small in first person.
+- The server trusts the direction a client sends, so a cheat could send shots with no stray. It does check everything else.
+- Hit boxes are the avatar's own parts, so a player with a small avatar is a smaller target. Not decided: one standard body for everyone.
+- Touch controls are not designed. A fire and a reload button appear on a phone; aiming and walking do not.
+- Attachments (the rifle and pistol have the sockets for them), more weapons, the utility, the shop, rounds, teams.
+
+Notes for the next session:
+- A test cannot press keys. `ReplicatedStorage.DesertFps.DevWeapon:Invoke("trigger" | "aim" | "walk", held)`, `("equip", slot)`, `("reload")`, `("state")` drive the weapon from the client; the camera is aimed by setting its CFrame.
+- The client's `require` gives the running game's own modules, so a value in `WeaponConfig` can be changed while playing to tune it.
+- `Players:CreateHumanoidModelFromDescription` with a new description gives a black body: its colours default to black.
+- An Animator in edit mode only moves joints after `StepAnimations` with a time above zero.
+- `ReplicatedStorage.DesertFpsAnimations` is not part of the `DesertFps` folder on purpose: installing the scripts replaces that folder.
+- Blender's animation of a rig overrides a pose set by hand as soon as the action has keys. Solve poses with no action assigned, then key them.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
