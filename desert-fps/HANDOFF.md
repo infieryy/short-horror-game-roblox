@@ -748,6 +748,68 @@ Notes for the next session:
 - After Studio is restarted, the official MCP has a new `studio_id` (ask `list_roblox_studios`), and the community MCP's `capture_video` could not find Studio's window. The official `video_capture` recorded instead: it writes an mp4 under `%LOCALAPPDATA%\Roblox\tmp-capture-storage\mcp\`.
 - A `Highlight` with `DepthMode` AlwaysOnTop and its `Adornee` set shows through walls from a folder under the camera.
 
+### Wallbangs (2026-11-27)
+
+The owner: "Add wallbangs and partial wallbangs through certain objects like valorant. After ur done, run a two player test of everything".
+
+**The outcome.** A shot goes through some things and loses force in them. What is left is the share of its damage it still does, to a body or to the next thing in its way. A kill through something says so in the list ("RIFLE, THROUGH WALL").
+
+| What is in the way | Rifle | Pistol |
+|---|---|---|
+| Cloth: awnings, banners, racks, rugs; a tree's crown | through, nearly whole | through |
+| A market stall, a door (0.3 studs of wood) | through, 0.9 or more left | through, 0.84 left |
+| A barrel, a counter, a crate (3 studs of wood) | through, a quarter to two thirds left | stopped |
+| One house wall (1 stud of plaster) | through, 0.45 left: 72 to the head, 18 to the body | stopped |
+| A door frame or a moulding (1.2 to 1.3 studs) | through, 0.3 to 0.36 left | stopped |
+| A corner post, a second wall, floors, roofs, stairs, the town wall | stopped | stopped |
+
+**How it works.**
+- `Weapons/PenetrationConfig` (shared) is the data: three materials with a loss for each stud of thickness, and which kit piece is made of which. A piece that is not listed stops every shot. A weapon's `Pierce` (`WeaponConfig`: rifle 1, pistol 0.45, knife none) divides the loss.
+- `Weapons/Penetration.trace` (shared) works out a shot's path: it casts to the first thing, asks what it is made of, measures how thick it is along the shot by looking back at it from as far on as the shot could still afford, takes the force off, and goes on from there. It ends at a body, at something it cannot go through, or when it would come out with less than 0.15 of its force.
+- The **server** traces the shot through the town with bodies left out, tests the claimed body against its own hit boxes as before, and multiplies the damage by the force left at that distance. Everything the shot went through before it ended takes wall damage on the way, so a wall can be shot down from either side of a door.
+- The **client** traces the same path to say whom it thinks it hit, so it can claim someone it cannot see, and draws the tracer to where the shot really ends.
+
+**Tested.**
+- `build/tests/test_wallbang.luau` (server): 12 checks, all ok. It stands pieces in the air and traces through them: one wall 0.45, two walls stopped, a door 0.93, a crate 0.27, cloth 1.00, a corner post and the town wall stopped, a door and then a wall 0.38, the pistol through a door (0.84) and stopped by a wall, the knife stopped by a door.
+- With a wall stood between the player and a dummy: the rifle did 73 to the head and 18 to the body through it, the pistol nothing, and the kill read "RIFLE, THROUGH WALL".
+- `test_weapons.luau` still passes its six checks, the one shot to the head among them.
+
+**Decisions made here.** All the numbers, and which pieces are made of what, are first guesses at "like Valorant": cover you can see through or that is wood is not safe, one wall takes more than half, two walls or anything of stone are safe. Leaves count as cloth, pots and sacks as wood.
+
+**Not done, not verified.**
+- Nothing on the screen shows what a shot went through: no bullet holes, no different sound. A player learns it from the tracer and the damage.
+- A house wall is not the same thickness all the way up (a moulding four studs up is 1.17), so the damage through one wall varies between 0.36 and 0.45 of the whole.
+- The laser's dot and the recon dart's sight stop at the first surface, as before.
+
+### The two-player test (2026-11-27)
+
+A server and two players, in Studio on this PC (`multiplayer_playtest`), each driven by script: player A shoots and throws, player B is moved 21 studs from A and watches. Everything that earlier sections list as "no second player" was looked at from B's side.
+
+| What | Result |
+|---|---|
+| B sees A's weapon and how A holds it | The rifle's 11 parts in A's hand, the hold animation playing, no name over the head |
+| A's shots at B | B saw each tracer and was told each hit; A was told each hit; armor went first, then health |
+| A kill | Both screens listed "Player1, RIFLE, HEAD, Player2"; B was back at the spawn with full health, armor, rounds and darts |
+| A's attachments, seen by B | 15 parts with scope, foregrip, laser and long magazine on; the magazine 1.04 studs tall |
+| The suppressor | B saw 0 of 2 suppressed shots, and 2 of 2 once it was taken off |
+| The laser | B's screen drew A's beam from the emitter on A's weapon |
+| The recon dart | B saw it thrown and its 3 pulses and was told "spotted" 3 times. Only A was told who was seen (Player2, three times). B's screen had no outlines |
+| Shooting the dart | B shot A's dart after its first pulse: gone on B's screen, no more pulses |
+| A wallbang | With a wall between them A hit B through it (14 to 17 a shot) and the kill read "THROUGH WALL" on both screens. The pistol did nothing |
+
+**A bug it found, fixed.** A shot to the head of a player with hair was counted as a shot to the body. The client's cast met the hair first, an accessory and no part of the body, so it told the server it had hit that player without saying where; the server then took the nearest hit box on the line, which was the hand B holds up in front of the face. The cast now goes on through whatever is on a body and is no part of it (`Penetration.trace`). After the fix a clear shot to the head of the same player was told "head" and killed. This was there before wallbangs: the dummies it was tested on have no hair.
+
+**Two numbers that looked wrong and were not.** A's first shot did 39, not 40: it grazed a slat of the market stall next to B, 0.08 studs of wood, which costs 2 in 100. The same shot again did 40. And shots through the wall did 14 to 17, not 18: see the moulding above.
+
+**Not covered.**
+- The second run, after the fix, had no script connection to B's screen (its MCP peer never came up), so the fix was checked from A's screen and the server only.
+- Both players were on this PC, so nothing here says how hits feel with real delay. The server's rewind of where a target was has still only been run with none.
+- A changing to the pistol or the knife was not looked at from B's screen. More than two players were not tried.
+
+Notes for the next session:
+- In a multiplayer playtest each peer has its own id (`get_connected_instances`); pass it as `instance_id`. Player1 was client-1.
+- Stand the second player away from stalls before reading damage numbers: a stray slat changes them.
+
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
 2. Read `desert-fps/README.md`, `plan/PLAN.md` and `assets/README.md`.

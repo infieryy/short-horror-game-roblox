@@ -4,6 +4,7 @@
 -- by the server (to decide). PenetrationConfig says what can be gone through.
 
 local Config = require(script.Parent.PenetrationConfig)
+local CombatConfig = require(script.Parent.Parent.Combat.CombatConfig)
 
 local Penetration = {}
 
@@ -16,7 +17,7 @@ export type Path = {
 	pierced: { Pierced },
 	stopped: RaycastResult?, -- what it ended in; nil if it ran out of range, or met a body
 	force: number, -- the share of its force it had where it ended
-	body: RaycastResult?, -- the body it met, if bodies are not left out of the cast
+	body: RaycastResult?, -- the part of a body it met, if bodies are not left out of the cast
 }
 
 -- The kit piece a part belongs to: a piece that breaks is a model that says so; dressing that does not is a
@@ -41,15 +42,16 @@ local function materialOf(part: Instance): { Loss: number }?
 	return nil
 end
 
-local function isBody(part: Instance): boolean
+-- The body a part belongs to, if it belongs to one.
+local function bodyOf(part: Instance): Model?
 	local model = part:FindFirstAncestorWhichIsA("Model")
 	while model do
 		if model:FindFirstChildOfClass("Humanoid") then
-			return true
+			return model
 		end
 		model = model:FindFirstAncestorWhichIsA("Model")
 	end
-	return false
+	return nil
 end
 
 -- How thick `hit.Instance` is along the shot, if it is no thicker than `most`: found by looking back at it from
@@ -79,8 +81,18 @@ function Penetration.trace(origin: Vector3, direction: Vector3, range: number, p
 			break
 		end
 		local enter = travelled + hit.Distance
-		if isBody(hit.Instance) then
-			return { finish = hit.Position, reach = enter, pierced = pierced, force = force, body = hit }
+		local body = bodyOf(hit.Instance)
+		if body then
+			if hit.Instance.Parent == body and (CombatConfig.Zones :: any)[hit.Instance.Name] then
+				return { finish = hit.Position, reach = enter, pierced = pierced, force = force, body = hit }
+			end
+			-- Hair, a hat, a pack on the back: on a body, and no part of it. The shot goes on to what is under
+			-- it. (Told that a shot met "hair", the server had to guess which part was meant, and a shot to
+			-- the head was taken for one to the hand held up in front of it.)
+			table.insert(ignore, hit.Instance)
+			mine.FilterDescendantsInstances = ignore
+			from, travelled = hit.Position, enter
+			continue
 		end
 		local material = if pierce > 0 and #pierced < Config.Most then materialOf(hit.Instance) else nil
 		local most = if material then (force - Config.Least) * pierce / material.Loss else 0
