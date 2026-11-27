@@ -176,6 +176,31 @@ Guns are not breakable. They are built from named parts, and each part is its ow
 
 The piece origin is the top of the grip, where the hand goes, and the barrel points along +X.
 
+### Attachments
+
+![Rifle with a suppressor, a red dot and a foregrip](out/fitted-rifle-quiet-side.png)
+
+![Rifle with a compensator, a scope and a laser](out/fitted-rifle-long-side.png)
+
+![Pistol with a suppressor, a red dot and a laser](out/fitted-pistol-quiet-side.png)
+
+Six pieces that go on the guns' sockets (`recipes/attach.py`), built with the guns' toolkit, at their scale and in their paint. Each is one part, `body`, with its origin where it meets the gun: the back face of a muzzle device on the bore's axis, the underside of an optic's base, the top of what hangs under the barrel. So a piece goes on at the gun's socket with no turning. What each one does in the game is in `game/ReplicatedStorage/DesertFps/Weapons/AttachmentConfig.luau`.
+
+| Piece | Socket | Size (studs) | Triangles | Notes |
+|---|---|---|---|---|
+| `att_suppressor` | muzzle | 0.62 long, 0.15 across | 272 | a can with a collar and wrench flats |
+| `att_compensator` | muzzle | 0.22 long, 0.13 across | 256 | a ported sleeve; the ports are paint |
+| `att_reddot` | optic | 0.27 x 0.21 x 0.19 | 220 | a reflex sight, half as big again as a real one. Socket `eye`: the middle of its window |
+| `att_scope` | optic | 0.35 x 0.21 x 0.17 | 432 | a tube on two rings, open from end to end. Socket `eye`: on the tube's axis |
+| `att_foregrip` | underbarrel | 0.14 x 0.30 x 0.15 | 164 | the rifle's wood on a steel clamp |
+| `att_laser` | underbarrel | 0.20 x 0.09 x 0.11 | 268 | a box with a brass lens. Socket `beam`: the lens |
+
+Two things learnt from looking through the optics in the game, both now rules in the recipes:
+- **Nothing may reach into a scope's bore.** The tops of the ring feet and the underside of the turret did, by 2 to 3 mm, and from the eye they sat in the picture. They now end inside the tube's wall.
+- **An emitter in front of a window hides it.** The red dot's emitter was as tall as a real one's and covered the lower half of the window from where the eye is. It is now a low step.
+
+`python preview.py rifle-quiet rifle-long pistol-quiet` renders the three pictures above (`FITTED` in `preview.py` says what is on each).
+
 ### How a gun is written
 `recipes/gun.py` is the shared toolkit. A gun recipe is a list of side-view outlines in millimetres, each given a part name, a material and a real width:
 

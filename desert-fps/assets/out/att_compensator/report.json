@@ -1,0 +1,12 @@
+{
+ "piece": "att_compensator",
+ "triangles": 256,
+ "triangles_low": 124,
+ "strokes": 1079,
+ "px_per_stud": 2386.5,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 256,
+ "problems": [],
+ "seconds": 8.7
+}

@@ -23,6 +23,8 @@ return {
 
 	-- Four lines round the middle of the screen. It does not move: where it points is where a first shot goes.
 	Crosshair = { Gap = 5, Length = 9, Thickness = 2, Dot = false },
+	-- Looking through an optic, the crosshair gives way to the optic's own dot: its width and colour.
+	SightDot = { Size = 5, Color = Color3.fromRGB(255, 72, 64) },
 	-- The cross that flashes on a hit: seconds it shows, and its size.
 	HitMark = { Time = 0.18, Gap = 8, Length = 10, Thickness = 2 },
 	-- Being hit tints the screen for this long, this strongly (0 is solid colour, 1 is nothing).
@@ -31,4 +33,23 @@ return {
 	-- Kills listed top right: how many, and how long each stays.
 	FeedLines = 5,
 	FeedTime = 6,
+
+	-- The loadout (Client/LoadoutMenu). The panel: its width, the space inside it and between its rows, how
+	-- round its corners are, how see-through it is (Panel) and how much of the scene behind it shows (Behind).
+	-- Caption is the width kept for a socket's name. A choice: the space inside it and between two, and how
+	-- see-through one that is not on the weapon is, left alone (Choice) and under the mouse (ChoiceUnder).
+	Menu = {
+		Width = 820,
+		Padding = 32,
+		Gap = 20,
+		Corner = 6,
+		Panel = 0.1,
+		Behind = 0.55,
+		Caption = 170,
+		ChoicePadding = Vector2.new(16, 10),
+		ChoiceGap = 8,
+		Choice = 0.9,
+		ChoiceUnder = 0.75,
+		Hint = "B closes. Changing the weapon in hand draws it again.",
+	},
 }

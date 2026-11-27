@@ -1,6 +1,7 @@
 """Recipe registry: piece name -> (build function, options)."""
 from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
 from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
+from . import attach
 from . import floor, furnish, hangings, lantern, paving, pergola, plants, stores, town, tree, wall2, water
 
 RECIPES = {
@@ -103,4 +104,11 @@ RECIPES = {
     "pistol": (pistol.build, {}),
     "knife": (knife.build, {}),
     "smoke": (smoke.build, {}),
+    # attachments for the guns
+    "att_suppressor": (attach.suppressor, {}),
+    "att_compensator": (attach.compensator, {}),
+    "att_reddot": (attach.reddot, {}),
+    "att_scope": (attach.scope, {}),
+    "att_foregrip": (attach.foregrip, {}),
+    "att_laser": (attach.laser, {}),
 }

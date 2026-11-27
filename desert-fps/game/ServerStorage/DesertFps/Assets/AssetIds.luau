@@ -107,4 +107,11 @@ return {
 	pistol = { Model = 87247004083333, Texture = 102072335700837 },
 	knife = { Model = 102511369777617, Texture = 76665044243244 },
 	smoke = { Model = 70814577468884, Texture = 135660649189835 },
+	-- what goes on the weapons (AttachmentConfig)
+	att_suppressor = { Model = 73836443694817, Texture = 110830734569208 },
+	att_compensator = { Model = 80030970932430, Texture = 87806755199892 },
+	att_reddot = { Model = 123464859283896, Texture = 79114053329453 },
+	att_scope = { Model = 92951252183787, Texture = 94016934404918 },
+	att_foregrip = { Model = 113941948735240, Texture = 99962778696816 },
+	att_laser = { Model = 124716580185428, Texture = 94890159381762 },
 }

@@ -1,8 +1,9 @@
 --!strict
 -- Server side of the weapons: what each player carries, and what their shots do.
--- A client says what it does (fire, reload, switch weapon, walk, aim) and where a shot went. The server checks
--- each claim against what the player holds, the fire rate, the ammunition and where the shooter stands, and
--- decides the hit itself: on a character through Hitboxes, on the town through Breakable.
+-- A client says what it does (fire, reload, switch weapon, walk, aim, fit an attachment) and where a shot
+-- went. The server checks each claim against what the player holds, the fire rate, the ammunition and where
+-- the shooter stands, and decides the hit itself: on a character through Hitboxes, on the town through
+-- Breakable. A weapon's numbers are the ones it has with its attachments on (Attachments.build).
 
 local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
@@ -12,6 +13,8 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared.Weapons.WeaponConfig)
 local Ballistics = require(Shared.Weapons.Ballistics)
+local AttachmentConfig = require(Shared.Weapons.AttachmentConfig)
+local Attachments = require(Shared.Weapons.Attachments)
 local CombatConfig = require(Shared.Combat.CombatConfig)
 local DesertFps = (ServerStorage :: any).DesertFps
 local Breakable = require(DesertFps.Destruction.Breakable)
@@ -25,7 +28,8 @@ local WeaponService = {}
 -- Weapons are modelled pointing along +X; a hand holds a tool pointing along -Z.
 local AIM = CFrame.Angles(0, math.pi / 2, 0)
 
-type Slot = { weapon: string, magazine: number, reserve: number }
+-- attachments: socket -> attachment name
+type Slot = { weapon: string, magazine: number, reserve: number, attachments: Attachments.Chosen }
 type Rate = { left: number, at: number }
 type Gunner = {
 	slots: { [string]: Slot },
@@ -38,6 +42,10 @@ type Gunner = {
 	rates: { [string]: Rate },
 }
 local gunners: { [Player]: Gunner } = {}
+-- What each player has put on the weapon of each slot. It outlives the body: dying does not strip a weapon.
+local fitted: { [Player]: { [string]: Attachments.Chosen } } = {}
+-- The models clients show, which the hand models are made from too: the weapons', the attachments'.
+local weaponModels: Folder, attachmentModels: Folder
 
 local remotes: { [string]: RemoteEvent } = {}
 
@@ -55,8 +63,8 @@ local function unseen(part: BasePart)
 	part.CanTouch = false
 end
 
--- The model clients show in first person: every part of the weapon, with what the client needs to pose it
--- copied out of the parts data (which never leaves the server).
+-- The model clients show in first person: every part of the weapon or the attachment, with what the client
+-- needs to pose it copied out of the parts data (which never leaves the server).
 local function viewModel(name: string, parent: Instance)
 	local data = PartsData[name]
 	local model = Instance.new("Model")
@@ -82,8 +90,9 @@ local function viewModel(name: string, parent: Instance)
 	model.Parent = parent
 end
 
--- The weapon everyone else sees in the player's hand: a Tool, so the character holds it out by itself.
-local function handModel(name: string): Tool
+-- The weapon everyone else sees in the player's hand, with what is attached to it: a Tool, so the character
+-- holds it out by itself.
+local function handModel(name: string, attached: Attachments.Chosen): Tool
 	local tool = Instance.new("Tool")
 	tool.Name = name
 	tool.CanBeDropped = false
@@ -96,24 +105,39 @@ local function handModel(name: string): Tool
 	handle.Massless = true
 	unseen(handle)
 	handle.Parent = tool
-	for _, template in DesertFps.Meshes[name].Parts:GetChildren() do
-		local part = template:Clone() :: BasePart
+
+	local source = weaponModels:FindFirstChild(name) :: Instance
+	local fitting = Attachments.fitting(source, attachmentModels, attached)
+	local function add(template: BasePart, at: Vector3, stretch: number?)
+		local part = template:Clone()
+		if stretch then
+			part.Size, at = Attachments.stretched(part.Size, at, stretch)
+		end
 		part.Anchored = false
 		part.Massless = true
-		unseen(part)
+		part.CastShadow = true
 		local weld = Instance.new("Weld")
 		weld.Part0 = handle
 		weld.Part1 = part
-		weld.C0 = AIM * CFrame.new(part:GetAttribute("Offset") :: Vector3)
+		weld.C0 = AIM * CFrame.new(at)
 		weld.Parent = part
 		part.Parent = tool
+	end
+	for _, template in source:GetChildren() do
+		if template:IsA("BasePart") then
+			add(template, template:GetAttribute("Offset") :: Vector3, fitting.stretch[template.Name])
+		end
+	end
+	for _, each in fitting.adds do
+		add(each.template, each.at)
 	end
 	return tool
 end
 
+-- The numbers of the weapon in hand, as it is fitted, and its slot.
 local function weaponOf(gunner: Gunner): (any, Slot)
 	local slot = gunner.slots[gunner.current]
-	return (WeaponConfig.Weapons :: any)[slot.weapon], slot
+	return Attachments.build(slot.weapon, slot.attachments), slot
 end
 
 local function humanoidOf(player: Player): (Model?, Humanoid?)
@@ -167,7 +191,7 @@ local function hold(player: Player, gunner: Gunner)
 		end
 	end
 	local weapon, slot = weaponOf(gunner)
-	handModel(slot.weapon).Parent = character
+	handModel(slot.weapon, weapon.Attached).Parent = character
 	gunner.readyAt = os.clock() + weapon.EquipTime - WeaponConfig.Grace
 	pace(gunner, humanoid)
 end
@@ -179,10 +203,18 @@ end
 
 local function arm(player: Player, character: Model)
 	local loadout = WeaponConfig.Loadout :: any
+	local kept = fitted[player] or {}
+	fitted[player] = kept
 	local slots = {}
 	for _, name in WeaponConfig.Slots do
-		local weapon = (WeaponConfig.Weapons :: any)[loadout[name]]
-		slots[name] = { weapon = loadout[name], magazine = weapon.Magazine or 0, reserve = weapon.Reserve or 0 }
+		kept[name] = kept[name] or {}
+		local weapon = Attachments.build(loadout[name], kept[name])
+		slots[name] = {
+			weapon = loadout[name],
+			magazine = weapon.Magazine or 0,
+			reserve = weapon.Reserve or 0,
+			attachments = kept[name],
+		}
 	end
 	local gunner: Gunner = {
 		slots = slots,
@@ -278,10 +310,12 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			Structure.knock(wall.Instance) -- a lantern, a sign, a banner: shot down
 		end
 	end
-	-- Everyone else sees the shot.
-	for _, other in Players:GetPlayers() do
-		if other ~= player then
-			remotes.Shot:FireClient(other, player, slot.weapon, origin, finish)
+	-- Everyone else sees the shot, unless the weapon hides it.
+	if not weapon.Silent then
+		for _, other in Players:GetPlayers() do
+			if other ~= player then
+				remotes.Shot:FireClient(other, player, slot.weapon, origin, finish)
+			end
 		end
 	end
 end
@@ -326,6 +360,42 @@ local function onEquip(player: Player, slotName: unknown)
 	gunner.aiming = false
 	interruptReload(gunner)
 	hold(player, gunner)
+	tell(player, gunner)
+end
+
+-- Puts an attachment on a socket of the weapon in a slot, or with no name takes off what is there.
+local function onAttach(player: Player, slotName: unknown, socket: unknown, name: unknown)
+	local gunner = gunners[player]
+	if typeof(slotName) ~= "string" or typeof(socket) ~= "string" or not (name == nil or typeof(name) == "string") then
+		return
+	end
+	if not (gunner and humanoidOf(player) and asks(gunner, "attach")) then
+		return
+	end
+	local slot = gunner.slots[slotName]
+	if
+		not slot
+		or not table.find(AttachmentConfig.Sockets, socket)
+		or slot.attachments[socket] == name
+		or (name ~= nil and Attachments.fits(slot.weapon, name :: string) ~= socket)
+	then
+		tell(player, gunner) -- the client shows a fitting before it is answered: this puts it right
+		return
+	end
+	slot.attachments[socket] = name :: any
+	-- Rounds a smaller magazine cannot hold go back to the reserve.
+	local weapon = Attachments.build(slot.weapon, slot.attachments)
+	local over = slot.magazine - (weapon.Magazine or 0)
+	if over > 0 then
+		slot.magazine -= over
+		slot.reserve += over
+	end
+	if slotName == gunner.current then
+		-- The weapon in hand is drawn again: fitting something is not free in a fight.
+		gunner.aiming = false
+		interruptReload(gunner)
+		hold(player, gunner)
+	end
 	tell(player, gunner)
 end
 
@@ -379,18 +449,26 @@ local function viewArms(parent: Instance)
 end
 
 function WeaponService.start()
-	local models = Instance.new("Folder")
-	models.Name = "WeaponModels"
+	weaponModels = Instance.new("Folder")
+	weaponModels.Name = "WeaponModels"
 	for name in WeaponConfig.Weapons do
-		viewModel(name, models)
+		viewModel(name, weaponModels)
 	end
-	models.Parent = Shared
+	weaponModels.Parent = Shared
+	attachmentModels = Instance.new("Folder")
+	attachmentModels.Name = "AttachmentModels"
+	for _, what in AttachmentConfig.Attachments :: { [string]: any } do
+		if what.Model then
+			viewModel(what.Model, attachmentModels)
+		end
+	end
+	attachmentModels.Parent = Shared
 	task.spawn(viewArms, Shared)
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Remotes"
-	-- From a client: FireWeapon, Reload, Equip, Stance. To clients: State, Hit, Hurt, Shot, Killed.
-	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "State", "Hit", "Hurt", "Shot", "Killed" } do
+	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Killed.
+	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Killed" } do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
 		remote.Parent = folder
@@ -402,6 +480,7 @@ function WeaponService.start()
 	remotes.Reload.OnServerEvent:Connect(onReload)
 	remotes.Equip.OnServerEvent:Connect(onEquip)
 	remotes.Stance.OnServerEvent:Connect(onStance)
+	remotes.Attach.OnServerEvent:Connect(onAttach)
 
 	table.insert(Combat.Hurt, function(victim, amount, hit)
 		local hurt = Players:GetPlayerFromCharacter(victim)
@@ -426,6 +505,7 @@ function WeaponService.start()
 	end
 	Players.PlayerRemoving:Connect(function(player)
 		gunners[player] = nil
+		fitted[player] = nil
 	end)
 end
 

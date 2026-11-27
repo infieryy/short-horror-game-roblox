@@ -618,6 +618,62 @@ Notes for the next session:
 - `Humanoid.AutomaticScalingEnabled` has to be off before a body's parts are resized, or it puts them back.
 - A second video is in `Documents/desert-fps/recordings/` (58 s), the same run as the first, with the arms.
 
+### Attachments (2026-11-27)
+
+The owner, asked what should come next: "Yes, attachments". Asked which, the owner chose **all seven**, and said yes to uploading the models.
+
+**The outcome.** A player presses B, picks what goes on the weapon in hand, and the weapon changes: how it looks in first person and to everyone else, and what it does. Seven attachments on four sockets. The rifle takes all seven, the pistol four, the knife none. Pictures: `assets/studio/fps-attachments-*.jpg`. Video (45 s): `Documents/desert-fps/recordings/fps-maxxing-attachments-20261127.mp4`.
+
+| Attachment | Socket | Goes on | What it does |
+|---|---|---|---|
+| Suppressor | muzzle | rifle, pistol | Nobody else is sent the shot's tracer. Damage falls off: rifle x0.9 past 150 studs (its shot to the head then no longer kills through heavy armor), pistol x0.85 past 70 instead of 100 |
+| Compensator | muzzle | rifle | A spray climbs 0.78 as high and swings 1.15 as wide |
+| Red dot | optic | rifle, pistol | Rifle: raised in 0.12 s instead of 0.16, aimed shots stray 0.85 as far. Pistol: it can aim at all (1.15 zoom) |
+| 2x scope | optic | rifle | Twice as close, aimed shots stray 0.6 as far; raised in 0.24 s, and the shooter walks at 0.8 of the usual aiming pace |
+| Foregrip | underbarrel | rifle | A spray swings 0.65 as wide and spreads 0.8 as fast; the draw takes 0.9 s instead of 0.8 |
+| Laser | underbarrel | rifle, pistol | Shots stray less on the move: walking x0.7, running x0.75, in the air x0.8. Its holder sees a red dot where the weapon points |
+| Extended magazine | magazine | rifle, pistol | 35 rounds instead of 25, 18 instead of 12; a reload takes 1.12 as long |
+
+**How it works.**
+- `Weapons/AttachmentConfig` is the data: for each attachment its socket, its model, and for each weapon it goes on what it changes in that weapon's numbers (multiply, add or replace, by a path like `Recoil.Sway`). A new attachment or a change of balance is an edit there and nowhere else.
+- `Weapons/Attachments.build(weapon, chosen)` gives the weapon's numbers with those attachments on. Server and client both ask it, so a shot is decided and felt with the same numbers. The same weapon fitted the same way is always the same table.
+- `Attachments.fitting` says what to add to a weapon's model. The server uses it for the weapon everyone sees, the client for the one in front of the camera.
+- **Server** (`WeaponService`): a new remote, `Attach(slot, socket, name)`. It checks the types, the socket, that the thing goes on that weapon and on that socket, and the rate. What a player has fitted outlives their death. Fitting the weapon in hand draws it again (so it is not free in a fight) and stops a reload. Rounds a smaller magazine cannot hold go back to the reserve.
+- **Client**: `Client/LoadoutMenu` is the menu (B). While it shows the mouse is free and the weapon does nothing. Looking through an optic, the crosshair gives way to a red dot (`Hud.setOptic`). Draw and reload animations play slower when an attachment makes the draw or the reload longer, so the magazine still changes hands at the right moment.
+- **Aiming changed for every sight.** It used to slide the weapon until the rear sight was at the eye. Now it also turns it, so the barrel points exactly where the eye looks: looking down a scope's tube shows any tilt. And where the weapon rests is followed fast (`ViewArms.RestFollow` 30, was 2), so an aimed weapon no longer drifts with the breath of the idle. Through a scope 0.4 studs from the eye that drift was a degree.
+- **Models**: six new kit pieces, `att_suppressor`, `att_compensator`, `att_reddot`, `att_scope`, `att_foregrip`, `att_laser` (`assets/recipes/attach.py`), built and painted like the guns and at their scale. Each has its origin where it meets the gun, so it goes on at the gun's socket with no turning. The extended magazine has no model: the weapon's own magazine is made 1.22 times as long.
+
+**Tested in a playtest.** `build/tests/test_attachments.luau`: 37 checks, all ok, 77 s.
+- Every attachment changes exactly what the config says, on both guns, and the weapon in hand gains one part for each that has a model.
+- What does not go on a weapon is refused (foregrip, scope and compensator on the pistol), and so are seven requests that make no sense sent straight to the server.
+- Extended magazine: 25 in at first, a reload makes it 35 with 65 in reserve, taking it off gives 25 and 75.
+- A spray climbs 7.60 degrees bare and 5.93 with the compensator.
+- Aimed, the sight in use is 0.0007 to 0.0009 studs from the line of sight and the barrel 0.03 degrees off, for the iron sights, the red dot and the scope on the rifle and the red dot on the pistol.
+- A click on the menu (simulated mouse) picked the suppressor and did not fire the weapon.
+
+**Uploads.** Sixteen files went to the owner's Roblox account, all approved: a model and a texture for each of the six pieces, and a second model and texture for the scope and the red dot. The first scope had the tops of its ring feet and the underside of its turret reaching into the tube, and the first red dot's emitter hid the lower half of its window; both only showed when aiming in the game. The four first versions are unused and still in the inventory: models 139670718029060 and 137224807917027, textures 124047060501744 and 130719010140410.
+
+**Decisions made here.**
+- Everything is free and can be changed at any time, until there is a shop. The only cost is the redraw.
+- The scope is a real hollow tube, not a picture of a lens. The clear circle is about a quarter of the screen's height. The whole screen is zoomed, not only what is in the tube.
+- The red dot is built half as big again as a real one, so its window is worth looking through.
+- The laser's dot is drawn where the shot will go (the middle of the screen), for its holder only.
+- The numbers are first guesses from how these attachments work in other tactical shooters. Nobody has played with them.
+
+**Not done, not verified.**
+- **No second player.** That a suppressed shot sends other players no tracer is in the code and has never been seen. Other players' fitted weapons were checked by counting their parts, not by looking from a second client.
+- There is no sound in the game, so a suppressor hides a tracer and nothing else.
+- The left hand stays on the handguard: it does not hold the foregrip.
+- The pistol's red dot stays still when the slide goes back.
+- The menu and the B key have no touch or gamepad way in. The menu was looked at on one screen size.
+- Nobody else sees a laser's dot.
+- The owner has seen pictures and a video, nothing in person.
+
+Notes for the next session:
+- A button with `Modal` on frees the mouse in first person while it shows. `UserInputService.MouseBehavior` still reads LockCenter.
+- A weapon's numbers in a script are `Attachments.build(...)`, never `WeaponConfig.Weapons[...]` directly, or attachments are ignored there.
+- The Studio viewport on this PC is 1096 by 385, far wider than a screen. A sight that looks small in these pictures is larger in a 16:9 window.
+
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
 2. Read `desert-fps/README.md`, `plan/PLAN.md` and `assets/README.md`.

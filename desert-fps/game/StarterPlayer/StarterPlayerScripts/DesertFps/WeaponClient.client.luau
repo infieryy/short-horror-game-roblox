@@ -1,7 +1,8 @@
 --!strict
 -- The player's side of the weapons: reads the keys, plays the weapon in first person, and tells the server what
 -- the player does. It works out where each shot goes (the aim, the recoil, how still the player stands) and
--- shows it at once; the server decides what the shot hit.
+-- shows it at once; the server decides what the shot hit. A weapon's numbers are the ones it has with its
+-- attachments on (Attachments.build), which the player picks in the loadout (B).
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,9 +13,12 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared:WaitForChild("Weapons"):WaitForChild("WeaponConfig"))
 local Ballistics = require(Shared.Weapons:WaitForChild("Ballistics"))
+local AttachmentConfig = require(Shared.Weapons:WaitForChild("AttachmentConfig"))
+local Attachments = require(Shared.Weapons:WaitForChild("Attachments"))
 local CombatConfig = require(Shared:WaitForChild("Combat"):WaitForChild("CombatConfig"))
 local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"))
 local Hud = require(Shared.Client:WaitForChild("Hud"))
+local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
 
@@ -42,8 +46,15 @@ local effects = Instance.new("Folder")
 effects.Name = "WeaponEffects"
 effects.Parent = camera
 
-local viewmodel = Viewmodel.new(Shared:WaitForChild("WeaponModels"), Shared:WaitForChild("ViewArms") :: Model, effects)
+local viewmodel = Viewmodel.new(
+	Shared:WaitForChild("WeaponModels"),
+	Shared:WaitForChild("AttachmentModels"),
+	Shared:WaitForChild("ViewArms") :: Model,
+	effects
+)
 local hud = Hud.new(player:WaitForChild("PlayerGui"), camera)
+hud:addKey("Attachments", "B")
+local menu: any = nil -- the loadout, made further down
 local animator: any = nil -- the animations of the body the player has now, which everyone else sees
 -- What a body does with each weapon, to fetch when the body is made.
 local bodySets = {}
@@ -51,10 +62,23 @@ for _, each in WeaponConfig.Weapons :: { [string]: any } do
 	table.insert(bodySets, each.Animations)
 end
 
-type Slot = { weapon: string, magazine: number, reserve: number }
+type Slot = { weapon: string, magazine: number, reserve: number, attachments: { [string]: string } }
 local slots: { [string]: Slot } = {}
 local current: string? = nil
-local weapon: any = nil -- the numbers of the weapon in hand
+local weapon: any = nil -- the numbers of the weapon in hand, as it is fitted
+
+-- The dot of a laser on the weapon in hand.
+local Laser = AttachmentConfig.Laser
+local laserDot = Instance.new("Part")
+laserDot.Name = "LaserDot"
+laserDot.Shape = Enum.PartType.Ball
+laserDot.Material = Enum.Material.Neon
+laserDot.Color = Laser.Color
+laserDot.Anchored = true
+laserDot.CanCollide = false
+laserDot.CanQuery = false
+laserDot.CanTouch = false
+laserDot.CastShadow = false
 
 local triggerHeld, triggerFresh = false, false -- fresh: pulled since the last shot
 local aimHeld, walkHeld = false, false
@@ -97,17 +121,20 @@ local function refresh()
 	hud:setSlots(WeaponConfig.Slots, titles, current)
 end
 
--- The weapon of that slot is now the one in hand.
+-- The weapon of that slot is now the one in hand, drawn as it is fitted.
 local function take(slotName: string)
 	current = slotName
-	weapon = (WeaponConfig.Weapons :: any)[slots[slotName].weapon]
+	weapon = Attachments.build(slots[slotName].weapon, slots[slotName].attachments)
 	drawnAt = os.clock()
 	reloadFrom = nil
 	spray, recoilUp, recoilRight = 0, 0, 0
-	viewmodel:show(slots[slotName].weapon)
+	viewmodel:show(weapon)
 	hud:setCrosshair(true)
 	if animator then
 		animator:switch(weapon.Animations, "Hold")
+	end
+	if menu.shown then
+		menu:show(weapon)
 	end
 	refresh()
 end
@@ -116,6 +143,23 @@ local function equip(slotName: string)
 	if body() and slots[slotName] and slotName ~= current then
 		take(slotName)
 		remote("Equip"):FireServer(slotName)
+	end
+end
+
+-- Puts an attachment on a socket of the weapon in a slot, or with no name takes off what is there. The server
+-- is asked, and answers with what the player carries; meanwhile this shows what it should answer.
+local function attach(slotName: string, socket: string, name: string?)
+	local slot = slots[slotName]
+	if not (slot and body()) or slot.attachments[socket] == name then
+		return
+	end
+	if name and Attachments.fits(slot.weapon, name) ~= socket then
+		return
+	end
+	slot.attachments[socket] = name :: any
+	remote("Attach"):FireServer(slotName, socket, name)
+	if slotName == current then
+		take(slotName) -- the weapon in hand is drawn again
 	end
 end
 
@@ -129,9 +173,17 @@ local function reload()
 		remote("Reload"):FireServer()
 		viewmodel:play("Reload")
 		if animator then
-			animator:play("Reload")
+			animator:play("Reload", nil, weapon.Quicken.Reload)
 		end
 	end
+end
+
+-- What a line of sight from the player's eye passes through: not their own body, not the weapon in front of it.
+local function sightline(character: Model): RaycastParams
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { character, effects }
+	return params
 end
 
 local function tracer(from: Vector3, to: Vector3, view: any)
@@ -155,9 +207,7 @@ end
 -- What a shot from `origin` along `direction` looks to have hit from here, and whose body if anyone's. A knife
 -- sweeps a ball of `radius` along the line instead. The server's own test is the one that counts.
 local function claim(character: Model, origin: Vector3, direction: Vector3, range: number, radius: number?): (RaycastResult?, Model?, string?)
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character, effects }
+	local params = sightline(character)
 	local hit = if radius
 		then workspace:Spherecast(origin, radius, direction * range, params)
 		else workspace:Raycast(origin, direction * range, params)
@@ -289,6 +339,7 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 	local eye = if sights then math.deg(2 * math.atan(math.tan(math.rad(hip / 2)) / sights.Zoom)) else hip
 	camera.FieldOfView = hip + (eye - hip) * ease(aim)
 	UserInputService.MouseDeltaSensitivity = camera.FieldOfView / hip
+	hud:setOptic(weapon.View.Dot == true and aim > 0.5)
 	local stance = `{walkHeld}{aiming}`
 	if stance ~= stanceTold then
 		stanceTold = stance
@@ -313,6 +364,16 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 		sideways = root.CFrame.RightVector:Dot(velocity) / weapon.RunSpeed,
 	})
 
+	-- A laser shows where the weapon points, once it is up.
+	local lit = if weapon.View.Laser and ready()
+		then workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Laser.Range, sightline(character))
+		else nil
+	if lit then
+		laserDot.Size = Vector3.one * math.max(Laser.Least, lit.Distance * Laser.PerStud)
+		laserDot.Position = lit.Position
+	end
+	laserDot.Parent = if lit then effects else nil
+
 	hud:setVitals(humanoid.Health, (character:GetAttribute("Armor") :: number?) or 0)
 	hud:setReload(if reloadFrom then (now - reloadFrom) / weapon.ReloadTime else nil)
 end)
@@ -321,15 +382,38 @@ local function held(state: Enum.UserInputState): boolean
 	return state == Enum.UserInputState.Begin
 end
 
+-- The loadout of the weapon in hand. While it shows, the mouse picks from it and the weapon does nothing.
+menu = LoadoutMenu.new(hud.gui, function(socket: string, name: string?)
+	if current then
+		attach(current, socket, name)
+	end
+end, function()
+	menu:hide()
+end)
+local function showLoadout(shown: boolean)
+	if shown and current and body() then
+		triggerHeld, aimHeld = false, false
+		menu:show(weapon)
+	else
+		menu:hide()
+	end
+end
+
 ContextActionService:BindAction("FireWeapon", function(_, state)
-	triggerHeld = held(state)
+	triggerHeld = held(state) and not menu.shown
 	triggerFresh = triggerHeld
-	return Enum.ContextActionResult.Sink
+	return if menu.shown then Enum.ContextActionResult.Pass else Enum.ContextActionResult.Sink
 end, true, Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2)
 ContextActionService:BindAction("AimWeapon", function(_, state)
-	aimHeld = held(state)
-	return Enum.ContextActionResult.Sink
+	aimHeld = held(state) and not menu.shown
+	return if menu.shown then Enum.ContextActionResult.Pass else Enum.ContextActionResult.Sink
 end, false, Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2)
+ContextActionService:BindAction("Loadout", function(_, state)
+	if held(state) then
+		showLoadout(not menu.shown)
+	end
+	return Enum.ContextActionResult.Sink
+end, false, Enum.KeyCode.B)
 ContextActionService:BindAction("Walk", function(_, state)
 	walkHeld = held(state)
 	return Enum.ContextActionResult.Sink
@@ -349,10 +433,12 @@ ContextActionService:BindAction("PickWeapon", function(_, state, input)
 	return Enum.ContextActionResult.Sink
 end, false, table.unpack(slotKeys))
 
--- The server says what the player carries: at spawn, after a reload, after a switch.
+-- The server says what the player carries: at spawn, after a reload, after a switch, after a fitting.
 remote("State").OnClientEvent:Connect(function(state: { current: string, slots: { [string]: Slot } })
 	slots = state.slots
-	if state.current ~= current then
+	local slot = slots[state.current]
+	-- The same weapon fitted the same way is the same table: anything else in hand is drawn.
+	if state.current ~= current or Attachments.build(slot.weapon, slot.attachments) ~= weapon then
 		take(state.current)
 	else
 		refresh()
@@ -414,6 +500,8 @@ local function onCharacter(character: Model)
 		current = nil
 		triggerHeld, aimHeld = false, false
 		viewmodel:show(nil)
+		menu:hide()
+		laserDot.Parent = nil
 		hud:setCrosshair(false)
 		hud:setReload(nil)
 	end)
@@ -425,7 +513,8 @@ end
 
 -- A hook for test scripts, which cannot press keys (DevConfig.TestHooks):
 --   ReplicatedStorage.DesertFps.DevWeapon:Invoke("trigger" | "aim" | "walk", held)   ("equip", slot)   ("reload")
---   ("state") returns what the weapon is doing.
+--   ("attach", { socket = "muzzle", name = "suppressor" })   on the weapon in hand; no name takes it off
+--   ("loadout", shown)   ("state") returns what the weapon is doing.
 local function testHook()
 	if Shared:FindFirstChild("DevWeapon") or not Shared:GetAttribute("TestHooks") then
 		return
@@ -443,10 +532,16 @@ local function testHook()
 			equip(value)
 		elseif what == "reload" then
 			reload()
+		elseif what == "attach" and current then
+			attach(current, value.socket, value.name)
+		elseif what == "loadout" then
+			showLoadout(value)
 		elseif what == "state" and current then
 			return {
 				slot = current,
 				weapon = slots[current].weapon,
+				attachments = slots[current].attachments,
+				numbers = weapon,
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),

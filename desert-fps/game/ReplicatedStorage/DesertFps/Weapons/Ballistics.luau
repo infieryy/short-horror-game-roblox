@@ -44,6 +44,7 @@ function Ballistics.recoil(weapon: any, spray: number, aiming: boolean): (number
 		local side = if math.floor(past / recoil.SwayEvery) % 2 == 0 then 1 else -1
 		up, right = pattern[#pattern][1], side * recoil.Sway
 	end
+	up *= recoil.Rise
 	if aiming and weapon.Aim then
 		up, right = up * weapon.Aim.Recoil, right * weapon.Aim.Recoil
 	end

@@ -105,6 +105,7 @@ function Hud.new(playerGui: Instance, camera: Camera)
 	gui.Name = "Hud"
 	gui.IgnoreGuiInset = true
 	gui.ResetOnSpawn = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	local scale = Instance.new("UIScale")
 	scale.Parent = gui
 	local function fit()
@@ -131,6 +132,21 @@ function Hud.new(playerGui: Instance, camera: Camera)
 		dot.BorderSizePixel = 0
 		dot.Parent = self.crosshair
 	end
+	-- An optic's dot, in place of the crosshair while looking through one.
+	local sightDot = Instance.new("Frame")
+	sightDot.AnchorPoint = Vector2.new(0.5, 0.5)
+	sightDot.Position = UDim2.fromScale(0.5, 0.5)
+	sightDot.Size = UDim2.fromOffset(Config.SightDot.Size, Config.SightDot.Size)
+	sightDot.BackgroundColor3 = Config.SightDot.Color
+	sightDot.BorderSizePixel = 0
+	sightDot.Visible = false
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(1, 0)
+	round.Parent = sightDot
+	sightDot.Parent = gui
+	self.sightDot = sightDot
+	self.crosshairShown, self.throughOptic = true, false
+
 	self.hitMark = cross(gui, Config.HitMark, true)
 	self.hitMark.Visible = false
 
@@ -177,6 +193,9 @@ function Hud.new(playerGui: Instance, camera: Camera)
 	return self
 end
 
+-- A line of text in the display's type, for what else is drawn in its ScreenGui (the loadout).
+Hud.label = label
+
 function Hud.setVitals(self: any, health: number, armor: number)
 	self.health.Text = tostring(math.ceil(health))
 	self.armor.Text = tostring(math.ceil(armor))
@@ -214,7 +233,25 @@ function Hud.setReload(self: any, progress: number?)
 end
 
 function Hud.setCrosshair(self: any, shown: boolean)
-	self.crosshair.Visible = shown
+	self.crosshairShown = shown
+	self.crosshair.Visible = shown and not self.throughOptic
+	self.sightDot.Visible = shown and self.throughOptic
+end
+
+-- Whether the player is looking through an optic: its dot then stands in for the crosshair.
+function Hud.setOptic(self: any, through: boolean)
+	if through ~= self.throughOptic then
+		self.throughOptic = through
+		self:setCrosshair(self.crosshairShown)
+	end
+end
+
+-- A line under the weapons carried, naming a key and what it is for.
+function Hud.addKey(self: any, title: string, key: string)
+	local line = label(self.slots, Config.Small, Config.Font, Enum.TextXAlignment.Right)
+	line.LayoutOrder = 100
+	line.Text = `{string.upper(title)}   {key}`
+	line.TextTransparency = Config.Dim
 end
 
 -- A shot of the player's landed.

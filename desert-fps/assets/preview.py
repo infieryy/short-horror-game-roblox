@@ -123,6 +123,35 @@ def render_gun(name):
         render("gun", "gun", os.path.join(OUT, f"{name}-{view}.png"), size=size)
 
 
+# Which socket of a gun each attachment goes on, and guns dressed with them to look at.
+FITS = {"att_suppressor": "muzzle", "att_compensator": "muzzle", "att_reddot": "optic", "att_scope": "optic",
+        "att_foregrip": "underbarrel", "att_laser": "underbarrel"}
+FITTED = {"rifle-quiet": ("rifle", ["att_suppressor", "att_reddot", "att_foregrip"]),
+          "rifle-long": ("rifle", ["att_compensator", "att_scope", "att_laser"]),
+          "pistol-quiet": ("pistol", ["att_suppressor", "att_reddot", "att_laser"])}
+
+
+def render_fitted(tag):
+    """A gun with attachments on its sockets: a side view and a three-quarter view."""
+    gun, attachments = FITTED[tag]
+    with open(os.path.join(OUT, gun, gun + ".parts.json")) as fh:
+        sockets = {s["name"]: s["position"] for s in json.load(fh)["sockets"]}
+    cx, cz, span = GUNS[gun]
+    span *= 1.15                                                    # a suppressor makes it longer
+    cx += 0.08 * span
+    h = 1.6 + cz
+    scene = [(gun, (0, 0, 1.6), 0, {})]
+    for name in attachments:
+        x, y, z = sockets[FITS[name]]                               # the parts data is in Roblox axes: y is up
+        scene.append((name, (x, -z, 1.6 + y), 0, {}))
+    views = {"side": ((cx, -2.6 * span, h), (cx, 0, h), 85, (1600, 640)),
+             "front": ((cx + 0.87 * span, -0.74 * span, h + 0.26 * span), (cx, 0, h), 50, (1600, 900))}
+    for view, (eye, target, lens, size) in views.items():
+        SCENES["gun"] = scene
+        CAMERAS["gun"] = (eye, target, lens)
+        render("gun", "gun", os.path.join(OUT, f"fitted-{tag}-{view}.png"), size=size)
+
+
 def load(name, mesh=None):
     folder = os.path.join(OUT, name)
     bpy.ops.wm.obj_import(filepath=os.path.join(folder, (mesh or name) + ".obj"), forward_axis="NEGATIVE_Z", up_axis="Y")
@@ -221,6 +250,11 @@ if __name__ == "__main__":
     if scenes:                                  # python3 preview.py building building-back props
         for name in scenes:
             render(name.split("-")[0], name, os.path.join(OUT, f"preview-{name}.png"))
+        sys.exit()
+    fitted = [name for name in sys.argv[1:] if name in FITTED]
+    if fitted:                                  # python3 preview.py rifle-quiet rifle-long pistol-quiet
+        for name in fitted:
+            render_fitted(name)
         sys.exit()
     guns = [name for name in sys.argv[1:] if name in GUNS]
     if guns:

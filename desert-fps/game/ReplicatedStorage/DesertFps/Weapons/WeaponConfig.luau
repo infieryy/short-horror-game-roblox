@@ -3,6 +3,7 @@
 -- Angles are degrees, distances studs, times seconds.
 return {
 	-- What every player carries until the shop exists: a weapon in each slot, and armor (CombatConfig.Armor).
+	-- What goes on a weapon, and what that changes in the numbers below, is in AttachmentConfig.
 	Loadout = { primary = "rifle", secondary = "pistol", melee = "knife", armor = "heavy" },
 	-- The slots, in key order: 1, 2, 3.
 	Slots = { "primary", "secondary", "melee" },
@@ -46,9 +47,11 @@ return {
 		-- How fast a weapon's bolt comes forward again after a shot (per second).
 		BoltReturn = 16,
 		-- Aiming needs to know where the weapon rests in the hands. It is measured once the arms have done
-		-- nothing but hold it for Settle seconds, and followed from then on at RestFollow a second.
+		-- nothing but hold it for Settle seconds, and followed from then on at RestFollow a second: fast, so
+		-- that an aimed weapon stays on the line of sight instead of drifting with the breath of the idle
+		-- (through an optic a few studs from the eye, a hundredth of a stud of drift is a degree).
 		Settle = 0.3,
-		RestFollow = 2,
+		RestFollow = 30,
 	},
 
 	Weapons = {
@@ -78,7 +81,8 @@ return {
 			-- Recoil. Shot n of a spray leaves { up, right } of the aim: the Pattern, the same every time.
 			-- Past its end the spray stays as high as the last entry and swings Sway to one side, then the other,
 			-- changing sides every SwayEvery shots. Reset is the pause that ends a spray; Recover is how fast
-			-- the aim comes back down. View is the share of the recoil that the view itself climbs.
+			-- the aim comes back down. View is the share of the recoil that the view itself climbs. Rise is how
+			-- much of the climb is left (1: all of it).
 			Recoil = {
 				Pattern = {
 					{ 0, 0 },
@@ -92,6 +96,7 @@ return {
 					{ 7.2, -0.6 },
 					{ 7.6, -0.3 },
 				},
+				Rise = 1,
 				Sway = 2.2,
 				SwayEvery = 5,
 				Reset = 0.35,
@@ -147,6 +152,7 @@ return {
 			Spread = { Still = 0.35, Walk = 0.6, Run = 2, Air = 5, Spray = 0.3, SprayMost = 1.5 },
 			Recoil = {
 				Pattern = { { 0, 0 }, { 0.9, 0.1 }, { 1.6, -0.15 }, { 2.1, 0.2 }, { 2.5, -0.2 } },
+				Rise = 1,
 				Sway = 0.6,
 				SwayEvery = 2,
 				Reset = 0.3,

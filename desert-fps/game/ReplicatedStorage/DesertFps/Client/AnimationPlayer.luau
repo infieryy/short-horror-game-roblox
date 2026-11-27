@@ -98,8 +98,9 @@ function AnimationPlayer.switch(self: any, set: Set?, loop: string)
 	end
 end
 
--- Plays an action of the weapon in hand from its start, `fade` seconds in (AnimationConfig.ActionFade if not given).
-function AnimationPlayer.play(self: any, action: string, fade: number?)
+-- Plays an action of the weapon in hand from its start, `fade` seconds in (AnimationConfig.ActionFade if not
+-- given), `speed` times as fast as it was made.
+function AnimationPlayer.play(self: any, action: string, fade: number?, speed: number?)
 	local entry = self.set and self.set[action]
 	local name = entry
 	if typeof(entry) == "table" then
@@ -110,7 +111,7 @@ function AnimationPlayer.play(self: any, action: string, fade: number?)
 	local track = self:track(name)
 	if track then
 		track:Stop(0)
-		track:Play(fade or Config.ActionFade)
+		track:Play(fade or Config.ActionFade, 1, speed or 1)
 	end
 end
 

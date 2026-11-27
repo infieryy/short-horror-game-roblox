@@ -1,0 +1,12 @@
+{
+ "piece": "att_laser",
+ "triangles": 268,
+ "triangles_low": 108,
+ "strokes": 1025,
+ "px_per_stud": 2835.1,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 268,
+ "problems": [],
+ "seconds": 5.7
+}

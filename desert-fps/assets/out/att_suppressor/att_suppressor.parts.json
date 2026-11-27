@@ -1,0 +1,43 @@
+{
+ "piece": "att_suppressor",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [
+  {
+   "name": "mount",
+   "position": [
+    0.0,
+    0.0,
+    -0.0
+   ],
+   "forward": [
+    -1,
+    0,
+    0
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  }
+ ],
+ "joints": [],
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/att_suppressor_body.fbx",
+   "center": [
+    0.311,
+    0.0,
+    -0.0
+   ],
+   "size": [
+    0.623,
+    0.153,
+    0.153
+   ],
+   "triangles": 272
+  }
+ ]
+}

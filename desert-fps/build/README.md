@@ -14,7 +14,7 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 | 8 | `08_sky.luau` | Sets the painted sky (six faces cut from one painting by `assets/sky.py`) |
 | 9 | `09_graybox_town.luau` | Builds the compact town (plan v2) as gray boxes in `Workspace.Graybox_town`, west of the old town |
 | 10 | `10_build_town.luau` | Builds the whole compact town from its recipes: every building and house, the street dressing and the town wall in `Workspace.Buildings`, paving in `Workspace.TownGround`, unseen walls behind the town wall in `Workspace.TownEdge`. Of the gray boxes only the slab is left. Players spawn in front of the Tea House. About 2 seconds |
-| 11 | `11_import_animations.luau` | Loads the eight weapon animations into `ReplicatedStorage.DesertFpsAnimations`. Copy `animations/fps_*.rbxmx` into Studio's content folder first (the script says where) |
+| 11 | `11_import_animations.luau` | Loads the twenty weapon animations into `ReplicatedStorage.DesertFpsAnimations`. Copy `animations/*.rbxmx` into Studio's content folder first (the script says where) |
 
 `tests/time_market_routes.luau` runs on the server during a playtest. It walks bots along the planner's Market Square routes and writes the timings to the `RouteTiming` attribute on Workspace. `tests/time_all_routes.luau` does the same for every zone and writes a summary to `RouteSummary`.
 
@@ -27,6 +27,8 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 `tests/test_collapse.luau` runs on the server during a playtest, with `DevConfig.TestHooks` on. It shoots out the ground walls of one end of the Captain's House and all of the Watchtower's and returns how many pieces are left standing (49 of 72, and 2 of 68).
 
 `tests/test_weapons.luau` runs on the client during a playtest, with `DevConfig.TestHooks` and `DevConfig.Dummies` on. It shoots the target dummies with the rifle and the pistol and returns six checks that should all start "ok".
+
+`tests/test_attachments.luau` runs on the client during a playtest, with `DevConfig.TestHooks` on, from the spawn. It fits every attachment on the rifle and the pistol and returns 37 checks that should all start "ok": the numbers each one changes, what is refused, the magazine's rounds, the compensator's climb, every sight on the line of sight, the laser's dot. It takes 80 seconds, longer than one MCP call may run: start it in a `task.spawn` and read the result from `shared` afterwards.
 
 `tests/measure_views.luau` runs on the client during a playtest. It stands the player at seven viewpoints and returns draw calls, triangles on screen, drawing time and frames a second for each. Set the graphics level by hand first.
 

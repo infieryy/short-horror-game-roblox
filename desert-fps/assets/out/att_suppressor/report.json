@@ -1,0 +1,12 @@
+{
+ "piece": "att_suppressor",
+ "triangles": 272,
+ "triangles_low": 132,
+ "strokes": 2154,
+ "px_per_stud": 1229.3,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 272,
+ "problems": [],
+ "seconds": 6.4
+}
