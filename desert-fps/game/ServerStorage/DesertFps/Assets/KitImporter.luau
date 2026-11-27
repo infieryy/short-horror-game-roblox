@@ -24,6 +24,9 @@ local FIDELITY = {
 	wall_upper_window = PRECISE,
 	well = PRECISE,
 	vat = PRECISE,
+	vat_indigo = PRECISE,
+	vat_saffron = PRECISE,
+	vat_plum = PRECISE,
 	stall = PRECISE,
 	awning = PRECISE,
 	stairs = HULL, -- one smooth ramp to walk up
@@ -41,7 +44,18 @@ local FIDELITY = {
 }
 -- Pieces players pass straight through. Shots still hit them.
 -- (A ladder is climbed on the TrussPart the map builder stands with it.)
-local WALK_THROUGH = { cloth = true, ladder = true, rug = true, banner = true, sign_tea = true, bougainvillea = true }
+local WALK_THROUGH = {
+	cloth = true,
+	rack_red = true,
+	rack_saffron = true,
+	rack_plum = true,
+	ladder = true,
+	rug = true,
+	banner = true,
+	sign_tea = true,
+	sign_dye = true,
+	bougainvillea = true,
+}
 
 local function import(piece: string, ids: { Model: number, Texture: number }, meshes: Instance): { meshes: number, worstOffset: number }
 	local fixed = PartsData[piece] ~= nil -- does not break

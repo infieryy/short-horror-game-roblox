@@ -1,0 +1,110 @@
+{
+ "piece": "rack_plum",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 55,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/rack_plum_s00.fbx",
+   "center": [
+    1.052,
+    8.382,
+    0.081
+   ],
+   "size": [
+    5.897,
+    3.007,
+    0.729
+   ],
+   "material": "plum",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 192,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/rack_plum_s01.fbx",
+   "center": [
+    2.69,
+    5.0,
+    -0.0
+   ],
+   "size": [
+    2.919,
+    10.0,
+    1.0
+   ],
+   "material": "darkwood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 96,
+   "neighbors": [
+    "s00",
+    "s03"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/rack_plum_s02.fbx",
+   "center": [
+    -2.245,
+    5.15,
+    0.081
+   ],
+   "size": [
+    3.511,
+    9.7,
+    0.729
+   ],
+   "material": "darkwood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 132,
+   "neighbors": [
+    "s00",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/rack_plum_s03.fbx",
+   "center": [
+    -0.521,
+    3.767,
+    -0.0
+   ],
+   "size": [
+    7.259,
+    7.534,
+    1.0
+   ],
+   "material": "plum",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 208,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

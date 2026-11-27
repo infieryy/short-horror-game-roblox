@@ -1,0 +1,12 @@
+{
+ "piece": "bolts",
+ "triangles": 1568,
+ "triangles_low": 928,
+ "strokes": 15587,
+ "px_per_stud": 40.1,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 1140,
+ "problems": [],
+ "seconds": 10.7
+}

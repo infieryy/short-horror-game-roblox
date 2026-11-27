@@ -38,6 +38,33 @@ def sign(p):
             line([(cy + dy, -1.1), (cy + dy + 0.1, -0.98), (cy + dy - 0.04, -0.86), (cy + dy + 0.08, -0.74)], "band", 0.07)
 
 
+def sign_dye(p):
+    """The dyers' sign: a framed panel flat on a wall with three hanging flasks of dye painted on it, as on the
+    concept's Dye Works. The origin is on the wall face, at the middle of the panel."""
+    w, h = 2.7, 1.9
+    p.box((-w - 0.2, -0.16, -h - 0.2), (w + 0.2, 0.0, h + 0.2), "wood", bevel=0.04, grain="x", group="frame")
+    face = p.box((-w, -0.21, -h), (w, -0.16, h), "canvas", group="face")
+    y = -0.21
+
+    def line(points, family, width, closed=False, tone=None):
+        if family:
+            p.mark(face, "-y", [(x, y, z) for x, z in points], width=width, closed=closed, family=family)
+        else:
+            p.mark(face, "-y", [(x, y, z) for x, z in points], width=width, closed=closed, tone=tone)
+
+    line([(-w + 0.4, h - 0.35), (w - 0.4, h - 0.35)], None, 0.09, tone=-5)                 # the rod they hang from
+    for cx, family in ((-1.6, "redcloth"), (0.0, "saffron"), (1.6, "indigo")):
+        cz = -0.45
+        line([(cx, h - 0.35), (cx, cz + 1.05)], None, 0.05, tone=-5)                         # cord
+        for radius, width in ((0.62, 0.2), (0.34, 0.26), (0.1, 0.2)):                         # the body, filled in rings
+            ring = [(cx + radius * math.cos(math.radians(a)), cz + radius * 1.1 * math.sin(math.radians(a)))
+                    for a in range(0, 360, 30)]
+            line(ring, family, width, closed=True)
+        line([(cx - 0.16, cz + 0.6), (cx - 0.13, cz + 1.0)], family, 0.12)                    # the neck
+        line([(cx + 0.16, cz + 0.6), (cx + 0.13, cz + 1.0)], family, 0.12)
+        line([(cx - 0.26, cz + 1.05), (cx + 0.26, cz + 1.05)], family, 0.11)                  # the lip
+
+
 def banner(p):
     """A long red banner on a pole, flat against the wall, with a brass-yellow emblem.
     The origin is on the wall face at the pole."""

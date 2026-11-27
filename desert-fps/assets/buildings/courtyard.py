@@ -141,6 +141,38 @@ def placements():
     lay.put("bougainvillea", 36, -16.5, STORY + 3.0, 0)                 # over the balustrades
     lay.put("bougainvillea", 16.5, -44, STORY + 3.0, 90)
 
+    # ---------------------------------------------------------------- the roof: washing, stores, a place to sit
+    # (nobody can climb up here yet; it is what you see from the street and from other roofs)
+    lay.at("tree", 2, 0, up)
+    lay.at("tree", 6, 6, up)
+    lay.at("rack_saffron", 1, 1, up)
+    lay.at("rack_red", 1, 3, up)
+    lay.at("rack_plum", 4, 5, up, 90)
+    lay.at("sacks", 0, 0, up, 0, dy=1.0)
+    for dx in (-1.5, 1.2):
+        lay.at("barrel", 0, 3, up, 0, dx=dx, dy=2.2)
+    lay.at("crate", 0, 4, up, 0, dx=2.0, dy=1.8)
+    lay.at("crate", 0, 4, up + 3.0, 25, dx=2.0, dy=1.8)
+    lay.against("divan", 4, 0, "W", 1.9, up)                            # the sitting corner on the west wing
+    lay.at("rug", 4, 1, up, 90, dx=-1.5)
+    lay.at("tea_table", 5, 0, up, 30, dx=-2.0, dy=1.0)
+    lay.at("pot_round", 3, 0, up, 0, dx=-2.5, dy=-1.5)
+    lay.at("vase", 5, 0, up, 0, dx=-2.6, dy=-2.4)
+    for dy in (1.6, -1.2):                                              # over the store, more stores
+        lay.at("barrel", 3, 6, up, 0, dx=2.2, dy=dy)
+    lay.at("crate", 4, 6, up, -8, dx=2.0)
+    lay.at("pot_tall", 2, 6, up, 0, dx=2.5, dy=2.4)
+    lay.at("bolts", 5, 5, up, 15)
+    lay.at("tea_table", 8, 3, up, 0, dx=0.5)                            # under the pergolas
+    lay.at("vase", 8, 4, up, 0, dx=2.4, dy=-2.4)
+    lay.at("pot_round", 8, 4, up, 0, dx=1.0, dy=-2.7)
+    lay.at("sacks", 8, 1, up, 90, dx=-1.0)
+    lay.at("barrel", 8, 0, up, 0, dx=-2.2, dy=-2.2)
+    lay.at("pot_tall", 8, 6, up, 0, dx=2.4, dy=-2.4)
+    lay.at("pot_round", 7, 6, up, 0, dx=2.5, dy=1.0)
+    lay.on_wall("lantern_wall", 1, 5, "W", STORY + 8.6, along=3.0, outside=True)
+    lay.on_wall("lantern_wall", 1, 6, "S", STORY + 8.6, along=3.0, outside=True)
+
     # ---------------------------------------------------------------- outside
     for r, c, side in ((0, 2, "N"), (8, 2, "S")):                       # the two street doors
         for along in (-3.4, 3.4):

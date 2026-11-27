@@ -44,8 +44,8 @@ def build(p):
 V = C.KIT["vat"]
 
 
-def vat(p):
-    """Dye vat: a low, wide ring of stone blocks with a turquoise foot, full of red dye."""
+def vat(p, dye="redcloth"):
+    """Dye vat: a low, wide ring of stone blocks with a turquoise foot, full of dye."""
     r0, r1, h, n = V["r_in"], V["r_out"], V["h"], V["segments"]
     lip = 0.28
     ring = p.lathe([(r1, 0.0), (r1, h - lip), (r1 + 0.1, h - lip), (r1 + 0.1, h), (r0 - 0.1, h), (r0 - 0.1, h - lip),
@@ -59,4 +59,4 @@ def vat(p):
     p.lathe([(r1 + 0.1, 0.0), (r1 + 0.1, 0.5), (r1 + 0.01, 0.62), (r1 + 0.01, 0.0)], n, "band",
             closed=True, grain=None, group="foot", extra=CUT)
     # the dye: a flat pool just inside the ring, below its lip
-    p.lathe([(r0 - 0.01, 0.05), (r0 - 0.01, h - lip - 0.18)], n, "redcloth", grain=None, group="dye", extra=CUT)
+    p.lathe([(r0 - 0.01, 0.05), (r0 - 0.01, h - lip - 0.18)], n, dye, grain=None, group="dye", extra=CUT)

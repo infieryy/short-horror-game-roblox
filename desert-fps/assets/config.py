@@ -198,6 +198,15 @@ PAINT["paving"] = {                             # flagstones: flat dabs, no lean
     ],
 }
 
+# dyes (reference/zones/dye-works.webp: yellow cloth 249/156/62, purple cloth 146/73/129, blue vat 80/96/165)
+PALETTE["saffron"] = {"h": (27, 38), "l": (0.52, 0.66), "s": (0.75, 0.98), "step": 0.018, "hue_step": 0.5,
+                      "bases": [(31, 0.61, 0.93), (34, 0.58, 0.92)]}
+PALETTE["plum"] = {"h": (296, 318), "l": (0.36, 0.56), "s": (0.30, 0.46), "step": 0.02, "hue_step": 0.6,
+                   "bases": [(310, 0.44, 0.36), (305, 0.49, 0.41)]}
+PALETTE["indigo"] = {"h": (222, 236), "l": (0.38, 0.60), "s": (0.30, 0.50), "step": 0.02, "hue_step": 0.5,
+                     "bases": [(229, 0.48, 0.38), (227, 0.52, 0.40)]}
+CORE.update({"saffron": "saffron", "plum": "plum", "indigo": "indigo"})
+
 PAINT["leaf"] = {                               # foliage: round dabs every way
     "lean": 30, "lean_jitter": 90,
     "layers": [
@@ -208,6 +217,9 @@ PAINT["leaf"] = {                               # foliage: round dabs every way
 PAINT["bloom"] = PAINT["leaf"]
 PAINT["glow"] = {"lean": 80, "lean_jitter": 10,
                  "layers": [{"per_stud2": 6.0, "len": (0.3, 0.8), "wid": (0.1, 0.2), "opacity": (0.3, 0.5), "round": 0.4}]}
+
+for _dye in ("saffron", "plum", "indigo"):
+    PAINT[_dye] = PAINT["canvas"]
 
 GLAZE = {
     "shade_per_stud2": 260.0,  # dark glaze dabs per square stud of fully occluded surface
@@ -289,7 +301,7 @@ KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
                 "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7,
                 "lantern": 0.3, "tea": 0.4, "rug": 0.6, "divan": 0.7, "shelf": 0.4, "counter": 0.6, "sign": 0.4,
-                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7}
+                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7, "bolts": 0.7}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -331,7 +343,8 @@ STYLE["smoke"] = STYLE["knife"]
 # Pale cloth and sacking show the dark corner glaze as stains, so they get much less of it.
 STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
 STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
-for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree"):
+STYLE["rack"] = STYLE["cloth"]
+for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree", "bolts"):
     STYLE[_soft] = {"glaze": {"shade_per_stud2": 60.0, "shade_mix": 0.1}}
 
 # ---------------------------------------------------------------- destruction
@@ -347,7 +360,8 @@ for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree"):
 BREAK = {
     "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30,
                      "canvas": 2, "redcloth": 2, "burlap": 4, "clay": 6, "rope": 3, "paving": 16, "band": 6,
-                     "brass": 20, "leaf": 2, "bloom": 2, "glow": 4, "cloth": 2},
+                     "brass": 20, "leaf": 2, "bloom": 2, "glow": 4, "cloth": 2,
+                     "saffron": 2, "plum": 2, "indigo": 2},
     "hp_min": 10,
     "pieces": {
         "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
@@ -397,11 +411,19 @@ BREAK = {
         "shelf": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "counter": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "tree": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "rack_red": {"mode": "shatter", "shards": 4, "apart": 0.5},
+        "rack_saffron": {"mode": "shatter", "shards": 4, "apart": 0.5},
+        "rack_plum": {"mode": "shatter", "shards": 4, "apart": 0.5},
+        "vat_indigo": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "vat_saffron": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "vat_plum": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "bolts": {"mode": "shatter", "shards": 8, "apart": 0.5},
         # mode "parts": not breakable. Only splits off the parts a recipe tags, so they can be animated.
         "lantern": {"mode": "parts"},
         "lantern_wall": {"mode": "parts"},
         "rug": {"mode": "parts"},
         "sign_tea": {"mode": "parts"},
+        "sign_dye": {"mode": "parts"},
         "banner": {"mode": "parts"},
         "bougainvillea": {"mode": "parts"},
         "ground": {"mode": "parts"},

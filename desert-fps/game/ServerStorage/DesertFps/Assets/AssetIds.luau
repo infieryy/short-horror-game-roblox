@@ -61,6 +61,15 @@ return {
 	bougainvillea = { Model = 83906939320149, Texture = 99875833079690 },
 	tree = { Model = 132570403835455, Texture = 139426433969260 },
 	wall2_shutter = { Model = 91282229117878, Texture = 125982005474478 },
+	-- the Dye Works
+	rack_red = { Model = 110447407514704, Texture = 82426634834729 },
+	rack_saffron = { Model = 84455056084426, Texture = 75361261558095 },
+	rack_plum = { Model = 106334261582445, Texture = 112147417176606 },
+	vat_indigo = { Model = 85205347875308, Texture = 86963045612227 },
+	vat_saffron = { Model = 140281164581152, Texture = 107580919296679 },
+	vat_plum = { Model = 109028908759454, Texture = 82135775569448 },
+	bolts = { Model = 109269944048767, Texture = 86770433051229 },
+	sign_dye = { Model = 107064438731434, Texture = 127230305563878 },
 	-- weapons
 	rifle = { Model = 118729713583609, Texture = 98441666077201 },
 	pistol = { Model = 87247004083333, Texture = 102072335700837 },

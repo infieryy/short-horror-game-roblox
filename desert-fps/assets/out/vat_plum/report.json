@@ -1,0 +1,12 @@
+{
+ "piece": "vat_plum",
+ "triangles": 444,
+ "triangles_low": 220,
+ "strokes": 46424,
+ "px_per_stud": 46.1,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 764,
+ "problems": [],
+ "seconds": 15.5
+}

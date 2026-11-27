@@ -13,7 +13,7 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 | 7 | `07_build_teahouse.luau` | Optional. Stands the tea house alone on a paved yard outside the old town's south wall, for looking at it. Step 10 moves it into the town |
 | 8 | `08_sky.luau` | Sets the painted sky (six faces cut from one painting by `assets/sky.py`) |
 | 9 | `09_graybox_town.luau` | Builds the compact town (plan v2) as gray boxes in `Workspace.Graybox_town`, west of the old town |
-| 10 | `10_build_town.luau` | Builds the compact town with its real buildings (Tea House, Courtyard House) in `Workspace.Buildings` and gray boxes for the rest. Players spawn in front of the Tea House |
+| 10 | `10_build_town.luau` | Builds the compact town with its real buildings (Tea House, Courtyard House, Dye Works) in `Workspace.Buildings`, flagstone paving in `Workspace.TownGround` and gray boxes for the rest. Players spawn in front of the Tea House |
 
 `tests/time_market_routes.luau` runs on the server during a playtest. It walks bots along the planner's Market Square routes and writes the timings to the `RouteTiming` attribute on Workspace. `tests/time_all_routes.luau` does the same for every zone and writes a summary to `RouteSummary`.
 

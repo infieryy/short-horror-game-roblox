@@ -1,0 +1,214 @@
+{
+ "piece": "bolts",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 275,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/bolts_s00.fbx",
+   "center": [
+    1.858,
+    0.25,
+    -2.089
+   ],
+   "size": [
+    2.083,
+    0.5,
+    1.621
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s04",
+    "s06"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/bolts_s01.fbx",
+   "center": [
+    0.0,
+    1.814,
+    1.035
+   ],
+   "size": [
+    5.4,
+    3.628,
+    2.4
+   ],
+   "material": "saffron",
+   "health": 25,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 132,
+   "neighbors": [
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/bolts_s02.fbx",
+   "center": [
+    1.916,
+    0.25,
+    1.913
+   ],
+   "size": [
+    1.967,
+    0.5,
+    1.973
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 28,
+   "neighbors": [
+    "s01",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/bolts_s03.fbx",
+   "center": [
+    -0.35,
+    2.856,
+    1.515
+   ],
+   "size": [
+    5.1,
+    5.711,
+    2.77
+   ],
+   "material": "indigo",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 76,
+   "neighbors": [
+    "s01",
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/bolts_s04.fbx",
+   "center": [
+    0.0,
+    3.414,
+    -0.163
+   ],
+   "size": [
+    5.4,
+    6.828,
+    5.475
+   ],
+   "material": "band",
+   "health": 160,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 608,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/bolts_s05.fbx",
+   "center": [
+    -2.111,
+    0.25,
+    -1.27
+   ],
+   "size": [
+    1.577,
+    0.5,
+    3.261
+   ],
+   "material": "wood",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 36,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s04"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/bolts_s06.fbx",
+   "center": [
+    1.82,
+    2.372,
+    -0.0
+   ],
+   "size": [
+    2.16,
+    4.745,
+    5.15
+   ],
+   "material": "saffron",
+   "health": 25,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 120,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s04",
+    "s07"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/bolts_s07.fbx",
+   "center": [
+    0.0,
+    1.814,
+    1.922
+   ],
+   "size": [
+    5.4,
+    3.628,
+    1.955
+   ],
+   "material": "redcloth",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 116,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s06"
+   ]
+  }
+ ]
+}

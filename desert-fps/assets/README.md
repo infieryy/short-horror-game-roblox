@@ -112,6 +112,7 @@ The plain kit above makes boxes. Buildings that are meant to be looked at use a 
 - **A building's walls come from the plan.** `buildings/layout.py` reads a building's cells from `plan/out/town.json` and stands a wall, door or window on every edge exactly as the planner has it (`shell`). A recipe may swap a blank wall for a shuttered window (`wall2_shutter`, same blocking) and add pilasters; it then adds roof, furniture and lamps by hand. `buildings/courtyard.py` is built this way; `teahouse.py` predates it and places its walls by hand.
 - **Furniture keeps to the walls.** The plan lets a player walk through every room cell, so nothing stands within a stud of a cell's middle.
 - Two more pieces: `wall2_shutter` (an arched window closed by painted turquoise shutters) and `tree` (an orange tree in a stone planter). 58 pieces in the kit.
+- **The Dye Works** (`buildings/dyeworks.py`) also takes what stands in its yard from the plan: a vat cell is a vat, a hanging-cloth cell is a rack of dyed cloth, high cover is a stack of cloth bolts. Eight pieces for it: `rack_red`, `rack_saffron`, `rack_plum` (dyed cloth on two posts), `vat_indigo`, `vat_saffron`, `vat_plum`, `bolts`, `sign_dye` (three flasks painted on a panel). Dye colours `saffron`, `plum` and `indigo` are measured from `reference/zones/dye-works.webp`. 66 pieces in the kit.
 - New colour families: `leaf`, `bloom`, `glow`. Paving is now pinker and paler than the walls, as in the concept.
 
 ## Destruction

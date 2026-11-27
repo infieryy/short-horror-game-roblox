@@ -1,0 +1,12 @@
+{
+ "piece": "vat_saffron",
+ "triangles": 444,
+ "triangles_low": 220,
+ "strokes": 46414,
+ "px_per_stud": 46.1,
+ "break_mode": "shatter",
+ "chunks": 8,
+ "chunk_triangles": 740,
+ "problems": [],
+ "seconds": 14.6
+}

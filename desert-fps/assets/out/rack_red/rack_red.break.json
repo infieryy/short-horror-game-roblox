@@ -1,0 +1,110 @@
+{
+ "piece": "rack_red",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 55,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/rack_red_s00.fbx",
+   "center": [
+    2.261,
+    5.15,
+    0.081
+   ],
+   "size": [
+    3.478,
+    9.7,
+    0.729
+   ],
+   "material": "darkwood",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 132,
+   "neighbors": [
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/rack_red_s01.fbx",
+   "center": [
+    -2.233,
+    5.0,
+    -0.0
+   ],
+   "size": [
+    3.834,
+    10.0,
+    1.0
+   ],
+   "material": "darkwood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 120,
+   "neighbors": [
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/rack_red_s02.fbx",
+   "center": [
+    -1.142,
+    6.865,
+    0.081
+   ],
+   "size": [
+    5.716,
+    6.041,
+    0.729
+   ],
+   "material": "redcloth",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 192,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/rack_red_s03.fbx",
+   "center": [
+    1.063,
+    2.135,
+    -0.0
+   ],
+   "size": [
+    6.173,
+    4.271,
+    1.0
+   ],
+   "material": "canvas",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 196,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

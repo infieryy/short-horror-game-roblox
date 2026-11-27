@@ -21,7 +21,17 @@ return {
 		Shadows = { lantern = true, lantern_wall = false },
 	},
 	-- Pieces too small or too flat for their shadow to be missed. They cast none.
-	NoShadow = { rug = true, banner = true, sign_tea = true, tea_table = true, shelf = true, vase = true, pot_round = true, pot_tall = true },
+	NoShadow = {
+		rug = true,
+		banner = true,
+		sign_tea = true,
+		sign_dye = true,
+		tea_table = true,
+		shelf = true,
+		vase = true,
+		pot_round = true,
+		pot_tall = true,
+	},
 	-- A fill is a soft light with no lamp to see, where a recipe asks for one (daylight under a dome).
 	Fill = {
 		LightColor = Color3.fromRGB(255, 176, 122),

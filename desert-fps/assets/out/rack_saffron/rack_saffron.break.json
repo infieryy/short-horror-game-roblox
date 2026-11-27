@@ -1,0 +1,110 @@
+{
+ "piece": "rack_saffron",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 65,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/rack_saffron_s00.fbx",
+   "center": [
+    0.0,
+    5.0,
+    -0.0
+   ],
+   "size": [
+    8.3,
+    10.0,
+    1.0
+   ],
+   "material": "darkwood",
+   "health": 25,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 244,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/rack_saffron_s01.fbx",
+   "center": [
+    -3.307,
+    7.644,
+    0.081
+   ],
+   "size": [
+    1.386,
+    4.482,
+    0.729
+   ],
+   "material": "saffron",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "left"
+   ],
+   "triangles": 68,
+   "neighbors": [
+    "s00",
+    "s03"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/rack_saffron_s02.fbx",
+   "center": [
+    1.764,
+    5.15,
+    0.081
+   ],
+   "size": [
+    4.473,
+    9.7,
+    0.729
+   ],
+   "material": "darkwood",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [
+    "right"
+   ],
+   "triangles": 200,
+   "neighbors": [
+    "s00",
+    "s03"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/rack_saffron_s03.fbx",
+   "center": [
+    -1.013,
+    6.859,
+    0.081
+   ],
+   "size": [
+    4.223,
+    6.052,
+    0.729
+   ],
+   "material": "saffron",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 160,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02"
+   ]
+  }
+ ]
+}

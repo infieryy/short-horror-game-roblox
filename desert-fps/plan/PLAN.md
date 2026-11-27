@@ -64,10 +64,13 @@ How it got there:
 
 ![The Courtyard House and the Tea House in the gray-box town](../assets/studio/town-two-buildings.png)
 
-`game/ServerStorage/DesertFps/Town/TownConfig.luau` lists the buildings that have a recipe; `TownBuilder` stands them at their plan cells and leaves the rest as gray boxes. So far: the Tea House and the Courtyard House.
+`game/ServerStorage/DesertFps/Town/TownConfig.luau` lists the buildings that have a recipe; `TownBuilder` stands them at their plan cells and leaves the rest as gray boxes. So far: the Tea House, the Courtyard House and the Dye Works.
 
+![The town paved, three buildings built](../assets/studio/town-paved.png)
+
+- **The floor is flagstone, not gray**: `TownBuilder` lays the kit's paving piece on every street, yard and unbuilt room cell (1,115 of them), each turned a different way so the one painted tile does not read as a pattern.
 - The bots walk the same routes straight through the real buildings: **35 of 35 pass**.
-- **Five routes run 10% to 16% slower than planned**, all of them through a real building (door frames and furniture to brush past): two Market Square lanes and one Tea House lane, and the two climbs up outside stairs. The planner still times a building as open floor.
+- **Six routes run 10% to 19% slower than planned**, all of them through or past a real building (door frames and furniture to brush past): two Market Square lanes, one Tea House lane and the climbs up outside stairs. The planner still times a building as open floor.
 
 - **Fairness is measured, not given.** The two players' runs to the meeting point were 0.1 to 0.5 s apart in the bot test. The mirrored first draft showed the same 0.5 s, so that gap is the bots, not the layout.
 - **The Tea House in the plan is the real building's footprint** (hall, wing, porch, outside stairs, the three doors). The planner cannot see its upper floor: it treats the roof as one flat level.
@@ -87,7 +90,7 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 | Inside its hall | 31,000 | 36 |
 | Inside its gallery | 37,000 | 37 |
 
-- **Landmark building** (5 of them): about 1,500 triangles per plan cell, up to 12 lamps that cast shadows. The Tea House (16 cells, two stories) is 72,000; the Courtyard House (63 cells) is 90,000. The first budget here said 75,000 for any landmark; that was set from the Tea House alone and does not fit a building four times its footprint.
+- **Landmark building** (5 of them): about 1,500 triangles per plan cell, up to 12 lamps that cast shadows. The Tea House (16 cells, two stories) is 72,000; the Courtyard House (63 cells) is 116,000 with its roof dressed; the Dye Works (72 cells with its yard) is 86,000. The first budget here said 75,000 for any landmark; that was set from the Tea House alone and does not fit a building four times its footprint.
 - **Small house** (16 of them): up to 15,000 triangles, 2 lamps that cast shadows.
 - **Whole town:** about 700,000 triangles and 6,000 pieces. The source video's town is about 2,000,000 triangles.
 - **Any view in a round:** aim for under 150,000 triangles.
@@ -96,7 +99,7 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 **Frame rate itself is not measured.** This Studio session draws 16 frames a second whether the whole tea house or an empty sky is on screen, so it says nothing. It needs a run on a phone and on an ordinary PC.
 
 ### Not done
-- The Tea House and the Courtyard House are built. The other three landmarks and all the small houses are boxes.
+- The Tea House, the Courtyard House and the Dye Works are built. The Cistern Hall, the Market Square and all the small houses are boxes.
 - Sight is still only checked at eye level on the ground, not from roofs.
 - Barriers that close an arena, rounds and team spawns are not built.
 

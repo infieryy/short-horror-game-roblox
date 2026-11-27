@@ -1,0 +1,12 @@
+{
+ "piece": "rack_red",
+ "triangles": 576,
+ "triangles_low": 384,
+ "strokes": 4916,
+ "px_per_stud": 47.0,
+ "break_mode": "shatter",
+ "chunks": 4,
+ "chunk_triangles": 640,
+ "problems": [],
+ "seconds": 6.3
+}

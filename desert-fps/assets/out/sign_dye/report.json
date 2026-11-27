@@ -1,0 +1,12 @@
+{
+ "piece": "sign_dye",
+ "triangles": 56,
+ "triangles_low": 24,
+ "strokes": 21202,
+ "px_per_stud": 85.0,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 56,
+ "problems": [],
+ "seconds": 9.7
+}

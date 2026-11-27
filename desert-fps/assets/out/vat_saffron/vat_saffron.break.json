@@ -1,0 +1,218 @@
+{
+ "piece": "vat_saffron",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 350,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/vat_saffron_s00.fbx",
+   "center": [
+    -0.168,
+    0.85,
+    2.271
+   ],
+   "size": [
+    3.34,
+    1.7,
+    2.357
+   ],
+   "material": "stone",
+   "health": 35,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 94,
+   "neighbors": [
+    "s01",
+    "s03",
+    "s04",
+    "s07"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/vat_saffron_s01.fbx",
+   "center": [
+    -0.186,
+    0.645,
+    -0.271
+   ],
+   "size": [
+    3.212,
+    1.19,
+    2.765
+   ],
+   "material": "saffron",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 40,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/vat_saffron_s02.fbx",
+   "center": [
+    0.903,
+    0.85,
+    -2.258
+   ],
+   "size": [
+    3.612,
+    1.7,
+    2.385
+   ],
+   "material": "stone",
+   "health": 65,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 114,
+   "neighbors": [
+    "s01",
+    "s05",
+    "s06"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/vat_saffron_s03.fbx",
+   "center": [
+    0.546,
+    0.85,
+    1.848
+   ],
+   "size": [
+    4.38,
+    1.7,
+    2.789
+   ],
+   "material": "saffron",
+   "health": 40,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 108,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s06",
+    "s07"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/vat_saffron_s04.fbx",
+   "center": [
+    -2.426,
+    0.85,
+    1.284
+   ],
+   "size": [
+    2.049,
+    1.7,
+    2.696
+   ],
+   "material": "stone",
+   "health": 40,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 110,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s05",
+    "s07"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/vat_saffron_s05.fbx",
+   "center": [
+    -1.971,
+    0.85,
+    -1.264
+   ],
+   "size": [
+    2.958,
+    1.7,
+    3.838
+   ],
+   "material": "saffron",
+   "health": 75,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 120,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s04"
+   ]
+  },
+  {
+   "id": "s06",
+   "mesh": "chunks/vat_saffron_s06.fbx",
+   "center": [
+    2.124,
+    0.85,
+    0.198
+   ],
+   "size": [
+    2.652,
+    1.7,
+    4.195
+   ],
+   "material": "saffron",
+   "health": 70,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 92,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03"
+   ]
+  },
+  {
+   "id": "s07",
+   "mesh": "chunks/vat_saffron_s07.fbx",
+   "center": [
+    -1.225,
+    0.85,
+    2.169
+   ],
+   "size": [
+    1.924,
+    1.7,
+    2.345
+   ],
+   "material": "stone",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 62,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s03",
+    "s04"
+   ]
+  }
+ ]
+}
