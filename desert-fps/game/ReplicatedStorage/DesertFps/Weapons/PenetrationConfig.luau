@@ -7,7 +7,7 @@
 -- less than Least left does not come out.
 --
 -- With these numbers the rifle goes through:
---   cloth, a market stall, a door (0.3 studs of wood)      and keeps nine tenths or more
+--   cloth, leaves, a market stall, a door (0.3 studs of wood)   and keeps nine tenths or more
 --   a barrel, a counter, a crate (3 studs of wood)          and keeps a quarter to two thirds
 --   one house wall (1 stud of plaster)                      and keeps 0.45: a shot to the head does 72
 --   a door frame (1.3 studs of plaster)                     and keeps 0.3
@@ -19,7 +19,8 @@ return {
 	Most = 8,
 
 	Materials = {
-		cloth = { Loss = 0.06 }, -- and leaves: a tree's crown is no cover
+		cloth = { Loss = 0.06 },
+		leaves = { Loss = 0.06 }, -- a tree's crown is no cover. Its own material because it marks differently
 		wood = { Loss = 0.25 }, -- and fired clay: pots, vases
 		plaster = { Loss = 0.55 }, -- the houses' walls
 	},
@@ -34,13 +35,14 @@ return {
 		rug = "cloth",
 		rack = "cloth",
 		bolts = "cloth",
-		bougainvillea = "cloth",
 		baskets = "cloth",
 		divan = "cloth",
-		tree = "cloth",
-		cypress = "cloth",
-		palm = "cloth",
-		potted = "cloth",
+
+		bougainvillea = "leaves",
+		tree = "leaves",
+		cypress = "leaves",
+		palm = "leaves",
+		potted = "leaves",
 
 		door = "wood",
 		door2 = "wood",

@@ -32,7 +32,11 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 
 `tests/test_utility.luau` runs on the client during a playtest, with `DevConfig.TestHooks` and `DevConfig.Dummies` on, from the spawn. It throws recon darts and returns 15 checks that should all start "ok": what is refused, the charge and the weapon put away, the three pulses and who they outline, a dart shot down, none left, a charge coming back. It takes up to 50 seconds: start it in a `task.spawn` too.
 
-`tests/test_wallbang.luau` runs on the server during a playtest. It stands walls, doors, a crate and other pieces in the air above the town, traces shots through them and returns 12 checks that should all start "ok": what the rifle, the pistol and the knife go through and how much force is left.
+`tests/test_wallbang.luau` runs on the server during a playtest. It stands walls, doors, a crate and other pieces in the air above the town, traces shots through them and returns 15 checks that should all start "ok": what the rifle, the pistol and the knife go through, how much force is left, and the marks a shot leaves.
+
+`tests/test_marks.luau` runs on the client during a playtest. It stands slabs of its own in the air, has `Client/BulletMarks` draw what shots leave on them and returns 11 checks that should all start "ok": holes, ways out and chips where they belong, dust, marks that move with their part, stay on a wall that cracks and go with a part that goes.
+
+`pack_tests.py` packs every `tests/test_*.luau` into `out/Tests.rbxmx` as modules, so a test can be run without pasting it: import the file into ReplicatedStorage of the running server of a playtest and `require` the test on the side it runs on.
 
 `tests/measure_views.luau` runs on the client during a playtest. It stands the player at seven viewpoints and returns draw calls, triangles on screen, drawing time and frames a second for each. Set the graphics level by hand first.
 

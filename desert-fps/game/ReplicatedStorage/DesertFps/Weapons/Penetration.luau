@@ -9,8 +9,21 @@ local CombatConfig = require(script.Parent.Parent.Combat.CombatConfig)
 local Penetration = {}
 
 -- Something the shot went through: the part, how far along the shot it was entered and left, where it was
--- entered, and the share of its force the shot had before and after.
-export type Pierced = { part: BasePart, enter: number, leave: number, at: Vector3, before: number, left: number }
+-- entered and left and which way those faces look, and the share of its force the shot had before and after.
+export type Pierced = {
+	part: BasePart,
+	enter: number,
+	leave: number,
+	at: Vector3,
+	normal: Vector3,
+	out: Vector3,
+	outNormal: Vector3,
+	before: number,
+	left: number,
+}
+-- A mark a shot leaves on what it met: "in" where it went into something it came out of, "out" where it came
+-- out, "stop" where it was stopped.
+export type Mark = { part: BasePart, at: Vector3, normal: Vector3, kind: string }
 export type Path = {
 	finish: Vector3, -- where the shot ends
 	reach: number, -- how far that is along it
@@ -20,9 +33,10 @@ export type Path = {
 	body: RaycastResult?, -- the part of a body it met, if bodies are not left out of the cast
 }
 
--- The kit piece a part belongs to: a piece that breaks is a model that says so; dressing that does not is a
+-- What a part is made of: a name in PenetrationConfig.Materials, or nil if it stops every shot. It goes by
+-- the kit piece the part belongs to: a piece that breaks is a model that says so; dressing that does not is a
 -- part, or is in a model, named after its piece.
-local function materialOf(part: Instance): { Loss: number }?
+function Penetration.material(part: Instance): string?
 	local names = { part.Name, if part.Parent then part.Parent.Name else "" }
 	local model = part:FindFirstAncestorWhichIsA("Model")
 	while model do
@@ -36,7 +50,7 @@ local function materialOf(part: Instance): { Loss: number }?
 	for _, name in names do
 		local material = (Config.Pieces :: any)[name] or (Config.Pieces :: any)[string.match(name, "^[^_]+") or name]
 		if material then
-			return (Config.Materials :: any)[material]
+			return material
 		end
 	end
 	return nil
@@ -54,15 +68,15 @@ local function bodyOf(part: Instance): Model?
 	return nil
 end
 
--- How thick `hit.Instance` is along the shot, if it is no thicker than `most`: found by looking back at it from
--- that far on. A look that starts inside the part sees nothing of it, and then it is too thick.
-local function thickness(hit: RaycastResult, direction: Vector3, most: number): number?
+-- Where the shot comes out of `hit.Instance`, if that is no thicker along the shot than `most`: found by
+-- looking back at it from that far on. A look that starts inside the part sees nothing of it, and then it is
+-- too thick.
+local function farSide(hit: RaycastResult, direction: Vector3, most: number): RaycastResult?
 	local only = RaycastParams.new()
 	only.FilterType = Enum.RaycastFilterType.Include
 	only.FilterDescendantsInstances = { hit.Instance }
 	local reach = most + 0.02
-	local back = workspace:Raycast(hit.Position + direction * reach, -direction * reach, only)
-	return if back then (back.Position - hit.Position).Magnitude else nil
+	return workspace:Raycast(hit.Position + direction * reach, -direction * reach, only)
 end
 
 -- The path of a shot from `origin` along `direction` (a unit vector), `range` studs at most, from a weapon
@@ -94,18 +108,23 @@ function Penetration.trace(origin: Vector3, direction: Vector3, range: number, p
 			from, travelled = hit.Position, enter
 			continue
 		end
-		local material = if pierce > 0 and #pierced < Config.Most then materialOf(hit.Instance) else nil
+		local made = if pierce > 0 and #pierced < Config.Most then Penetration.material(hit.Instance) else nil
+		local material: { Loss: number }? = if made then (Config.Materials :: any)[made] else nil
 		local most = if material then (force - Config.Least) * pierce / material.Loss else 0
-		local thick = if material and most > 0 then thickness(hit, direction, most) else nil
-		if not (material and thick) then
+		local back = if material and most > 0 then farSide(hit, direction, most) else nil
+		if not (material and back) then
 			return { finish = hit.Position, reach = enter, pierced = pierced, force = force, stopped = hit }
 		end
+		local thick = (back.Position - hit.Position).Magnitude
 		local left = force - material.Loss * thick / pierce
 		table.insert(pierced, {
 			part = hit.Instance :: BasePart,
 			enter = enter,
 			leave = enter + thick,
 			at = hit.Position,
+			normal = hit.Normal,
+			out = back.Position,
+			outNormal = back.Normal,
 			before = force,
 			left = left,
 		})
@@ -127,6 +146,26 @@ function Penetration.left(path: Path, distance: number): number
 		end
 	end
 	return force
+end
+
+-- The marks the shot leaves, as far as `ends` along its path (where it met a body, if the server says it
+-- did): a way in and a way out for everything it went through, and where it was stopped.
+function Penetration.marks(path: Path, ends: number?): { Mark }
+	local upTo = ends or path.reach
+	local marks: { Mark } = {}
+	for _, each in path.pierced do
+		if each.enter < upTo then
+			table.insert(marks, { part = each.part, at = each.at, normal = each.normal, kind = "in" })
+			if each.leave < upTo then
+				table.insert(marks, { part = each.part, at = each.out, normal = each.outNormal, kind = "out" })
+			end
+		end
+	end
+	local stopped = path.stopped
+	if stopped and path.reach <= upTo and stopped.Instance:IsA("BasePart") then
+		table.insert(marks, { part = stopped.Instance, at = stopped.Position, normal = stopped.Normal, kind = "stop" })
+	end
+	return marks
 end
 
 return Penetration

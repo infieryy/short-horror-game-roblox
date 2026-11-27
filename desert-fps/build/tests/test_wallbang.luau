@@ -7,7 +7,9 @@
 --   a corner post and the town wall stop it
 --   the pistol goes through a door and is stopped by a wall; the knife goes through nothing
 --   the force left at a distance along the path is the force after the last thing before it
--- That a body behind a wall is hurt by that much is checked with a second player, not here.
+--   the marks a shot leaves: in and out of what it went through, a stop where it ended, none past a body
+-- That a body behind a wall is hurt by that much is checked with a second player, not here. How the marks
+-- are drawn is test_marks.luau, on the client.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
@@ -111,6 +113,35 @@ check(pistolWall.stopped ~= nil and #pistolWall.pierced == 0, "pistol, a wall: s
 
 local knife = through(11, { "door2_wood" }, 0)
 check(knife.stopped ~= nil and #knife.pierced == 0, "knife, a door: stopped")
+
+-- The marks: what every client draws on the town (Client/BulletMarks).
+local function kindsOf(marks: { Penetration.Mark }): string
+	local kinds = {}
+	for _, mark in marks do
+		table.insert(kinds, mark.kind)
+	end
+	return table.concat(kinds, " ")
+end
+local onWall = Penetration.marks(wall)
+check(
+	kindsOf(onWall) == "in out"
+		and onWall[1].part == onWall[2].part
+		and near((onWall[2].at - onWall[1].at).Magnitude, wall.pierced[1].leave - wall.pierced[1].enter, 0.01)
+		and onWall[1].normal:Dot(onWall[2].normal) < -0.9,
+	("marks, one wall: %s, on opposite faces of it"):format(kindsOf(onWall))
+)
+local onTwo = Penetration.marks(two)
+check(
+	kindsOf(onTwo) == "in out stop" and onTwo[3].part ~= onTwo[1].part,
+	("marks, two walls: %s, the stop on the second"):format(kindsOf(onTwo))
+)
+-- A body the server says the shot met: nothing past it is marked, and nothing is if it stood before the wall.
+local between = Penetration.marks(two, two.pierced[1].leave + 1)
+local before = Penetration.marks(two, two.pierced[1].enter - 1)
+check(
+	kindsOf(between) == "in out" and #before == 0,
+	("marks, a body between two walls: %s; a body before them: %d"):format(kindsOf(between), #before)
+)
 
 stage:Destroy()
 return table.concat(lines, "\n")

@@ -320,11 +320,16 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 	if path.stopped and path.reach <= ends then
 		strike(path.stopped.Instance, path.force, path.stopped.Position)
 	end
-	-- Everyone else sees the shot, unless the weapon hides it.
-	if not weapon.Silent then
-		for _, other in Players:GetPlayers() do
-			if other ~= player then
+	-- Everyone else sees the shot, unless the weapon hides it, and what it left on the town, which nothing
+	-- hides. (The shooter has drawn both already. What the shot broke is gone, and is not marked.)
+	local marks = if gun then Penetration.marks(path, ends) else {}
+	for _, other in Players:GetPlayers() do
+		if other ~= player then
+			if not weapon.Silent then
 				remotes.Shot:FireClient(other, player, slot.weapon, origin, finish)
+			end
+			if #marks > 0 then
+				remotes.Marks:FireClient(other, marks)
 			end
 		end
 	end
@@ -499,8 +504,8 @@ function WeaponService.start()
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Remotes"
-	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Killed.
-	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Killed" } do
+	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Killed.
+	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Killed" } do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
 		remote.Parent = folder

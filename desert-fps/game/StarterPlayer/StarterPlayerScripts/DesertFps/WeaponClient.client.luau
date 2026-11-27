@@ -21,6 +21,7 @@ local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"
 local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
+local BulletMarks = require(Shared.Client:WaitForChild("BulletMarks"))
 local UtilityClient = require(Shared.Client:WaitForChild("UtilityClient"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
@@ -73,6 +74,8 @@ local weapon: any = nil -- the numbers of the weapon in hand, as it is fitted
 -- The light of a laser on the weapon in hand.
 local Laser = AttachmentConfig.Laser
 local laser = LaserSight.new(effects)
+-- What shots leave on the town: the player's own and everyone else's.
+local marks = BulletMarks.new(effects)
 
 local triggerHeld, triggerFresh = false, false -- fresh: pulled since the last shot
 local aimHeld, walkHeld = false, false
@@ -242,6 +245,7 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		animator:play("Fire")
 	end
 	tracer(viewmodel:socket("muzzle") or origin, path.finish, weapon.View)
+	marks:leave(Penetration.marks(path))
 	refresh()
 end
 
@@ -479,6 +483,10 @@ remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: strin
 	local from = if handle and handle:IsA("BasePart") then handle.Position else origin
 	tracer(from, finish, (WeaponConfig.Weapons :: any)[weaponName].View)
 end)
+-- What someone else's shot left on the town. A weapon that hides its shot does not hide this.
+remote("Marks").OnClientEvent:Connect(function(left: { Penetration.Mark })
+	marks:leave(left)
+end)
 
 -- The player's own body is unseen in first person, but a tool in its hand is not: the weapon would show twice.
 local function hideHeld(character: Model)
@@ -565,6 +573,7 @@ local function testHook()
 				attachments = slots[current].attachments,
 				numbers = weapon,
 				utility = UtilityClient.state(),
+				marks = marks:state(),
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),

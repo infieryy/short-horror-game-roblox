@@ -774,10 +774,10 @@ The owner: "Add wallbangs and partial wallbangs through certain objects like val
 - With a wall stood between the player and a dummy: the rifle did 73 to the head and 18 to the body through it, the pistol nothing, and the kill read "RIFLE, THROUGH WALL".
 - `test_weapons.luau` still passes its six checks, the one shot to the head among them.
 
-**Decisions made here.** All the numbers, and which pieces are made of what, are first guesses at "like Valorant": cover you can see through or that is wood is not safe, one wall takes more than half, two walls or anything of stone are safe. Leaves count as cloth, pots and sacks as wood.
+**Decisions made here.** All the numbers, and which pieces are made of what, are first guesses at "like Valorant": cover you can see through or that is wood is not safe, one wall takes more than half, two walls or anything of stone are safe. Leaves cost what cloth costs, pots and sacks count as wood.
 
 **Not done, not verified.**
-- Nothing on the screen shows what a shot went through: no bullet holes, no different sound. A player learns it from the tracer and the damage.
+- Nothing on the screen shows what a shot went through: no bullet holes, no different sound. A player learns it from the tracer and the damage. (Marks were added later the same day: see "Bullet marks".)
 - A house wall is not the same thickness all the way up (a moulding four studs up is 1.17), so the damage through one wall varies between 0.36 and 0.45 of the whole.
 - The laser's dot and the recon dart's sight stop at the first surface, as before.
 
@@ -809,6 +809,52 @@ A server and two players, in Studio on this PC (`multiplayer_playtest`), each dr
 Notes for the next session:
 - In a multiplayer playtest each peer has its own id (`get_connected_instances`); pass it as `instance_id`. Player1 was client-1.
 - Stand the second player away from stalls before reading damage numbers: a stray slat changes them.
+
+### Bullet marks (2026-11-27)
+
+The owner, asked whether to add marks that show whether a shot went through: "Yes, add marks".
+
+**The outcome.** Every shot from a gun marks what it meets, and the mark says what happened to the shot:
+
+| The shot | The mark |
+|---|---|
+| Went into something and came out of it | A dark hole with a pale, chipped rim |
+| Came out the far side | A wider hole, torn open outwards |
+| Was stopped | A pale chip with cracks from under it, and no hole |
+
+So dark in the middle is through, pale is stopped: the rifle leaves holes in a house wall, the pistol leaves chips on the same wall. Each mark throws up a ball of dust. Leaves are not marked, only shaken. The knife leaves nothing. Pictures: `assets/studio/fps-marks-front.jpg` (rifle holes and pistol chips, from the eye), `fps-marks-back.jpg` (the way out), `fps-marks-cracked-door.jpg`.
+
+**How it works.**
+- `Penetration.marks(path, ends)` (shared) turns a shot's path into its marks: a way in and a way out for everything it went through, a stop where it ended, nothing past a body. `Penetration.trace` now also keeps where and through which face the shot left each thing.
+- The **shooter's client** draws its own marks at once, from the path it traced for the shot. The **server** works the marks out from its own path and sends them to everyone else on the `Marks` remote. A suppressed shot still sends its marks: it hides the tracer, not the hole. A mark names the part it is on; a part the shot broke arrives as nothing and is not marked.
+- `Client/BulletMarks` draws them and `Client/MarkConfig` is how they look: sizes, how long they stay (60 s), how many at once (90, the oldest goes first), and four colours for each material (`plaster`, `wood`, `cloth`, `hard` for everything that stops every shot; `leaves` has only dust). `leaves` is a new material in `PenetrationConfig` with cloth's numbers, so that trees can mark differently; nothing about what goes through changed.
+- A mark is a thin unseen part with a SurfaceGui on it, drawn from round-ended strokes like the ones the town is painted with. No image was uploaded. It is lit like the wall it is on (`LightInfluence = 1`).
+- A mark is welded to what it is on, so it moves and falls with it. When that part goes, the mark waits 0.2 s and looks for a surface of the same piece under it: a wall that cracks is swapped for its shards, and its marks move onto them. If there is none (the piece burst, or its rubble was cleared) the mark goes too.
+
+**Tested.**
+- `build/tests/test_marks.luau` (client): 11 checks, all ok. On slabs of its own in the air: a way in and a way out on opposite faces, each looking out; the rifle through a wall and the pistol stopped by it; stone chipped; leaves shaken and not marked; dust for every mark; a mark moves with its part; a cracked wall keeps its marks on its shards; marks go with their part; never more than 90.
+- `test_wallbang.luau` (server): now 15 checks, all ok. The three new ones are `Penetration.marks`: one wall, two walls, a body between or before them.
+- Fired in a playtest, from the eye: the rifle left 5 holes in a wall and 5 ways out, the pistol 3 chips. Four shots at a door left four holes; the fifth cracked it and all ten marks moved onto its shards; nine more brought it down and the marks fell with the planks and went with the rubble. No mark was left fixed to nothing.
+- With a second player (`multiplayer_playtest`, each driven by script), A shooting at a wall and B watching it from the side: B's screen drew the same marks as A's, shot for shot, 37 of 37 over 8 shots (15 ways in, 14 ways out, 8 stops). Two of the shots were suppressed: B saw no tracer for them (6 tracers for 8 shots) and still got their marks. Two were the pistol's: chips, no holes.
+- The older tests, run again after this change: `test_weapons` 6 of 6, `test_utility` 15 of 15, `test_attachments` 38 of 38. (`test_attachments` must start from a fresh spawn. Run after `test_weapons` it reports three wrong magazine counts, because that test has used rounds.)
+
+The place is saved with this in (version 88). Backup: `backups/fps_marks_scripts_kit_animations.rbxm`.
+
+**Decisions made here.** The look (dark hole, torn way out, pale chip), the sizes (0.45, 0.7 and 0.5 studs), 60 seconds and 90 marks are mine. Marks are drawn from shapes and not from an uploaded picture, so nothing was uploaded.
+
+**Not done, not verified.**
+- No sound, as everywhere in the game.
+- The mark does not say how much force the shot had left, only that it came out.
+- For other players, the one shot that cracks a wall leaves no mark (the part it hit is gone when the mark arrives). The shooter keeps theirs.
+- Marks were looked at on a PC at Studio's graphics level. Ninety SurfaceGuis have not been measured on a phone.
+- The pictures are from a small Studio window (1096 by 385); on a full screen a mark is about two and a half times as many pixels across.
+- There is no picture from the second player's screen: capturing that window failed twice. What it drew is known from its script, not from looking.
+- A shot that goes on through a wall also marks what is behind it, as far as it gets. A way in has no way out when the thing it went into ends inside the next thing (a divan against a wall).
+
+Notes for the next session:
+- `python build/pack_tests.py` packs the tests into `build/out/Tests.rbxmx`. Import it into ReplicatedStorage of the running server (`import_rbxm` with `target = "server"`) and `require` a test on the side it runs on, in a `task.spawn`, instead of pasting it.
+- To aim the player from a script: set the camera's type to Scriptable, set its CFrame, wait a frame, set it back to Custom. The first-person camera keeps that direction.
+- Studio's MCP calls time out for a while right after a playtest stops. Ask again after a few seconds before assuming a call did not run.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
