@@ -1,0 +1,1270 @@
+{
+ "name": "house_04_06",
+ "title": "Barracks",
+ "size": [
+  32.0,
+  32.0
+ ],
+ "placements": [
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -4.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -4.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    20.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -4.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -4.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -12.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -12.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    20.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -12.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -12.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    20.0,
+    -20.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -20.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -20.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -20.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -20.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -20.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    20.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -28.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -28.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -28.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -28.0,
+    23.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    12.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    20.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    28.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    32.0,
+    -4.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    32.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    32.0,
+    -20.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    32.0,
+    -28.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    4.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    12.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    20.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    28.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    0.0,
+    -4.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    0.0,
+    -12.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    16.0,
+    -20.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    16.0,
+    -28.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "door2_wood",
+   "pos": [
+    20.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "door2_wood",
+   "pos": [
+    32.0,
+    -20.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    8.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    24.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    -8.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    -8.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    8.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    -24.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    24.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    4.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    12.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    20.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    28.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    32.0,
+    -4.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    32.0,
+    -12.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    32.0,
+    -20.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    32.0,
+    -28.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    4.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    12.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    20.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_upper_window",
+   "pos": [
+    28.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    0.0,
+    -4.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    0.0,
+    -12.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_upper",
+   "pos": [
+    16.0,
+    -20.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_upper_shutter",
+   "pos": [
+    16.0,
+    -28.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "lantern",
+   "pos": [
+    28.0,
+    -28.0,
+    22.4
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2_upper",
+   "pos": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2_upper",
+   "pos": [
+    32.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2_upper",
+   "pos": [
+    0.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2_upper",
+   "pos": [
+    16.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2_upper",
+   "pos": [
+    16.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2_upper",
+   "pos": [
+    32.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    24.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    12.0,
+    -0.0,
+    24.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    20.0,
+    -0.0,
+    24.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    28.0,
+    -0.0,
+    24.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -4.0,
+    24.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -12.0,
+    24.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -20.0,
+    24.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -28.0,
+    24.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -16.0,
+    24.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    12.0,
+    -16.0,
+    24.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    20.0,
+    -32.0,
+    24.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    28.0,
+    -32.0,
+    24.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -4.0,
+    24.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -12.0,
+    24.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    16.0,
+    -20.0,
+    24.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    16.0,
+    -28.0,
+    24.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    0.0,
+    24.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    32.0,
+    0.0,
+    24.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    -16.0,
+    24.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    16.0,
+    -16.0,
+    24.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    16.0,
+    -32.0,
+    24.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    32.0,
+    -32.0,
+    24.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    16.6,
+    -32.5,
+    8.6
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    23.4,
+    -32.5,
+    8.6
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    32.5,
+    -16.6,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "banner",
+   "pos": [
+    20.0,
+    0.5,
+    9.7
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "banner",
+   "pos": [
+    12.0,
+    -16.5,
+    9.7
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "banner",
+   "pos": [
+    -0.5,
+    -4.0,
+    21.7
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "divan",
+   "pos": [
+    14.05,
+    -20.0,
+    0.01
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "rug",
+   "pos": [
+    4.0,
+    -4.0,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    6.4,
+    -6.4,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "divan",
+   "pos": [
+    12.0,
+    -2.1,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "rug",
+   "pos": [
+    28.0,
+    -4.0,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    25.6,
+    -6.4,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    2.1,
+    -10.1,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_round",
+   "pos": [
+    2.1,
+    -12.6,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    1.7,
+    -14.6,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "rug",
+   "pos": [
+    28.0,
+    -12.0,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    25.6,
+    -9.6,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.7,
+    -17.7,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.7,
+    -19.6,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.7,
+    -21.8,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "rug",
+   "pos": [
+    20.0,
+    -28.0,
+    24.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    22.4,
+    -25.6,
+    24.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "divan",
+   "pos": [
+    28.0,
+    -29.9,
+    24.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "stack_crates",
+   "pos": [
+    4.0,
+    -4.0,
+    0.01
+   ],
+   "turn": 10
+  },
+  {
+   "piece": "divan",
+   "pos": [
+    4.0,
+    -1.9,
+    0.01
+   ],
+   "turn": 0
+  }
+ ]
+}

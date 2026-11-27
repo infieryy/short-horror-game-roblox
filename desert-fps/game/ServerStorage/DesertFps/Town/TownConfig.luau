@@ -1,14 +1,15 @@
 --!strict
--- The compact town (plan v2, plan/town.py): where it stands and which of its buildings are built for real.
--- Everything else is still gray boxes.
+-- The compact town (plan v2, plan/town.py): where it stands and what it stands on.
+-- Which buildings it has and where is TownData, written by assets/buildings/town.py.
 return {
 	-- The middle of the town; Y is the top of the street.
 	Middle = CFrame.new(-700, 1, 0),
-	-- Studs a real building's paving stands above the gray floor, so the two never show in the same plane.
+	-- Studs the buildings' own paving stands above the slab under the town, so the two never show in one plane.
 	Lift = 0.02,
+	-- Where the buildings go, under Workspace.
+	Folder = "Buildings",
 
-	-- The streets and yards are paved with kit pieces (Workspace.TownGround), so the real buildings stand on
-	-- the ground they were painted for. Cells under a solid gray box are left out.
+	-- The streets and yards are paved with kit pieces (Workspace.TownGround).
 	Paving = {
 		Folder = "TownGround",
 		Drop = -0.49,
@@ -19,15 +20,13 @@ return {
 		-- Open water in the plan (the cistern's overflow pool).
 		Pool = "paving_pool",
 		-- Sand blows against the foot of walls: against one wall face in every OneIn, picked by the cell.
+		-- A wall's face stands WallOut studs out from the line between two cells.
 		Sand = { Piece = "sand_drift", OneIn = 3, WallOut = 0.66 },
 	},
 
-	-- Buildings with a recipe (assets/buildings/<recipe>.py). Row and Column are the plan cell of the building's
-	-- north-west corner, Rows and Columns its size; all four are the building's rectangle in plan/town.py.
-	Buildings = {
-		{ Recipe = "teahouse", Row = 7, Column = 17, Rows = 4, Columns = 4 },
-		{ Recipe = "courtyard", Row = 15, Column = 3, Rows = 9, Columns = 7 },
-		{ Recipe = "dyeworks", Row = 15, Column = 28, Rows = 9, Columns = 8 },
-		{ Recipe = "cistern", Row = 28, Column = 17, Rows = 7, Columns = 8 },
-	},
+	-- Unseen walls behind the town wall. The town wall can be shot down like everything else; these cannot.
+	Edge = { Folder = "TownEdge", Thickness = 2, Height = 80 },
+
+	-- Where a player spawns while there are no rounds (DevConfig.SpawnPath points at it): a plan cell.
+	DevSpawn = { Row = 13, Column = 19 },
 }

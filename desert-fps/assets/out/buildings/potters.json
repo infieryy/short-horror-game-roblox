@@ -1,0 +1,1279 @@
+{
+ "name": "potters",
+ "title": "PottersWorkshop",
+ "size": [
+  32.0,
+  32.0
+ ],
+ "placements": [
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    20.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -20.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -20.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    28.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    12.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    20.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    12.0,
+    -20.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    20.0,
+    -20.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    12.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    20.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    4.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    0.0,
+    -4.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    12.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    12.0,
+    -8.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    20.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    20.0,
+    -8.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    28.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_window",
+   "pos": [
+    32.0,
+    -4.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_window",
+   "pos": [
+    8.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_window",
+   "pos": [
+    0.0,
+    -12.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    32.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    24.0,
+    -12.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    8.0,
+    -20.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    0.0,
+    -20.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    32.0,
+    -20.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    24.0,
+    -20.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    4.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    8.0,
+    -28.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    0.0,
+    -28.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_window",
+   "pos": [
+    28.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_window",
+   "pos": [
+    32.0,
+    -28.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_window",
+   "pos": [
+    24.0,
+    -28.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    8.0,
+    -8.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    24.0,
+    -8.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    8.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    24.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    32.0,
+    -32.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    20.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -20.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -20.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -28.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    28.0,
+    -28.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -4.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    12.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    12.0,
+    -8.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    20.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    20.0,
+    -8.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    28.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -4.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    8.0,
+    -12.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -12.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -12.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    24.0,
+    -12.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    8.0,
+    -20.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -20.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -20.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    24.0,
+    -20.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    8.0,
+    -28.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -28.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    28.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    32.0,
+    -28.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    24.0,
+    -28.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    16.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    32.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    8.0,
+    -8.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    24.0,
+    -8.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    32.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    8.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    24.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    32.0,
+    -32.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "counter",
+   "pos": [
+    20.0,
+    -1.45,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "shelf",
+   "pos": [
+    20.0,
+    -0.5,
+    5.4
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    30.4,
+    -1.6,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    28.4,
+    -1.2,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    14.0,
+    -1.6,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    12.0,
+    -1.6,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "barrel",
+   "pos": [
+    6.4,
+    -6.3,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_rack",
+   "pos": [
+    1.65,
+    -20.0,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "stack_crates",
+   "pos": [
+    5.6,
+    -20.0,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "barrel",
+   "pos": [
+    1.7,
+    -13.9,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_rack",
+   "pos": [
+    30.35,
+    -20.0,
+    0.01
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "shelf",
+   "pos": [
+    24.5,
+    -20.0,
+    5.2
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "baskets",
+   "pos": [
+    28.6,
+    -30.9,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    30.8,
+    -30.7,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "lantern",
+   "pos": [
+    4.0,
+    -4.0,
+    10.4
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "lantern",
+   "pos": [
+    20.0,
+    -4.0,
+    10.4
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "lantern",
+   "pos": [
+    4.0,
+    -28.0,
+    10.4
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "lantern",
+   "pos": [
+    28.0,
+    -12.0,
+    10.4
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "lantern",
+   "pos": [
+    28.0,
+    -28.0,
+    10.4
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "kiln",
+   "pos": [
+    12.0,
+    -12.0,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_rack",
+   "pos": [
+    20.0,
+    -25.1,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_rack",
+   "pos": [
+    20.0,
+    -27.0,
+    0.01
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "stack_crates",
+   "pos": [
+    20.0,
+    -30.0,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_round",
+   "pos": [
+    22.3,
+    -10.0,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    19.8,
+    -10.0,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.5,
+    -9.6,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    10.0,
+    -18.5,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    10.0,
+    -21.4,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "baskets",
+   "pos": [
+    22.5,
+    -20.8,
+    0.01
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    22.4,
+    -17.6,
+    0.01
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "sign_pot",
+   "pos": [
+    7.0,
+    -32.5,
+    9.6
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    0.6,
+    -32.5,
+    8.6
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    7.4,
+    0.5,
+    8.6
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    32.5,
+    -8.6,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    -0.5,
+    -31.4,
+    8.6
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    8.5,
+    -8.7,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    23.5,
+    -31.3,
+    8.6
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "banner",
+   "pos": [
+    32.5,
+    -20.0,
+    9.7
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_rack",
+   "pos": [
+    12.0,
+    -1.8,
+    12.06
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    29.9,
+    -5.9,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "pot_round",
+   "pos": [
+    29.9,
+    -3.4,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    30.3,
+    -1.4,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    2.1,
+    -18.5,
+    12.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    2.1,
+    -21.5,
+    12.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_rack",
+   "pos": [
+    30.2,
+    -20.0,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    25.7,
+    -30.3,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    27.6,
+    -30.3,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    29.8,
+    -30.3,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "baskets",
+   "pos": [
+    1.5,
+    -28.0,
+    12.06
+   ],
+   "turn": 90
+  }
+ ]
+}

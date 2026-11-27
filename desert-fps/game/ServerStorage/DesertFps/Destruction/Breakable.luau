@@ -6,6 +6,7 @@
 -- barrels ("shatter") burst. The rubble lies for a while, fades and is removed.
 -- Shard layout and health come from assets/out/<piece>/<piece>.break.json. Its per-shard support data
 -- (grounded, neighbors, touches) is not used: a piece never stands with parts missing.
+-- What a piece was holding up comes down after it: see Structure, which listens to Breakable.Crumbled.
 
 local Debris = game:GetService("Debris")
 local PhysicsService = game:GetService("PhysicsService")
@@ -18,6 +19,8 @@ local BreakData = require(script.Parent.Parent.Assets.BreakData)
 local Breakable = {}
 
 Breakable.Tag = "Breakable"
+-- Called with every piece as it comes apart, whatever took it down.
+Breakable.Crumbled = {} :: { (model: Model) -> () }
 
 type ShardData = { id: string, center: { number }, size: { number }, health: number }
 type PieceData = { piece: string, mode: string, health: number?, chunks: { ShardData } }
@@ -84,6 +87,14 @@ local function pieceBounds(data: PieceData): (Vector3, Vector3)
 	return lo, hi
 end
 
+-- A house's own shade of plaster: the painted texture multiplied by `tint`.
+local function paint(part: BasePart, tint: Color3?)
+	local appearance = part:FindFirstChildOfClass("SurfaceAppearance")
+	if tint and appearance then
+		appearance.Color = tint
+	end
+end
+
 -- The shards of a piece, built in place of the whole part the first time they are needed.
 local function shardsOf(model: Model, data: PieceData): Instance
 	local shards = model:FindFirstChild("Shards")
@@ -92,6 +103,7 @@ local function shardsOf(model: Model, data: PieceData): Instance
 	end
 	local templates = meshTemplates(data.piece)
 	local shardTemplates = templates and templates:FindFirstChild("Shards")
+	local tint = model:GetAttribute("Tint") :: Color3?
 
 	local built = Instance.new("Folder")
 	built.Name = "Shards"
@@ -103,6 +115,7 @@ local function shardsOf(model: Model, data: PieceData): Instance
 		part.Name = shard.id
 		part.Anchored = true
 		part.CFrame = model.WorldPivot * CFrame.new(vector(shard.center))
+		paint(part, tint)
 		part.Parent = built
 	end
 	local whole = model:FindFirstChild("Whole")
@@ -161,9 +174,11 @@ local function crumble(model: Model, data: PieceData, point: Vector3, push: Vect
 	local reach = (hi - lo).Magnitude
 
 	model:SetAttribute("Health", 0)
-	local ramp = model:FindFirstChild("Ramp")
-	if ramp then
-		ramp:Destroy()
+	for _, name in { "Ramp", "Climb" } do
+		local unseen = model:FindFirstChild(name)
+		if unseen then
+			unseen:Destroy()
+		end
 	end
 	for _, part in shardsOf(model, data):GetChildren() do
 		if part:IsA("BasePart") then
@@ -180,6 +195,9 @@ local function crumble(model: Model, data: PieceData, point: Vector3, push: Vect
 		end
 	end
 	Debris:AddItem(model, how.Stagger + Config.DebrisLifetime)
+	for _, heard in Breakable.Crumbled do
+		task.spawn(heard, model)
+	end
 end
 
 -- The breakable piece a part belongs to, if it has not crumbled yet.
@@ -194,8 +212,8 @@ function Breakable.modelOf(part: Instance): Model?
 	return model
 end
 
--- Stands a whole, undamaged piece with its bottom centre at `origin`.
-function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Model
+-- Stands a whole, undamaged piece with its bottom centre at `origin`. `tint` gives it a house's own shade.
+function Breakable.place(piece: string, origin: CFrame, parent: Instance?, tint: Color3?): Model
 	local data = pieceData(piece)
 	local templates = meshTemplates(piece)
 	local template = templates and templates:FindFirstChild("Whole")
@@ -218,6 +236,10 @@ function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Mode
 	model.WorldPivot = origin
 	model:SetAttribute("Piece", piece)
 	model:SetAttribute("Health", fullHealth(data))
+	if tint then
+		model:SetAttribute("Tint", tint)
+		paint(whole, tint)
+	end
 	model:AddTag(Breakable.Tag)
 	whole.Parent = model
 
@@ -234,8 +256,30 @@ function Breakable.place(piece: string, origin: CFrame, parent: Instance?): Mode
 		ramp.CFrame = origin * CFrame.new(0, rampSize.Y / 2, 0) * CFrame.Angles(0, math.pi, 0)
 		ramp.Parent = model
 	end
+	local climb = (Config.Climbs :: any)[piece]
+	if climb then
+		local truss = Instance.new("TrussPart")
+		truss.Name = "Climb"
+		truss.Anchored = true
+		truss.Transparency = 1
+		truss.CanQuery = false
+		truss.Size = climb.Size
+		truss.CFrame = origin * CFrame.new(climb.Offset)
+		truss.Parent = model
+	end
 	model.Parent = parent or workspace
 	return model
+end
+
+-- Brings a standing piece down because nothing holds it up any more: it comes apart from the bottom.
+function Breakable.collapse(model: Model)
+	if model.Parent == nil or (model:GetAttribute("Health") :: number) <= 0 then
+		return
+	end
+	local data = pieceData(model:GetAttribute("Piece") :: string)
+	local lo, hi = pieceBounds(data)
+	local foot = model.WorldPivot * Vector3.new((lo.X + hi.X) / 2, lo.Y, (lo.Z + hi.Z) / 2)
+	crumble(model, data, foot, Vector3.zero, 0)
 end
 
 -- A shot that landed on `part` at `point`, travelling along the unit vector `direction`.

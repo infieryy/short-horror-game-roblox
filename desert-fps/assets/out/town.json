@@ -1,0 +1,530 @@
+{
+ "buildings": [
+  {
+   "recipe": "teahouse",
+   "row": 7,
+   "column": 17,
+   "rows": 4,
+   "columns": 4,
+   "paves": true
+  },
+  {
+   "recipe": "cistern",
+   "row": 28,
+   "column": 17,
+   "rows": 7,
+   "columns": 8,
+   "paves": true
+  },
+  {
+   "recipe": "courtyard",
+   "row": 15,
+   "column": 3,
+   "rows": 9,
+   "columns": 7,
+   "paves": true
+  },
+  {
+   "recipe": "dyeworks",
+   "row": 15,
+   "column": 28,
+   "rows": 9,
+   "columns": 8,
+   "paves": true
+  },
+  {
+   "recipe": "potters",
+   "row": 4,
+   "column": 28,
+   "rows": 4,
+   "columns": 4,
+   "paves": true
+  },
+  {
+   "recipe": "guardhouse",
+   "row": 29,
+   "column": 9,
+   "rows": 3,
+   "columns": 3,
+   "paves": true
+  },
+  {
+   "recipe": "house_01_09",
+   "row": 1,
+   "column": 9,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_01_18",
+   "row": 1,
+   "column": 18,
+   "rows": 2,
+   "columns": 4,
+   "paves": false
+  },
+  {
+   "recipe": "house_03_30",
+   "row": 3,
+   "column": 30,
+   "rows": 1,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_04_03",
+   "row": 4,
+   "column": 3,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_04_06",
+   "row": 4,
+   "column": 6,
+   "rows": 4,
+   "columns": 4,
+   "paves": false
+  },
+  {
+   "recipe": "house_04_16",
+   "row": 4,
+   "column": 16,
+   "rows": 2,
+   "columns": 5,
+   "paves": false
+  },
+  {
+   "recipe": "house_04_22",
+   "row": 4,
+   "column": 22,
+   "rows": 2,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_04_34",
+   "row": 4,
+   "column": 34,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_05_11",
+   "row": 5,
+   "column": 11,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_06_38",
+   "row": 6,
+   "column": 38,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_07_03",
+   "row": 7,
+   "column": 3,
+   "rows": 3,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_07_14",
+   "row": 7,
+   "column": 14,
+   "rows": 3,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_08_01",
+   "row": 8,
+   "column": 1,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_08_23",
+   "row": 8,
+   "column": 23,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_08_33",
+   "row": 8,
+   "column": 33,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_09_09",
+   "row": 9,
+   "column": 9,
+   "rows": 2,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_09_28",
+   "row": 9,
+   "column": 28,
+   "rows": 5,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_11_03",
+   "row": 11,
+   "column": 3,
+   "rows": 1,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_11_34",
+   "row": 11,
+   "column": 34,
+   "rows": 1,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_12_07",
+   "row": 12,
+   "column": 7,
+   "rows": 1,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_14_11",
+   "row": 14,
+   "column": 11,
+   "rows": 6,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_14_14",
+   "row": 14,
+   "column": 14,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_19_36",
+   "row": 19,
+   "column": 36,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_22_01",
+   "row": 22,
+   "column": 1,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_22_23",
+   "row": 22,
+   "column": 23,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_25_04",
+   "row": 25,
+   "column": 4,
+   "rows": 1,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_25_14",
+   "row": 25,
+   "column": 14,
+   "rows": 1,
+   "columns": 6,
+   "paves": false
+  },
+  {
+   "recipe": "house_25_29",
+   "row": 25,
+   "column": 29,
+   "rows": 1,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_25_34",
+   "row": 25,
+   "column": 34,
+   "rows": 1,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_26_08",
+   "row": 26,
+   "column": 8,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_26_13",
+   "row": 26,
+   "column": 13,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_28_06",
+   "row": 28,
+   "column": 6,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_28_28",
+   "row": 28,
+   "column": 28,
+   "rows": 2,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_29_03",
+   "row": 29,
+   "column": 3,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_29_32",
+   "row": 29,
+   "column": 32,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_31_14",
+   "row": 31,
+   "column": 14,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_32_30",
+   "row": 32,
+   "column": 30,
+   "rows": 3,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_33_03",
+   "row": 33,
+   "column": 3,
+   "rows": 2,
+   "columns": 3,
+   "paves": false
+  },
+  {
+   "recipe": "house_33_09",
+   "row": 33,
+   "column": 9,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_34_35",
+   "row": 34,
+   "column": 35,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_35_16",
+   "row": 35,
+   "column": 16,
+   "rows": 1,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_36_07",
+   "row": 36,
+   "column": 7,
+   "rows": 2,
+   "columns": 1,
+   "paves": false
+  },
+  {
+   "recipe": "house_36_23",
+   "row": 36,
+   "column": 23,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "house_37_31",
+   "row": 37,
+   "column": 31,
+   "rows": 2,
+   "columns": 2,
+   "paves": false
+  },
+  {
+   "recipe": "streets",
+   "row": 0,
+   "column": 0,
+   "rows": 40,
+   "columns": 40,
+   "paves": false
+  },
+  {
+   "recipe": "townwall",
+   "row": 0,
+   "column": 0,
+   "rows": 40,
+   "columns": 40,
+   "paves": false
+  }
+ ],
+ "clear": [
+  "10:1:-1:0",
+  "10:24:-1:0",
+  "10:30:0:-1",
+  "10:33:-1:0",
+  "10:34:-1:0",
+  "10:35:1:0",
+  "10:4:-1:0",
+  "11:10:-1:0",
+  "11:27:0:1",
+  "11:30:0:-1",
+  "11:36:0:-1",
+  "11:6:0:-1",
+  "12:29:0:-1",
+  "12:34:-1:0",
+  "12:4:-1:0",
+  "12:5:-1:0",
+  "12:6:0:1",
+  "13:11:1:0",
+  "13:29:0:-1",
+  "13:8:-1:0",
+  "14:16:0:-1",
+  "15:10:0:1",
+  "16:12:0:-1",
+  "16:15:-1:0",
+  "17:10:0:1",
+  "1:22:0:-1",
+  "1:8:0:1",
+  "20:37:0:-1",
+  "21:23:1:0",
+  "21:24:1:0",
+  "21:36:-1:0",
+  "23:2:0:-1",
+  "24:1:-1:0",
+  "24:24:-1:0",
+  "24:30:1:0",
+  "24:34:1:0",
+  "24:35:1:0",
+  "25:13:0:1",
+  "25:20:0:-1",
+  "25:6:0:-1",
+  "25:8:1:0",
+  "26:12:0:1",
+  "26:17:-1:0",
+  "26:29:-1:0",
+  "26:5:-1:0",
+  "27:12:0:1",
+  "27:14:0:-1",
+  "27:29:1:0",
+  "27:7:0:1",
+  "27:9:0:-1",
+  "28:3:1:0",
+  "29:27:0:1",
+  "29:34:0:-1",
+  "29:8:0:-1",
+  "2:31:1:0",
+  "2:8:0:1",
+  "30:14:1:0",
+  "30:28:-1:0",
+  "30:34:0:-1",
+  "30:5:0:-1",
+  "31:16:0:-1",
+  "31:31:1:0",
+  "32:16:0:-1",
+  "32:29:0:1",
+  "33:11:0:-1",
+  "33:32:0:-1",
+  "33:35:1:0",
+  "34:16:1:0",
+  "34:29:0:1",
+  "34:2:0:1",
+  "34:6:0:-1",
+  "34:8:0:1",
+  "35:24:1:0",
+  "35:34:0:1",
+  "35:3:-1:0",
+  "35:4:-1:0",
+  "36:22:0:1",
+  "36:32:1:0",
+  "37:22:0:1",
+  "37:8:0:-1",
+  "38:30:0:1",
+  "3:10:-1:0",
+  "3:16:1:0",
+  "3:19:-1:0",
+  "3:29:0:1",
+  "3:35:1:0",
+  "4:15:0:1",
+  "5:22:0:1",
+  "5:33:0:1",
+  "5:5:0:-1",
+  "6:10:0:-1",
+  "6:12:0:-1",
+  "6:16:-1:0",
+  "6:18:-1:0",
+  "6:23:-1:0",
+  "6:34:-1:0",
+  "6:7:0:1",
+  "7:13:0:1",
+  "7:24:1:0",
+  "7:37:0:1",
+  "8:15:0:-1",
+  "8:38:-1:0",
+  "8:5:0:-1",
+  "8:8:-1:0",
+  "9:22:0:1",
+  "9:2:0:-1",
+  "9:35:0:-1",
+  "9:6:0:-1"
+ ]
+}

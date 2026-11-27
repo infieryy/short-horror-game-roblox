@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local WeaponConfig = require(Shared.Weapons.WeaponConfig)
 local DesertFps = (ServerStorage :: any).DesertFps
 local Breakable = require(DesertFps.Destruction.Breakable)
+local Structure = require(DesertFps.Destruction.Structure)
 local PartsData = require(DesertFps.Assets.PartsData)
 
 local WeaponService = {}
@@ -102,7 +103,9 @@ local function onFire(player: Player, origin: unknown, direction: unknown)
 
 	local hit = workspace:Raycast(origin, direction.Unit * weapon.Range, params)
 	if hit and hit.Instance:IsA("BasePart") then
-		Breakable.damage(hit.Instance, weapon.Damage, hit.Position, direction.Unit)
+		if not Breakable.damage(hit.Instance, weapon.Damage, hit.Position, direction.Unit) then
+			Structure.knock(hit.Instance) -- a lantern, a sign, a banner: shot down
+		end
 		-- TODO: damage to players, once teams and rounds exist.
 	end
 	-- TODO: show the shot (tracer, weapon in hand) to the other players.

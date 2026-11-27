@@ -1,0 +1,415 @@
+{
+ "name": "house_14_14",
+ "title": "MarketKiosk",
+ "size": [
+  16.0,
+  16.0
+ ],
+ "placements": [
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    12.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    16.0,
+    -4.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    16.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    12.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    0.0,
+    -4.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    0.0,
+    -12.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "door2_teal",
+   "pos": [
+    12.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "awning",
+   "pos": [
+    12.0,
+    0.5,
+    6.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    4.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    12.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    16.0,
+    -4.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    4.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    12.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    0.0,
+    -4.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_pierced",
+   "pos": [
+    0.0,
+    -12.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    16.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    0.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "sign_drop",
+   "pos": [
+    15.0,
+    -16.5,
+    9.6
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    8.6,
+    -16.5,
+    8.6
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.5,
+    -6.4,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.5,
+    -4.5,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.5,
+    -2.3,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    2.1,
+    -2.1,
+    12.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "pot_round",
+   "pos": [
+    2.1,
+    -4.6,
+    12.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    1.7,
+    -6.6,
+    12.06
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "divan",
+   "pos": [
+    13.9,
+    -4.0,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "pot_tall",
+   "pos": [
+    2.1,
+    -13.9,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "pot_round",
+   "pos": [
+    4.6,
+    -13.9,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    6.6,
+    -14.3,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "counter",
+   "pos": [
+    4.0,
+    -1.6,
+    0.01
+   ],
+   "turn": 0
+  }
+ ]
+}

@@ -1,0 +1,352 @@
+{
+ "name": "house_29_32",
+ "title": "CardersHouse",
+ "size": [
+  16.0,
+  16.0
+ ],
+ "placements": [
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    12.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    12.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    12.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    16.0,
+    -4.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    16.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    12.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "wall2_shutter",
+   "pos": [
+    0.0,
+    -4.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    0.0,
+    -12.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "door2_wood",
+   "pos": [
+    16.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    0.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    16.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    12.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    16.0,
+    -4.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    16.0,
+    -12.0,
+    12.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    12.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    0.0,
+    -12.0,
+    12.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    16.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    16.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    16.5,
+    -15.4,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    16.5,
+    -8.6,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "baskets",
+   "pos": [
+    17.4,
+    -4.7,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    17.5,
+    -1.4,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "rack_saffron",
+   "pos": [
+    14.5,
+    -4.0,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "baskets",
+   "pos": [
+    14.5,
+    -12.6,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    14.3,
+    -9.4,
+    12.06
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "rug",
+   "pos": [
+    4.0,
+    -4.0,
+    0.01
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "divan",
+   "pos": [
+    4.0,
+    -1.9,
+    0.01
+   ],
+   "turn": 0
+  }
+ ]
+}

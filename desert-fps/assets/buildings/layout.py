@@ -57,12 +57,40 @@ class Layout:
         self.put(piece, x + dx * reach - dy * along, y + dy * reach + dx * along, z, turn)
 
 
-def footprint(name):
+_PLAN = {}
+
+
+def town_plan():
+    """The town plan as plan/town.py wrote it (grid, buildings, arenas)."""
+    if not _PLAN:
+        with open(os.path.join(HERE, "..", "..", "plan", "out", "town.json")) as fh:
+            _PLAN.update(json.load(fh))
+    return _PLAN
+
+
+def route_cells():
+    """The plan cells the test bots walk through (ground), and the roof cells their routes end on. A slantwise
+    step also counts the two cells it passes between. Goods that stand in a street keep off these."""
+    with open(os.path.join(HERE, "..", "..", "plan", "out", "routes.json")) as fh:
+        arenas = json.load(fh)["towns"]["town"]
+    ground, roofs = set(), set()
+    for routes in arenas.values():
+        for route in routes:
+            path = route["path"]
+            for node in path:
+                (roofs if node[0] else ground).add((node[1], node[2]))
+            for a, b in zip(path, path[1:]):
+                if a[0] == b[0] == 0 and a[1] != b[1] and a[2] != b[2]:
+                    ground |= {(a[1], b[2]), (b[1], a[2])}
+    return ground, roofs
+
+
+def footprint(name=None, rect=None):
     """A building's cells as the town plan has them: (rows of characters, look-up for any cell by its place in
-    the building, including the cells just outside it)."""
-    with open(os.path.join(HERE, "..", "..", "plan", "out", "town.json")) as fh:
-        town = json.load(fh)
-    r0, c0, r1, c1 = next(b["rect"] for b in town["buildings"] if b["name"] == name)
+    the building, including the cells just outside it). The building is one the plan names, or a rectangle of
+    plan cells (row0, column0, row1, column1)."""
+    town = town_plan()
+    r0, c0, r1, c1 = rect or next(b["rect"] for b in town["buildings"] if b["name"] == name)
     grid = town["grid"]
 
     def cell(r, c):

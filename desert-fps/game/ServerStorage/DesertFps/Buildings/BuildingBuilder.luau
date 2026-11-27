@@ -16,7 +16,7 @@ local Config = require(script.Parent.BuildingConfig)
 
 local BuildingBuilder = {}
 
-type Placement = { piece: string, pos: { number }, turn: number }
+type Placement = { piece: string, pos: { number }, turn: number, tint: { number }? }
 
 -- Pieces placed between two yields, so Studio stays responsive.
 local BATCH = 60
@@ -88,13 +88,29 @@ function BuildingBuilder.build(name: string, origin: CFrame, parent: Instance?):
 		if Config.Lamp.Pieces[piece] then
 			standLamp(piece, cf, lamps)
 		elseif BreakData[piece] then
-			local placed = Breakable.place(piece, cf, structure)
+			local tint = item.tint and Color3.fromRGB(item.tint[1], item.tint[2], item.tint[3])
+			local placed = Breakable.place(piece, cf, structure, tint)
 			if Config.NoShadow[piece] then
 				for _, part in placed:GetDescendants() do
 					if part:IsA("BasePart") then
 						part.CastShadow = false
 					end
 				end
+			end
+			local glow = Config.Glow[piece]
+			local whole = placed:FindFirstChild("Whole")
+			if glow and whole and whole:IsA("BasePart") then
+				-- a fire: the light sits in the mesh, so it goes out when the piece breaks
+				local ember = Instance.new("Attachment")
+				ember.Name = "Glow"
+				ember.CFrame = whole.CFrame:ToObjectSpace(cf * CFrame.new(glow.At))
+				local light = Instance.new("PointLight")
+				light.Color = glow.Color
+				light.Brightness = glow.Brightness
+				light.Range = glow.Range
+				light.Shadows = false
+				light.Parent = ember
+				ember.Parent = whole
 			end
 		else
 			copy(meshes(piece):FindFirstChild("Whole") :: BasePart, cf, piece, dressing).CastShadow = not Config.NoShadow[piece]

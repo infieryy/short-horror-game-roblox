@@ -43,6 +43,10 @@ return {
 		paving_b = true,
 		paving_c = true,
 	},
+	-- Pieces with a fire in them: a light at At (studs from the piece's origin; +Z is the piece's front).
+	Glow = {
+		kiln = { At = Vector3.new(0, 1.4, 3.6), Color = Color3.fromRGB(255, 150, 80), Brightness = 1.1, Range = 14 },
+	},
 	-- A fill is a soft light with no lamp to see, where a recipe asks for one (daylight under a dome).
 	Fill = {
 		LightColor = Color3.fromRGB(255, 176, 122),

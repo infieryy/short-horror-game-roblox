@@ -9,9 +9,25 @@ local DesertFps = (ServerStorage :: any).DesertFps
 local DevConfig = require(DesertFps.DevConfig)
 local DestructionConfig = require(DesertFps.Destruction.DestructionConfig)
 local Breakable = require(DesertFps.Destruction.Breakable)
+local Structure = require(DesertFps.Destruction.Structure)
+local TownConfig = require(DesertFps.Town.TownConfig)
 local WeaponService = require(DesertFps.Weapons.WeaponService)
 
 WeaponService.start()
+
+-- Buildings come down when what holds them up is destroyed.
+Structure.start(DevConfig.RebuildSeconds)
+task.spawn(function()
+	local buildings = workspace:FindFirstChild(TownConfig.Folder)
+	if buildings then
+		local report = Structure.register(buildings, TownConfig.Middle.Y)
+		local loose = 0
+		for _, count in report.unheld do
+			loose += count
+		end
+		print(`Structure: {report.pieces} pieces, {report.links} links, {loose} with nothing to hold them (pinned)`)
+	end
+end)
 
 -- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by
 -- one the first time it cracks.
@@ -67,10 +83,11 @@ local function rebuild(model: Instance)
 		return
 	end
 	local piece, origin, parent = model:GetAttribute("Piece") :: string, model.WorldPivot, model.Parent
+	local tint = model:GetAttribute("Tint") :: Color3?
 	model.Destroying:Once(function()
 		task.delay(seconds, function()
 			if parent and parent:IsDescendantOf(workspace) then
-				Breakable.place(piece, origin, parent)
+				Breakable.place(piece, origin, parent, tint)
 			end
 		end)
 	end)

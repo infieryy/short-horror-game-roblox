@@ -1,0 +1,1567 @@
+{
+ "name": "townwall",
+ "title": "TownWall",
+ "size": [
+  320.0,
+  320.0
+ ],
+ "placements": [
+  {
+   "piece": "townwall",
+   "pos": [
+    12.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    20.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    28.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    36.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    44.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    52.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    60.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    68.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    76.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    84.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    92.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    100.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    108.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    116.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    124.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    132.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    140.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    148.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    156.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    164.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    172.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    180.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    188.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    196.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    204.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    212.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    220.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    228.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    236.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    244.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    252.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    260.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    268.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    276.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    284.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    292.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    300.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    308.0,
+    -6.75,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    60.0,
+    -5.3,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    124.0,
+    -5.3,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    196.0,
+    -5.3,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    252.0,
+    -5.3,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    12.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    20.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    28.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    36.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    44.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    52.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    60.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "towngate",
+   "pos": [
+    68.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    76.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    84.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    92.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    100.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    108.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    116.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    124.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    132.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    140.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    148.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    156.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    164.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    172.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    180.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    188.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    196.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    204.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    212.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    220.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    228.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    236.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    244.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    252.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    260.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    268.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    276.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    284.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    292.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    300.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    308.0,
+    -313.25,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    52.0,
+    -314.7,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    84.0,
+    -314.7,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    140.0,
+    -314.7,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    212.0,
+    -314.7,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    268.0,
+    -314.7,
+    0.0
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -20.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -28.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -36.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -44.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -52.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -60.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -68.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -76.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -84.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -92.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -100.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -108.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -116.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -124.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -132.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -140.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -148.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -156.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -164.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -172.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -180.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -188.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -196.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -204.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -212.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -220.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -228.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -236.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -244.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -252.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -260.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -268.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -276.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -284.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -292.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -300.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    6.75,
+    -308.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    5.3,
+    -52.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    5.3,
+    -116.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    5.3,
+    -172.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    5.3,
+    -244.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -12.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -20.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -28.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -36.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -44.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -52.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -60.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -68.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -76.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -84.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -92.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -100.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -108.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -116.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -124.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -132.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -140.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -148.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -156.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -164.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -172.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -180.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -188.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -196.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -204.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -212.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -220.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -228.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -236.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -244.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -252.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -260.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -268.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -276.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -284.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -292.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -300.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall",
+   "pos": [
+    313.25,
+    -308.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    314.7,
+    -76.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    314.7,
+    -140.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    314.7,
+    -204.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    314.7,
+    -268.0,
+    0.0
+   ],
+   "turn": -90
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    5.3,
+    -5.3,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    5.3,
+    -314.7,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    314.7,
+    -5.3,
+    0.0
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "townwall_tower",
+   "pos": [
+    314.7,
+    -314.7,
+    0.0
+   ],
+   "turn": 0
+  }
+ ]
+}

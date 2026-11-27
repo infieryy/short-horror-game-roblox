@@ -1,0 +1,322 @@
+{
+ "name": "house_22_01",
+ "title": "GardenersShed",
+ "size": [
+  8.0,
+  16.0
+ ],
+ "placements": [
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -4.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -4.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_tiles",
+   "pos": [
+    4.0,
+    -12.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "floor",
+   "pos": [
+    4.0,
+    -12.0,
+    11.0
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    0.0
+   ],
+   "turn": 180,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    8.0,
+    -4.0,
+    0.0
+   ],
+   "turn": 90,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "wall2_door",
+   "pos": [
+    8.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "wall2_plain",
+   "pos": [
+    4.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "door2_wood",
+   "pos": [
+    8.0,
+    -12.0,
+    0.0
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    8.0,
+    0.0,
+    0.0
+   ],
+   "turn": 0.0,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "corner2",
+   "pos": [
+    8.0,
+    -16.0,
+    0.0
+   ],
+   "turn": 0.0,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -0.0,
+    12.0
+   ],
+   "turn": 180,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    8.0,
+    -4.0,
+    12.0
+   ],
+   "turn": 90,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    8.0,
+    -12.0,
+    12.0
+   ],
+   "turn": 90,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "parapet_plain",
+   "pos": [
+    4.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    8.0,
+    0.0,
+    12.0
+   ],
+   "turn": 0.0,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "parapet_corner",
+   "pos": [
+    8.0,
+    -16.0,
+    12.0
+   ],
+   "turn": 0.0,
+   "tint": [
+    255,
+    220,
+    216
+   ]
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    8.5,
+    -15.4,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "lantern_wall",
+   "pos": [
+    8.5,
+    -8.6,
+    8.6
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "potted_plant",
+   "pos": [
+    9.6,
+    -15.1,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "potted_plant",
+   "pos": [
+    9.6,
+    -8.9,
+    0.01
+   ],
+   "turn": 90
+  },
+  {
+   "piece": "baskets",
+   "pos": [
+    3.3,
+    -17.4,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "vase",
+   "pos": [
+    6.6,
+    -17.5,
+    0.01
+   ],
+   "turn": 0
+  },
+  {
+   "piece": "tree",
+   "pos": [
+    3.7,
+    -4.3,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "potted_plant",
+   "pos": [
+    1.8,
+    -14.1,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "potted_plant",
+   "pos": [
+    6.0,
+    -14.1,
+    12.06
+   ],
+   "turn": 180
+  },
+  {
+   "piece": "stack_crates",
+   "pos": [
+    4.3,
+    -4.2,
+    0.01
+   ],
+   "turn": 20
+  },
+  {
+   "piece": "barrel",
+   "pos": [
+    2.0,
+    -2.1,
+    0.01
+   ],
+   "turn": 0
+  }
+ ]
+}
