@@ -70,6 +70,16 @@ SCENES["props"] = [
 ]
 # The pilot building, from its own recipe (buildings/teahouse.py).
 SCENES["teahouse"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in teahouse.placements()]
+# The floor pieces side by side, with a wall and a drift of sand, to judge them before they are uploaded.
+SCENES["paving"] = (
+    [(("paving_a", "paving_b", "paving_c")[(i * 2 + j) % 3], (8 * i, 8 * j, -0.49), 90 * ((i + 2 * j) % 4), {})
+     for i in range(-3, 0) for j in range(-1, 2)]
+    + [("paving_tiles", (8 * i, 8 * j, -0.49), 0, {}) for i in range(0, 2) for j in range(-1, 2)]
+    + [("paving_bricks", (8 * i, 8 * j, -0.49), 0, {}) for i in range(2, 4) for j in range(-1, 1)]
+    + [("paving_dyed", (8 * i, 8, -0.49), 90 * i, {}) for i in range(2, 4)]
+    + [("wall2_plain", (-16, 12, 0), 0, {}), ("wall2_shutter", (-8, 12, 0), 0, {}), ("sand_drift", (-16, 11.3, 0.01), 0, {}),
+       ("vat_indigo", (24, 8, 0.01), 0, {}), ("tea_table", (4, 0, 0.01), 0, {})]
+)
 SCENES["dyeworks"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in dyeworks.placements()]
 SCENES["courtyard"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in courtyard.placements()]
 # guns: (centre x, centre height, span) in studs, used to frame the camera
@@ -83,7 +93,7 @@ CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11
            "teahouse-gallery": ((3.4, -21, 17.4), (15, -9, 17.5), 14), "teahouse-terrace": ((31, -1.5, 17.6), (22, -22, 14), 16),
            "courtyard": ((120, -150, 75), (28, -34, 6), 38), "courtyard-court": ((27, -52.5, 5.2), (30, -22, 7.5), 14),
            "courtyard-room": ((3.6, -12.5, 5.2), (40, -5, 5.5), 14),
-           "dyeworks": ((-70, -150, 80), (30, -36, 6), 38), "dyeworks-yard": ((3, -68, 5.2), (30, -30, 7.5), 14)}
+           "paving": ((4, -34, 30), (4, 2, 0), 38), "dyeworks": ((-70, -150, 80), (30, -36, 6), 38), "dyeworks-yard": ((3, -68, 5.2), (30, -30, 7.5), 14)}
 
 
 def render_gun(name):

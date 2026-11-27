@@ -59,8 +59,10 @@ def placements():
         put(piece, x + dx * reach - dy * along, y + dy * reach + dx * along, z, turn)
 
     # ---------------------------------------------------------------- ground floor
-    for r, c in HALL + PORCH + WING + [(3, 3)]:
-        put("ground", *centre(r, c), -0.49)
+    for r, c in HALL + WING:                                           # clay tiles indoors
+        put("paving_tiles", *centre(r, c), -0.49)
+    for r, c in PORCH + [(3, 3)]:                                      # brick under the porch
+        put("paving_bricks", *centre(r, c), -0.49)
     ground = {
         (0, 0, "N"): "window", (0, 1, "N"): "plain", (0, 2, "N"): "window",
         (0, 0, "W"): "plain", (1, 0, "W"): "plain", (2, 0, "W"): "window",

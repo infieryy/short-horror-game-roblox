@@ -1,0 +1,12 @@
+{
+ "piece": "sand_drift",
+ "triangles": 68,
+ "triangles_low": 68,
+ "strokes": 407,
+ "px_per_stud": 151.3,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 68,
+ "problems": [],
+ "seconds": 3.8
+}

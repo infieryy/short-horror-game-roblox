@@ -7,7 +7,7 @@
  ],
  "placements": [
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -4.0,
@@ -16,7 +16,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -4.0,
@@ -25,7 +25,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -4.0,
@@ -34,7 +34,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -4.0,
@@ -43,7 +43,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     36.0,
     -4.0,
@@ -52,7 +52,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -4.0,
@@ -61,7 +61,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -4.0,
@@ -70,7 +70,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -12.0,
@@ -79,7 +79,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -12.0,
@@ -88,7 +88,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -12.0,
@@ -97,7 +97,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -12.0,
@@ -106,7 +106,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     36.0,
     -12.0,
@@ -115,7 +115,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -12.0,
@@ -124,7 +124,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -12.0,
@@ -133,7 +133,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -20.0,
@@ -142,7 +142,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -20.0,
@@ -151,7 +151,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -20.0,
@@ -160,7 +160,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -20.0,
@@ -169,7 +169,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -28.0,
@@ -178,7 +178,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -28.0,
@@ -187,7 +187,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -28.0,
@@ -196,7 +196,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -28.0,
@@ -205,7 +205,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -36.0,
@@ -214,7 +214,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -36.0,
@@ -223,7 +223,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -36.0,
@@ -232,7 +232,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -36.0,
@@ -241,7 +241,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -44.0,
@@ -250,7 +250,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -44.0,
@@ -259,7 +259,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -44.0,
@@ -268,7 +268,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -44.0,
@@ -277,7 +277,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -52.0,
@@ -286,7 +286,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -52.0,
@@ -295,7 +295,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -52.0,
@@ -304,7 +304,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -52.0,
@@ -313,7 +313,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -60.0,
@@ -322,7 +322,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -60.0,
@@ -331,7 +331,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -60.0,
@@ -340,7 +340,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -60.0,
@@ -349,7 +349,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     36.0,
     -60.0,
@@ -358,7 +358,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -60.0,
@@ -367,7 +367,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -60.0,
@@ -376,7 +376,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -68.0,
@@ -385,7 +385,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -68.0,
@@ -394,7 +394,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -68.0,
@@ -403,7 +403,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -68.0,
@@ -412,7 +412,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     36.0,
     -68.0,
@@ -421,7 +421,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     44.0,
     -68.0,
@@ -430,7 +430,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     52.0,
     -68.0,
@@ -439,7 +439,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     20.0,
     -20.0,
@@ -448,7 +448,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     28.0,
     -20.0,
@@ -457,7 +457,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     36.0,
     -20.0,
@@ -466,7 +466,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     20.0,
     -28.0,
@@ -475,7 +475,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     28.0,
     -28.0,
@@ -484,7 +484,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     36.0,
     -28.0,
@@ -493,7 +493,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     20.0,
     -36.0,
@@ -502,7 +502,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     28.0,
     -36.0,
@@ -511,7 +511,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     36.0,
     -36.0,
@@ -520,7 +520,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     20.0,
     -44.0,
@@ -529,7 +529,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     28.0,
     -44.0,
@@ -538,7 +538,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     36.0,
     -44.0,
@@ -547,7 +547,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     20.0,
     -52.0,
@@ -556,7 +556,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     28.0,
     -52.0,
@@ -565,7 +565,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
    "pos": [
     36.0,
     -52.0,
@@ -3085,127 +3085,64 @@
    "turn": 90
   },
   {
-   "piece": "tree",
-   "pos": [
-    4.0,
-    -20.0,
-    12.06
-   ],
-   "turn": 0.0
-  },
-  {
-   "piece": "tree",
-   "pos": [
-    52.0,
-    -52.0,
-    12.06
-   ],
-   "turn": 0.0
-  },
-  {
    "piece": "rack_saffron",
    "pos": [
     12.0,
-    -12.0,
+    -8.0,
     12.06
    ],
-   "turn": 0.0
+   "turn": 0
   },
   {
    "piece": "rack_red",
    "pos": [
-    28.0,
-    -12.0,
+    20.0,
+    -8.0,
     12.06
    ],
-   "turn": 0.0
+   "turn": 0
   },
   {
    "piece": "rack_plum",
    "pos": [
-    44.0,
-    -36.0,
-    12.06
-   ],
-   "turn": 90
-  },
-  {
-   "piece": "sacks",
-   "pos": [
-    4.0,
-    -3.0,
+    28.0,
+    -8.0,
     12.06
    ],
    "turn": 0
   },
   {
-   "piece": "barrel",
+   "piece": "tree",
    "pos": [
-    26.5,
-    -1.8,
+    3.6,
+    -20.0,
     12.06
    ],
    "turn": 0
   },
   {
-   "piece": "barrel",
+   "piece": "tree",
    "pos": [
-    29.2,
-    -1.8,
+    3.6,
+    -52.0,
     12.06
    ],
    "turn": 0
   },
   {
-   "piece": "crate",
+   "piece": "pot_tall",
    "pos": [
-    38.0,
-    -2.2,
+    1.4,
+    -26.5,
     12.06
    ],
    "turn": 0
-  },
-  {
-   "piece": "crate",
-   "pos": [
-    38.0,
-    -2.2,
-    15.06
-   ],
-   "turn": 25
-  },
-  {
-   "piece": "divan",
-   "pos": [
-    1.9,
-    -36.0,
-    12.06
-   ],
-   "turn": 90
-  },
-  {
-   "piece": "rug",
-   "pos": [
-    10.5,
-    -36.0,
-    12.06
-   ],
-   "turn": 90
-  },
-  {
-   "piece": "tea_table",
-   "pos": [
-    2.0,
-    -43.0,
-    12.06
-   ],
-   "turn": 30
   },
   {
    "piece": "pot_round",
    "pos": [
-    1.5,
-    -29.5,
+    1.4,
+    -29.8,
     12.06
    ],
    "turn": 0
@@ -3214,115 +3151,79 @@
    "piece": "vase",
    "pos": [
     1.4,
-    -46.4,
+    -35.4,
     12.06
    ],
    "turn": 0
   },
   {
-   "piece": "barrel",
+   "piece": "pot_round",
    "pos": [
-    54.2,
-    -26.4,
+    1.4,
+    -42.0,
     12.06
    ],
    "turn": 0
-  },
-  {
-   "piece": "barrel",
-   "pos": [
-    54.2,
-    -29.2,
-    12.06
-   ],
-   "turn": 0
-  },
-  {
-   "piece": "crate",
-   "pos": [
-    54.0,
-    -36.0,
-    12.06
-   ],
-   "turn": -8
   },
   {
    "piece": "pot_tall",
    "pos": [
-    54.5,
-    -17.6,
+    1.4,
+    -45.2,
     12.06
    ],
    "turn": 0
-  },
-  {
-   "piece": "bolts",
-   "pos": [
-    44.0,
-    -44.0,
-    12.06
-   ],
-   "turn": 15
   },
   {
    "piece": "tea_table",
    "pos": [
-    28.5,
+    31.6,
     -68.0,
     12.06
    ],
    "turn": 0
   },
   {
-   "piece": "vase",
+   "piece": "divan",
    "pos": [
-    38.4,
-    -70.4,
+    20.0,
+    -70.1,
     12.06
    ],
-   "turn": 0
+   "turn": 180
   },
   {
-   "piece": "pot_round",
+   "piece": "divan",
    "pos": [
-    37.0,
-    -70.7,
+    44.0,
+    -70.1,
     12.06
    ],
-   "turn": 0
+   "turn": 180
   },
   {
    "piece": "sacks",
    "pos": [
-    11.0,
-    -68.0,
+    52.0,
+    -18.6,
     12.06
    ],
-   "turn": 90
+   "turn": 0
   },
   {
    "piece": "barrel",
    "pos": [
-    1.8,
-    -70.2,
+    42.6,
+    -17.8,
     12.06
    ],
    "turn": 0
   },
   {
-   "piece": "pot_tall",
+   "piece": "barrel",
    "pos": [
-    54.4,
-    -70.4,
-    12.06
-   ],
-   "turn": 0
-  },
-  {
-   "piece": "pot_round",
-   "pos": [
-    54.5,
-    -59.0,
+    45.3,
+    -17.8,
     12.06
    ],
    "turn": 0

@@ -55,6 +55,7 @@ local WALK_THROUGH = {
 	sign_tea = true,
 	sign_dye = true,
 	bougainvillea = true,
+	sand_drift = true,
 }
 
 local function import(piece: string, ids: { Model: number, Texture: number }, meshes: Instance): { meshes: number, worstOffset: number }

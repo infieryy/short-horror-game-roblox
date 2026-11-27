@@ -1,7 +1,7 @@
 """Recipe registry: piece name -> (build function, options)."""
 from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
 from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
-from . import floor, furnish, hangings, lantern, pergola, stores, tree, wall2
+from . import floor, furnish, hangings, lantern, paving, pergola, stores, tree, wall2
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
@@ -52,6 +52,14 @@ RECIPES = {
     "vat_plum": (well.vat, {"dye": "plum"}),
     "bolts": (stores.bolts, {}),
     "sign_dye": (hangings.sign_dye, {}),
+    # what the town stands on
+    "paving_a": (paving.flags, {"seed": 1, "rows": 4}),
+    "paving_b": (paving.flags, {"seed": 2, "rows": 3}),
+    "paving_c": (paving.flags, {"seed": 3, "rows": 5}),
+    "paving_tiles": (paving.tiles, {}),
+    "paving_bricks": (paving.bricks, {}),
+    "paving_dyed": (paving.flags, {"seed": 5, "rows": 4, "splashes": True}),
+    "sand_drift": (paving.drift, {}),
     "stairs": (stairs.build, {}),
     "stairs_narrow": (stairs.build, {"narrow": True}),
     "ladder": (ladder.build, {}),

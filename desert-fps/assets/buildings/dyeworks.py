@@ -29,9 +29,12 @@ def placements():
     up = STORY + FLOOR
 
     # ---------------------------------------------------------------- shell, from the plan
+    # clay tiles indoors; brick in the yard, and stones splashed with dye round every vat
     for r, row in enumerate(rows):
-        for c in range(len(row)):
-            lay.at("ground", r, c, -0.49)
+        for c, ch in enumerate(row):
+            near_vat = any(cell(r + dr, c + dc) == "w" for dr in (-1, 0, 1) for dc in (-1, 0, 1))
+            lay.at("paving_tiles" if ch in ROOM else "paving_dyed" if near_vat else "paving_bricks", r, c, -0.49,
+                   0 if ch in ROOM else (r * 3 + c) % 4 * 90)
     shutters = [(0, 4, "N"), (0, 6, "N"), (2, 7, "E"), (5, 7, "E"), (3, 5, "W"), (5, 5, "W")]
     pilasters = [(0, 4), (0, 6), (3, 8), (6, 8)]
     edges, posts = shell(lay, rows, cell, dress={key: "shutter" for key in shutters}, pilasters=pilasters)
@@ -63,7 +66,8 @@ def placements():
     lay.against("divan", 8, 6, "S", 1.7, up)
     lay.put("rug", 52, -62.5, up, 0)
     lay.at("tea_table", 7, 7, up, 0, dx=2.2, dy=2.2)
-    lay.at("bolts", 7, 5, up, 10, dx=-0.6, dy=0.6)
+    lay.against("counter", 7, 5, "W", 1.45, up)                          # the dyer's desk, his ledgers over it
+    lay.on_wall("shelf", 7, 5, "W", STORY + 5.4)
     lay.on_wall("lantern_wall", 8, 7, "E", STORY + 8.6)
 
     # ---------------------------------------------------------------- what the plan puts in the yard and the rooms
@@ -122,27 +126,20 @@ def placements():
     for r, c, side, along in ((0, 2, "N", 3.4), (0, 2, "W", -3.4), (6, 7, "E", 3.4), (8, 6, "S", 3.4), (2, 4, "S", 3.4),
                               (7, 5, "W", 3.4)):
         lay.on_wall("lantern_wall", r, c, side, 8.6, along=along, outside=True)
-    for r, c, side in ((0, 3, "N"), (1, 7, "E"), (3, 7, "E"), (8, 5, "S")):
+    for r, c, side in ((0, 3, "N"), (8, 5, "S")):                       # one banner by each street door
         lay.on_wall("banner", r, c, side, 9.7, outside=True)
 
-    # ---------------------------------------------------------------- the roof: cloth drying, bolts, a place to sit
-    lay.at("rack_plum", 0, 3, up)
-    lay.at("rack_saffron", 1, 5, up)
-    lay.at("rack_red", 0, 6, up, 90, dx=1.0)
-    lay.at("rack_saffron", 4, 6, up, 90)
-    lay.at("rack_plum", 5, 7, up, 90, dx=0.6)
-    lay.at("bolts", 2, 7, up, 20, dx=0.6)
-    lay.at("bolts", 3, 5, up, -15, dx=-0.4)
-    lay.at("pergola", 1, 2, up, 0, dx=0.4)
-    lay.at("rug", 1, 2, up, 90, dx=0.4)
-    lay.at("tea_table", 2, 2, up, 0, dx=-2.0, dy=-2.0)
-    lay.at("pot_round", 0, 2, up, 0, dx=-2.4, dy=2.4)
-    for dx in (-1.2, 1.4):
-        lay.at("barrel", 6, 6, up, 0, dx=dx, dy=1.8)
-    lay.at("sacks", 6, 7, up, 90, dx=1.0, dy=-0.5)
-    lay.put("bougainvillea", 28, -24.5, STORY + 3.0, 0)                 # over the yard balustrade
-    lay.put("bougainvillea", 39.5, -44, STORY + 3.0, -90)
+    # ---------------------------------------------------------------- the roof, in two uses
+    # The drying roof over the dye kitchen: two long lines of cloth.
+    for c, piece in ((3, "rack_plum"), (4, "rack_saffron"), (5, "rack_red")):
+        lay.at(piece, 0, c, up, 0, dy=0.6)
+    for c, piece in ((3, "rack_red"), (4, "rack_plum"), (5, "rack_saffron")):
+        lay.at(piece, 2, c, up, 0, dy=-0.6)
+    # Finished cloth waiting by the office door: a stack of bolts on each side of it.
+    lay.at("bolts", 6, 5, up, 0, dy=-0.6)
+    lay.at("bolts", 6, 7, up, 90, dy=-0.6)
     lay.on_wall("lantern_wall", 7, 6, "N", STORY + 8.6, along=3.0, outside=True)
+    lay.put("bougainvillea", 28, -24.5, STORY + 3.0, 0)                 # over the yard balustrade
     return lay.items
 
 

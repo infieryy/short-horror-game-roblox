@@ -31,6 +31,9 @@ return {
 		vase = true,
 		pot_round = true,
 		pot_tall = true,
+		paving_tiles = true,
+		paving_bricks = true,
+		paving_dyed = true,
 	},
 	-- A fill is a soft light with no lamp to see, where a recipe asks for one (daylight under a dome).
 	Fill = {

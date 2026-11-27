@@ -70,6 +70,14 @@ return {
 	vat_plum = { Model = 109028908759454, Texture = 82135775569448 },
 	bolts = { Model = 109269944048767, Texture = 86770433051229 },
 	sign_dye = { Model = 107064438731434, Texture = 127230305563878 },
+	-- what the town stands on
+	paving_a = { Model = 124638701434255, Texture = 81124065876025 },
+	paving_b = { Model = 102455473142798, Texture = 109369881173142 },
+	paving_c = { Model = 122546491111782, Texture = 108080190612305 },
+	paving_tiles = { Model = 125864486061852, Texture = 113985252189910 },
+	paving_bricks = { Model = 118797870425051, Texture = 128881648527339 },
+	paving_dyed = { Model = 94737529748017, Texture = 102692256344018 },
+	sand_drift = { Model = 80070480170020, Texture = 75962112650924 },
 	-- weapons
 	rifle = { Model = 118729713583609, Texture = 98441666077201 },
 	pistol = { Model = 87247004083333, Texture = 102072335700837 },

@@ -1,0 +1,12 @@
+{
+ "piece": "paving_tiles",
+ "triangles": 12,
+ "triangles_low": 12,
+ "strokes": 3014,
+ "px_per_stud": 61.7,
+ "break_mode": "parts",
+ "chunks": 1,
+ "chunk_triangles": 12,
+ "problems": [],
+ "seconds": 4.6
+}

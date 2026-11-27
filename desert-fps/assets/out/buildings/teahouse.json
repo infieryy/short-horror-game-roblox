@@ -7,7 +7,7 @@
  ],
  "placements": [
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -4.0,
@@ -16,7 +16,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -4.0,
@@ -25,7 +25,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -4.0,
@@ -34,7 +34,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -12.0,
@@ -43,7 +43,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -12.0,
@@ -52,7 +52,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -12.0,
@@ -61,7 +61,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     4.0,
     -20.0,
@@ -70,7 +70,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     12.0,
     -20.0,
@@ -79,7 +79,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     20.0,
     -20.0,
@@ -88,34 +88,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
-   "pos": [
-    4.0,
-    -28.0,
-    -0.49
-   ],
-   "turn": 0.0
-  },
-  {
-   "piece": "ground",
-   "pos": [
-    12.0,
-    -28.0,
-    -0.49
-   ],
-   "turn": 0.0
-  },
-  {
-   "piece": "ground",
-   "pos": [
-    20.0,
-    -28.0,
-    -0.49
-   ],
-   "turn": 0.0
-  },
-  {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -4.0,
@@ -124,7 +97,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -12.0,
@@ -133,7 +106,7 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_tiles",
    "pos": [
     28.0,
     -20.0,
@@ -142,7 +115,34 @@
    "turn": 0.0
   },
   {
-   "piece": "ground",
+   "piece": "paving_bricks",
+   "pos": [
+    4.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    12.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
+   "pos": [
+    20.0,
+    -28.0,
+    -0.49
+   ],
+   "turn": 0.0
+  },
+  {
+   "piece": "paving_bricks",
    "pos": [
     28.0,
     -28.0,

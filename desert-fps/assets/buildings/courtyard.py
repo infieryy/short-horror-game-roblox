@@ -28,8 +28,10 @@ def placements():
     court = [(r, c) for r, row in enumerate(rows) for c, ch in enumerate(row) if ch not in ROOM]
 
     # ---------------------------------------------------------------- shell, from the plan
-    for r, c in rooms + court:
-        lay.at("ground", r, c, -0.49)
+    for r, c in rooms:                                                  # clay tiles indoors, brick in the court
+        lay.at("paving_tiles", r, c, -0.49)
+    for r, c in court:
+        lay.at("paving_bricks", r, c, -0.49)
     # Blank walls in the plan get closed shutters here and there, and pilasters break the long fronts.
     shutters = [(0, 1, "N"), (0, 3, "N"), (1, 0, "W"), (5, 0, "W"), (7, 0, "W"), (8, 1, "S"), (8, 3, "S"), (8, 5, "S"),
                 (3, 6, "E"), (2, 1, "E"), (6, 1, "E"), (2, 5, "W"), (6, 5, "W")]
@@ -141,35 +143,24 @@ def placements():
     lay.put("bougainvillea", 36, -16.5, STORY + 3.0, 0)                 # over the balustrades
     lay.put("bougainvillea", 16.5, -44, STORY + 3.0, 90)
 
-    # ---------------------------------------------------------------- the roof: washing, stores, a place to sit
+    # ---------------------------------------------------------------- the roof, in four uses
     # (nobody can climb up here yet; it is what you see from the street and from other roofs)
-    lay.at("tree", 2, 0, up)
-    lay.at("tree", 6, 6, up)
-    lay.at("rack_saffron", 1, 1, up)
-    lay.at("rack_red", 1, 3, up)
-    lay.at("rack_plum", 4, 5, up, 90)
-    lay.at("sacks", 0, 0, up, 0, dy=1.0)
-    for dx in (-1.5, 1.2):
-        lay.at("barrel", 0, 3, up, 0, dx=dx, dy=2.2)
-    lay.at("crate", 0, 4, up, 0, dx=2.0, dy=1.8)
-    lay.at("crate", 0, 4, up + 3.0, 25, dx=2.0, dy=1.8)
-    lay.against("divan", 4, 0, "W", 1.9, up)                            # the sitting corner on the west wing
-    lay.at("rug", 4, 1, up, 90, dx=-1.5)
-    lay.at("tea_table", 5, 0, up, 30, dx=-2.0, dy=1.0)
-    lay.at("pot_round", 3, 0, up, 0, dx=-2.5, dy=-1.5)
-    lay.at("vase", 5, 0, up, 0, dx=-2.6, dy=-2.4)
-    for dy in (1.6, -1.2):                                              # over the store, more stores
-        lay.at("barrel", 3, 6, up, 0, dx=2.2, dy=dy)
-    lay.at("crate", 4, 6, up, -8, dx=2.0)
-    lay.at("pot_tall", 2, 6, up, 0, dx=2.5, dy=2.4)
-    lay.at("bolts", 5, 5, up, 15)
-    lay.at("tea_table", 8, 3, up, 0, dx=0.5)                            # under the pergolas
-    lay.at("vase", 8, 4, up, 0, dx=2.4, dy=-2.4)
-    lay.at("pot_round", 8, 4, up, 0, dx=1.0, dy=-2.7)
-    lay.at("sacks", 8, 1, up, 90, dx=-1.0)
-    lay.at("barrel", 8, 0, up, 0, dx=-2.2, dy=-2.2)
-    lay.at("pot_tall", 8, 6, up, 0, dx=2.4, dy=-2.4)
-    lay.at("pot_round", 7, 6, up, 0, dx=2.5, dy=1.0)
+    # Washing day on the north wing: one long line of cloth in three colours.
+    for c, piece in ((1, "rack_saffron"), (2, "rack_red"), (3, "rack_plum")):
+        lay.at(piece, 0, c, up, 0, dy=-4.0)
+    # The roof garden on the west wing: an orange tree at each end, a row of pots along the parapet between.
+    lay.at("tree", 2, 0, up, 0, dx=-0.4)
+    lay.at("tree", 6, 0, up, 0, dx=-0.4)
+    for r, piece, dy in ((3, "pot_tall", 1.5), (3, "pot_round", -1.8), (4, "vase", 0.6), (5, "pot_round", 2.0), (5, "pot_tall", -1.2)):
+        lay.at(piece, r, 0, up, 0, dx=-2.6, dy=dy)
+    # The sitting terrace on the south wing: the pergolas, a rug and a tea table under them, a divan at each end.
+    lay.at("tea_table", 8, 3, up, 0, dx=3.6)
+    lay.against("divan", 8, 2, "S", 1.9, up)
+    lay.against("divan", 8, 5, "S", 1.9, up)
+    # The kitchen's store, against the loft and by its door: grain sacks and two barrels.
+    lay.at("sacks", 2, 6, up, 0, dy=1.4)
+    for dx in (-1.4, 1.3):
+        lay.at("barrel", 2, 5, up, 0, dx=dx, dy=2.2)
     lay.on_wall("lantern_wall", 1, 5, "W", STORY + 8.6, along=3.0, outside=True)
     lay.on_wall("lantern_wall", 1, 6, "S", STORY + 8.6, along=3.0, outside=True)
 

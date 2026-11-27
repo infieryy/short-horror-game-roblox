@@ -304,6 +304,20 @@ The owner: "Decorate the top of courtyard house with props. Then do Dye works an
 - **Bots: 35 of 35 routes** with all three buildings in; six are 10% to 19% slower than planned.
 - **Not done / not checked:** nothing in the Dye Works or on the roof was shot down. The Dye Works roof and office cannot be reached. The awnings were placed without a close look at how they meet the wall. The yard was checked in Studio, not in a Blender render. Frame rate unmeasured.
 
+### Floors with detail, props with a reason (same session)
+
+![The dyers' yard on its stained paving](assets/studio/dyeworks-yard.png)
+![Clay tiles indoors](assets/studio/courtyard-room-tiles.png)
+![The Courtyard House roof, in four uses](assets/studio/courtyard-roof.png)
+
+The owner: "this is okay but make the floor much better and more detailed to fit the theme also dont just slap random props because you feel like it. make it fill space but make sense to portray a theme".
+
+- **Floors.** Seven new pieces (14 uploads, approved): three flagstone layouts for streets, clay tiles with turquoise insets for rooms, brick for courts, yards, the porch and the Market Square, dye-splashed stones round the vats, and sand drifts at wall feet (173 of them, picked by cell). Every stone has its own tone. See `assets/README.md`.
+- **Props.** The Courtyard House roof was scattered filler (barrels, crates, bolts, sacks, pots). It is now four uses: a washing line on the north wing, a roof garden on the west wing (two orange trees, a row of pots), a sitting terrace under the pergolas (rug, tea table, two divans), and the kitchen's store by the loft door (grain sacks, two barrels). The Dye Works roof is two: drying lines over the dye kitchen, finished bolts by the office door. Its office has a desk and ledgers instead of a bolt stack; two banners instead of four.
+- **Rule for every building from here on:** name what each area is for, then place only the groups that belong to it.
+- Bots: 35 of 35 routes after the change.
+- **Not done:** the upper floors and roofs still use the plain `floor` piece (flagstones in one tone). The streets' cover, trees and unbuilt houses are still boxes. Tea House props were not reviewed against the new rule.
+
 Notes for the next session:
 - The Studio viewport on this machine is 1096 x 385, so screenshots are small and wide. `python preview.py teahouse` gives a larger Blender render for judging shape.
 - `bmesh.ops.triangulate` and friends need `normal_update()` first on a freshly built mesh, or faces with a notch in them are cut wrongly.

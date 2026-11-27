@@ -9,10 +9,12 @@ import colorsys
 import math
 
 import numpy as np
+from PIL import Image, ImageDraw
 
 import brush
 import config as C
 from build import FACETS
+from mathutils import Vector
 
 
 def rgb(hls):
@@ -98,6 +100,8 @@ class Painter:
         self.canvas[mask_b] = base
         if part.get("staves") and isl["facet"] == "lathe":
             self.staves(isl, mask_b, base, fam, part["staves"])
+        if part.get("stones") and isl["facet"] == "+z":
+            self.stones(isl, mask_b, base, fam, part["stones"])
 
         if isl["grain_world"] is not None:
             g = isl["grain_world"]
@@ -115,6 +119,25 @@ class Painter:
             self.shine(isl, mask, fam)
         if part["band"] and family in ("plaster", "stone"):
             self.band(isl, mask_b)
+
+    def stones(self, isl, mask_b, base, fam, stones):
+        """Each paving stone is its own piece with its own tone: fill its outline before the strokes go on.
+        A stone may be of another colour family (a creamier slab, an inset tile, a splash of dye); `soft`
+        lets the paint underneath show through (a stain)."""
+        part = isl["part"]
+        place = self.piece.layout["islands"][isl["key"]]
+        inv, (U, V) = part["frame"].inverted(), FACETS[isl["facet"]]
+        for index, stone in enumerate(stones):
+            points = [(isl["origin_px"][0] + ((inv @ Vector(q)).dot(U) - place["min"][0]) * self.px,
+                       isl["origin_px"][1] + ((inv @ Vector(q)).dot(V) - place["min"][1]) * self.px) for q in stone["poly"]]
+            sheet = Image.new("L", (C.TEX, C.TEX), 0)
+            ImageDraw.Draw(sheet).polygon(points, fill=1)
+            inside = mask_b & (np.asarray(sheet) > 0)
+            family = stone.get("family")
+            colour = step(self.mix(f"{part['group']}/{family}", family), stone["tone"], C.PALETTE[family]) if family \
+                else step(base, stone["tone"], fam)
+            cover = stone.get("soft", 1.0)
+            self.canvas[inside] += (colour - self.canvas[inside]) * cover
 
     def _stave_edges(self, isl, count):
         x0 = isl["origin_px"][0]

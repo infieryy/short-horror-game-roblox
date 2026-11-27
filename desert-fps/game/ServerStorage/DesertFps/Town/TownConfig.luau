@@ -7,9 +7,18 @@ return {
 	-- Studs a real building's paving stands above the gray floor, so the two never show in the same plane.
 	Lift = 0.02,
 
-	-- The streets and yards are paved with the kit's flagstones (Workspace.TownGround), so the real buildings
-	-- stand on the ground they were painted for. Cells under a solid gray box are left out.
-	Paving = { Piece = "ground", Folder = "TownGround", Drop = -0.49 },
+	-- The streets and yards are paved with kit pieces (Workspace.TownGround), so the real buildings stand on
+	-- the ground they were painted for. Cells under a solid gray box are left out.
+	Paving = {
+		Folder = "TownGround",
+		Drop = -0.49,
+		-- Streets: three layouts of flagstones, mixed and turned so no pattern shows.
+		Street = { "paving_a", "paving_b", "paving_c" },
+		-- The Market Square is laid in brick ({ row0, column0, row1, column1 } of plan/town.py).
+		Square = { Piece = "paving_bricks", Rect = { 14, 14, 25, 24 } },
+		-- Sand blows against the foot of walls: against one wall face in every OneIn, picked by the cell.
+		Sand = { Piece = "sand_drift", OneIn = 3, WallOut = 0.66 },
+	},
 
 	-- Buildings with a recipe (assets/buildings/<recipe>.py). Row and Column are the plan cell of the building's
 	-- north-west corner, Rows and Columns its size; all four are the building's rectangle in plan/town.py.

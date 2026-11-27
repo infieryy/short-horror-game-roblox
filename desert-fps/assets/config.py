@@ -206,6 +206,10 @@ PALETTE["plum"] = {"h": (296, 318), "l": (0.36, 0.56), "s": (0.30, 0.46), "step"
 PALETTE["indigo"] = {"h": (222, 236), "l": (0.38, 0.60), "s": (0.30, 0.50), "step": 0.02, "hue_step": 0.5,
                      "bases": [(229, 0.48, 0.38), (227, 0.52, 0.40)]}
 CORE.update({"saffron": "saffron", "plum": "plum", "indigo": "indigo"})
+# blown sand (reference/sky/panorama-dunes-fortress.webp: sunlit dunes 253/180/123)
+PALETTE["sand"] = {"h": (22, 30), "l": (0.68, 0.80), "s": (0.80, 0.98), "step": 0.014, "hue_step": 0.5,
+                   "bases": [(26, 0.745, 0.95), (24, 0.76, 0.92)]}
+CORE["sand"] = "sand"
 
 PAINT["leaf"] = {                               # foliage: round dabs every way
     "lean": 30, "lean_jitter": 90,
@@ -220,6 +224,9 @@ PAINT["glow"] = {"lean": 80, "lean_jitter": 10,
 
 for _dye in ("saffron", "plum", "indigo"):
     PAINT[_dye] = PAINT["canvas"]
+PAINT["sand"] = {"lean": 8, "lean_jitter": 14,          # long shallow ripples
+                 "layers": [{"per_stud2": 5.0, "len": (0.8, 2.2), "wid": (0.12, 0.3), "opacity": (0.35, 0.6), "round": 0.4},
+                            {"per_stud2": 8.0, "len": (0.4, 1.2), "wid": (0.04, 0.09), "opacity": (0.4, 0.7), "round": 0.1}]}
 
 GLAZE = {
     "shade_per_stud2": 260.0,  # dark glaze dabs per square stud of fully occluded surface
@@ -344,7 +351,7 @@ STYLE["smoke"] = STYLE["knife"]
 STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
 STYLE["sacks"] = {"glaze": {"shade_per_stud2": 90.0, "shade_mix": 0.1}}
 STYLE["rack"] = STYLE["cloth"]
-for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree", "bolts"):
+for _soft in ("rug", "divan", "banner", "bougainvillea", "pergola", "tree", "bolts", "sand"):
     STYLE[_soft] = {"glaze": {"shade_per_stud2": 60.0, "shade_mix": 0.1}}
 
 # ---------------------------------------------------------------- destruction
@@ -361,7 +368,7 @@ BREAK = {
     "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30,
                      "canvas": 2, "redcloth": 2, "burlap": 4, "clay": 6, "rope": 3, "paving": 16, "band": 6,
                      "brass": 20, "leaf": 2, "bloom": 2, "glow": 4, "cloth": 2,
-                     "saffron": 2, "plum": 2, "indigo": 2},
+                     "saffron": 2, "plum": 2, "indigo": 2, "sand": 2},
     "hp_min": 10,
     "pieces": {
         "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
@@ -424,6 +431,13 @@ BREAK = {
         "rug": {"mode": "parts"},
         "sign_tea": {"mode": "parts"},
         "sign_dye": {"mode": "parts"},
+        "paving_a": {"mode": "parts"},
+        "paving_b": {"mode": "parts"},
+        "paving_c": {"mode": "parts"},
+        "paving_tiles": {"mode": "parts"},
+        "paving_bricks": {"mode": "parts"},
+        "paving_dyed": {"mode": "parts"},
+        "sand_drift": {"mode": "parts"},
         "banner": {"mode": "parts"},
         "bougainvillea": {"mode": "parts"},
         "ground": {"mode": "parts"},
