@@ -21,6 +21,10 @@ return {
 		chunks = { Stagger = 0.45, Outward = 0, Scatter = 3 }, -- walls and doors sag and fall
 		shatter = { Stagger = 0, Outward = 14, Scatter = 0 }, -- crates and barrels burst
 	},
+	-- Pieces stronger than their size says: health is multiplied by this. A house door is a thin leaf, but the
+	-- plan counts a house as closed; at four times its health it takes a second and a half of rifle fire to
+	-- shoot open, a third of what the wall beside it takes.
+	Tough = { door2_wood = 4, door2_teal = 4 },
 	-- Extra push on the shards nearest the hit (studs per second): along a shot, and away from a blast.
 	ShotPush = 12,
 	BlastPush = 30,
@@ -42,8 +46,11 @@ return {
 	-- What holds what up (Structure). A piece stands while it rests on the ground or on a standing piece.
 	-- The links are worked out from the boxes round the pieces as they are built.
 	Structure = {
-		-- Two pieces touch if they are no further apart than Touch and share an edge at least Share long.
+		-- Two pieces touch if they are no further apart than Touch. One rests on the other only if it also
+		-- lies over it: by at least Overlap one way and Share the other. (A floor does not rest on the wall of
+		-- the next cell by its corner, nor an upper wall on the wall of the next bay by its end.)
 		Touch = 0.15,
+		Overlap = 0.3,
 		Share = 0.8,
 		-- A piece rests on a touching piece that starts at least this much lower.
 		Lower = 0.5,
@@ -52,13 +59,14 @@ return {
 		-- Pieces that can hold others up, by the start of their name. (Corner posts do not: a wall or a floor
 		-- with nothing but a post under it comes down.)
 		Bearing = { "wall", "pillar", "floor", "roof", "parapet", "town", "stairs" },
-		-- Floors and roofs also hold each other up sideways: one stands if it is within SpanReach floors of
-		-- one that rests on a wall.
+		-- Floors and roofs also hold each other up sideways: a slab with no wall under it stands while two of
+		-- the slabs beside it stand, no more than SpanReach slabs from one that rests on a wall. So the end of
+		-- a house comes down when its walls go, and the middle of a hall does not.
 		Spans = { "floor", "roof" },
-		SpanReach = 2,
+		SpanReach = 3,
 		-- Pieces fixed to a wall instead of standing: they stay while any bearing piece they touch stays.
-		-- Looked up before Hangs ("lantern_wall" is fixed, "lantern" hangs).
-		Fixed = { "door", "shelf", "sign", "banner", "lantern_wall", "spout", "bougainvillea", "awning", "cloth" },
+		-- Looked up before Hangs ("lantern_wall" is fixed, "lantern" hangs). A corner post goes with its walls.
+		Fixed = { "door", "shelf", "sign", "banner", "lantern_wall", "spout", "bougainvillea", "awning", "cloth", "corner" },
 		-- Pieces that hang: held by a bearing piece that reaches at least as high as they do.
 		Hangs = { "lantern" },
 		-- The ground itself. It is not part of any structure.

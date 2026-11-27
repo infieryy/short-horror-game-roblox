@@ -122,8 +122,8 @@ local function newEntity(piece: string, instance: Instance, lo: Vector3, hi: Vec
 	}
 end
 
--- Whether `under` can hold `over` up, given that they touch.
-local function canHold(under: Entity, over: Entity): boolean
+-- Whether `under` can hold `over` up, given that they touch. `lapped`: one lies over the other.
+local function canHold(under: Entity, over: Entity, lapped: boolean): boolean
 	if not under.bearing or over.grounded then
 		return false
 	elseif over.hold == "fixed" then
@@ -131,27 +131,81 @@ local function canHold(under: Entity, over: Entity): boolean
 	elseif over.hold == "hangs" then
 		return under.hi.Y >= over.hi.Y - Rules.Lower
 	end
-	return under.lo.Y < over.lo.Y - Rules.Lower
+	return lapped and under.lo.Y < over.lo.Y - Rules.Lower
 end
 
 local function link(a: Entity, b: Entity)
 	local over = a.hi:Min(b.hi) - a.lo:Max(b.lo) -- how far the boxes overlap on each axis; negative is a gap
-	if over.Y < -Rules.Touch or math.min(over.X, over.Z) < -Rules.Touch or math.max(over.X, over.Z) < Rules.Share then
+	if over.Y < -Rules.Touch or math.min(over.X, over.Z) < -Rules.Touch then
 		return
 	end
+	local shared = math.max(over.X, over.Z) >= Rules.Share -- side by side along an edge, or one over the other
+	local lapped = shared and math.min(over.X, over.Z) >= Rules.Overlap
 	for _, pair in { { a, b }, { b, a } } do
 		local under, top = pair[1], pair[2]
-		if canHold(under, top) then
+		if canHold(under, top, lapped) then
 			table.insert(top.holders, under)
 			table.insert(under.holds, top)
 		end
 	end
-	if a.span and b.span and math.abs(a.lo.Y - b.lo.Y) < Rules.Lower then
+	if shared and a.span and b.span and math.abs(a.lo.Y - b.lo.Y) < Rules.Lower then
 		table.insert(a.beside, b)
 		table.insert(b.beside, a)
 		table.insert(a.holds, b)
 		table.insert(b.holds, a)
 	end
+end
+
+-- How firmly a piece stands: 0 on the ground or on a standing piece; for a slab held only by the slabs beside
+-- it, how many slabs away the nearest wall-borne one is; nil if nothing holds it. `footingOf` gives the same
+-- for another piece. One slab beside it is not enough: it hangs between two.
+local function footing(entity: Entity, footingOf: (Entity) -> number?): number?
+	if entity.grounded then
+		return 0
+	end
+	for _, holder in entity.holders do
+		if footingOf(holder) ~= nil then
+			return 0
+		end
+	end
+	local nearest: number?, next: number? = nil, nil
+	for _, other in entity.beside do
+		local far = footingOf(other)
+		if far and far < Rules.SpanReach then
+			if nearest == nil or far < nearest then
+				nearest, next = far, nearest
+			elseif next == nil or far < next then
+				next = far
+			end
+		end
+	end
+	return if next then next + 1 else nil
+end
+
+-- Works out the footing of every piece in `pieces`, given the footing of the pieces outside it.
+local function footings(pieces: { Entity }, outside: (Entity) -> number?): { [Entity]: number }
+	local found: { [Entity]: number } = {}
+	local inside: { [Entity]: boolean } = {}
+	for _, entity in pieces do
+		inside[entity] = true
+	end
+	local function footingOf(entity: Entity): number?
+		return if inside[entity] then found[entity] else outside(entity)
+	end
+	local changed = true
+	while changed do
+		changed = false
+		for _, entity in pieces do
+			if found[entity] ~= 0 then
+				local firm = footing(entity, footingOf)
+				if firm and (found[entity] == nil or firm < found[entity]) then
+					found[entity] = firm
+					changed = true
+				end
+			end
+		end
+	end
+	return found
 end
 
 -- Whether a piece has anything at all left to hold it (used when one piece is stood up again).
@@ -243,45 +297,14 @@ local function settle(gone: Entity)
 		index += 1
 	end
 
-	-- which of those still stand: on the ground, on a standing piece, or (a floor) beside a standing floor.
-	-- `hops` is how many floors away the nearest wall-borne floor is.
-	local hops: { [Entity]: number } = {}
-	local changed = true
-	while changed do
-		changed = false
-		for _, entity in queue do
-			if hops[entity] == 0 then
-				continue
-			end
-			local best: number? = nil
-			if entity.grounded then
-				best = 0
-			else
-				for _, holder in entity.holders do
-					if not holder.down and (not affected[holder] or hops[holder] ~= nil) then
-						best = 0
-						break
-					end
-				end
-			end
-			if best == nil then
-				for _, other in entity.beside do
-					local far = hops[other]
-					if not other.down and far and far < Rules.SpanReach and (best == nil or far + 1 < best) then
-						best = far + 1
-					end
-				end
-			end
-			if best and (hops[entity] == nil or best < hops[entity]) then
-				hops[entity] = best
-				changed = true
-			end
-		end
-	end
+	-- which of those still stand; everything else that is not down already stands as before
+	local firm = footings(queue, function(entity: Entity): number?
+		return if entity.down then nil else 0
+	end)
 
 	local from = (gone.lo + gone.hi) / 2
 	for _, entity in queue do
-		if hops[entity] == nil then
+		if firm[entity] == nil then
 			entity.down = true
 			local away = ((entity.lo + entity.hi) / 2 - from).Magnitude
 			task.delay(away / Rules.Speed, bringDown, entity)
@@ -409,41 +432,11 @@ function Structure.register(root: Instance, groundY: number): { pieces: number, 
 
 	-- a piece that nothing holds as built is pinned to the ground rather than left to fall at the first shot
 	local unheld: { [string]: number } = {}
-	local hops: { [Entity]: number } = {}
-	local changed = true
-	while changed do
-		changed = false
-		for _, entity in entities do
-			if hops[entity] == 0 then
-				continue
-			end
-			local best: number? = nil
-			if entity.grounded then
-				best = 0
-			else
-				for _, holder in entity.holders do
-					if hops[holder] ~= nil then
-						best = 0
-						break
-					end
-				end
-			end
-			if best == nil then
-				for _, other in entity.beside do
-					local far = hops[other]
-					if far and far < Rules.SpanReach and (best == nil or far + 1 < best) then
-						best = far + 1
-					end
-				end
-			end
-			if best and (hops[entity] == nil or best < hops[entity]) then
-				hops[entity] = best
-				changed = true
-			end
-		end
-	end
+	local firm = footings(entities, function(): number?
+		return nil
+	end)
 	for _, entity in entities do
-		if hops[entity] == nil then
+		if firm[entity] == nil then
 			entity.grounded = true
 			unheld[entity.piece] = (unheld[entity.piece] or 0) + 1
 		end

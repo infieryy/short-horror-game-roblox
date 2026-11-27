@@ -6,6 +6,8 @@ return {
 	Middle = CFrame.new(-700, 1, 0),
 	-- Studs the buildings' own paving stands above the slab under the town, so the two never show in one plane.
 	Lift = 0.02,
+	-- The slab under the town is sand-coloured, like the desert round it (build/03_lighting.luau).
+	Slab = Color3.fromRGB(240, 172, 128),
 	-- Where the buildings go, under Workspace.
 	Folder = "Buildings",
 

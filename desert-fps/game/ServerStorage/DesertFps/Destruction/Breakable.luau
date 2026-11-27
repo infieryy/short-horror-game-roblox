@@ -42,14 +42,15 @@ end
 
 -- A crate or barrel carries its health in the data; a wall or door is as strong as its shards together.
 local function fullHealth(data: PieceData): number
+	local tough = (Config.Tough :: any)[data.piece] or 1
 	if data.health then
-		return data.health
+		return data.health * tough
 	end
 	local total = 0
 	for _, shard in data.chunks do
 		total += shard.health
 	end
-	return total
+	return total * tough
 end
 
 local function meshTemplates(piece: string): Instance?

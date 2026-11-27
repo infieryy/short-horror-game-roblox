@@ -21,13 +21,22 @@ task.spawn(function()
 	local buildings = workspace:FindFirstChild(TownConfig.Folder)
 	if buildings then
 		local report = Structure.register(buildings, TownConfig.Middle.Y)
-		local loose = 0
-		for _, count in report.unheld do
-			loose += count
+		local unheld = {}
+		for piece, count in report.unheld do
+			table.insert(unheld, `{count} {piece}`)
 		end
-		print(`Structure: {report.pieces} pieces, {report.links} links, {loose} with nothing to hold them (pinned)`)
+		print(`Structure: {report.pieces} pieces, {report.links} links; nothing holds: {table.concat(unheld, ", ")}`)
 	end
 end)
+
+if DevConfig.TestHooks then
+	local damage = Instance.new("BindableFunction")
+	damage.Name = "DevDamage"
+	damage.OnInvoke = function(part: BasePart, amount: number): boolean
+		return Breakable.damage(part, amount, part.Position, Vector3.new(0, -1, 0)) or Structure.knock(part)
+	end
+	damage.Parent = DesertFps
+end
 
 -- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by
 -- one the first time it cracks.

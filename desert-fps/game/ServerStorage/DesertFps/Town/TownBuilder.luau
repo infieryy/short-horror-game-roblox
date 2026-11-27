@@ -159,7 +159,12 @@ function TownBuilder.build(only: { string }?): { [string]: number }
 	local pieces: { [string]: number } = {}
 	if not only then
 		-- the gray boxes are gone; the slab under the town stays for the route tests
-		GrayboxBuilder.build("town", workspace, Config.Middle, { { 0, 0, size - 1, size - 1 } })
+		local graybox = GrayboxBuilder.build("town", workspace, Config.Middle, { { 0, 0, size - 1, size - 1 } })
+		for _, slab in graybox:GetDescendants() do
+			if slab:IsA("BasePart") then
+				slab.Color = Config.Slab -- it shows as a strip outside the town wall
+			end
+		end
 	end
 
 	local buildings = workspace:FindFirstChild(Config.Folder)

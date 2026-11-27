@@ -6,4 +6,8 @@ return {
 	SpawnPath = { "Buildings", "Spawn" } :: { string }?,
 	-- Seconds after a breakable piece is completely destroyed before it is stood up again.
 	RebuildSeconds = 30 :: number?,
+	-- Lets a test script reach the running game: ServerStorage.DesertFps.DevDamage:Invoke(part, amount) does
+	-- to `part` what a shot of that strength would. (Studio's command bar gets its own copies of the modules,
+	-- so a test cannot call Breakable itself and have the running game notice.)
+	TestHooks = true :: boolean?,
 }

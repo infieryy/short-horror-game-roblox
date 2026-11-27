@@ -56,13 +56,22 @@ task.spawn(function()
 	local buildings = workspace:FindFirstChild(TownConfig.Folder)
 	if buildings then
 		local report = Structure.register(buildings, TownConfig.Middle.Y)
-		local loose = 0
-		for _, count in report.unheld do
-			loose += count
+		local unheld = {}
+		for piece, count in report.unheld do
+			table.insert(unheld, `{count} {piece}`)
 		end
-		print(`Structure: {report.pieces} pieces, {report.links} links, {loose} with nothing to hold them (pinned)`)
+		print(`Structure: {report.pieces} pieces, {report.links} links; nothing holds: {table.concat(unheld, ", ")}`)
 	end
 end)
+
+if DevConfig.TestHooks then
+	local damage = Instance.new("BindableFunction")
+	damage.Name = "DevDamage"
+	damage.OnInvoke = function(part: BasePart, amount: number): boolean
+		return Breakable.damage(part, amount, part.Position, Vector3.new(0, -1, 0)) or Structure.knock(part)
+	end
+	damage.Parent = DesertFps
+end
 
 -- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by
 -- one the first time it cracks.
@@ -703,14 +712,15 @@ end
 
 -- A crate or barrel carries its health in the data; a wall or door is as strong as its shards together.
 local function fullHealth(data: PieceData): number
+	local tough = (Config.Tough :: any)[data.piece] or 1
 	if data.health then
-		return data.health
+		return data.health * tough
 	end
 	local total = 0
 	for _, shard in data.chunks do
 		total += shard.health
 	end
-	return total
+	return total * tough
 end
 
 local function meshTemplates(piece: string): Instance?
@@ -1014,6 +1024,10 @@ return {
 		chunks = { Stagger = 0.45, Outward = 0, Scatter = 3 }, -- walls and doors sag and fall
 		shatter = { Stagger = 0, Outward = 14, Scatter = 0 }, -- crates and barrels burst
 	},
+	-- Pieces stronger than their size says: health is multiplied by this. A house door is a thin leaf, but the
+	-- plan counts a house as closed; at four times its health it takes a second and a half of rifle fire to
+	-- shoot open, a third of what the wall beside it takes.
+	Tough = { door2_wood = 4, door2_teal = 4 },
 	-- Extra push on the shards nearest the hit (studs per second): along a shot, and away from a blast.
 	ShotPush = 12,
 	BlastPush = 30,
@@ -1035,8 +1049,11 @@ return {
 	-- What holds what up (Structure). A piece stands while it rests on the ground or on a standing piece.
 	-- The links are worked out from the boxes round the pieces as they are built.
 	Structure = {
-		-- Two pieces touch if they are no further apart than Touch and share an edge at least Share long.
+		-- Two pieces touch if they are no further apart than Touch. One rests on the other only if it also
+		-- lies over it: by at least Overlap one way and Share the other. (A floor does not rest on the wall of
+		-- the next cell by its corner, nor an upper wall on the wall of the next bay by its end.)
 		Touch = 0.15,
+		Overlap = 0.3,
 		Share = 0.8,
 		-- A piece rests on a touching piece that starts at least this much lower.
 		Lower = 0.5,
@@ -1045,13 +1062,14 @@ return {
 		-- Pieces that can hold others up, by the start of their name. (Corner posts do not: a wall or a floor
 		-- with nothing but a post under it comes down.)
 		Bearing = { "wall", "pillar", "floor", "roof", "parapet", "town", "stairs" },
-		-- Floors and roofs also hold each other up sideways: one stands if it is within SpanReach floors of
-		-- one that rests on a wall.
+		-- Floors and roofs also hold each other up sideways: a slab with no wall under it stands while two of
+		-- the slabs beside it stand, no more than SpanReach slabs from one that rests on a wall. So the end of
+		-- a house comes down when its walls go, and the middle of a hall does not.
 		Spans = { "floor", "roof" },
-		SpanReach = 2,
+		SpanReach = 3,
 		-- Pieces fixed to a wall instead of standing: they stay while any bearing piece they touch stays.
-		-- Looked up before Hangs ("lantern_wall" is fixed, "lantern" hangs).
-		Fixed = { "door", "shelf", "sign", "banner", "lantern_wall", "spout", "bougainvillea", "awning", "cloth" },
+		-- Looked up before Hangs ("lantern_wall" is fixed, "lantern" hangs). A corner post goes with its walls.
+		Fixed = { "door", "shelf", "sign", "banner", "lantern_wall", "spout", "bougainvillea", "awning", "cloth", "corner" },
 		-- Pieces that hang: held by a bearing piece that reaches at least as high as they do.
 		Hangs = { "lantern" },
 		-- The ground itself. It is not part of any structure.
@@ -1192,8 +1210,8 @@ local function newEntity(piece: string, instance: Instance, lo: Vector3, hi: Vec
 	}
 end
 
--- Whether `under` can hold `over` up, given that they touch.
-local function canHold(under: Entity, over: Entity): boolean
+-- Whether `under` can hold `over` up, given that they touch. `lapped`: one lies over the other.
+local function canHold(under: Entity, over: Entity, lapped: boolean): boolean
 	if not under.bearing or over.grounded then
 		return false
 	elseif over.hold == "fixed" then
@@ -1201,27 +1219,81 @@ local function canHold(under: Entity, over: Entity): boolean
 	elseif over.hold == "hangs" then
 		return under.hi.Y >= over.hi.Y - Rules.Lower
 	end
-	return under.lo.Y < over.lo.Y - Rules.Lower
+	return lapped and under.lo.Y < over.lo.Y - Rules.Lower
 end
 
 local function link(a: Entity, b: Entity)
 	local over = a.hi:Min(b.hi) - a.lo:Max(b.lo) -- how far the boxes overlap on each axis; negative is a gap
-	if over.Y < -Rules.Touch or math.min(over.X, over.Z) < -Rules.Touch or math.max(over.X, over.Z) < Rules.Share then
+	if over.Y < -Rules.Touch or math.min(over.X, over.Z) < -Rules.Touch then
 		return
 	end
+	local shared = math.max(over.X, over.Z) >= Rules.Share -- side by side along an edge, or one over the other
+	local lapped = shared and math.min(over.X, over.Z) >= Rules.Overlap
 	for _, pair in { { a, b }, { b, a } } do
 		local under, top = pair[1], pair[2]
-		if canHold(under, top) then
+		if canHold(under, top, lapped) then
 			table.insert(top.holders, under)
 			table.insert(under.holds, top)
 		end
 	end
-	if a.span and b.span and math.abs(a.lo.Y - b.lo.Y) < Rules.Lower then
+	if shared and a.span and b.span and math.abs(a.lo.Y - b.lo.Y) < Rules.Lower then
 		table.insert(a.beside, b)
 		table.insert(b.beside, a)
 		table.insert(a.holds, b)
 		table.insert(b.holds, a)
 	end
+end
+
+-- How firmly a piece stands: 0 on the ground or on a standing piece; for a slab held only by the slabs beside
+-- it, how many slabs away the nearest wall-borne one is; nil if nothing holds it. `footingOf` gives the same
+-- for another piece. One slab beside it is not enough: it hangs between two.
+local function footing(entity: Entity, footingOf: (Entity) -> number?): number?
+	if entity.grounded then
+		return 0
+	end
+	for _, holder in entity.holders do
+		if footingOf(holder) ~= nil then
+			return 0
+		end
+	end
+	local nearest: number?, next: number? = nil, nil
+	for _, other in entity.beside do
+		local far = footingOf(other)
+		if far and far < Rules.SpanReach then
+			if nearest == nil or far < nearest then
+				nearest, next = far, nearest
+			elseif next == nil or far < next then
+				next = far
+			end
+		end
+	end
+	return if next then next + 1 else nil
+end
+
+-- Works out the footing of every piece in `pieces`, given the footing of the pieces outside it.
+local function footings(pieces: { Entity }, outside: (Entity) -> number?): { [Entity]: number }
+	local found: { [Entity]: number } = {}
+	local inside: { [Entity]: boolean } = {}
+	for _, entity in pieces do
+		inside[entity] = true
+	end
+	local function footingOf(entity: Entity): number?
+		return if inside[entity] then found[entity] else outside(entity)
+	end
+	local changed = true
+	while changed do
+		changed = false
+		for _, entity in pieces do
+			if found[entity] ~= 0 then
+				local firm = footing(entity, footingOf)
+				if firm and (found[entity] == nil or firm < found[entity]) then
+					found[entity] = firm
+					changed = true
+				end
+			end
+		end
+	end
+	return found
 end
 
 -- Whether a piece has anything at all left to hold it (used when one piece is stood up again).
@@ -1313,45 +1385,14 @@ local function settle(gone: Entity)
 		index += 1
 	end
 
-	-- which of those still stand: on the ground, on a standing piece, or (a floor) beside a standing floor.
-	-- `hops` is how many floors away the nearest wall-borne floor is.
-	local hops: { [Entity]: number } = {}
-	local changed = true
-	while changed do
-		changed = false
-		for _, entity in queue do
-			if hops[entity] == 0 then
-				continue
-			end
-			local best: number? = nil
-			if entity.grounded then
-				best = 0
-			else
-				for _, holder in entity.holders do
-					if not holder.down and (not affected[holder] or hops[holder] ~= nil) then
-						best = 0
-						break
-					end
-				end
-			end
-			if best == nil then
-				for _, other in entity.beside do
-					local far = hops[other]
-					if not other.down and far and far < Rules.SpanReach and (best == nil or far + 1 < best) then
-						best = far + 1
-					end
-				end
-			end
-			if best and (hops[entity] == nil or best < hops[entity]) then
-				hops[entity] = best
-				changed = true
-			end
-		end
-	end
+	-- which of those still stand; everything else that is not down already stands as before
+	local firm = footings(queue, function(entity: Entity): number?
+		return if entity.down then nil else 0
+	end)
 
 	local from = (gone.lo + gone.hi) / 2
 	for _, entity in queue do
-		if hops[entity] == nil then
+		if firm[entity] == nil then
 			entity.down = true
 			local away = ((entity.lo + entity.hi) / 2 - from).Magnitude
 			task.delay(away / Rules.Speed, bringDown, entity)
@@ -1479,41 +1520,11 @@ function Structure.register(root: Instance, groundY: number): { pieces: number, 
 
 	-- a piece that nothing holds as built is pinned to the ground rather than left to fall at the first shot
 	local unheld: { [string]: number } = {}
-	local hops: { [Entity]: number } = {}
-	local changed = true
-	while changed do
-		changed = false
-		for _, entity in entities do
-			if hops[entity] == 0 then
-				continue
-			end
-			local best: number? = nil
-			if entity.grounded then
-				best = 0
-			else
-				for _, holder in entity.holders do
-					if hops[holder] ~= nil then
-						best = 0
-						break
-					end
-				end
-			end
-			if best == nil then
-				for _, other in entity.beside do
-					local far = hops[other]
-					if far and far < Rules.SpanReach and (best == nil or far + 1 < best) then
-						best = far + 1
-					end
-				end
-			end
-			if best and (hops[entity] == nil or best < hops[entity]) then
-				hops[entity] = best
-				changed = true
-			end
-		end
-	end
+	local firm = footings(entities, function(): number?
+		return nil
+	end)
 	for _, entity in entities do
-		if hops[entity] == nil then
+		if firm[entity] == nil then
 			entity.grounded = true
 			unheld[entity.piece] = (unheld[entity.piece] or 0) + 1
 		end
@@ -1548,6 +1559,10 @@ return {
 	SpawnPath = { "Buildings", "Spawn" } :: { string }?,
 	-- Seconds after a breakable piece is completely destroyed before it is stood up again.
 	RebuildSeconds = 30 :: number?,
+	-- Lets a test script reach the running game: ServerStorage.DesertFps.DevDamage:Invoke(part, amount) does
+	-- to `part` what a shot of that strength would. (Studio's command bar gets its own copies of the modules,
+	-- so a test cannot call Breakable itself and have the running game notice.)
+	TestHooks = true :: boolean?,
 }
 ]=] },
 	{ path = { "ServerStorage", "DesertFps", "Graybox", "GrayboxBuilder" }, class = "ModuleScript", source = [=[
@@ -3229,7 +3244,12 @@ function TownBuilder.build(only: { string }?): { [string]: number }
 	local pieces: { [string]: number } = {}
 	if not only then
 		-- the gray boxes are gone; the slab under the town stays for the route tests
-		GrayboxBuilder.build("town", workspace, Config.Middle, { { 0, 0, size - 1, size - 1 } })
+		local graybox = GrayboxBuilder.build("town", workspace, Config.Middle, { { 0, 0, size - 1, size - 1 } })
+		for _, slab in graybox:GetDescendants() do
+			if slab:IsA("BasePart") then
+				slab.Color = Config.Slab -- it shows as a strip outside the town wall
+			end
+		end
 	end
 
 	local buildings = workspace:FindFirstChild(Config.Folder)
@@ -3294,6 +3314,8 @@ return {
 	Middle = CFrame.new(-700, 1, 0),
 	-- Studs the buildings' own paving stands above the slab under the town, so the two never show in one plane.
 	Lift = 0.02,
+	-- The slab under the town is sand-coloured, like the desert round it (build/03_lighting.luau).
+	Slab = Color3.fromRGB(240, 172, 128),
 	-- Where the buildings go, under Workspace.
 	Folder = "Buildings",
 
