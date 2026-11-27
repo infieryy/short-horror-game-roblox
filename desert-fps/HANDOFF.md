@@ -167,8 +167,8 @@ Renders for reference: `assets/out/preview.png`, `compare.png` (next to the conc
 - Whether beam ends go on every wall or only at the roofline.
 
 **Not built yet**
-- Kit pieces still missing: arched doorways and arcades, the dome, a tower roof, pierced and round-topped parapets, curved and walled stairs, the other ladder styles, palm trees, the cart, lantern, rug, baskets, banners.
-- Set dressing, map edge (sky, background cards, sandstorm, the ground outside the wall).
+- Kit pieces still missing: a tower roof, round-topped parapets, curved and walled stairs, the other ladder styles.
+- Map edge: the sky and the town wall are done; background cards, a sandstorm and the ground outside the wall are not.
 - Attachments, more weapons, armor, the frag and flash grenades.
 
 ## 6. What to do next
@@ -329,7 +329,104 @@ The owner: "fix up the above with this feedback then start next building".
 - **Bots:** 35 of 35; the seven Cistern Hall routes are within 3% of the plan.
 - **Still to do on it:** it is the plainest of the four. No arches between the pillars (the concept has them), the outside was not looked at closely, the fall of water from the spouts was not checked in Studio, and nothing was shot down. The water looks bluer in Studio than painted, because the shade light is violet. Wading does not slow anyone yet.
 
+### The whole town, built, and it comes down (overnight, 2026-11-27)
+
+![The town from above the south-east corner](assets/studio/town-from-south-east.jpg)
+![The street past the bakery to the Tea House](assets/studio/town-street-to-teahouse.jpg)
+
+The owner, going to bed: "finish this entire map structure by structure... Do it in as much painstaking detail. Obsess over every building like it owes you money", "remember to make the environment fully destructible and physics based (buildings can collapse)", "Each house should feel, look, and be different. It should feel like a lively desert village".
+
+**What stands now.** No gray boxes are left. `Workspace.Buildings` holds 52 recipes: the four large buildings, two small ones you can walk into, 44 houses, the street dressing and the town wall. 4,071 pieces, about 1,080,000 triangles, 210 lamps, on 1,034 paving pieces with 141 sand drifts. The kit has 95 pieces (19 new, 38 uploads, all approved).
+
+- **The Cistern Hall is finished:** arcades over both channels, the water sellers' sign. ![Inside the Cistern Hall](assets/studio/cistern-arcades.jpg)
+- **44 houses** (`assets/buildings/houses.py`). Every solid block of the plan is a real, hollow, closed house. Each has an entry in `HOUSES`: who lives or works there, its own shade of plaster, its door, its sign, what its roof is used for, what stands outside it and what is inside. The list is in [assets/out/town-houses.md](assets/out/town-houses.md) and below. ![The Inn](assets/studio/town-inn.jpg) ![The wayside shrine](assets/studio/town-shrine.jpg)
+- **The Potters' Workshop** (`buildings/potters.py`): a U of open workrooms round the kiln yard; the kiln's fire is a light that goes out when the kiln is broken. **The Guard House** (`buildings/guardhouse.py`): one hall with the duty desk, two bunks and the guards' stores. Both take their walls from the plan like the large buildings. ![The potters' yard](assets/studio/town-potters-yard.jpg) ![Inside the Guard House](assets/studio/town-guardhouse-inside.jpg)
+- **The streets** (`buildings/streets.py`): every cover spot, tree, cloth line, well, pillar, ladder, flight of stairs and plank of the plan, each named in a table with what it is and why it is there: stalls round the market well all facing it, the water carrier's cart loading at the well, the dyers' cloth across the east entrance of the square, pots waiting for the kiln, carts and a trough by the stable, seats outside the Tea House. A spot the plan has and the table does not name stops the build. ![The Market Square](assets/studio/town-market-square.jpg) ![The arcade](assets/studio/town-arcade.jpg)
+- **The town wall** (`buildings/walls.py`): two stories of plaster and battlements in the ring of cells the plan keeps solid, 21 towers, and the gate in the south wall at the end of the street through the Gate Quarter. Behind it stand unseen walls 80 studs high (`Workspace.TownEdge`), so a hole shot in the town wall lets nobody out. ![The street to the gate](assets/studio/town-gate-street.jpg)
+- **One command writes all of it:** `python -m buildings.town` in `assets/` writes every generated recipe and `out/town.json` (which recipe stands at which plan cell, and where no sand is banked); `pack.py` packs that as `Town/TownData`; `TownBuilder.build()` stands the town in about 2 seconds. `TownBuilder.build({ "house_04_03" })` rebuilds one recipe.
+
+**Buildings collapse** (`Destruction/Structure.luau`, rules in `DestructionConfig.Structure`).
+
+![The Watchtower before](assets/studio/town-watchtower-before.jpg)
+![The Watchtower coming down](assets/studio/town-watchtower-collapse.jpg)
+
+- At the start of a game every piece in `Workspace.Buildings` is linked to what holds it up, worked out from the boxes round the pieces: a floor rests on the walls under it, an upper wall on the wall or floor below, a parapet on its wall, furniture on its floor; a lantern hangs from its ceiling; a sign, a banner, an awning, a door leaf and a corner post are fixed to their wall. 3,661 pieces, 6,699 links, and not one piece with nothing to hold it.
+- When a piece is destroyed, whatever it was the last thing holding comes down too, and so on up the building, running outward at 45 studs a second. Breakable pieces crumble into their shards from the bottom (`Breakable.collapse`); loose pieces (lanterns, signs, rugs, banners) drop and lie as rubble.
+- A floor slab with no wall under it stands while two slabs beside it stand. So the end of a house falls when its walls go and the middle of a hall does not.
+- A shot knocks a lantern, a sign or a banner down directly.
+- **Tested in a playtest** (`build/tests/test_collapse.luau`): with the four ground walls of its west end destroyed, the Captain's House went from 72 pieces to 49, that end down through both stories and the rest standing; with all eight ground walls destroyed the three-story Watchtower went from 68 pieces to 2 (the crates and the bunk inside). With the dev rebuild on, everything stood again 30 seconds later, lamps and banners included.
+- A rifle (30 damage, 600 shots a minute) takes about 4 seconds to bring down one wall, so about 12 seconds for the end of a small house. There is no explosive yet; `Breakable.blast` is ready for one.
+
+**The plan still holds.** Bots walked all 35 routes through the finished town: **35 of 35**, four of them more than 10% slower than planned, the worst 14%. `plan/town.py` knows the piers of the Cistern Hall's arcades; all five arenas still pass every check.
+
+**Decisions made while the owner was asleep. Say if any should change.**
+- **Houses are closed.** The plan tested them as solid boxes, so their doors are shut and their ground floors have shutters, not open windows. A house can be shot open and is hollow inside, with a few things that say whose it is.
+- **House doors take four times their health** (`DestructionConfig.Tough`): 400, a second and a half of rifle fire. At their real strength every house could be opened in half a second, and the plan counts on houses being closed.
+- **Each house's shade of plaster** is the painted texture multiplied by a colour (`SurfaceAppearance.Color`, ten tints in `houses.py`), not a new painting per house. It keeps to the wall family and costs no uploads, but it shifts the turquoise band a little too.
+- **Goods in the street keep off the cells the test bots walk through** unless they are shallow (pots of plants, baskets, vases). 67 street cells have goods.
+- **The gate** is in the south wall at column 8. The plan only says "the gatehouse".
+- **`DevConfig.TestHooks`** (on): a `DevDamage` function a test script can call. Turn it off with the other dev switches for the real game.
+- **The old town (`Workspace.Map`, about 57,000 instances) and `Workspace.KitShowcase` were left alone.** Deleting them was never asked for. They are a long way east of the new town and cost memory and load time.
+
+**Not done, not verified.**
+- **Frame rate is still not measured.** The town is about 1,080,000 triangles; the estimate in `plan/PLAN.md` was 700,000. Houses are 568,000 of it and the street dressing 135,000. The heaviest pieces by count are barrels, plain and shuttered walls, bougainvillea, divans and trees.
+- Nothing was judged by a person. Every picture here was looked at, but the owner has not seen any of it.
+- Rubble does not hurt anyone, and a player standing on a roof that falls just drops.
+- All roofs but six cannot be reached; what is on them is to be looked at.
+- Collapse was tested on two houses, not on every building. The large buildings were not shot at all.
+- Water still does not slow anyone. Arena barriers, rounds and team spawns are not built.
+- The low-detail meshes every piece has are still not used.
+
+| The 44 houses | | | | | | | |
+|---|---|---|---|---|---|---|---|
+| CharcoalShed | the charcoal burner's shed | 4 | 1 | clay | store | 37 | 10432 |
+| TeaMerchantsHouse | the tea merchant's house, behind the tea garden | 8 | 2 | apricot | sitting | 78 | 24524 |
+| ClayStore | the potters' clay store | 2 | 1 | terracotta | pots | 27 | 6188 |
+| Watchtower | the watchtower | 4 | 3 | sand | lookout | 79 | 16756 |
+| Barracks | the barracks: an L of two stories | 12 | 2 | peach | sleeping | 140 | 24996 |
+| TeaStore | the tea store and packing rooms, across the lane from the Tea House | 8 | 1 | sand | drying | 90 | 22532 |
+| Inn | the inn: a tall house with a low porch | 5 | 1/2 | rose | garden + sitting | 78 | 26692 |
+| MasterPotter | the master potter's house | 4 | 2 | ochre | pots | 64 | 15088 |
+| WatchmansHouse | the watchman's house | 2 | 1 | blush | garden | 34 | 9352 |
+| GlazeStore | the glaze store, against the town wall | 2 | 1 | clay | kitchen | 27 | 6132 |
+| Quartermaster | the quartermaster's store; a ladder goes up to its roof | 7 | 1 | sand | store | 67 | 17052 |
+| ScribesHouse | the scribe's house, narrow and tall | 3 | 2 | dusk | garden | 59 | 15360 |
+| OilStore | the lamp-oil store, against the town wall | 2 | 1 | ochre | tanks | 26 | 5776 |
+| Bakery | the bakery | 4 | 1 | apricot | kitchen | 48 | 10752 |
+| DryingLoft | the drying loft; a ladder goes up to its roof, where pots dry | 4 | 1 | peach | pots | 47 | 11168 |
+| CaptainsHouse | the captain's house | 6 | 2 | lilac | sitting | 86 | 19780 |
+| PottersGuild | the potters' guild hall, and its shop at the south end | 8 | 1/2 | terracotta | pots + pots | 113 | 26056 |
+| Armourer | the armourer's workshop | 3 | 2 | clay | washing | 57 | 13468 |
+| GlazeMixer | the glaze mixer's shed | 2 | 1 | sand | kitchen | 38 | 8056 |
+| Cobbler | the cobbler's shop | 2 | 1 | rose | sleeping | 33 | 7240 |
+| ShopRow | a row of six lock-up shops facing the market street | 6 | 1 | sand | shops | 82 | 19184 |
+| MarketKiosk | the sherbet seller's kiosk; stairs go up to its roof terrace | 4 | 1 | peach | sitting | 45 | 11236 |
+| MordantStore | the dyers' mordant store, built onto the Dye Works | 2 | 1 | dusk | cloth | 25 | 6564 |
+| GardenersShed | the gardener's shed, against the town wall | 2 | 1 | blush | garden | 28 | 8816 |
+| WeighHouse | the weigh house | 4 | 1 | ochre | store | 51 | 13228 |
+| Carpenter | the carpenter's workshop | 2 | 1 | clay | store | 33 | 7880 |
+| Arcade | the arcade: six cloth merchants' shops behind the pillars | 6 | 1 | peach | shops | 78 | 23756 |
+| DyersHouse | the dyer's house | 2 | 2 | lilac | cloth | 46 | 10968 |
+| WoolStore | the wool store | 2 | 1 | sand | drying | 35 | 6068 |
+| Farrier | the farrier's forge | 2 | 1 | terracotta | store | 36 | 8988 |
+| Grocer | the grocer's | 2 | 1 | apricot | drying | 38 | 8360 |
+| CustomsHouse | the customs house, on the street to the gate | 4 | 2 | dusk | lookout | 66 | 14700 |
+| WeaversWorkshop | the weavers' workshop; a plank crosses to its roof | 6 | 1 | rose | cloth | 61 | 10712 |
+| FodderBarn | the fodder barn | 4 | 1 | sand | store | 43 | 9760 |
+| CardersHouse | the carder's house; a ladder goes up to its roof | 4 | 1 | peach | washing | 38 | 7320 |
+| WaterCarriers | the water carriers' house | 4 | 1 | blush | tanks | 46 | 10236 |
+| MasterWeaver | the master weaver's house | 7 | 2 | lilac | cloth | 93 | 25412 |
+| CartersLodge | the carters' lodging house | 6 | 2 | clay | washing | 80 | 16792 |
+| Stable | the stable; stairs go up to its hay roof | 4 | 1 | ochre | store | 45 | 9608 |
+| SpinnersCottage | the spinner's cottage | 2 | 1 | blush | cloth | 35 | 8624 |
+| Shrine | a wayside shrine: one small whitewashed room | 1 | 1 | peach | bare | 26 | 5132 |
+| Gatehouse | the gatehouse, beside the town gate | 2 | 2 | sand | lookout | 49 | 11480 |
+| WashHouse | the wash house, by the overflow pool | 4 | 1 | dusk | washing | 46 | 9092 |
+| WeaversShed | the weavers' shed, against the town wall | 4 | 1 | apricot | cloth | 33 | 6264 |
+
 Notes for the next session:
+- Studio's command bar (and an MCP `execute_luau`) gets its own copies of the modules. A test that calls `Breakable.damage` itself breaks the wall, but the running game's `Structure` never hears of it. Go through `ServerStorage.DesertFps.DevDamage`.
+- `python -m buildings.town` needs `plan/out/town.json` and `routes.json` (run `plan/town.py` first after changing the plan).
 - The Studio viewport on this machine is 1096 x 385, so screenshots are small and wide. `python preview.py teahouse` gives a larger Blender render for judging shape.
 - `bmesh.ops.triangulate` and friends need `normal_update()` first on a freshly built mesh, or faces with a notch in them are cut wrongly.
 - Test bots made with `CreateHumanoidModelFromDescription` log "Unable to load rbxasset://avatar/characterR15V3.rbxm" and six asset-type warnings in this Studio. They still walk.

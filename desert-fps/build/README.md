@@ -13,7 +13,7 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 | 7 | `07_build_teahouse.luau` | Optional. Stands the tea house alone on a paved yard outside the old town's south wall, for looking at it. Step 10 moves it into the town |
 | 8 | `08_sky.luau` | Sets the painted sky (six faces cut from one painting by `assets/sky.py`) |
 | 9 | `09_graybox_town.luau` | Builds the compact town (plan v2) as gray boxes in `Workspace.Graybox_town`, west of the old town |
-| 10 | `10_build_town.luau` | Builds the compact town with its real buildings (Tea House, Courtyard House, Dye Works, Cistern Hall) in `Workspace.Buildings`, flagstone paving in `Workspace.TownGround` and gray boxes for the rest. Players spawn in front of the Tea House |
+| 10 | `10_build_town.luau` | Builds the whole compact town from its recipes: every building and house, the street dressing and the town wall in `Workspace.Buildings`, paving in `Workspace.TownGround`, unseen walls behind the town wall in `Workspace.TownEdge`. Of the gray boxes only the slab is left. Players spawn in front of the Tea House. About 2 seconds |
 
 `tests/time_market_routes.luau` runs on the server during a playtest. It walks bots along the planner's Market Square routes and writes the timings to the `RouteTiming` attribute on Workspace. `tests/time_all_routes.luau` does the same for every zone and writes a summary to `RouteSummary`.
 
@@ -22,6 +22,8 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 `tests/time_town_routes.luau` walks bots along the planner's routes in every arena of the compact town's graybox; the summary lands in `TownRouteSummary`.
 
 `tests/walk_teahouse.luau` walks bots through the tea house: in at each door, up both flights of stairs, out onto both terraces. The result lands in the `TeaHouseWalk` attribute on Workspace.
+
+`tests/test_collapse.luau` runs on the server during a playtest, with `DevConfig.TestHooks` on. It shoots out the ground walls of one end of the Captain's House and all of the Watchtower's and returns how many pieces are left standing (49 of 72, and 2 of 68).
 
 `tests/break_wall.luau` runs on the server during a playtest. It damages a wall through its crack stages until it crumbles, bursts a crate and sets off a blast, and returns a list of checks that should all be `ok = true`.
 

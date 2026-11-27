@@ -58,13 +58,21 @@ How it got there:
 ![The gray-box town in Studio](out/graybox-town.png)
 ![From a spawn: two alleys fork round the watchtower](out/graybox-town-spawn.png)
 
-`build/09_graybox_town.luau` builds it all as gray boxes; `build/10_build_town.luau` builds it with the real buildings standing in their places (see below). `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 35 of 35 pass. On gray boxes alone the bots were within 4.3% of the planner's times.
+`build/09_graybox_town.luau` builds it all as gray boxes; `build/10_build_town.luau` builds the real town (see below) and leaves only the slab of the gray-box town, which the route tests measure from. `build/tests/time_town_routes.luau` walks a bot along every route the planner exports: 35 of 35 pass. On gray boxes alone the bots were within 4.3% of the planner's times.
 
 ### Real buildings in the town
 
 ![The Courtyard House and the Tea House in the gray-box town](../assets/studio/town-two-buildings.png)
 
-`game/ServerStorage/DesertFps/Town/TownConfig.luau` lists the buildings that have a recipe; `TownBuilder` stands them at their plan cells and leaves the rest as gray boxes. So far: the Tea House, the Courtyard House, the Dye Works and the Cistern Hall (started).
+**Every cell of the plan is built now** (2026-11-27). `python -m buildings.town` in `assets/` writes a recipe for every house, the Potters' Workshop, the Guard House, the street dressing and the town wall, and `Town/TownData`: which recipe stands at which plan cell. `TownBuilder` stands them all. The pictures below are from the way there.
+
+![The finished town](../assets/studio/town-from-south-east.jpg)
+
+- A solid block of the plan is a closed house: walls on every outside edge, a shut door, a roof behind a parapet. Where the plan gives a roof a ladder, stairs or a plank, the parapet is left open there and the roof is kept clear.
+- High cover is a group that fills its cell and stands taller than a player (a stall, a cart, stacked crates, cloth bolts, the kiln); low cover blocks the way but not the view (sacks, pots, a trough, seats); hanging cloth is a rack you walk through, hung across the way people walk.
+- Goods outside houses keep off the cells the test routes use, unless they reach no further than 2.6 studs from the wall.
+- **35 of 35 routes pass** in the finished town; four run more than 10% slower than planned, the worst 14%.
+- Everything can be shot down, so the layout the plan tested is the layout at the start of a round.
 
 ![The town paved, three buildings built](../assets/studio/town-paved.png)
 
@@ -92,14 +100,14 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 
 - **Landmark building** (5 of them): about 1,500 triangles per plan cell, up to 12 lamps that cast shadows. The Tea House (16 cells, two stories) is 72,000; the Courtyard House (63 cells) is 116,000 with its roof dressed; the Dye Works (72 cells with its yard) is 86,000. The first budget here said 75,000 for any landmark; that was set from the Tea House alone and does not fit a building four times its footprint.
 - **Small house** (16 of them): up to 15,000 triangles, 2 lamps that cast shadows.
-- **Whole town:** about 700,000 triangles and 6,000 pieces. The source video's town is about 2,000,000 triangles.
+- **Whole town:** the estimate was about 700,000 triangles and 6,000 pieces. Built, it is 4,071 pieces (5,246 with the paving and sand) and about 1,080,000 triangles: 44 houses 568,000, the six buildings 345,000, street dressing 135,000, the wall 34,000. A house averages 13,000. The source video's town is about 2,000,000.
 - **Any view in a round:** aim for under 150,000 triangles.
 - **Lamps:** hanging lanterns cast shadows, wall lanterns do not. Rugs, banners, signs, tables, shelves and small pots cast no shadows (`Buildings/BuildingConfig.luau`).
 
 **Frame rate itself is not measured.** This Studio session draws 16 frames a second whether the whole tea house or an empty sky is on screen, so it says nothing. It needs a run on a phone and on an ordinary PC.
 
 ### Not done
-- The Tea House, the Courtyard House and the Dye Works are built; the Cistern Hall is started. The Market Square and all the small houses are boxes.
+- The whole town is built. Nothing in it has been seen by the owner yet.
 - The plan has one cell kind the v1 planner lacks: `u`, shallow water indoors (the Cistern Hall's two channels). `town.py` adds it.
 - Sight is still only checked at eye level on the ground, not from roofs.
 - Barriers that close an arena, rounds and team spawns are not built.
