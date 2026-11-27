@@ -48,6 +48,9 @@ return {
 	-- Kills listed top right: how many, and how long each stays.
 	FeedLines = 5,
 	FeedTime = 6,
+	-- A word under the crosshair when something happens to the player ("SPOTTED") or for them ("2 REVEALED"):
+	-- how far under, and how long it stays.
+	Notice = { Below = 78, Time = 1.4 },
 
 	-- The loadout (Client/LoadoutMenu). The panel: its width, the space inside it and between its rows, how
 	-- round its corners are, how see-through it is (Panel) and how much of the scene behind it shows (Behind).

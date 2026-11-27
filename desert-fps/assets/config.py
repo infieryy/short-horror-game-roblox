@@ -268,6 +268,7 @@ KIT = {
     "knife": {"chunky": 1.3},
     "smoke": {"chunky": 1.0},
     "att": {"chunky": 1.2},                         # attachments: as thick as the rifle they go on
+    "util": {"chunky": 1.2},                        # utility (the recon dart): thrown things, in the guns' metal
     "barrel": {"h": 3.6, "r_end": 1.0, "r_mid": 1.22, "segments": 16, "hoops": (0.5, 1.8, 3.1), "hoop_h": 0.22},
     # --- the rest of the building kit. Everything snaps to the 8-stud cell and the 12-stud story.
     "corner": {"half": 0.75},                       # post that closes the notch where two walls meet
@@ -317,7 +318,7 @@ KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 # ---------------------------------------------------------------- small objects
 # Brush sizes, shading reach and flicker tolerance are tuned for buildings. A piece listed here
 # uses them scaled down (0.2 = a brush one fifth the size).
-DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1, "att": 0.08,
+DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1, "att": 0.08, "util": 0.08,
                 "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7,
                 "lantern": 0.3, "tea": 0.4, "rug": 0.6, "divan": 0.7, "shelf": 0.4, "counter": 0.6, "sign": 0.4,
                 "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7, "bolts": 0.7, "spout": 0.5,
@@ -361,6 +362,7 @@ STYLE["knife"] = {**STYLE["rifle"], "extra_layers": {**STYLE["rifle"]["extra_lay
 
 STYLE["smoke"] = STYLE["knife"]
 STYLE["att"] = STYLE["knife"]
+STYLE["util"] = STYLE["knife"]
 
 # Pale cloth and sacking show the dark corner glaze as stains, so they get much less of it.
 STYLE["cloth"] = {"glaze": {"shade_per_stud2": 30.0}}
@@ -489,6 +491,7 @@ BREAK = {
         "att_scope": {"mode": "parts"},
         "att_foregrip": {"mode": "parts"},
         "att_laser": {"mode": "parts"},
+        "util_dart": {"mode": "parts"},
     },
 }
 

@@ -19,11 +19,15 @@ local CombatConfig = require(Shared.Combat.CombatConfig)
 local DesertFps = (ServerStorage :: any).DesertFps
 local Breakable = require(DesertFps.Destruction.Breakable)
 local Structure = require(DesertFps.Destruction.Structure)
-local PartsData = require(DesertFps.Assets.PartsData)
+local KitModels = require(DesertFps.Assets.KitModels)
 local Combat = require(DesertFps.Combat.Combat)
 local Hitboxes = require(DesertFps.Combat.Hitboxes)
 
 local WeaponService = {}
+
+-- Called when a shot or a slash lands on something in the world that is not a body, before the town is asked:
+-- the first to answer true has taken the hit (the recon dart, which is knocked out).
+WeaponService.Struck = {} :: { (part: BasePart, by: Player) -> boolean }
 
 -- Weapons are modelled pointing along +X; a hand holds a tool pointing along -Z.
 local AIM = CFrame.Angles(0, math.pi / 2, 0)
@@ -49,10 +53,6 @@ local weaponModels: Folder, attachmentModels: Folder
 
 local remotes: { [string]: RemoteEvent } = {}
 
-local function vector(values: { number }): Vector3
-	return Vector3.new(values[1], values[2], values[3])
-end
-
 local function isFinite(v: Vector3): boolean
 	return v.X == v.X and v.Y == v.Y and v.Z == v.Z and v.Magnitude < 1e6
 end
@@ -61,33 +61,6 @@ local function unseen(part: BasePart)
 	part.CanCollide = false
 	part.CanQuery = false
 	part.CanTouch = false
-end
-
--- The model clients show in first person: every part of the weapon or the attachment, with what the client
--- needs to pose it copied out of the parts data (which never leaves the server).
-local function viewModel(name: string, parent: Instance)
-	local data = PartsData[name]
-	local model = Instance.new("Model")
-	model.Name = name
-	for _, socket in data.sockets do
-		model:SetAttribute("Socket_" .. socket.name, vector(socket.position))
-	end
-	for _, template in DesertFps.Meshes[name].Parts:GetChildren() do
-		local part = template:Clone() :: BasePart
-		part.Anchored = true
-		part.CastShadow = false
-		unseen(part)
-		part.Parent = model
-	end
-	for _, joint in data.joints do
-		local part = model:FindFirstChild(joint.part)
-		if part and joint.type == "slide" then
-			part:SetAttribute("Slide", vector(joint.axis) * joint.amount)
-		elseif part and joint.type == "detach" then
-			part:SetAttribute("Detach", vector(joint.axis).Unit)
-		end
-	end
-	model.Parent = parent
 end
 
 -- The weapon everyone else sees in the player's hand, with what is attached to it: a Tool, so the character
@@ -317,7 +290,14 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 		finish = origin + direction * distance
 		remotes.Hit:FireClient(player, zone, dealt, killed)
 	elseif wall and wall.Instance:IsA("BasePart") then
-		if not Breakable.damage(wall.Instance, weapon.WallDamage, wall.Position, direction) then
+		local taken = false
+		for _, struck in WeaponService.Struck do
+			taken = struck(wall.Instance, player)
+			if taken then
+				break
+			end
+		end
+		if not taken and not Breakable.damage(wall.Instance, weapon.WallDamage, wall.Position, direction) then
 			Structure.knock(wall.Instance) -- a lantern, a sign, a banner: shot down
 		end
 	end
@@ -465,18 +445,34 @@ local function viewArms(parent: Instance)
 	arms.Parent = parent
 end
 
+-- The player's hands do something else for `seconds` (throw a dart): the weapon in hand cannot be used for
+-- that long, and then has to be drawn again. A reload under way is lost. False if the player holds nothing.
+function WeaponService.lower(player: Player, seconds: number): boolean
+	local gunner = gunners[player]
+	local _, humanoid = humanoidOf(player)
+	if not (gunner and humanoid) then
+		return false
+	end
+	gunner.aiming = false
+	interruptReload(gunner)
+	local drawn = os.clock() + seconds + weaponOf(gunner).EquipTime - WeaponConfig.Grace
+	gunner.readyAt = math.max(gunner.readyAt, drawn)
+	pace(gunner, humanoid)
+	return true
+end
+
 function WeaponService.start()
 	weaponModels = Instance.new("Folder")
 	weaponModels.Name = "WeaponModels"
 	for name in WeaponConfig.Weapons do
-		viewModel(name, weaponModels)
+		KitModels.view(name, weaponModels)
 	end
 	weaponModels.Parent = Shared
 	attachmentModels = Instance.new("Folder")
 	attachmentModels.Name = "AttachmentModels"
 	for _, what in AttachmentConfig.Attachments :: { [string]: any } do
 		if what.Model then
-			viewModel(what.Model, attachmentModels)
+			KitModels.view(what.Model, attachmentModels)
 		end
 	end
 	attachmentModels.Parent = Shared

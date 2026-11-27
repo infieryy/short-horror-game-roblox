@@ -273,6 +273,14 @@ function Hud.new(playerGui: Instance, camera: Camera)
 	reload.Parent = gui
 	self.reload, self.reloadFilled = reload, filled
 
+	-- Under the crosshair: a word for what just happened.
+	self.noticeLine = label(gui, Config.Medium, Config.Font, Enum.TextXAlignment.Center)
+	self.noticeLine.AnchorPoint = Vector2.new(0.5, 0)
+	self.noticeLine.Position = UDim2.new(0.5, 0, 0.5, Config.Notice.Below)
+	self.noticeLine.Visible = false
+	self.noticeAt = 0
+	self.utilityLines = {} :: { [number]: TextLabel }
+
 	-- Top right: who killed whom.
 	self.feed = block(gui, Vector2.new(1, 0), UDim2.new(1, -Config.Edge, 0, Config.Edge), Enum.FillDirection.Vertical, 6)
 	local feedLayout = self.feed:FindFirstChildOfClass("UIListLayout") :: UIListLayout
@@ -354,6 +362,31 @@ function Hud.setScope(self: any, raised: number): number
 		end
 	end
 	return there
+end
+
+-- A utility the player carries, under the weapons: its place in the list, its name, its key, how many are left.
+function Hud.setUtility(self: any, order: number, title: string, key: string, left: number)
+	local line = self.utilityLines[order]
+	if not line then
+		line = label(self.slots, Config.Small, Config.Font, Enum.TextXAlignment.Right)
+		line.LayoutOrder = 50 + order
+		self.utilityLines[order] = line
+	end
+	line.Text = `{string.upper(title)}  x{left}   {key}`
+	line.TextTransparency = if left > 0 then 0 else Config.Dim
+end
+
+-- A word under the crosshair for a moment.
+function Hud.notice(self: any, text: string, colour: Color3)
+	self.noticeLine.Text = text
+	self.noticeLine.TextColor3 = colour
+	self.noticeLine.Visible = true
+	self.noticeAt = os.clock()
+	task.delay(Config.Notice.Time, function()
+		if os.clock() - self.noticeAt >= Config.Notice.Time then
+			self.noticeLine.Visible = false
+		end
+	end)
 end
 
 -- A line under the weapons carried, naming a key and what it is for.

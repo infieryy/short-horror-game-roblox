@@ -20,6 +20,7 @@ local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"
 local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
+local UtilityClient = require(Shared.Client:WaitForChild("UtilityClient"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
 
@@ -86,6 +87,7 @@ local aim = 0 -- 0 at the hip, 1 at the eye
 local walked = 0
 local stanceTold = ""
 local lastStray = 0 -- how far the last shot was free to stray (for tests)
+local lowered = false -- the weapon is put away while the hands do something else (throw a dart)
 
 local function body(): (Model?, Humanoid?, BasePart?)
 	local character = player.Character
@@ -132,7 +134,7 @@ local function take(slotName: string)
 end
 
 local function equip(slotName: string)
-	if body() and slots[slotName] and slotName ~= current then
+	if body() and slots[slotName] and slotName ~= current and not lowered then
 		take(slotName)
 		remote("Equip"):FireServer(slotName)
 	end
@@ -384,7 +386,7 @@ end, function()
 	menu:hide()
 end)
 local function showLoadout(shown: boolean)
-	if shown and current and body() then
+	if shown and current and body() and not lowered then
 		triggerHeld, aimHeld = false, false
 		menu:show(weapon)
 	else
@@ -425,6 +427,29 @@ ContextActionService:BindAction("PickWeapon", function(_, state, input)
 	end
 	return Enum.ContextActionResult.Sink
 end, false, table.unpack(slotKeys))
+
+-- The utility borrows the player's hands: the weapon goes away for the throw, and is drawn again after it.
+UtilityClient.start({
+	hud = hud,
+	effects = effects,
+	free = function(): boolean
+		return current ~= nil and body() ~= nil and not lowered and not menu.shown
+	end,
+	lower = function(seconds: number, released: () -> ())
+		lowered = true
+		triggerHeld, aimHeld = false, false
+		reloadFrom = nil
+		drawnAt = os.clock() + seconds -- not ready until it is drawn again
+		viewmodel:show(nil)
+		task.delay(seconds, function()
+			lowered = false
+			if current and body() then
+				released()
+				take(current)
+			end
+		end)
+	end,
+})
 
 -- The server says what the player carries: at spawn, after a reload, after a switch, after a fitting.
 remote("State").OnClientEvent:Connect(function(state: { current: string, slots: { [string]: Slot } })
@@ -508,7 +533,7 @@ end
 -- A hook for test scripts, which cannot press keys (DevConfig.TestHooks):
 --   ReplicatedStorage.DesertFps.DevWeapon:Invoke("trigger" | "aim" | "walk", held)   ("equip", slot)   ("reload")
 --   ("attach", { socket = "muzzle", name = "suppressor" })   on the weapon in hand; no name takes it off
---   ("loadout", shown)   ("state") returns what the weapon is doing.
+--   ("loadout", shown)   ("utility", name) throws it   ("state") returns what the weapon is doing.
 local function testHook()
 	if Shared:FindFirstChild("DevWeapon") or not Shared:GetAttribute("TestHooks") then
 		return
@@ -530,12 +555,15 @@ local function testHook()
 			attach(current, value.socket, value.name)
 		elseif what == "loadout" then
 			showLoadout(value)
+		elseif what == "utility" then
+			return UtilityClient.use(value)
 		elseif what == "state" and current then
 			return {
 				slot = current,
 				weapon = slots[current].weapon,
 				attachments = slots[current].attachments,
 				numbers = weapon,
+				utility = UtilityClient.state(),
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),

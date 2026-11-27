@@ -14,9 +14,11 @@ local Combat = require(DesertFps.Combat.Combat)
 local Dummies = require(DesertFps.Combat.Dummies)
 local TownConfig = require(DesertFps.Town.TownConfig)
 local WeaponService = require(DesertFps.Weapons.WeaponService)
+local UtilityService = require(DesertFps.Utility.UtilityService)
 
 Combat.start()
 WeaponService.start()
+UtilityService.start()
 if DevConfig.Dummies then
 	Dummies.start(DevConfig.Dummies)
 end

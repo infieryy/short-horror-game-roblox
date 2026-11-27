@@ -712,6 +712,42 @@ Notes for the next session:
 - A `Beam` with `LightEmission` 1 adds its colour to what is behind it. Over this town's bright plaster a red beam came out near white. It is at 0.3.
 - A beam a hundredth of a stud wide is under a pixel across a square. Its far end is widened by its distance from the eye, as the dot is.
 
+### The recon dart (2026-11-27)
+
+The owner's first brief asked for "util to find enemies on the map". Asked whether to build it next, the owner said "Yes, utility". The question of which utility was put to the owner and closed unanswered ("wait pause rq pls", then "Continue now"), so the recommended one was built: a recon dart. The owner said yes to uploading its model.
+
+**The outcome.** Q throws a dart. It flies in an arc, sticks in the first thing it meets, and after 0.7 s pulses three times, 1.3 s apart. Each pulse outlines, for the thrower only and through walls, every enemy the dart has a clear line to within 80 studs, for 1.5 s. Everyone sees the dart, its light and its pulses; whoever is seen is told ("SPOTTED"); one shot or slash knocks it out. A player carries two, and a used one comes back after 25 s. Throwing costs the weapon: it is put away for 0.3 s and has to be drawn again. Pictures: `assets/studio/fps-recon-*.jpg`. Video (26 s): `Documents/desert-fps/recordings/fps-maxxing-recon-dart-20261127.mp4`.
+
+**How it works.**
+- `Utility/UtilityConfig` (shared) holds every number: charges, the flight, the pulses, the reach, how it looks. Another utility is another entry and its own code for what it does once thrown.
+- **Server** (`Utility/UtilityService`): the client sends `UseUtility(name, origin, direction)` at the moment of release. The server checks the types, that the thrower is alive and has a charge, and that the throw starts at their head and not behind a wall, as for a shot. Then it decides the rest itself. The flight is worked out at once, in sixtieths of a second, to where it first meets the world; clients are told the start and the speed and draw the arc themselves; the dart is stood in `Workspace.Utilities` when the flight is over. Each pulse casts from the dart's sensor to the head, chest and middle of every character but the thrower's, past bodies and other darts. Only the thrower is sent who was seen (`Reveal`).
+- `WeaponService.lower(player, seconds)` is new: the hands are busy, the weapon cannot be used for that long plus its draw, a reload is lost. `WeaponService.Struck` is new too: a list of functions asked first when a shot lands on the world. The dart is in it, which is how a shot knocks it out without the weapons knowing what a dart is.
+- `Assets/KitModels.view` makes the model of a kit piece that clients show. It is the function the weapons had for themselves, moved so the utility uses it too.
+- **Client** (`Client/UtilityClient`): the key, the dart in flight, the bubble of a pulse, and a `Highlight` on everyone the player's own dart saw. `WeaponClient` lends it the display and the player's hands (`free`, `lower`).
+- **The model** is a kit piece, `util_dart` (`assets/recipes/dart.py`): a steel point, a brass collar, a sensor head with a turquoise glass band, a shaft and four fins. It is 0.94 studs long as made and 1.6 times that in the game, or nobody could see it on a wall across a square, let alone shoot it.
+
+**Tested in a playtest.** `build/tests/test_utility.luau`: 15 checks, all ok. Five requests that make no sense throw nothing and cost nothing. A throw costs a charge, puts the weapon away and stands a dart where it lands. It pulses three times, every pulse sees the dummy in front of it, the dummy is outlined, and dart and outline are gone afterwards. A shot knocks a dart out and it pulses no more. With none left neither the key nor a request sent straight to the server throws one. A charge comes back. The outlines were also looked at from behind the Market Kiosk's wall, 46 studs from the dummies: they show through it.
+
+**Uploads.** Two files, both approved: the dart's model 89191045180811 and texture 88683663378582.
+
+**Decisions made here.**
+- Which utility: the recon dart, on the recommendation, not on the owner's word. A trip sensor on a wall was the other one offered.
+- There are no teams yet, so everyone but the thrower counts as an enemy, the target dummies too.
+- The outline follows whoever was seen for the 1.5 s, it is not a still picture of where they stood.
+- A throw is quick (press Q, it goes where the player looks), not a second weapon to draw and aim. The price is the weapon being away for about 1.1 s.
+
+**Not done, not verified.**
+- **No second player.** That only the thrower sees the outlines, that the one seen is told, and that others see the dart fly and pulse are all in the code and untested by a real second client.
+- **No throw animation.** The weapon drops out of view and is drawn again; no arm throws anything, in first person or on the character.
+- The server takes the client's word for when the throw is released, so a cheat can skip the 0.3 s before it. It cannot skip the draw after it.
+- No sound. No sign on the screen of which way a dart that saw you is.
+- The numbers (two charges, 25 s, 80 studs, three pulses) are first guesses.
+- A dart stuck in a wall that is then destroyed is removed at its next pulse, not at once.
+
+Notes for the next session:
+- After Studio is restarted, the official MCP has a new `studio_id` (ask `list_roblox_studios`), and the community MCP's `capture_video` could not find Studio's window. The official `video_capture` recorded instead: it writes an mp4 under `%LOCALAPPDATA%\Roblox\tmp-capture-storage\mcp\`.
+- A `Highlight` with `DepthMode` AlwaysOnTop and its `Adornee` set shows through walls from a folder under the camera.
+
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
 2. Read `desert-fps/README.md`, `plan/PLAN.md` and `assets/README.md`.

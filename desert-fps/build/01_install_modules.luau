@@ -415,6 +415,14 @@ function Hud.new(playerGui: Instance, camera: Camera)
 	reload.Parent = gui
 	self.reload, self.reloadFilled = reload, filled
 
+	-- Under the crosshair: a word for what just happened.
+	self.noticeLine = label(gui, Config.Medium, Config.Font, Enum.TextXAlignment.Center)
+	self.noticeLine.AnchorPoint = Vector2.new(0.5, 0)
+	self.noticeLine.Position = UDim2.new(0.5, 0, 0.5, Config.Notice.Below)
+	self.noticeLine.Visible = false
+	self.noticeAt = 0
+	self.utilityLines = {} :: { [number]: TextLabel }
+
 	-- Top right: who killed whom.
 	self.feed = block(gui, Vector2.new(1, 0), UDim2.new(1, -Config.Edge, 0, Config.Edge), Enum.FillDirection.Vertical, 6)
 	local feedLayout = self.feed:FindFirstChildOfClass("UIListLayout") :: UIListLayout
@@ -496,6 +504,31 @@ function Hud.setScope(self: any, raised: number): number
 		end
 	end
 	return there
+end
+
+-- A utility the player carries, under the weapons: its place in the list, its name, its key, how many are left.
+function Hud.setUtility(self: any, order: number, title: string, key: string, left: number)
+	local line = self.utilityLines[order]
+	if not line then
+		line = label(self.slots, Config.Small, Config.Font, Enum.TextXAlignment.Right)
+		line.LayoutOrder = 50 + order
+		self.utilityLines[order] = line
+	end
+	line.Text = `{string.upper(title)}  x{left}   {key}`
+	line.TextTransparency = if left > 0 then 0 else Config.Dim
+end
+
+-- A word under the crosshair for a moment.
+function Hud.notice(self: any, text: string, colour: Color3)
+	self.noticeLine.Text = text
+	self.noticeLine.TextColor3 = colour
+	self.noticeLine.Visible = true
+	self.noticeAt = os.clock()
+	task.delay(Config.Notice.Time, function()
+		if os.clock() - self.noticeAt >= Config.Notice.Time then
+			self.noticeLine.Visible = false
+		end
+	end)
 end
 
 -- A line under the weapons carried, naming a key and what it is for.
@@ -605,6 +638,9 @@ return {
 	-- Kills listed top right: how many, and how long each stays.
 	FeedLines = 5,
 	FeedTime = 6,
+	-- A word under the crosshair when something happens to the player ("SPOTTED") or for them ("2 REVEALED"):
+	-- how far under, and how long it stays.
+	Notice = { Below = 78, Time = 1.4 },
 
 	-- The loadout (Client/LoadoutMenu). The panel: its width, the space inside it and between its rows, how
 	-- round its corners are, how see-through it is (Panel) and how much of the scene behind it shows (Behind).
@@ -936,6 +972,220 @@ function LoadoutMenu.hide(self: any)
 end
 
 return LoadoutMenu
+]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Client", "UtilityClient" }, class = "ModuleScript", source = [=[
+--!strict
+-- The player's side of the utility: the key that throws it, the dart in flight, its pulses, and the outlines
+-- of whoever the player's own dart saw. The server decides where a dart goes and what it sees
+-- (UtilityService); this shows it.
+
+local ContextActionService = game:GetService("ContextActionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local Shared = ReplicatedStorage:WaitForChild("DesertFps")
+local Config = require(script.Parent.Parent.Utility.UtilityConfig)
+local HudConfig = require(script.Parent.HudConfig)
+
+local UtilityClient = {}
+
+-- A piece is modelled pointing along +X; this turns a frame that looks along a direction into the piece's.
+local AIM = CFrame.Angles(0, math.pi / 2, 0)
+local Look = Config.Look
+
+-- What the weapons lend it: the display, where to draw, and the player's hands.
+export type Hands = {
+	hud: any,
+	effects: Instance,
+	-- Whether the player can throw now: alive, a weapon in hand, nothing else going on.
+	free: () -> boolean,
+	-- Puts the weapon away for `seconds`, calls `released` if the player is still alive then, and draws the
+	-- weapon again.
+	lower: (seconds: number, released: () -> ()) -> (),
+}
+
+local hands: Hands
+local left: { [string]: number } = {}
+local throwing = false
+-- Whoever the player's darts saw: their outline, and when it ends.
+local outlined: { [Model]: { highlight: Highlight, ends: number } } = {}
+
+local function remote(name: string): RemoteEvent
+	return Shared:WaitForChild("Remotes"):WaitForChild(name) :: RemoteEvent
+end
+
+local function show(name: string)
+	local what = (Config.Utilities :: any)[name]
+	local key = UserInputService:GetStringForKeyCode(what.Key)
+	hands.hud:setUtility(table.find(Config.Loadout, name), what.Title, if key == "" then what.Key.Name else key, left[name] or 0)
+end
+
+-- Throws the utility of that name, as its key does. False if it cannot be thrown now.
+function UtilityClient.use(name: string): boolean
+	local what = (Config.Utilities :: any)[name]
+	if not what or throwing or (left[name] or 0) < 1 or not hands.free() then
+		return false
+	end
+	throwing = true
+	hands.lower(what.ThrowTime, function()
+		local camera = workspace.CurrentCamera
+		remote("UseUtility"):FireServer(name, camera.CFrame.Position, camera.CFrame.LookVector)
+		-- The server says how many are left; until it does, this is one fewer.
+		left[name] = math.max((left[name] or 1) - 1, 0)
+		show(name)
+	end)
+	task.delay(what.ThrowTime, function()
+		throwing = false
+	end)
+	return true
+end
+
+-- What the player carries and who is outlined now, for tests.
+function UtilityClient.state(): { left: { [string]: number }, outlined: { Model } }
+	local seen = {}
+	for character in outlined do
+		table.insert(seen, character)
+	end
+	return { left = table.clone(left), outlined = seen }
+end
+
+-- A copy of a utility's model for this client alone, as big as it is in the game.
+local function copy(what: any): Model
+	local model = (Shared:WaitForChild("UtilityModels") :: Instance):WaitForChild(what.Model):Clone() :: Model
+	for _, part in model:GetChildren() do
+		if part:IsA("BasePart") then
+			part.Size *= what.Size
+		end
+	end
+	return model
+end
+
+local function place(model: Model, frame: CFrame, size: number)
+	for _, part in model:GetChildren() do
+		if part:IsA("BasePart") then
+			part.CFrame = frame * CFrame.new((part:GetAttribute("Offset") :: Vector3) * size)
+		end
+	end
+end
+
+-- A dart in flight: drawn here from where it started and how fast, for as long as the server said it flies.
+-- The dart that is stuck afterwards is the server's own.
+local function fly(name: string, origin: Vector3, velocity: Vector3, seconds: number)
+	local what = (Config.Utilities :: any)[name]
+	if not what then
+		return
+	end
+	local model = copy(what)
+	local started = os.clock()
+	local down = Vector3.new(0, -what.Gravity, 0)
+	local function at(t: number): CFrame
+		return CFrame.lookAlong(origin + velocity * t + down * (t * t / 2), velocity + down * t) * AIM
+	end
+	place(model, at(0), what.Size)
+	model.Parent = hands.effects
+	local flying: RBXScriptConnection
+	flying = RunService.RenderStepped:Connect(function()
+		local t = os.clock() - started
+		if t >= seconds then
+			flying:Disconnect()
+			model:Destroy()
+		else
+			place(model, at(t), what.Size)
+		end
+	end)
+end
+
+-- A pulse: a bubble of the dart's light that grows and fades.
+local function pulse(at: Vector3)
+	local bubble = Instance.new("Part")
+	bubble.Shape = Enum.PartType.Ball
+	bubble.Material = Enum.Material.Neon
+	bubble.Color = Look.Light
+	bubble.Transparency = 0.45
+	bubble.Anchored = true
+	bubble.CanCollide = false
+	bubble.CanQuery = false
+	bubble.CanTouch = false
+	bubble.CastShadow = false
+	bubble.Size = Vector3.one * 0.4
+	bubble.Position = at
+	bubble.Parent = hands.effects
+	local grow = TweenInfo.new(Look.PulseTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(bubble, grow, { Size = Vector3.one * Look.PulseSize, Transparency = 1 }):Play()
+	task.delay(Look.PulseTime, bubble.Destroy, bubble)
+end
+
+-- The player's dart saw these: each is outlined, through walls, for `seconds`.
+local function reveal(seen: { Model }, seconds: number)
+	local ends = os.clock() + seconds
+	for _, character in seen do
+		if typeof(character) ~= "Instance" or not character:IsDescendantOf(workspace) then
+			continue -- gone since the server looked
+		end
+		local mark = outlined[character]
+		if not mark then
+			local highlight = Instance.new("Highlight")
+			highlight.Adornee = character
+			highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+			highlight.FillColor = Look.Enemy
+			highlight.OutlineColor = Look.Enemy
+			highlight.Parent = hands.effects
+			mark = { highlight = highlight, ends = ends }
+			outlined[character] = mark
+		end
+		mark.ends = math.max(mark.ends, ends)
+	end
+	if #seen > 0 then
+		hands.hud:notice(`{#seen} REVEALED`, HudConfig.Accent)
+	end
+end
+
+-- Outlines fade at their end, and go with whoever wore them.
+local function fade()
+	local now = os.clock()
+	for character, mark in outlined do
+		local remaining = mark.ends - now
+		if remaining <= 0 or not character:IsDescendantOf(workspace) then
+			mark.highlight:Destroy()
+			outlined[character] = nil
+		else
+			local gone = 1 - math.clamp(remaining / Look.Fade, 0, 1)
+			mark.highlight.OutlineTransparency = gone
+			mark.highlight.FillTransparency = Look.Fill + (1 - Look.Fill) * gone
+		end
+	end
+end
+
+function UtilityClient.start(lent: Hands)
+	hands = lent
+	for _, name in Config.Loadout do
+		local what = (Config.Utilities :: any)[name]
+		left[name] = 0
+		show(name)
+		ContextActionService:BindAction("Utility_" .. name, function(_, state)
+			if state == Enum.UserInputState.Begin then
+				UtilityClient.use(name)
+			end
+			return Enum.ContextActionResult.Sink
+		end, false, what.Key)
+	end
+
+	remote("UtilityState").OnClientEvent:Connect(function(name: string, now: number)
+		left[name] = now
+		show(name)
+	end)
+	remote("UtilityThrown").OnClientEvent:Connect(fly)
+	remote("UtilityPulse").OnClientEvent:Connect(pulse)
+	remote("Reveal").OnClientEvent:Connect(reveal)
+	remote("Spotted").OnClientEvent:Connect(function()
+		hands.hud:notice("SPOTTED", HudConfig.Harm)
+	end)
+	RunService.RenderStepped:Connect(fade)
+end
+
+return UtilityClient
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "Viewmodel" }, class = "ModuleScript", source = [=[
 --!strict
@@ -1352,6 +1602,64 @@ return {
 
 	-- Seconds from dying to standing at the spawn again, while there are no rounds.
 	RespawnSeconds = 3,
+}
+]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Utility", "UtilityConfig" }, class = "ModuleScript", source = [=[
+--!strict
+-- Utility: what a player throws to find enemies. Read by the server (what it does) and the client (how it
+-- looks). Times are seconds, distances studs.
+-- Until there are teams, everyone but the thrower is an enemy, the target dummies too.
+return {
+	-- What every player carries until there is a shop, in the order the display lists it.
+	Loadout = { "recon" },
+
+	Utilities = {
+		-- The recon dart. Thrown, it sticks in the first thing it meets. After a moment it pulses, and with each
+		-- pulse every enemy it has a clear line to is outlined for its thrower, through walls. Everyone sees it
+		-- pulse, the enemy is told they were seen, and one shot or slash knocks it out.
+		recon = {
+			Title = "Recon dart",
+			Key = Enum.KeyCode.Q,
+			-- The kit piece, and how many times as big as made it is in the game: at its true size a dart is
+			-- lost on a wall across a square, and nobody could shoot it down.
+			Model = "util_dart",
+			Size = 1.6,
+			-- A used charge comes back after Recharge.
+			Charges = 2,
+			Recharge = 25,
+			-- Throwing: the weapon is put away for ThrowTime, the dart leaves, and the weapon is drawn again.
+			ThrowTime = 0.3,
+			-- Its flight: how fast it leaves, how hard it is pulled down (a quarter of what a body is, so it
+			-- carries across a square), and how long it may fly before it is lost.
+			Speed = 110,
+			Gravity = 45,
+			FlightMost = 3,
+			-- Stuck: Arm until the first pulse, then Pulses of them, one every Every. Linger is how long it
+			-- stays after the last.
+			Arm = 0.7,
+			Pulses = 3,
+			Every = 1.3,
+			Linger = 0.6,
+			-- How far it sees, and how long someone it saw stays outlined.
+			Radius = 80,
+			Reveal = 1.5,
+		},
+	},
+
+	-- How it looks.
+	Look = {
+		-- The dart's own light and the bubble of a pulse: the town's turquoise.
+		Light = Color3.fromRGB(72, 196, 186),
+		LightRange = 7,
+		-- A pulse: a bubble at the dart that grows to PulseSize across in PulseTime and fades.
+		PulseSize = 12,
+		PulseTime = 0.45,
+		-- Someone it saw: the colour of their outline, how see-through its inside is, and how long it takes
+		-- to fade at the end.
+		Enemy = Color3.fromRGB(232, 84, 76),
+		Fill = 0.7,
+		Fade = 0.3,
+	},
 }
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Weapons", "AnimationConfig" }, class = "ModuleScript", source = [=[
@@ -1985,9 +2293,11 @@ local Combat = require(DesertFps.Combat.Combat)
 local Dummies = require(DesertFps.Combat.Dummies)
 local TownConfig = require(DesertFps.Town.TownConfig)
 local WeaponService = require(DesertFps.Weapons.WeaponService)
+local UtilityService = require(DesertFps.Utility.UtilityService)
 
 Combat.start()
 WeaponService.start()
+UtilityService.start()
 if DevConfig.Dummies then
 	Dummies.start(DevConfig.Dummies)
 end
@@ -2208,6 +2518,8 @@ return {
 	att_scope = { Model = 92951252183787, Texture = 94016934404918 },
 	att_foregrip = { Model = 113941948735240, Texture = 99962778696816 },
 	att_laser = { Model = 80545025910238, Texture = 103299523819440 },
+	-- utility (UtilityConfig)
+	util_dart = { Model = 89191045180811, Texture = 88683663378582 },
 }
 ]=] },
 	{ path = { "ServerStorage", "DesertFps", "Assets", "BreakData" }, class = "ModuleScript", source = [==[
@@ -2387,13 +2699,64 @@ end
 
 return KitImporter
 ]=] },
+	{ path = { "ServerStorage", "DesertFps", "Assets", "KitModels" }, class = "ModuleScript", source = [=[
+--!strict
+-- Models of kit pieces for clients to show: a weapon in front of the camera, an attachment on it, a dart in
+-- flight. The kit's meshes and the parts data never leave the server; what a client needs to place and pose a
+-- piece is copied onto the model.
+
+local ServerStorage = game:GetService("ServerStorage")
+
+local DesertFps = (ServerStorage :: any).DesertFps
+local PartsData = require(script.Parent.PartsData)
+
+local KitModels = {}
+
+local function vector(values: { number }): Vector3
+	return Vector3.new(values[1], values[2], values[3])
+end
+
+-- A model of piece `name` under `parent`: every part of it, anchored and out of the way of everything. Each
+-- part keeps its "Offset" (its middle from the piece's origin). The model has a "Socket_<name>" attribute for
+-- each of the piece's sockets, and a part that moves has "Slide" (how far, and which way) or "Detach" (the way
+-- it pulls out).
+function KitModels.view(name: string, parent: Instance): Model
+	local data = PartsData[name]
+	local model = Instance.new("Model")
+	model.Name = name
+	for _, socket in data.sockets do
+		model:SetAttribute("Socket_" .. socket.name, vector(socket.position))
+	end
+	for _, template in DesertFps.Meshes[name].Parts:GetChildren() do
+		local part = template:Clone() :: BasePart
+		part.Anchored = true
+		part.CastShadow = false
+		part.CanCollide = false
+		part.CanQuery = false
+		part.CanTouch = false
+		part.Parent = model
+	end
+	for _, joint in data.joints do
+		local part = model:FindFirstChild(joint.part)
+		if part and joint.type == "slide" then
+			part:SetAttribute("Slide", vector(joint.axis) * joint.amount)
+		elseif part and joint.type == "detach" then
+			part:SetAttribute("Detach", vector(joint.axis).Unit)
+		end
+	end
+	model.Parent = parent
+	return model
+end
+
+return KitModels
+]=] },
 	{ path = { "ServerStorage", "DesertFps", "Assets", "PartsData" }, class = "ModuleScript", source = [==[
 --!strict
 -- Generated by build/pack.py from assets/out/<piece>/<piece>.parts.json. Do not edit; rebuild the source and re-run pack.py.
 local HttpService = game:GetService("HttpService")
 
 return HttpService:JSONDecode([=[
-{"att_compensator":{"piece":"att_compensator","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_compensator_body.fbx","center":[0.109,0.0,-0.0],"size":[0.218,0.133,0.133],"triangles":256}]},"att_foregrip":{"piece":"att_foregrip","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_foregrip_body.fbx","center":[0.0,-0.152,-0.0],"size":[0.135,0.304,0.147],"triangles":164}]},"att_laser":{"piece":"att_laser","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"beam","position":[0.1537,0.0112,-0.0488],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_laser_body.fbx","center":[-0.002,0.007,-0.052],"size":[0.311,0.111,0.103],"triangles":468}]},"att_reddot":{"piece":"att_reddot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0619,0.1181,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_reddot_body.fbx","center":[0.0,0.107,-0.0],"size":[0.27,0.214,0.188],"triangles":220}]},"att_scope":{"piece":"att_scope","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0,0.1162,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_scope_body.fbx","center":[0.004,0.103,-0.0],"size":[0.345,0.206,0.167],"triangles":432}]},"att_suppressor":{"piece":"att_suppressor","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_suppressor_body.fbx","center":[0.311,0.0,-0.0],"size":[0.623,0.153,0.153],"triangles":272}]},"banner":{"piece":"banner","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/banner_body.fbx","center":[0.0,-2.72,0.15],"size":[2.5,5.6,0.3],"triangles":100}]},"bougainvillea":{"piece":"bougainvillea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/bougainvillea_body.fbx","center":[-0.01,-1.512,0.208],"size":[6.757,4.598,2.035],"triangles":4864}]},"ground":{"piece":"ground","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/ground_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"knife":{"piece":"knife","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"blade_base","position":[0.1488,0.0528,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"blade_tip","position":[0.5136,-0.0134,-0.0],"forward":[0.6,-0.8,0],"up":[0,1,0]},{"name":"ring","position":[-0.1392,-0.1968,-0.0],"forward":[0,0,-1],"up":[0,1,0]},{"name":"charm","position":[-0.1392,-0.2681,-0.0],"forward":[0,-1,0],"up":[0,1,0]}],"joints":[{"part":"knife","type":"hinge","pivot":[-0.1392,-0.1968,-0.0],"axis":[0,0,-1],"amount":360,"unit":"degrees"}],"parts":[{"id":"blade","mesh":"parts/knife_blade.fbx","center":[0.317,0.062,-0.0],"size":[0.394,0.162,0.02],"triangles":104},{"id":"charm","mesh":"parts/knife_charm.fbx","center":[-0.132,-0.335,-0.0],"size":[0.083,0.189,0.049],"triangles":68},{"id":"handle","mesh":"parts/knife_handle.fbx","center":[-0.021,-0.011,-0.0],"size":[0.376,0.29,0.092],"triangles":916},{"id":"ring","mesh":"parts/knife_ring.fbx","center":[-0.139,-0.197,-0.0],"size":[0.144,0.144,0.031],"triangles":240}]},"lantern":{"piece":"lantern","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_body.fbx","center":[0.0,-1.795,-0.0],"size":[1.103,3.59,1.103],"triangles":224},{"id":"glass","mesh":"parts/lantern_glass.fbx","center":[0.0,-2.515,-0.0],"size":[0.84,1.15,0.84],"triangles":12}]},"lantern_wall":{"piece":"lantern_wall","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_wall_body.fbx","center":[0.0,-1.195,0.851],"size":[1.103,2.89,1.702],"triangles":260},{"id":"glass","mesh":"parts/lantern_wall_glass.fbx","center":[0.0,-1.565,1.15],"size":[0.84,1.15,0.84],"triangles":12}]},"paving_a":{"piece":"paving_a","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_a_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_b":{"piece":"paving_b","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_b_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_bricks":{"piece":"paving_bricks","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_bricks_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_c":{"piece":"paving_c","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_c_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_channel":{"piece":"paving_channel","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_channel_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_dyed":{"piece":"paving_dyed","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_dyed_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_pool":{"piece":"paving_pool","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_pool_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_tiles":{"piece":"paving_tiles","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_tiles_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"pistol":{"piece":"pistol","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[0.9113,0.1613,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.5625,0.2362,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[0.6375,0.015,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"side","position":[0.6375,0.045,-0.0647],"forward":[1,0,0],"up":[0,1,0]},{"name":"magazine","position":[-0.0225,-0.33,-0.0],"forward":[-0.2,-1,0],"up":[0,1,0]},{"name":"aim_rear","position":[-0.0638,0.27,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[0.8475,0.2625,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"slide","type":"slide","pivot":[0.075,0.1837,-0.0],"axis":[-1,0,0],"amount":0.2175,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.3262,-0.0112,-0.0],"axis":[0,0,-1],"amount":12,"unit":"degrees"},{"part":"hammer","type":"hinge","pivot":[-0.1237,0.1125,-0.0],"axis":[0,0,-1],"amount":50,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[-0.0225,-0.33,-0.0],"axis":[-0.2,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/pistol_barrel.fbx","center":[0.594,0.191,-0.0],"size":[0.634,0.142,0.129],"triangles":292},{"id":"body","mesh":"parts/pistol_body.fbx","center":[0.33,-0.105,-0.006],"size":[1.02,0.45,0.141],"triangles":224},{"id":"charm","mesh":"parts/pistol_charm.fbx","center":[-0.036,-0.308,-0.0],"size":[0.341,0.15,0.171],"triangles":100},{"id":"grip","mesh":"parts/pistol_grip.fbx","center":[0.0,-0.157,-0.0],"size":[0.3,0.285,0.164],"triangles":128},{"id":"hammer","mesh":"parts/pistol_hammer.fbx","center":[-0.141,0.163,-0.0],"size":[0.049,0.101,0.034],"triangles":52},{"id":"magazine","mesh":"parts/pistol_magazine.fbx","center":[-0.026,-0.197,-0.0],"size":[0.337,0.334,0.125],"triangles":40},{"id":"slide","mesh":"parts/pistol_slide.fbx","center":[0.368,0.176,-0.0],"size":[0.96,0.188,0.161],"triangles":140},{"id":"trigger","mesh":"parts/pistol_trigger.fbx","center":[0.319,-0.066,-0.0],"size":[0.053,0.109,0.026],"triangles":20}]},"rifle":{"piece":"rifle","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[2.2988,0.1687,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.2812,0.3037,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[1.0687,0.0037,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"side","position":[1.3013,0.1087,-0.0945],"forward":[1,0,0],"up":[0,1,0]},{"name":"magazine","position":[0.4763,0.0,-0.0],"forward":[0.2,-1,0],"up":[0,1,0]},{"name":"stock","position":[-0.2062,0.1012,-0.0],"forward":[-1,0,0],"up":[0,1,0]},{"name":"aim_rear","position":[0.8812,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[1.9762,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"bolt","type":"slide","pivot":[0.5363,0.24,-0.0],"axis":[-1,0,0],"amount":0.2625,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.2137,0.0037,-0.0],"axis":[0,0,-1],"amount":15,"unit":"degrees"},{"part":"selector","type":"hinge","pivot":[0.6937,0.1237,-0.0],"axis":[0,0,-1],"amount":20,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[0.4763,0.0,-0.0],"axis":[0.35,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/rifle_barrel.fbx","center":[1.477,0.238,-0.0],"size":[1.432,0.282,0.09],"triangles":232},{"id":"body","mesh":"parts/rifle_body.fbx","center":[0.364,0.097,-0.0],"size":[1.14,0.502,0.16],"triangles":308},{"id":"bolt","mesh":"parts/rifle_bolt.fbx","center":[0.517,0.242,0.111],"size":[0.322,0.049,0.131],"triangles":56},{"id":"cover","mesh":"parts/rifle_cover.fbx","center":[0.278,0.258,-0.0],"size":[0.877,0.088,0.135],"triangles":152},{"id":"grip","mesh":"parts/rifle_grip.fbx","center":[-0.011,-0.193,-0.0],"size":[0.24,0.401,0.117],"triangles":80},{"id":"handguard","mesh":"parts/rifle_handguard.fbx","center":[1.065,0.069,-0.0],"size":[0.585,0.491,0.223],"triangles":348},{"id":"magazine","mesh":"parts/rifle_magazine.fbx","center":[0.583,-0.391,-0.0],"size":[0.453,0.852,0.138],"triangles":264},{"id":"muzzle","mesh":"parts/rifle_muzzle.fbx","center":[2.246,0.169,-0.0],"size":[0.105,0.104,0.104],"triangles":164},{"id":"selector","mesh":"parts/rifle_selector.fbx","center":[0.548,0.112,0.08],"size":[0.382,0.067,0.012],"triangles":16},{"id":"stock","mesh":"parts/rifle_stock.fbx","center":[-0.679,-0.049,-0.0],"size":[0.96,0.48,0.14],"triangles":132},{"id":"trigger","mesh":"parts/rifle_trigger.fbx","center":[0.21,-0.053,-0.0],"size":[0.052,0.112,0.023],"triangles":20}]},"rug":{"piece":"rug","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/rug_body.fbx","center":[0.0,0.035,-0.0],"size":[6.48,0.07,4.0],"triangles":300}]},"sand_drift":{"piece":"sand_drift","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sand_drift_body.fbx","center":[0.005,0.25,0.95],"size":[6.61,0.5,1.9],"triangles":68}]},"sign_bread":{"piece":"sign_bread","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_bread_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_cloth":{"piece":"sign_cloth","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_cloth_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_drop":{"piece":"sign_drop","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_drop_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_dye":{"piece":"sign_dye","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_dye_body.fbx","center":[0.0,0.0,0.105],"size":[5.8,4.2,0.21],"triangles":56}]},"sign_pot":{"piece":"sign_pot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_pot_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_tea":{"piece":"sign_tea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_tea_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"smoke":{"piece":"smoke","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"smoke","position":[0.0,0.2175,-0.0],"forward":[0,1,0],"up":[1,0,0]}],"joints":[{"part":"pin","type":"detach","pivot":[0.0112,0.2925,-0.0],"axis":[0,0,1],"amount":0,"unit":"direction"},{"part":"lever","type":"hinge","pivot":[-0.0412,0.3412,-0.0],"axis":[0,0,-1],"amount":100,"unit":"degrees"}],"parts":[{"id":"body","mesh":"parts/smoke_body.fbx","center":[0.0,0.002,-0.0],"size":[0.23,0.431,0.23],"triangles":312},{"id":"fuze","mesh":"parts/smoke_fuze.fbx","center":[0.004,0.275,-0.0],"size":[0.097,0.122,0.071],"triangles":80},{"id":"lever","mesh":"parts/smoke_lever.fbx","center":[0.048,0.146,-0.0],"size":[0.179,0.399,0.056],"triangles":52},{"id":"pin","mesh":"parts/smoke_pin.fbx","center":[0.011,0.252,-0.0],"size":[0.094,0.092,0.112],"triangles":188}]}}]=]) :: any
+{"att_compensator":{"piece":"att_compensator","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_compensator_body.fbx","center":[0.109,0.0,-0.0],"size":[0.218,0.133,0.133],"triangles":256}]},"att_foregrip":{"piece":"att_foregrip","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_foregrip_body.fbx","center":[0.0,-0.152,-0.0],"size":[0.135,0.304,0.147],"triangles":164}]},"att_laser":{"piece":"att_laser","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"beam","position":[0.1537,0.0112,-0.0488],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_laser_body.fbx","center":[-0.002,0.007,-0.052],"size":[0.311,0.111,0.103],"triangles":468}]},"att_reddot":{"piece":"att_reddot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0619,0.1181,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_reddot_body.fbx","center":[0.0,0.107,-0.0],"size":[0.27,0.214,0.188],"triangles":220}]},"att_scope":{"piece":"att_scope","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0,0.1162,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_scope_body.fbx","center":[0.004,0.103,-0.0],"size":[0.345,0.206,0.167],"triangles":432}]},"att_suppressor":{"piece":"att_suppressor","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_suppressor_body.fbx","center":[0.311,0.0,-0.0],"size":[0.623,0.153,0.153],"triangles":272}]},"banner":{"piece":"banner","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/banner_body.fbx","center":[0.0,-2.72,0.15],"size":[2.5,5.6,0.3],"triangles":100}]},"bougainvillea":{"piece":"bougainvillea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/bougainvillea_body.fbx","center":[-0.01,-1.512,0.208],"size":[6.757,4.598,2.035],"triangles":4864}]},"ground":{"piece":"ground","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/ground_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"knife":{"piece":"knife","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"blade_base","position":[0.1488,0.0528,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"blade_tip","position":[0.5136,-0.0134,-0.0],"forward":[0.6,-0.8,0],"up":[0,1,0]},{"name":"ring","position":[-0.1392,-0.1968,-0.0],"forward":[0,0,-1],"up":[0,1,0]},{"name":"charm","position":[-0.1392,-0.2681,-0.0],"forward":[0,-1,0],"up":[0,1,0]}],"joints":[{"part":"knife","type":"hinge","pivot":[-0.1392,-0.1968,-0.0],"axis":[0,0,-1],"amount":360,"unit":"degrees"}],"parts":[{"id":"blade","mesh":"parts/knife_blade.fbx","center":[0.317,0.062,-0.0],"size":[0.394,0.162,0.02],"triangles":104},{"id":"charm","mesh":"parts/knife_charm.fbx","center":[-0.132,-0.335,-0.0],"size":[0.083,0.189,0.049],"triangles":68},{"id":"handle","mesh":"parts/knife_handle.fbx","center":[-0.021,-0.011,-0.0],"size":[0.376,0.29,0.092],"triangles":916},{"id":"ring","mesh":"parts/knife_ring.fbx","center":[-0.139,-0.197,-0.0],"size":[0.144,0.144,0.031],"triangles":240}]},"lantern":{"piece":"lantern","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_body.fbx","center":[0.0,-1.795,-0.0],"size":[1.103,3.59,1.103],"triangles":224},{"id":"glass","mesh":"parts/lantern_glass.fbx","center":[0.0,-2.515,-0.0],"size":[0.84,1.15,0.84],"triangles":12}]},"lantern_wall":{"piece":"lantern_wall","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_wall_body.fbx","center":[0.0,-1.195,0.851],"size":[1.103,2.89,1.702],"triangles":260},{"id":"glass","mesh":"parts/lantern_wall_glass.fbx","center":[0.0,-1.565,1.15],"size":[0.84,1.15,0.84],"triangles":12}]},"paving_a":{"piece":"paving_a","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_a_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_b":{"piece":"paving_b","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_b_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_bricks":{"piece":"paving_bricks","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_bricks_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_c":{"piece":"paving_c","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_c_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_channel":{"piece":"paving_channel","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_channel_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_dyed":{"piece":"paving_dyed","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_dyed_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_pool":{"piece":"paving_pool","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_pool_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_tiles":{"piece":"paving_tiles","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_tiles_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"pistol":{"piece":"pistol","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[0.9113,0.1613,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.5625,0.2362,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[0.6375,0.015,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"side","position":[0.6375,0.045,-0.0647],"forward":[1,0,0],"up":[0,1,0]},{"name":"magazine","position":[-0.0225,-0.33,-0.0],"forward":[-0.2,-1,0],"up":[0,1,0]},{"name":"aim_rear","position":[-0.0638,0.27,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[0.8475,0.2625,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"slide","type":"slide","pivot":[0.075,0.1837,-0.0],"axis":[-1,0,0],"amount":0.2175,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.3262,-0.0112,-0.0],"axis":[0,0,-1],"amount":12,"unit":"degrees"},{"part":"hammer","type":"hinge","pivot":[-0.1237,0.1125,-0.0],"axis":[0,0,-1],"amount":50,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[-0.0225,-0.33,-0.0],"axis":[-0.2,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/pistol_barrel.fbx","center":[0.594,0.191,-0.0],"size":[0.634,0.142,0.129],"triangles":292},{"id":"body","mesh":"parts/pistol_body.fbx","center":[0.33,-0.105,-0.006],"size":[1.02,0.45,0.141],"triangles":224},{"id":"charm","mesh":"parts/pistol_charm.fbx","center":[-0.036,-0.308,-0.0],"size":[0.341,0.15,0.171],"triangles":100},{"id":"grip","mesh":"parts/pistol_grip.fbx","center":[0.0,-0.157,-0.0],"size":[0.3,0.285,0.164],"triangles":128},{"id":"hammer","mesh":"parts/pistol_hammer.fbx","center":[-0.141,0.163,-0.0],"size":[0.049,0.101,0.034],"triangles":52},{"id":"magazine","mesh":"parts/pistol_magazine.fbx","center":[-0.026,-0.197,-0.0],"size":[0.337,0.334,0.125],"triangles":40},{"id":"slide","mesh":"parts/pistol_slide.fbx","center":[0.368,0.176,-0.0],"size":[0.96,0.188,0.161],"triangles":140},{"id":"trigger","mesh":"parts/pistol_trigger.fbx","center":[0.319,-0.066,-0.0],"size":[0.053,0.109,0.026],"triangles":20}]},"rifle":{"piece":"rifle","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[2.2988,0.1687,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.2812,0.3037,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[1.0687,0.0037,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"side","position":[1.3013,0.1087,-0.0945],"forward":[1,0,0],"up":[0,1,0]},{"name":"magazine","position":[0.4763,0.0,-0.0],"forward":[0.2,-1,0],"up":[0,1,0]},{"name":"stock","position":[-0.2062,0.1012,-0.0],"forward":[-1,0,0],"up":[0,1,0]},{"name":"aim_rear","position":[0.8812,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[1.9762,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"bolt","type":"slide","pivot":[0.5363,0.24,-0.0],"axis":[-1,0,0],"amount":0.2625,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.2137,0.0037,-0.0],"axis":[0,0,-1],"amount":15,"unit":"degrees"},{"part":"selector","type":"hinge","pivot":[0.6937,0.1237,-0.0],"axis":[0,0,-1],"amount":20,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[0.4763,0.0,-0.0],"axis":[0.35,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/rifle_barrel.fbx","center":[1.477,0.238,-0.0],"size":[1.432,0.282,0.09],"triangles":232},{"id":"body","mesh":"parts/rifle_body.fbx","center":[0.364,0.097,-0.0],"size":[1.14,0.502,0.16],"triangles":308},{"id":"bolt","mesh":"parts/rifle_bolt.fbx","center":[0.517,0.242,0.111],"size":[0.322,0.049,0.131],"triangles":56},{"id":"cover","mesh":"parts/rifle_cover.fbx","center":[0.278,0.258,-0.0],"size":[0.877,0.088,0.135],"triangles":152},{"id":"grip","mesh":"parts/rifle_grip.fbx","center":[-0.011,-0.193,-0.0],"size":[0.24,0.401,0.117],"triangles":80},{"id":"handguard","mesh":"parts/rifle_handguard.fbx","center":[1.065,0.069,-0.0],"size":[0.585,0.491,0.223],"triangles":348},{"id":"magazine","mesh":"parts/rifle_magazine.fbx","center":[0.583,-0.391,-0.0],"size":[0.453,0.852,0.138],"triangles":264},{"id":"muzzle","mesh":"parts/rifle_muzzle.fbx","center":[2.246,0.169,-0.0],"size":[0.105,0.104,0.104],"triangles":164},{"id":"selector","mesh":"parts/rifle_selector.fbx","center":[0.548,0.112,0.08],"size":[0.382,0.067,0.012],"triangles":16},{"id":"stock","mesh":"parts/rifle_stock.fbx","center":[-0.679,-0.049,-0.0],"size":[0.96,0.48,0.14],"triangles":132},{"id":"trigger","mesh":"parts/rifle_trigger.fbx","center":[0.21,-0.053,-0.0],"size":[0.052,0.112,0.023],"triangles":20}]},"rug":{"piece":"rug","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/rug_body.fbx","center":[0.0,0.035,-0.0],"size":[6.48,0.07,4.0],"triangles":300}]},"sand_drift":{"piece":"sand_drift","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sand_drift_body.fbx","center":[0.005,0.25,0.95],"size":[6.61,0.5,1.9],"triangles":68}]},"sign_bread":{"piece":"sign_bread","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_bread_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_cloth":{"piece":"sign_cloth","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_cloth_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_drop":{"piece":"sign_drop","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_drop_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_dye":{"piece":"sign_dye","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_dye_body.fbx","center":[0.0,0.0,0.105],"size":[5.8,4.2,0.21],"triangles":56}]},"sign_pot":{"piece":"sign_pot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_pot_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_tea":{"piece":"sign_tea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_tea_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"smoke":{"piece":"smoke","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"smoke","position":[0.0,0.2175,-0.0],"forward":[0,1,0],"up":[1,0,0]}],"joints":[{"part":"pin","type":"detach","pivot":[0.0112,0.2925,-0.0],"axis":[0,0,1],"amount":0,"unit":"direction"},{"part":"lever","type":"hinge","pivot":[-0.0412,0.3412,-0.0],"axis":[0,0,-1],"amount":100,"unit":"degrees"}],"parts":[{"id":"body","mesh":"parts/smoke_body.fbx","center":[0.0,0.002,-0.0],"size":[0.23,0.431,0.23],"triangles":312},{"id":"fuze","mesh":"parts/smoke_fuze.fbx","center":[0.004,0.275,-0.0],"size":[0.097,0.122,0.071],"triangles":80},{"id":"lever","mesh":"parts/smoke_lever.fbx","center":[0.048,0.146,-0.0],"size":[0.179,0.399,0.056],"triangles":52},{"id":"pin","mesh":"parts/smoke_pin.fbx","center":[0.011,0.252,-0.0],"size":[0.094,0.092,0.112],"triangles":188}]},"util_dart":{"piece":"util_dart","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"tip","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"eye","position":[-0.405,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/util_dart_body.fbx","center":[-0.469,0.0,-0.0],"size":[0.938,0.27,0.27],"triangles":552}]}}]=]) :: any
 ]==] },
 	{ path = { "ServerStorage", "DesertFps", "Buildings", "BuildingBuilder" }, class = "ModuleScript", source = [=[
 --!strict
@@ -5644,6 +6007,306 @@ local HttpService = game:GetService("HttpService")
 return HttpService:JSONDecode([=[
 {"buildings":[{"recipe":"teahouse","row":7,"column":17,"rows":4,"columns":4,"paves":true},{"recipe":"cistern","row":28,"column":17,"rows":7,"columns":8,"paves":true},{"recipe":"courtyard","row":15,"column":3,"rows":9,"columns":7,"paves":true},{"recipe":"dyeworks","row":15,"column":28,"rows":9,"columns":8,"paves":true},{"recipe":"potters","row":4,"column":28,"rows":4,"columns":4,"paves":true},{"recipe":"guardhouse","row":29,"column":9,"rows":3,"columns":3,"paves":true},{"recipe":"house_01_09","row":1,"column":9,"rows":2,"columns":2,"paves":false},{"recipe":"house_01_18","row":1,"column":18,"rows":2,"columns":4,"paves":false},{"recipe":"house_03_30","row":3,"column":30,"rows":1,"columns":2,"paves":false},{"recipe":"house_04_03","row":4,"column":3,"rows":2,"columns":2,"paves":false},{"recipe":"house_04_06","row":4,"column":6,"rows":4,"columns":4,"paves":false},{"recipe":"house_04_16","row":4,"column":16,"rows":2,"columns":5,"paves":false},{"recipe":"house_04_22","row":4,"column":22,"rows":2,"columns":3,"paves":false},{"recipe":"house_04_34","row":4,"column":34,"rows":2,"columns":2,"paves":false},{"recipe":"house_05_11","row":5,"column":11,"rows":2,"columns":1,"paves":false},{"recipe":"house_06_38","row":6,"column":38,"rows":2,"columns":1,"paves":false},{"recipe":"house_07_03","row":7,"column":3,"rows":3,"columns":3,"paves":false},{"recipe":"house_07_14","row":7,"column":14,"rows":3,"columns":1,"paves":false},{"recipe":"house_08_01","row":8,"column":1,"rows":2,"columns":1,"paves":false},{"recipe":"house_08_23","row":8,"column":23,"rows":2,"columns":2,"paves":false},{"recipe":"house_08_33","row":8,"column":33,"rows":2,"columns":2,"paves":false},{"recipe":"house_09_09","row":9,"column":9,"rows":2,"columns":3,"paves":false},{"recipe":"house_09_28","row":9,"column":28,"rows":5,"columns":2,"paves":false},{"recipe":"house_11_03","row":11,"column":3,"rows":1,"columns":3,"paves":false},{"recipe":"house_11_34","row":11,"column":34,"rows":1,"columns":2,"paves":false},{"recipe":"house_12_07","row":12,"column":7,"rows":1,"columns":2,"paves":false},{"recipe":"house_14_11","row":14,"column":11,"rows":6,"columns":1,"paves":false},{"recipe":"house_14_14","row":14,"column":14,"rows":2,"columns":2,"paves":false},{"recipe":"house_19_36","row":19,"column":36,"rows":2,"columns":1,"paves":false},{"recipe":"house_22_01","row":22,"column":1,"rows":2,"columns":1,"paves":false},{"recipe":"house_22_23","row":22,"column":23,"rows":2,"columns":2,"paves":false},{"recipe":"house_25_04","row":25,"column":4,"rows":1,"columns":2,"paves":false},{"recipe":"house_25_14","row":25,"column":14,"rows":1,"columns":6,"paves":false},{"recipe":"house_25_29","row":25,"column":29,"rows":1,"columns":2,"paves":false},{"recipe":"house_25_34","row":25,"column":34,"rows":1,"columns":2,"paves":false},{"recipe":"house_26_08","row":26,"column":8,"rows":2,"columns":1,"paves":false},{"recipe":"house_26_13","row":26,"column":13,"rows":2,"columns":1,"paves":false},{"recipe":"house_28_06","row":28,"column":6,"rows":2,"columns":2,"paves":false},{"recipe":"house_28_28","row":28,"column":28,"rows":2,"columns":3,"paves":false},{"recipe":"house_29_03","row":29,"column":3,"rows":2,"columns":2,"paves":false},{"recipe":"house_29_32","row":29,"column":32,"rows":2,"columns":2,"paves":false},{"recipe":"house_31_14","row":31,"column":14,"rows":2,"columns":2,"paves":false},{"recipe":"house_32_30","row":32,"column":30,"rows":3,"columns":3,"paves":false},{"recipe":"house_33_03","row":33,"column":3,"rows":2,"columns":3,"paves":false},{"recipe":"house_33_09","row":33,"column":9,"rows":2,"columns":2,"paves":false},{"recipe":"house_34_35","row":34,"column":35,"rows":2,"columns":1,"paves":false},{"recipe":"house_35_16","row":35,"column":16,"rows":1,"columns":1,"paves":false},{"recipe":"house_36_07","row":36,"column":7,"rows":2,"columns":1,"paves":false},{"recipe":"house_36_23","row":36,"column":23,"rows":2,"columns":2,"paves":false},{"recipe":"house_37_31","row":37,"column":31,"rows":2,"columns":2,"paves":false},{"recipe":"streets","row":0,"column":0,"rows":40,"columns":40,"paves":false},{"recipe":"townwall","row":0,"column":0,"rows":40,"columns":40,"paves":false}],"clear":["10:1:-1:0","10:24:-1:0","10:30:0:-1","10:33:-1:0","10:34:-1:0","10:35:1:0","10:4:-1:0","11:10:-1:0","11:27:0:1","11:30:0:-1","11:36:0:-1","11:6:0:-1","12:29:0:-1","12:34:-1:0","12:4:-1:0","12:5:-1:0","12:6:0:1","13:11:1:0","13:29:0:-1","13:8:-1:0","14:16:0:-1","15:10:0:1","16:12:0:-1","16:15:-1:0","17:10:0:1","1:22:0:-1","1:8:0:1","20:37:0:-1","21:23:1:0","21:24:1:0","21:36:-1:0","23:2:0:-1","24:1:-1:0","24:24:-1:0","24:30:1:0","24:34:1:0","24:35:1:0","25:13:0:1","25:20:0:-1","25:6:0:-1","25:8:1:0","26:12:0:1","26:17:-1:0","26:29:-1:0","26:5:-1:0","27:12:0:1","27:14:0:-1","27:29:1:0","27:7:0:1","27:9:0:-1","28:3:1:0","29:27:0:1","29:34:0:-1","29:8:0:-1","2:31:1:0","2:8:0:1","30:14:1:0","30:28:-1:0","30:34:0:-1","30:5:0:-1","31:16:0:-1","31:31:1:0","32:16:0:-1","32:29:0:1","33:11:0:-1","33:32:0:-1","33:35:1:0","34:16:1:0","34:29:0:1","34:2:0:1","34:6:0:-1","34:8:0:1","35:24:1:0","35:34:0:1","35:3:-1:0","35:4:-1:0","36:22:0:1","36:32:1:0","37:22:0:1","37:8:0:-1","38:30:0:1","3:10:-1:0","3:16:1:0","3:19:-1:0","3:29:0:1","3:35:1:0","4:15:0:1","5:22:0:1","5:33:0:1","5:5:0:-1","6:10:0:-1","6:12:0:-1","6:16:-1:0","6:18:-1:0","6:23:-1:0","6:34:-1:0","6:7:0:1","7:13:0:1","7:24:1:0","7:37:0:1","8:15:0:-1","8:38:-1:0","8:5:0:-1","8:8:-1:0","9:22:0:1","9:2:0:-1","9:35:0:-1","9:6:0:-1"]}]=]) :: any
 ]==] },
+	{ path = { "ServerStorage", "DesertFps", "Utility", "UtilityService" }, class = "ModuleScript", source = [=[
+--!strict
+-- Server side of the utility: who has how many charges, where a thrown dart goes, and what it sees.
+-- A client says "I throw this, from here, that way". The server checks the claim (alive, a charge left, the
+-- throw starts at the thrower's head) and decides the rest itself: the flight, where the dart sticks, each
+-- pulse and who it shows. Only the thrower is told who was seen.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("DesertFps")
+local Config = require(Shared.Utility.UtilityConfig)
+local WeaponConfig = require(Shared.Weapons.WeaponConfig)
+local DesertFps = (ServerStorage :: any).DesertFps
+local Combat = require(DesertFps.Combat.Combat)
+local KitModels = require(DesertFps.Assets.KitModels)
+local WeaponService = require(DesertFps.Weapons.WeaponService)
+
+local UtilityService = {}
+
+-- The flight is worked out in steps this long.
+local STEP = 1 / 60
+-- A piece is modelled pointing along +X; this turns a frame that looks along a direction into the piece's.
+local AIM = CFrame.Angles(0, math.pi / 2, 0)
+-- Where a dart looks for someone: any of these in the clear and they are seen.
+local SEEN_AT = { "Head", "UpperTorso", "HumanoidRootPart" }
+
+-- Charges left, and how many more are on their way back.
+type Carried = { left: number, coming: number }
+type Device = { owner: Player, model: Model, stuckTo: BasePart, eye: Vector3, out: boolean }
+
+local carried: { [Player]: { [string]: Carried } } = {}
+local lastAsk: { [Player]: number } = {}
+local devices: { [BasePart]: Device } = {}
+local remotes: { [string]: RemoteEvent } = {}
+local models: Folder -- what clients show in flight: one model for each utility's piece
+local placed: Folder -- the darts that are stuck in the town
+
+local function isFinite(v: Vector3): boolean
+	return v.X == v.X and v.Y == v.Y and v.Z == v.Z and v.Magnitude < 1e6
+end
+
+local function tell(player: Player, name: string)
+	local mine = carried[player] and carried[player][name]
+	if mine then
+		remotes.UtilityState:FireClient(player, name, mine.left)
+	end
+end
+
+-- What a dart flies through and sees past: bodies, and other darts.
+local function world(): RaycastParams
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local ignore: { Instance } = Combat.all()
+	table.insert(ignore, placed)
+	params.FilterDescendantsInstances = ignore
+	return params
+end
+
+-- Where something thrown from `origin` at `velocity` first meets the world: after how long, what it met and
+-- where, and which way it was going. Nil if it meets nothing in time.
+local function flight(origin: Vector3, velocity: Vector3, gravity: number, most: number): (number?, RaycastResult?, Vector3?)
+	local params = world()
+	local position, elapsed = origin, 0
+	while elapsed < most do
+		local after = velocity - Vector3.new(0, gravity * STEP, 0)
+		local move = (velocity + after) / 2 * STEP
+		local hit = workspace:Raycast(position, move, params)
+		if hit then
+			return elapsed + STEP * hit.Distance / move.Magnitude, hit, velocity.Unit
+		end
+		position, velocity, elapsed = position + move, after, elapsed + STEP
+	end
+	return nil, nil, nil
+end
+
+local function remove(device: Device)
+	if device.out then
+		return
+	end
+	device.out = true
+	for part, other in devices do
+		if other == device then
+			devices[part] = nil
+		end
+	end
+	device.model:Destroy()
+end
+
+-- One pulse: everyone else the dart has a clear line to, within its reach.
+local function pulse(device: Device, what: any)
+	local params = world()
+	local seen: { Model } = {}
+	local theirs = device.owner.Character
+	for _, character in Combat.all() do
+		if character == theirs or not character:IsA("Model") then
+			continue
+		end
+		for _, name in SEEN_AT do
+			local part = character:FindFirstChild(name)
+			if part and part:IsA("BasePart") then
+				local to = part.Position - device.eye
+				if to.Magnitude <= what.Radius and not workspace:Raycast(device.eye, to, params) then
+					table.insert(seen, character)
+					break
+				end
+			end
+		end
+	end
+	remotes.UtilityPulse:FireAllClients(device.eye)
+	if device.owner.Parent then
+		remotes.Reveal:FireClient(device.owner, seen, what.Reveal)
+	end
+	for _, character in seen do
+		local spotted = Players:GetPlayerFromCharacter(character)
+		if spotted then
+			remotes.Spotted:FireClient(spotted)
+		end
+	end
+end
+
+-- Stands the dart where it landed: its tip in the surface, leaning the way it came in.
+local function stick(owner: Player, name: string, hit: RaycastResult, heading: Vector3)
+	local what = (Config.Utilities :: any)[name]
+	local source = models:FindFirstChild(what.Model) :: Instance
+	local into = (heading - hit.Normal * 0.6).Unit
+	local frame = CFrame.lookAlong(hit.Position, into) * AIM
+	local model = Instance.new("Model")
+	model.Name = name
+	local device: Device = {
+		owner = owner,
+		model = model,
+		stuckTo = hit.Instance,
+		eye = frame * ((source:GetAttribute("Socket_eye") :: Vector3) * what.Size) + hit.Normal * 0.05,
+		out = false,
+	}
+	for _, template in source:GetChildren() do
+		if template:IsA("BasePart") then
+			local part = template:Clone()
+			part.Size *= what.Size
+			part.CFrame = frame * CFrame.new((template:GetAttribute("Offset") :: Vector3) * what.Size)
+			part.CanQuery = true -- so that it can be shot down
+			part.CastShadow = true
+			part.Parent = model
+			devices[part] = device
+			model.PrimaryPart = model.PrimaryPart or part
+		end
+	end
+	-- Its light shows where it is, to friend and enemy alike.
+	local lamp = Instance.new("Attachment")
+	lamp.Parent = model.PrimaryPart
+	lamp.WorldPosition = device.eye
+	local light = Instance.new("PointLight")
+	light.Color = Config.Look.Light
+	light.Range = Config.Look.LightRange
+	light.Brightness = 2
+	light.Shadows = false
+	light.Parent = lamp
+	model.Parent = placed
+
+	task.delay(what.Arm, function()
+		for _ = 1, what.Pulses do
+			-- A dart whose wall has come down goes with it.
+			if device.out or not device.stuckTo:IsDescendantOf(workspace) then
+				break
+			end
+			pulse(device, what)
+			task.wait(what.Every)
+		end
+		task.wait(what.Linger)
+		remove(device)
+	end)
+end
+
+local function onUse(player: Player, name: unknown, origin: unknown, direction: unknown)
+	if typeof(name) ~= "string" or typeof(origin) ~= "Vector3" or typeof(direction) ~= "Vector3" then
+		return
+	end
+	if not isFinite(origin) or not isFinite(direction) or math.abs(direction.Magnitude - 1) > 0.01 then
+		return
+	end
+	local what = (Config.Utilities :: any)[name]
+	local mine = carried[player] and carried[player][name]
+	local now = os.clock()
+	if not (what and mine) or now - (lastAsk[player] or 0) < WeaponConfig.AskInterval then
+		return
+	end
+	lastAsk[player] = now
+
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local head = character and character:FindFirstChild("Head")
+	if not (character and humanoid and humanoid.Health > 0 and head and head:IsA("BasePart")) then
+		return
+	end
+	if mine.left < 1 then
+		tell(player, name) -- the client thinks it has one left
+		return
+	end
+	-- As for a shot: it starts at the thrower's head, and not on the far side of something from it.
+	if (origin - head.Position).Magnitude > WeaponConfig.MaxOriginOffset then
+		return
+	end
+	if workspace:Raycast(head.Position, origin - head.Position, world()) then
+		return
+	end
+	-- Hands that throw do not shoot: the weapon is drawn again.
+	if not WeaponService.lower(player, 0) then
+		return
+	end
+
+	mine.left -= 1
+	mine.coming += 1
+	tell(player, name)
+	task.delay(what.Recharge, function()
+		if carried[player] and carried[player][name] == mine and mine.coming > 0 then
+			mine.coming -= 1
+			mine.left = math.min(what.Charges, mine.left + 1)
+			tell(player, name)
+		end
+	end)
+
+	local velocity = direction.Unit * what.Speed
+	local after, hit, heading = flight(origin, velocity, what.Gravity, what.FlightMost)
+	-- Everyone sees it fly. Each client draws the flight itself from where it starts and how fast.
+	remotes.UtilityThrown:FireAllClients(name, origin, velocity, after or what.FlightMost)
+	if after and hit and heading then
+		task.delay(after, function()
+			if hit.Instance:IsDescendantOf(workspace) then
+				stick(player, name, hit, heading)
+			end
+		end)
+	end
+end
+
+-- A full set of charges, at every spawn.
+local function stock(player: Player)
+	local mine = {}
+	for _, name in Config.Loadout do
+		mine[name] = { left = (Config.Utilities :: any)[name].Charges, coming = 0 }
+	end
+	carried[player] = mine
+	for _, name in Config.Loadout do
+		tell(player, name)
+	end
+end
+
+function UtilityService.start()
+	models = Instance.new("Folder")
+	models.Name = "UtilityModels"
+	for _, what in Config.Utilities :: { [string]: any } do
+		KitModels.view(what.Model, models)
+	end
+	models.Parent = Shared
+
+	placed = Instance.new("Folder")
+	placed.Name = "Utilities"
+	placed.Parent = workspace
+
+	-- From a client: UseUtility. To clients: UtilityState (their charges), UtilityThrown and UtilityPulse
+	-- (for everyone to see), Reveal (who the thrower's dart saw), Spotted (to whoever was seen).
+	local folder = Shared:WaitForChild("Remotes")
+	for _, name in { "UseUtility", "UtilityState", "UtilityThrown", "UtilityPulse", "Reveal", "Spotted" } do
+		local remote = Instance.new("RemoteEvent")
+		remote.Name = name
+		remote.Parent = folder
+		remotes[name] = remote
+	end
+	remotes.UseUtility.OnServerEvent:Connect(onUse)
+
+	-- A shot or a slash that lands on a dart knocks it out.
+	table.insert(WeaponService.Struck, function(part: BasePart): boolean
+		local device = devices[part]
+		if device then
+			remove(device)
+		end
+		return device ~= nil
+	end)
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function()
+			stock(player)
+		end)
+		if player.Character then
+			stock(player)
+		end
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerRemoving:Connect(function(player)
+		carried[player] = nil
+		lastAsk[player] = nil
+	end)
+end
+
+return UtilityService
+]=] },
 	{ path = { "ServerStorage", "DesertFps", "Weapons", "WeaponService" }, class = "ModuleScript", source = [=[
 --!strict
 -- Server side of the weapons: what each player carries, and what their shots do.
@@ -5666,11 +6329,15 @@ local CombatConfig = require(Shared.Combat.CombatConfig)
 local DesertFps = (ServerStorage :: any).DesertFps
 local Breakable = require(DesertFps.Destruction.Breakable)
 local Structure = require(DesertFps.Destruction.Structure)
-local PartsData = require(DesertFps.Assets.PartsData)
+local KitModels = require(DesertFps.Assets.KitModels)
 local Combat = require(DesertFps.Combat.Combat)
 local Hitboxes = require(DesertFps.Combat.Hitboxes)
 
 local WeaponService = {}
+
+-- Called when a shot or a slash lands on something in the world that is not a body, before the town is asked:
+-- the first to answer true has taken the hit (the recon dart, which is knocked out).
+WeaponService.Struck = {} :: { (part: BasePart, by: Player) -> boolean }
 
 -- Weapons are modelled pointing along +X; a hand holds a tool pointing along -Z.
 local AIM = CFrame.Angles(0, math.pi / 2, 0)
@@ -5696,10 +6363,6 @@ local weaponModels: Folder, attachmentModels: Folder
 
 local remotes: { [string]: RemoteEvent } = {}
 
-local function vector(values: { number }): Vector3
-	return Vector3.new(values[1], values[2], values[3])
-end
-
 local function isFinite(v: Vector3): boolean
 	return v.X == v.X and v.Y == v.Y and v.Z == v.Z and v.Magnitude < 1e6
 end
@@ -5708,33 +6371,6 @@ local function unseen(part: BasePart)
 	part.CanCollide = false
 	part.CanQuery = false
 	part.CanTouch = false
-end
-
--- The model clients show in first person: every part of the weapon or the attachment, with what the client
--- needs to pose it copied out of the parts data (which never leaves the server).
-local function viewModel(name: string, parent: Instance)
-	local data = PartsData[name]
-	local model = Instance.new("Model")
-	model.Name = name
-	for _, socket in data.sockets do
-		model:SetAttribute("Socket_" .. socket.name, vector(socket.position))
-	end
-	for _, template in DesertFps.Meshes[name].Parts:GetChildren() do
-		local part = template:Clone() :: BasePart
-		part.Anchored = true
-		part.CastShadow = false
-		unseen(part)
-		part.Parent = model
-	end
-	for _, joint in data.joints do
-		local part = model:FindFirstChild(joint.part)
-		if part and joint.type == "slide" then
-			part:SetAttribute("Slide", vector(joint.axis) * joint.amount)
-		elseif part and joint.type == "detach" then
-			part:SetAttribute("Detach", vector(joint.axis).Unit)
-		end
-	end
-	model.Parent = parent
 end
 
 -- The weapon everyone else sees in the player's hand, with what is attached to it: a Tool, so the character
@@ -5964,7 +6600,14 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 		finish = origin + direction * distance
 		remotes.Hit:FireClient(player, zone, dealt, killed)
 	elseif wall and wall.Instance:IsA("BasePart") then
-		if not Breakable.damage(wall.Instance, weapon.WallDamage, wall.Position, direction) then
+		local taken = false
+		for _, struck in WeaponService.Struck do
+			taken = struck(wall.Instance, player)
+			if taken then
+				break
+			end
+		end
+		if not taken and not Breakable.damage(wall.Instance, weapon.WallDamage, wall.Position, direction) then
 			Structure.knock(wall.Instance) -- a lantern, a sign, a banner: shot down
 		end
 	end
@@ -6112,18 +6755,34 @@ local function viewArms(parent: Instance)
 	arms.Parent = parent
 end
 
+-- The player's hands do something else for `seconds` (throw a dart): the weapon in hand cannot be used for
+-- that long, and then has to be drawn again. A reload under way is lost. False if the player holds nothing.
+function WeaponService.lower(player: Player, seconds: number): boolean
+	local gunner = gunners[player]
+	local _, humanoid = humanoidOf(player)
+	if not (gunner and humanoid) then
+		return false
+	end
+	gunner.aiming = false
+	interruptReload(gunner)
+	local drawn = os.clock() + seconds + weaponOf(gunner).EquipTime - WeaponConfig.Grace
+	gunner.readyAt = math.max(gunner.readyAt, drawn)
+	pace(gunner, humanoid)
+	return true
+end
+
 function WeaponService.start()
 	weaponModels = Instance.new("Folder")
 	weaponModels.Name = "WeaponModels"
 	for name in WeaponConfig.Weapons do
-		viewModel(name, weaponModels)
+		KitModels.view(name, weaponModels)
 	end
 	weaponModels.Parent = Shared
 	attachmentModels = Instance.new("Folder")
 	attachmentModels.Name = "AttachmentModels"
 	for _, what in AttachmentConfig.Attachments :: { [string]: any } do
 		if what.Model then
-			viewModel(what.Model, attachmentModels)
+			KitModels.view(what.Model, attachmentModels)
 		end
 	end
 	attachmentModels.Parent = Shared
@@ -6207,6 +6866,7 @@ local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"
 local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
+local UtilityClient = require(Shared.Client:WaitForChild("UtilityClient"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
 
@@ -6273,6 +6933,7 @@ local aim = 0 -- 0 at the hip, 1 at the eye
 local walked = 0
 local stanceTold = ""
 local lastStray = 0 -- how far the last shot was free to stray (for tests)
+local lowered = false -- the weapon is put away while the hands do something else (throw a dart)
 
 local function body(): (Model?, Humanoid?, BasePart?)
 	local character = player.Character
@@ -6319,7 +6980,7 @@ local function take(slotName: string)
 end
 
 local function equip(slotName: string)
-	if body() and slots[slotName] and slotName ~= current then
+	if body() and slots[slotName] and slotName ~= current and not lowered then
 		take(slotName)
 		remote("Equip"):FireServer(slotName)
 	end
@@ -6571,7 +7232,7 @@ end, function()
 	menu:hide()
 end)
 local function showLoadout(shown: boolean)
-	if shown and current and body() then
+	if shown and current and body() and not lowered then
 		triggerHeld, aimHeld = false, false
 		menu:show(weapon)
 	else
@@ -6612,6 +7273,29 @@ ContextActionService:BindAction("PickWeapon", function(_, state, input)
 	end
 	return Enum.ContextActionResult.Sink
 end, false, table.unpack(slotKeys))
+
+-- The utility borrows the player's hands: the weapon goes away for the throw, and is drawn again after it.
+UtilityClient.start({
+	hud = hud,
+	effects = effects,
+	free = function(): boolean
+		return current ~= nil and body() ~= nil and not lowered and not menu.shown
+	end,
+	lower = function(seconds: number, released: () -> ())
+		lowered = true
+		triggerHeld, aimHeld = false, false
+		reloadFrom = nil
+		drawnAt = os.clock() + seconds -- not ready until it is drawn again
+		viewmodel:show(nil)
+		task.delay(seconds, function()
+			lowered = false
+			if current and body() then
+				released()
+				take(current)
+			end
+		end)
+	end,
+})
 
 -- The server says what the player carries: at spawn, after a reload, after a switch, after a fitting.
 remote("State").OnClientEvent:Connect(function(state: { current: string, slots: { [string]: Slot } })
@@ -6695,7 +7379,7 @@ end
 -- A hook for test scripts, which cannot press keys (DevConfig.TestHooks):
 --   ReplicatedStorage.DesertFps.DevWeapon:Invoke("trigger" | "aim" | "walk", held)   ("equip", slot)   ("reload")
 --   ("attach", { socket = "muzzle", name = "suppressor" })   on the weapon in hand; no name takes it off
---   ("loadout", shown)   ("state") returns what the weapon is doing.
+--   ("loadout", shown)   ("utility", name) throws it   ("state") returns what the weapon is doing.
 local function testHook()
 	if Shared:FindFirstChild("DevWeapon") or not Shared:GetAttribute("TestHooks") then
 		return
@@ -6717,12 +7401,15 @@ local function testHook()
 			attach(current, value.socket, value.name)
 		elseif what == "loadout" then
 			showLoadout(value)
+		elseif what == "utility" then
+			return UtilityClient.use(value)
 		elseif what == "state" and current then
 			return {
 				slot = current,
 				weapon = slots[current].weapon,
 				attachments = slots[current].attachments,
 				numbers = weapon,
+				utility = UtilityClient.state(),
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),

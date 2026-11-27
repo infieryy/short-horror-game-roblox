@@ -114,4 +114,6 @@ return {
 	att_scope = { Model = 92951252183787, Texture = 94016934404918 },
 	att_foregrip = { Model = 113941948735240, Texture = 99962778696816 },
 	att_laser = { Model = 80545025910238, Texture = 103299523819440 },
+	-- utility (UtilityConfig)
+	util_dart = { Model = 89191045180811, Texture = 88683663378582 },
 }

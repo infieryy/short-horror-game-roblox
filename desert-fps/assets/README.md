@@ -233,6 +233,14 @@ A can with rolled rims, a brass fuze, a steel safety lever bent over the fuze an
 - **Socket:** `smoke`, on the lid, where the smoke comes out.
 - **Joints:** the pin pulls out sideways; the lever hinges at the top of the fuze.
 
+### The recon dart
+
+![Recon dart](out/util_dart-front.png)
+
+`util_dart` (`recipes/dart.py`): a thrown sensor that sticks in a wall and looks for enemies. A steel point, a brass collar, a fat sensor head with a turquoise glass band between brass rims, a thin shaft and four fins. 0.94 studs long, 552 triangles, one part. Its origin is the tip of the point, so a dart is put in the world by its tip; socket `eye` is the middle of the glass band, where it sees from. What it does in the game is in `game/ReplicatedStorage/DesertFps/Utility/UtilityConfig.luau`.
+
+Round parts that follow one another each start a millimetre inside the one behind: two end faces in one plane flicker.
+
 ### Paint
 - **Finer brush.** Small objects use the map's paint rules with a smaller brush (`DETAIL_SCALE` in `config.py`).
 - **Extra hand-painted detail** (`STYLE` in `config.py`), only on pieces seen up close:

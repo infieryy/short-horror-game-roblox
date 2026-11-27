@@ -95,7 +95,8 @@ SCENES["newkit"] = [
 SCENES["dyeworks"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in dyeworks.placements()]
 SCENES["courtyard"] = [(item["piece"], tuple(item["pos"]), item["turn"], {}) for item in courtyard.placements()]
 # guns: (centre x, centre height, span) in studs, used to frame the camera
-GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7), "knife": (0.15, -0.14, 1.45), "smoke": (0.02, 0.07, 1.6)}
+GUNS = {"rifle": (0.57, 0.0, 3.5), "pistol": (0.35, -0.05, 1.7), "knife": (0.15, -0.14, 1.45), "smoke": (0.02, 0.07, 1.6),
+        "util_dart": (-0.47, 0.0, 1.25)}
 CAMERAS = {"preview": ((7.5, -27, 7.5), (0.2, 0, 5.2), 38), "close": ((-1.5, -11, 4.2), (-4.5, 0, 3.4), 35),
            "broken": ((5.5, -27, 8.5), (0.0, 0, 5.0), 38),
            "building": ((24, -34, 21), (0.5, -1, 6.5), 38), "building-back": ((-26, 30, 19), (-1, 0, 6.5), 38),
