@@ -113,6 +113,7 @@ def build(p):
     g.socket("muzzle", 668, 0)
     g.socket("optic", 130, 36)
     g.socket("underbarrel", 340, -44, up=(0, 0, -1))
+    g.socket("side", 402, -16, side=1, on=42)                      # the lower handguard's left face, ahead of the wrap
     g.socket("magazine", 182, -45, forward=(0.2, 0, -1))
     g.socket("stock", 0, -18, forward=(-1, 0, 0))
     g.socket("aim_rear", 290, 46)

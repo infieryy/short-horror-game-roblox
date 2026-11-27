@@ -339,7 +339,8 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 	local eye = if sights then math.deg(2 * math.atan(math.tan(math.rad(hip / 2)) / sights.Zoom)) else hip
 	camera.FieldOfView = hip + (eye - hip) * ease(aim)
 	UserInputService.MouseDeltaSensitivity = camera.FieldOfView / hip
-	hud:setOptic(weapon.View.Dot == true and aim > 0.5)
+	hud:setOptic(weapon.View.Reticle == true and aim > 0.5)
+	viewmodel:veil(hud:setScope(if weapon.View.Scope then aim else 0) >= 0.5)
 	local stance = `{walkHeld}{aiming}`
 	if stance ~= stanceTold then
 		stanceTold = stance
@@ -500,6 +501,7 @@ local function onCharacter(character: Model)
 		current = nil
 		triggerHeld, aimHeld = false, false
 		viewmodel:show(nil)
+		hud:setScope(0)
 		menu:hide()
 		laserDot.Parent = nil
 		hud:setCrosshair(false)

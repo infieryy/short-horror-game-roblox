@@ -171,7 +171,7 @@ Guns are not breakable. They are built from named parts, and each part is its ow
 
 - **Animate:** the slide or bolt, trigger, hammer, selector and magazine are separate.
 - **Swap:** a stock, grip, handguard, barrel, muzzle or dust cover can be replaced by an attachment built to the same socket.
-- **Sockets** (`<gun>.parts.json`): named points with a position and direction for `muzzle`, `optic`, `underbarrel`, `magazine` (and `stock` on the rifle), plus `aim_rear` and `aim_front` so the sights can be lined up when aiming.
+- **Sockets** (`<gun>.parts.json`): named points with a position and direction for `muzzle`, `optic`, `underbarrel`, `side`, `magazine` (and `stock` on the rifle), plus `aim_rear` and `aim_front` so the sights can be lined up when aiming.
 - **Joints** (`<gun>.parts.json`): how each moving part moves. `slide` gives a direction and distance, `hinge` a pivot, axis and angle, `detach` the direction a magazine pulls out.
 
 The piece origin is the top of the grip, where the hand goes, and the barrel points along +X.
@@ -184,7 +184,11 @@ The piece origin is the top of the grip, where the hand goes, and the barrel poi
 
 ![Pistol with a suppressor, a red dot and a laser](out/fitted-pistol-quiet-side.png)
 
-Six pieces that go on the guns' sockets (`recipes/attach.py`), built with the guns' toolkit, at their scale and in their paint. Each is one part, `body`, with its origin where it meets the gun: the back face of a muzzle device on the bore's axis, the underside of an optic's base, the top of what hangs under the barrel. So a piece goes on at the gun's socket with no turning. What each one does in the game is in `game/ReplicatedStorage/DesertFps/Weapons/AttachmentConfig.luau`.
+![The rifle from behind its left side: the laser](out/fitted-rifle-long-left.png)
+
+![The pistol from behind its left side: the laser](out/fitted-pistol-quiet-left.png)
+
+Six pieces that go on the guns' sockets (`recipes/attach.py`), built with the guns' toolkit, at their scale and in their paint. Each is one part, `body`, with its origin where it meets the gun: the back face of a muzzle device on the bore's axis, the underside of an optic's base, the top of what hangs under the barrel, the inner face of what sits on the gun's left side. So a piece goes on at the gun's socket with no turning. What each one does in the game is in `game/ReplicatedStorage/DesertFps/Weapons/AttachmentConfig.luau`.
 
 | Piece | Socket | Size (studs) | Triangles | Notes |
 |---|---|---|---|---|
@@ -193,13 +197,15 @@ Six pieces that go on the guns' sockets (`recipes/attach.py`), built with the gu
 | `att_reddot` | optic | 0.27 x 0.21 x 0.19 | 220 | a reflex sight, half as big again as a real one. Socket `eye`: the middle of its window |
 | `att_scope` | optic | 0.35 x 0.21 x 0.17 | 432 | a tube on two rings, open from end to end. Socket `eye`: on the tube's axis |
 | `att_foregrip` | underbarrel | 0.14 x 0.30 x 0.15 | 164 | the rifle's wood on a steel clamp |
-| `att_laser` | underbarrel | 0.20 x 0.09 x 0.11 | 268 | a box with a brass lens. Socket `beam`: the lens |
+| `att_laser` | side | 0.31 x 0.11 x 0.10 | 468 | a box on the gun's left side: emitter, lamp, battery cap, turquoise switch. Socket `beam`: the emitter |
+
+The laser was first a small box under the barrel, and its holder never saw it: the handguard and the left hand hid it. It is now on the left side, which is the side the camera is on. The guns have a `side` socket for it (`g.socket("side", x, z, side=1, on=<width of the part there>)`), and the toolkit's `tube` and `muzzle` take `out`, millimetres to the left of the gun's middle.
 
 Two things learnt from looking through the optics in the game, both now rules in the recipes:
 - **Nothing may reach into a scope's bore.** The tops of the ring feet and the underside of the turret did, by 2 to 3 mm, and from the eye they sat in the picture. They now end inside the tube's wall.
 - **An emitter in front of a window hides it.** The red dot's emitter was as tall as a real one's and covered the lower half of the window from where the eye is. It is now a low step.
 
-`python preview.py rifle-quiet rifle-long pistol-quiet` renders the three pictures above (`FITTED` in `preview.py` says what is on each).
+`python preview.py rifle-quiet rifle-long pistol-quiet` renders the pictures above, three views of each (`FITTED` in `preview.py` says what is on each gun). `rifle-long:left` renders one view only.
 
 ### How a gun is written
 `recipes/gun.py` is the shared toolkit. A gun recipe is a list of side-view outlines in millimetres, each given a part name, a material and a real width:

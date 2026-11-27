@@ -37,12 +37,23 @@ With the owner's "Roblox Animation Kit" (its rig, its reference animations, its 
   solved to it: the right hand on the grip, the left on the handguard or wrapped round the pistol. The
   shoulders start from the kit's fighter guard. A blocky R15 arm cannot reach a rifle's handguard with the
   chest square on, so the chest is turned 32 degrees to the right and the head turned back.
+- **The pistol is held in both hands** (reworked 2026-11-27, at the owner's word). The left hand's end is
+  at (0.06, -0.20, -0.10) in the pistol's own space, turned as the right hand is, mirrored in the pistol's
+  middle plane. `regrip_pistol.py` did it, on the seven pistol animations: it solves the left arm again at
+  every key where the hand is on the pistol. The versions before are in the work file as "... (one hand
+  under)".
 - **Knife:** the hold is the kit's "Combat Idle" guard and the slash its "Punch Right", from the chest up.
   The blow lands 8 frames in instead of 13, because the game decides the hit at the click.
 - How each weapon sits in the hand is worked out from its hold pose and written to `WeaponConfig` (`Hand`).
   Change a hold and that number has to be worked out again.
 
 ## First person
+
+An animation only looks in the game as it does in Blender on a body with the rig's proportions. The game
+makes the first-person arms with `BodyTypeScale` 0 and `ProportionScale` 0, which is the kit's rig (upper
+arm 0.88, forearm 0.76). A body made with neither set has arms 0.92 and 0.81 long, and a left hand posed on
+a weapon then misses it by a sixth of a stud. Characters come in every proportion: on them the left hand
+lands near the weapon, not on it.
 
 The arms in front of the camera are a plain R15 body of their own, hung off the camera, with only the
 forearms and hands showing (0.6 studs thick instead of a body's full stud), in the player's own skin and
@@ -81,19 +92,19 @@ owner's account on 2026-11-27 (the owner said yes both times), and all were appr
 | FPS Rifle Hold | 83028381190337 |
 | FPS Rifle Fire | 96286693108659 |
 | FPS Rifle Reload | 124740467076400 |
-| FPS Pistol Hold | 108605858556304 |
-| FPS Pistol Fire | 137279406699731 |
-| FPS Pistol Reload | 126204687311857 |
+| FPS Pistol Hold | 93403698622412 |
+| FPS Pistol Fire | 96375376527245 |
+| FPS Pistol Reload | 77989691651728 |
 | FPS Knife Hold | 108323231141444 |
 | FPS Knife Slash | 78142187319149 |
 | FPV Rifle Idle | 111039337689658 |
 | FPV Rifle Equip | 85685273923057 |
 | FPV Rifle Fire | 106892581186919 |
 | FPV Rifle Reload | 71514583960293 |
-| FPV Pistol Idle | 126691491055902 |
-| FPV Pistol Equip | 108763930015179 |
-| FPV Pistol Fire | 123277761668379 |
-| FPV Pistol Reload | 108603579052641 |
+| FPV Pistol Idle | 76861397377005 |
+| FPV Pistol Equip | 73026129867825 |
+| FPV Pistol Fire | 99164105193780 |
+| FPV Pistol Reload | 71768503112160 |
 | FPV Knife Idle | 132308344203954 |
 | FPV Knife Equip | 75892368916750 |
 | FPV Knife Slash A | 105972440774537 |

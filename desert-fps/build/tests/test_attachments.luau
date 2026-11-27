@@ -235,10 +235,10 @@ task.wait(DRAWN)
 fit("optic", nil)
 local effects = (camera :: any).WeaponEffects
 check(effects:FindFirstChild("LaserDot") == nil, "no laser, no dot")
-fit("underbarrel", "laser")
+fit("side", "laser")
 task.wait(DRAWN)
 check(effects:FindFirstChild("LaserDot") ~= nil, "a laser on the rifle shows its dot")
-fit("underbarrel", nil)
+fit("side", nil)
 task.wait(DRAWN)
 check(effects:FindFirstChild("LaserDot") == nil, "taken off, the dot goes")
 

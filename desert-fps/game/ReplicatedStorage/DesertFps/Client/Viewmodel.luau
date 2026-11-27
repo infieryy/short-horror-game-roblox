@@ -202,6 +202,7 @@ local function fit(held: Held, config: any, attachments: Instance)
 	end
 	for _, each in fitting.adds do
 		local part = each.template:Clone()
+		part.Size = each.size
 		part.Anchored = false
 		unseen(part)
 		local weld = Instance.new("Weld")
@@ -222,6 +223,7 @@ function Viewmodel.show(self: any, config: any?)
 	end
 	self.current = if config then self.held[config.Name] else nil
 	self.magazineOut = false
+	self.veiled = false
 	local held: Held? = self.current
 	for _, part in self.rig:GetChildren() do
 		if part:IsA("BasePart") and SHOWN[part.Name] then
@@ -230,11 +232,37 @@ function Viewmodel.show(self: any, config: any?)
 	end
 	if held then
 		fit(held, config, self.attachments)
+		for _, part in held.model:GetChildren() do
+			if part:IsA("BasePart") then
+				part.LocalTransparencyModifier = 0 -- it may have been put away while veiled
+			end
+		end
 		held.model.Parent = self.rig
 		self.animations:switch(held.config.View.Animations, "Idle")
 		self.animations:play("Equip", 0, config.Quicken.Equip)
 	else
 		self.animations:switch(nil, "Idle")
+	end
+end
+
+-- Stops drawing the arms and the weapon, or draws them again, without putting the weapon away: a scope's
+-- view takes their place while the player looks through it.
+function Viewmodel.veil(self: any, veiled: boolean)
+	local held: Held? = self.current
+	if veiled == self.veiled or not held then
+		return
+	end
+	self.veiled = veiled
+	local unseenNow = if veiled then 1 else 0
+	for _, part in self.rig:GetChildren() do
+		if part:IsA("BasePart") and SHOWN[part.Name] then
+			part.LocalTransparencyModifier = unseenNow
+		end
+	end
+	for _, part in held.model:GetChildren() do
+		if part:IsA("BasePart") then
+			part.LocalTransparencyModifier = unseenNow
+		end
 	end
 end
 

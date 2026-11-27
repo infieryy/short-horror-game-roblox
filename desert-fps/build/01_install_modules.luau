@@ -240,8 +240,83 @@ local function cross(parent: Instance, shape: { Gap: number, Length: number, Thi
 	return holder
 end
 
+-- A part of a scope's view, and how see-through it is when the view is all there.
+type Veil = { item: Instance, property: string, solid: number }
+
+-- Draws a scope's view on a screen of that size: rings that make it blacker outward from the window's edge,
+-- one that is all black, and bars from there to the screen's edges. Returns what was drawn.
+local function scopeView(gui: ScreenGui, screen: Vector2): { Veil }
+	gui:ClearAllChildren()
+	local shape = Config.Scope
+	local veils: { Veil } = {}
+	local function ring(inner: number, thickness: number, transparency: number)
+		local frame = Instance.new("Frame")
+		frame.BackgroundTransparency = 1
+		frame.AnchorPoint = Vector2.new(0.5, 0.5)
+		frame.Position = UDim2.fromScale(0.5, 0.5)
+		frame.Size = UDim2.fromOffset(2 * inner, 2 * inner)
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(1, 0)
+		round.Parent = frame
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = shape.Color
+		stroke.Thickness = thickness
+		stroke.Transparency = transparency
+		stroke.Parent = frame
+		frame.Parent = gui
+		table.insert(veils, { item = stroke, property = "Transparency", solid = transparency })
+	end
+	local window = shape.Window * screen.Y / 2
+	local fuzz = shape.Fuzz * screen.Y
+	local step = fuzz / shape.Steps
+	-- Every ring reaches from its own inner edge to where the black begins, so they lie on one another:
+	-- rings laid side by side leave hairlines of light between them.
+	local behind = 0 -- how black the rings inside this one already make it
+	for index = 1, shape.Steps do
+		local along = index / shape.Steps
+		local wanted = along * along * (3 - 2 * along)
+		ring(window + (index - 1) * step, fuzz - (index - 1) * step + 1, (1 - wanted) / (1 - behind))
+		behind = wanted
+	end
+	-- The black ring reaches to the corners of the square round it; the bars take over from the square's sides.
+	local black = window + fuzz
+	ring(black, black * 0.45, 0)
+	local sides = math.max(0, screen.X / 2 - black + 1)
+	local ends = math.max(0, screen.Y / 2 - black + 1)
+	for _, bar in
+		{
+			{ UDim2.fromScale(0, 0), UDim2.new(0, sides, 1, 0), Vector2.zero },
+			{ UDim2.fromScale(1, 0), UDim2.new(0, sides, 1, 0), Vector2.new(1, 0) },
+			{ UDim2.fromScale(0, 0), UDim2.new(1, 0, 0, ends), Vector2.zero },
+			{ UDim2.fromScale(0, 1), UDim2.new(1, 0, 0, ends), Vector2.new(0, 1) },
+		}
+	do
+		local frame = Instance.new("Frame")
+		frame.Position, frame.Size, frame.AnchorPoint = bar[1], bar[2], bar[3]
+		frame.BackgroundColor3 = shape.Color
+		frame.BorderSizePixel = 0
+		frame.Parent = gui
+		table.insert(veils, { item = frame, property = "BackgroundTransparency", solid = 0 })
+	end
+	return veils
+end
+
 function Hud.new(playerGui: Instance, camera: Camera)
 	local self = setmetatable({}, Hud)
+
+	-- A scope's view, behind everything else the display shows. It is measured off the screen itself, not
+	-- scaled with the rest.
+	local scope = Instance.new("ScreenGui")
+	scope.Name = "ScopeView"
+	scope.IgnoreGuiInset = true
+	scope.ResetOnSpawn = false
+	scope.DisplayOrder = -1
+	scope.Enabled = false
+	scope.Parent = playerGui
+	self.scope = scope
+	self.camera = camera
+	self.scopeVeils = {} :: { Veil }
+	self.scopeIn = 0
 
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "Hud"
@@ -253,7 +328,11 @@ function Hud.new(playerGui: Instance, camera: Camera)
 	local function fit()
 		scale.Scale = math.max(camera.ViewportSize.Y / Config.ReferenceHeight, Config.SmallestScale)
 	end
-	camera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
+	camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		fit()
+		self.scopeVeils = {} -- drawn for the old size: drawn again when next looked through
+		self:setScope(0)
+	end)
 	fit()
 
 	-- Being hit: the whole screen, behind everything else.
@@ -274,19 +353,31 @@ function Hud.new(playerGui: Instance, camera: Camera)
 		dot.BorderSizePixel = 0
 		dot.Parent = self.crosshair
 	end
-	-- An optic's dot, in place of the crosshair while looking through one.
-	local sightDot = Instance.new("Frame")
-	sightDot.AnchorPoint = Vector2.new(0.5, 0.5)
-	sightDot.Position = UDim2.fromScale(0.5, 0.5)
-	sightDot.Size = UDim2.fromOffset(Config.SightDot.Size, Config.SightDot.Size)
-	sightDot.BackgroundColor3 = Config.SightDot.Color
-	sightDot.BorderSizePixel = 0
-	sightDot.Visible = false
-	local round = Instance.new("UICorner")
-	round.CornerRadius = UDim.new(1, 0)
-	round.Parent = sightDot
-	sightDot.Parent = gui
-	self.sightDot = sightDot
+	-- An optic's mark, in place of the crosshair while looking through one: a red cross. Each of its bars
+	-- lies on a dark one a little bigger, so the dark shows as a line round the whole cross and not across
+	-- its middle.
+	local mark = Config.SightCross
+	local sightCross = Instance.new("Frame")
+	sightCross.BackgroundTransparency = 1
+	sightCross.AnchorPoint = Vector2.new(0.5, 0.5)
+	sightCross.Position = UDim2.fromScale(0.5, 0.5)
+	sightCross.Size = UDim2.fromOffset(0, 0)
+	sightCross.Visible = false
+	for layer, grow in { mark.Outline, 0 } do
+		local long, thick = 2 * (mark.Arm + grow), mark.Thickness + 2 * grow
+		for _, size in { UDim2.fromOffset(long, thick), UDim2.fromOffset(thick, long) } do
+			local bar = Instance.new("Frame")
+			bar.AnchorPoint = Vector2.new(0.5, 0.5)
+			bar.Size = size
+			bar.BackgroundColor3 = if grow > 0 then mark.OutlineColor else mark.Color
+			bar.BackgroundTransparency = if grow > 0 then mark.OutlineTransparency else 0
+			bar.BorderSizePixel = 0
+			bar.ZIndex = layer
+			bar.Parent = sightCross
+		end
+	end
+	sightCross.Parent = gui
+	self.sightCross = sightCross
 	self.crosshairShown, self.throughOptic = true, false
 
 	self.hitMark = cross(gui, Config.HitMark, true)
@@ -377,15 +468,34 @@ end
 function Hud.setCrosshair(self: any, shown: boolean)
 	self.crosshairShown = shown
 	self.crosshair.Visible = shown and not self.throughOptic
-	self.sightDot.Visible = shown and self.throughOptic
+	self.sightCross.Visible = shown and self.throughOptic
 end
 
--- Whether the player is looking through an optic: its dot then stands in for the crosshair.
+-- Whether the player is looking through an optic: its cross then stands in for the crosshair.
 function Hud.setOptic(self: any, through: boolean)
 	if through ~= self.throughOptic then
 		self.throughOptic = through
 		self:setCrosshair(self.crosshairShown)
 	end
+end
+
+-- How far a weapon with a scope is raised, 0 to 1; 0 for any other weapon. Returns how much of the scope's
+-- view is there, 0 to 1: once it is, the weapon itself should not be drawn.
+function Hud.setScope(self: any, raised: number): number
+	local from = Config.Scope.From
+	local there = math.clamp((raised - from) / (1 - from), 0, 1)
+	if there > 0 and #self.scopeVeils == 0 then
+		self.scopeVeils = scopeView(self.scope, self.camera.ViewportSize)
+		self.scopeIn = -1
+	end
+	if there ~= self.scopeIn then
+		self.scopeIn = there
+		self.scope.Enabled = there > 0
+		for _, veil: Veil in self.scopeVeils do
+			(veil.item :: any)[veil.property] = 1 - (1 - veil.solid) * there
+		end
+	end
+	return there
 end
 
 -- A line under the weapons carried, naming a key and what it is for.
@@ -470,8 +580,23 @@ return {
 
 	-- Four lines round the middle of the screen. It does not move: where it points is where a first shot goes.
 	Crosshair = { Gap = 5, Length = 9, Thickness = 2, Dot = false },
-	-- Looking through an optic, the crosshair gives way to the optic's own dot: its width and colour.
-	SightDot = { Size = 5, Color = Color3.fromRGB(255, 72, 64) },
+	-- Looking through an optic, the crosshair gives way to the optic's own mark: a red cross with a thin dark
+	-- line round it, so it shows on bright plaster and on red cloth alike. Arm is how far each arm reaches
+	-- from the middle and Thickness how wide it is; Outline is the dark line's width, OutlineTransparency
+	-- how see-through it is.
+	SightCross = {
+		Arm = 10,
+		Thickness = 2,
+		Color = Color3.fromRGB(255, 40, 32),
+		Outline = 1,
+		OutlineColor = Color3.new(0, 0, 0),
+		OutlineTransparency = 0.35,
+	},
+	-- A scope's view: the screen is black but for a round window, and the weapon is not drawn. Window is how
+	-- wide the clear part is, as a share of the screen's height. Over Fuzz more (a share of the height too)
+	-- the black comes in, in Steps rings. From is how far the weapon is raised (0 to 1) when the view starts
+	-- to come in; it is all there at 1.
+	Scope = { Window = 0.74, Fuzz = 0.1, Steps = 16, From = 0.8, Color = Color3.new(0, 0, 0) },
 	-- The cross that flashes on a hit: seconds it shows, and its size.
 	HitMark = { Time = 0.18, Gap = 8, Length = 10, Thickness = 2 },
 	-- Being hit tints the screen for this long, this strongly (0 is solid colour, 1 is nothing).
@@ -913,6 +1038,7 @@ local function fit(held: Held, config: any, attachments: Instance)
 	end
 	for _, each in fitting.adds do
 		local part = each.template:Clone()
+		part.Size = each.size
 		part.Anchored = false
 		unseen(part)
 		local weld = Instance.new("Weld")
@@ -933,6 +1059,7 @@ function Viewmodel.show(self: any, config: any?)
 	end
 	self.current = if config then self.held[config.Name] else nil
 	self.magazineOut = false
+	self.veiled = false
 	local held: Held? = self.current
 	for _, part in self.rig:GetChildren() do
 		if part:IsA("BasePart") and SHOWN[part.Name] then
@@ -941,11 +1068,37 @@ function Viewmodel.show(self: any, config: any?)
 	end
 	if held then
 		fit(held, config, self.attachments)
+		for _, part in held.model:GetChildren() do
+			if part:IsA("BasePart") then
+				part.LocalTransparencyModifier = 0 -- it may have been put away while veiled
+			end
+		end
 		held.model.Parent = self.rig
 		self.animations:switch(held.config.View.Animations, "Idle")
 		self.animations:play("Equip", 0, config.Quicken.Equip)
 	else
 		self.animations:switch(nil, "Idle")
+	end
+end
+
+-- Stops drawing the arms and the weapon, or draws them again, without putting the weapon away: a scope's
+-- view takes their place while the player looks through it.
+function Viewmodel.veil(self: any, veiled: boolean)
+	local held: Held? = self.current
+	if veiled == self.veiled or not held then
+		return
+	end
+	self.veiled = veiled
+	local unseenNow = if veiled then 1 else 0
+	for _, part in self.rig:GetChildren() do
+		if part:IsA("BasePart") and SHOWN[part.Name] then
+			part.LocalTransparencyModifier = unseenNow
+		end
+	end
+	for _, part in held.model:GetChildren() do
+		if part:IsA("BasePart") then
+			part.LocalTransparencyModifier = unseenNow
+		end
 	end
 end
 
@@ -1096,19 +1249,19 @@ return {
 		["FPS Rifle Hold"] = 83028381190337,
 		["FPS Rifle Fire"] = 96286693108659,
 		["FPS Rifle Reload"] = 124740467076400,
-		["FPS Pistol Hold"] = 108605858556304,
-		["FPS Pistol Fire"] = 137279406699731,
-		["FPS Pistol Reload"] = 126204687311857,
+		["FPS Pistol Hold"] = 93403698622412,
+		["FPS Pistol Fire"] = 96375376527245,
+		["FPS Pistol Reload"] = 77989691651728,
 		["FPS Knife Hold"] = 108323231141444,
 		["FPS Knife Slash"] = 78142187319149,
 		["FPV Rifle Idle"] = 111039337689658,
 		["FPV Rifle Equip"] = 85685273923057,
 		["FPV Rifle Fire"] = 106892581186919,
 		["FPV Rifle Reload"] = 71514583960293,
-		["FPV Pistol Idle"] = 126691491055902,
-		["FPV Pistol Equip"] = 108763930015179,
-		["FPV Pistol Fire"] = 123277761668379,
-		["FPV Pistol Reload"] = 108603579052641,
+		["FPV Pistol Idle"] = 76861397377005,
+		["FPV Pistol Equip"] = 73026129867825,
+		["FPV Pistol Fire"] = 99164105193780,
+		["FPV Pistol Reload"] = 71768503112160,
 		["FPV Knife Idle"] = 132308344203954,
 		["FPV Knife Equip"] = 75892368916750,
 		["FPV Knife Slash A"] = 105972440774537,
@@ -1122,17 +1275,18 @@ return {
 	{ path = { "ReplicatedStorage", "DesertFps", "Weapons", "AttachmentConfig" }, class = "ModuleScript", source = [=[
 --!strict
 -- What can be put on a weapon, and what each thing does to it.
--- An attachment goes on one socket of a weapon's model: muzzle, optic, underbarrel or magazine. `Fits` lists
+-- An attachment goes on one socket of a weapon's model: muzzle, optic, underbarrel, side or magazine. `Fits` lists
 -- the weapons it goes on, and for each what it changes in that weapon's numbers (WeaponConfig):
 --   Scale  { ["Recoil.Sway"] = 0.7 }   the number is multiplied
 --   Add    { Magazine = 10 }           the number has this added
 --   Set    { ["Aim.Zoom"] = 2 }        the value is replaced (a table on the way is made if the weapon has none)
+--   Size   1.4                         its model is that many times as big on this weapon as it was made
 -- Model is the kit piece that shows on the weapon (assets/recipes/attach.py). An attachment with no piece of
 -- its own has Stretch: the weapon's own part of the socket's name is made that many times as long.
 -- Everything is free until there is a shop. Changing what is on the weapon in hand draws it again.
 return {
 	-- The sockets, in the order the loadout shows them.
-	Sockets = { "muzzle", "optic", "underbarrel", "magazine" },
+	Sockets = { "muzzle", "optic", "underbarrel", "side", "magazine" },
 
 	-- The dot a laser puts where the weapon points, which only its holder sees: its colour, how big it is for
 	-- each stud it is away and at least, and how far it carries.
@@ -1162,7 +1316,7 @@ return {
 		},
 		-- An optic is looked through, not over: the point brought to the eye is the middle of its window
 		-- (SightDrop 0), nearer than the iron sights so the window is worth looking through, and the screen
-		-- shows a dot there instead of the crosshair (View.Dot).
+		-- shows the optic's red cross there instead of the crosshair (View.Reticle).
 		reddot = {
 			Title = "Red dot",
 			About = "Quicker to aim, and tighter. Lets the pistol aim.",
@@ -1171,18 +1325,20 @@ return {
 			Fits = {
 				rifle = {
 					Scale = { ["Aim.Time"] = 0.75, ["Aim.Spread"] = 0.85 },
-					Set = { ["View.SightDistance"] = 0.6, ["View.SightDrop"] = 0, ["View.Dot"] = true },
+					Set = { ["View.SightDistance"] = 0.6, ["View.SightDrop"] = 0, ["View.Reticle"] = true },
 				},
 				pistol = {
 					Set = {
 						Aim = { Zoom = 1.15, Spread = 0.8, Recoil = 0.9, Speed = 0.85, Time = 0.14 },
 						["View.SightDistance"] = 0.7,
 						["View.SightDrop"] = 0,
-						["View.Dot"] = true,
+						["View.Reticle"] = true,
 					},
 				},
 			},
 		},
+		-- Raised all the way, a scope fills the screen: black, but for a round window (View.Scope, drawn by
+		-- the display; HudConfig.Scope says how).
 		scope = {
 			Title = "2x scope",
 			About = "Twice as close. Slow to raise, slow to walk with.",
@@ -1191,7 +1347,13 @@ return {
 			Fits = {
 				rifle = {
 					Scale = { ["Aim.Time"] = 1.5, ["Aim.Speed"] = 0.8, ["Aim.Spread"] = 0.6 },
-					Set = { ["Aim.Zoom"] = 2, ["View.SightDistance"] = 0.4, ["View.SightDrop"] = 0, ["View.Dot"] = true },
+					Set = {
+						["Aim.Zoom"] = 2,
+						["View.SightDistance"] = 0.4,
+						["View.SightDrop"] = 0,
+						["View.Reticle"] = true,
+						["View.Scope"] = true,
+					},
 				},
 			},
 		},
@@ -1204,15 +1366,17 @@ return {
 				rifle = { Scale = { ["Recoil.Sway"] = 0.65, ["Spread.Spray"] = 0.8, EquipTime = 1.12 } },
 			},
 		},
+		-- A box on the weapon's left side, the side its holder sees.
 		laser = {
 			Title = "Laser",
 			About = "Shots from the hip stray less on the move.",
-			Socket = "underbarrel",
+			Socket = "side",
 			Model = "att_laser",
 			Fits = {
 				rifle = {
 					Scale = { ["Spread.Walk"] = 0.7, ["Spread.Run"] = 0.75, ["Spread.Air"] = 0.8 },
 					Set = { ["View.Laser"] = true },
+					Size = 1.4, -- the one box is made to suit the pistol; on the long rifle it would look lost
 				},
 				pistol = {
 					Scale = { ["Spread.Walk"] = 0.7, ["Spread.Run"] = 0.75, ["Spread.Air"] = 0.8 },
@@ -1247,9 +1411,10 @@ local Attachments = {}
 -- socket -> attachment name
 export type Chosen = { [string]: string }
 -- What to do to a weapon's model: parts to copy onto it (`at` is where the part's middle goes from the weapon's
--- origin, `socket` the socket it is on), and which of its own parts to make how many times as long.
+-- origin, `size` how big the part is to be, `socket` the socket it is on), and which of its own parts to make
+-- how many times as long.
 export type Fitting = {
-	adds: { { template: BasePart, at: Vector3, socket: string } },
+	adds: { { template: BasePart, at: Vector3, size: Vector3, socket: string } },
 	stretch: { [string]: number },
 	-- Named points on what was added, from the weapon's origin: an optic's "eye", a laser's "beam".
 	points: { [string]: Vector3 },
@@ -1337,9 +1502,10 @@ function Attachments.build(weapon: string, chosen: Chosen?): any
 	return config
 end
 
--- What `attached` (a weapon's Attached) adds to the weapon's model. `weapon` is the weapon's model and `models`
--- holds the attachments' (ReplicatedStorage.DesertFps.WeaponModels.<weapon> and .AttachmentModels): their
--- parts carry an "Offset" and the models a "Socket_<name>" for each socket, both from the model's origin.
+-- What `attached` (a weapon's Attached) adds to the weapon's model. `weapon` is the weapon's model, named
+-- after the weapon, and `models` holds the attachments' (ReplicatedStorage.DesertFps.WeaponModels.<weapon>
+-- and .AttachmentModels): their parts carry an "Offset" and the models a "Socket_<name>" for each socket,
+-- both from the model's origin.
 function Attachments.fitting(weapon: Instance, models: Instance, attached: Chosen): Fitting
 	local fitting: Fitting = { adds = {}, stretch = {}, points = {} }
 	for socket, name in attached do
@@ -1353,18 +1519,21 @@ function Attachments.fitting(weapon: Instance, models: Instance, attached: Chose
 		end
 		local model = what.Model and models:FindFirstChild(what.Model)
 		if model then
+			-- A piece is as big as it was made, or Size times that: it grows from where it meets the weapon.
+			local size = what.Fits[weapon.Name].Size or 1
 			for _, template in model:GetChildren() do
 				if template:IsA("BasePart") then
 					table.insert(fitting.adds, {
 						template = template,
-						at = at + (template:GetAttribute("Offset") :: Vector3),
+						at = at + (template:GetAttribute("Offset") :: Vector3) * size,
+						size = template.Size * size,
 						socket = socket,
 					})
 				end
 			end
 			for attribute, value in model:GetAttributes() do
 				if string.sub(attribute, 1, 7) == "Socket_" then
-					fitting.points[string.sub(attribute, 8)] = at + (value :: Vector3)
+					fitting.points[string.sub(attribute, 8)] = at + (value :: Vector3) * size
 				end
 			end
 		end
@@ -1907,7 +2076,7 @@ return {
 	att_reddot = { Model = 123464859283896, Texture = 79114053329453 },
 	att_scope = { Model = 92951252183787, Texture = 94016934404918 },
 	att_foregrip = { Model = 113941948735240, Texture = 99962778696816 },
-	att_laser = { Model = 124716580185428, Texture = 94890159381762 },
+	att_laser = { Model = 80545025910238, Texture = 103299523819440 },
 }
 ]=] },
 	{ path = { "ServerStorage", "DesertFps", "Assets", "BreakData" }, class = "ModuleScript", source = [==[
@@ -2093,7 +2262,7 @@ return KitImporter
 local HttpService = game:GetService("HttpService")
 
 return HttpService:JSONDecode([=[
-{"att_compensator":{"piece":"att_compensator","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_compensator_body.fbx","center":[0.109,0.0,-0.0],"size":[0.218,0.133,0.133],"triangles":256}]},"att_foregrip":{"piece":"att_foregrip","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_foregrip_body.fbx","center":[0.0,-0.152,-0.0],"size":[0.135,0.304,0.147],"triangles":164}]},"att_laser":{"piece":"att_laser","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"beam","position":[0.105,-0.0394,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_laser_body.fbx","center":[0.007,-0.045,-0.0],"size":[0.195,0.09,0.111],"triangles":268}]},"att_reddot":{"piece":"att_reddot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0619,0.1181,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_reddot_body.fbx","center":[0.0,0.107,-0.0],"size":[0.27,0.214,0.188],"triangles":220}]},"att_scope":{"piece":"att_scope","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0,0.1162,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_scope_body.fbx","center":[0.004,0.103,-0.0],"size":[0.345,0.206,0.167],"triangles":432}]},"att_suppressor":{"piece":"att_suppressor","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_suppressor_body.fbx","center":[0.311,0.0,-0.0],"size":[0.623,0.153,0.153],"triangles":272}]},"banner":{"piece":"banner","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/banner_body.fbx","center":[0.0,-2.72,0.15],"size":[2.5,5.6,0.3],"triangles":100}]},"bougainvillea":{"piece":"bougainvillea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/bougainvillea_body.fbx","center":[-0.01,-1.512,0.208],"size":[6.757,4.598,2.035],"triangles":4864}]},"ground":{"piece":"ground","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/ground_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"knife":{"piece":"knife","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"blade_base","position":[0.1488,0.0528,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"blade_tip","position":[0.5136,-0.0134,-0.0],"forward":[0.6,-0.8,0],"up":[0,1,0]},{"name":"ring","position":[-0.1392,-0.1968,-0.0],"forward":[0,0,-1],"up":[0,1,0]},{"name":"charm","position":[-0.1392,-0.2681,-0.0],"forward":[0,-1,0],"up":[0,1,0]}],"joints":[{"part":"knife","type":"hinge","pivot":[-0.1392,-0.1968,-0.0],"axis":[0,0,-1],"amount":360,"unit":"degrees"}],"parts":[{"id":"blade","mesh":"parts/knife_blade.fbx","center":[0.317,0.062,-0.0],"size":[0.394,0.162,0.02],"triangles":104},{"id":"charm","mesh":"parts/knife_charm.fbx","center":[-0.132,-0.335,-0.0],"size":[0.083,0.189,0.049],"triangles":68},{"id":"handle","mesh":"parts/knife_handle.fbx","center":[-0.021,-0.011,-0.0],"size":[0.376,0.29,0.092],"triangles":916},{"id":"ring","mesh":"parts/knife_ring.fbx","center":[-0.139,-0.197,-0.0],"size":[0.144,0.144,0.031],"triangles":240}]},"lantern":{"piece":"lantern","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_body.fbx","center":[0.0,-1.795,-0.0],"size":[1.103,3.59,1.103],"triangles":224},{"id":"glass","mesh":"parts/lantern_glass.fbx","center":[0.0,-2.515,-0.0],"size":[0.84,1.15,0.84],"triangles":12}]},"lantern_wall":{"piece":"lantern_wall","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_wall_body.fbx","center":[0.0,-1.195,0.851],"size":[1.103,2.89,1.702],"triangles":260},{"id":"glass","mesh":"parts/lantern_wall_glass.fbx","center":[0.0,-1.565,1.15],"size":[0.84,1.15,0.84],"triangles":12}]},"paving_a":{"piece":"paving_a","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_a_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_b":{"piece":"paving_b","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_b_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_bricks":{"piece":"paving_bricks","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_bricks_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_c":{"piece":"paving_c","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_c_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_channel":{"piece":"paving_channel","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_channel_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_dyed":{"piece":"paving_dyed","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_dyed_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_pool":{"piece":"paving_pool","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_pool_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_tiles":{"piece":"paving_tiles","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_tiles_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"pistol":{"piece":"pistol","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[0.9113,0.1613,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.5625,0.2362,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[0.6375,0.015,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"magazine","position":[-0.0225,-0.33,-0.0],"forward":[-0.2,-1,0],"up":[0,1,0]},{"name":"aim_rear","position":[-0.0638,0.27,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[0.8475,0.2625,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"slide","type":"slide","pivot":[0.075,0.1837,-0.0],"axis":[-1,0,0],"amount":0.2175,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.3262,-0.0112,-0.0],"axis":[0,0,-1],"amount":12,"unit":"degrees"},{"part":"hammer","type":"hinge","pivot":[-0.1237,0.1125,-0.0],"axis":[0,0,-1],"amount":50,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[-0.0225,-0.33,-0.0],"axis":[-0.2,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/pistol_barrel.fbx","center":[0.594,0.191,-0.0],"size":[0.634,0.142,0.129],"triangles":292},{"id":"body","mesh":"parts/pistol_body.fbx","center":[0.33,-0.105,-0.006],"size":[1.02,0.45,0.141],"triangles":224},{"id":"charm","mesh":"parts/pistol_charm.fbx","center":[-0.036,-0.308,-0.0],"size":[0.341,0.15,0.171],"triangles":100},{"id":"grip","mesh":"parts/pistol_grip.fbx","center":[0.0,-0.157,-0.0],"size":[0.3,0.285,0.164],"triangles":128},{"id":"hammer","mesh":"parts/pistol_hammer.fbx","center":[-0.141,0.163,-0.0],"size":[0.049,0.101,0.034],"triangles":52},{"id":"magazine","mesh":"parts/pistol_magazine.fbx","center":[-0.026,-0.197,-0.0],"size":[0.337,0.334,0.125],"triangles":40},{"id":"slide","mesh":"parts/pistol_slide.fbx","center":[0.368,0.176,-0.0],"size":[0.96,0.188,0.161],"triangles":140},{"id":"trigger","mesh":"parts/pistol_trigger.fbx","center":[0.319,-0.066,-0.0],"size":[0.053,0.109,0.026],"triangles":20}]},"rifle":{"piece":"rifle","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[2.2988,0.1687,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.2812,0.3037,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[1.0687,0.0037,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"magazine","position":[0.4763,0.0,-0.0],"forward":[0.2,-1,0],"up":[0,1,0]},{"name":"stock","position":[-0.2062,0.1012,-0.0],"forward":[-1,0,0],"up":[0,1,0]},{"name":"aim_rear","position":[0.8812,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[1.9762,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"bolt","type":"slide","pivot":[0.5363,0.24,-0.0],"axis":[-1,0,0],"amount":0.2625,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.2137,0.0037,-0.0],"axis":[0,0,-1],"amount":15,"unit":"degrees"},{"part":"selector","type":"hinge","pivot":[0.6937,0.1237,-0.0],"axis":[0,0,-1],"amount":20,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[0.4763,0.0,-0.0],"axis":[0.35,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/rifle_barrel.fbx","center":[1.477,0.238,-0.0],"size":[1.432,0.282,0.09],"triangles":232},{"id":"body","mesh":"parts/rifle_body.fbx","center":[0.364,0.097,-0.0],"size":[1.14,0.502,0.16],"triangles":308},{"id":"bolt","mesh":"parts/rifle_bolt.fbx","center":[0.517,0.242,0.111],"size":[0.322,0.049,0.131],"triangles":56},{"id":"cover","mesh":"parts/rifle_cover.fbx","center":[0.278,0.258,-0.0],"size":[0.877,0.088,0.135],"triangles":152},{"id":"grip","mesh":"parts/rifle_grip.fbx","center":[-0.011,-0.193,-0.0],"size":[0.24,0.401,0.117],"triangles":80},{"id":"handguard","mesh":"parts/rifle_handguard.fbx","center":[1.065,0.069,-0.0],"size":[0.585,0.491,0.223],"triangles":348},{"id":"magazine","mesh":"parts/rifle_magazine.fbx","center":[0.583,-0.391,-0.0],"size":[0.453,0.852,0.138],"triangles":264},{"id":"muzzle","mesh":"parts/rifle_muzzle.fbx","center":[2.246,0.169,-0.0],"size":[0.105,0.104,0.104],"triangles":164},{"id":"selector","mesh":"parts/rifle_selector.fbx","center":[0.548,0.112,0.08],"size":[0.382,0.067,0.012],"triangles":16},{"id":"stock","mesh":"parts/rifle_stock.fbx","center":[-0.679,-0.049,-0.0],"size":[0.96,0.48,0.14],"triangles":132},{"id":"trigger","mesh":"parts/rifle_trigger.fbx","center":[0.21,-0.053,-0.0],"size":[0.052,0.112,0.023],"triangles":20}]},"rug":{"piece":"rug","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/rug_body.fbx","center":[0.0,0.035,-0.0],"size":[6.48,0.07,4.0],"triangles":300}]},"sand_drift":{"piece":"sand_drift","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sand_drift_body.fbx","center":[0.005,0.25,0.95],"size":[6.61,0.5,1.9],"triangles":68}]},"sign_bread":{"piece":"sign_bread","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_bread_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_cloth":{"piece":"sign_cloth","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_cloth_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_drop":{"piece":"sign_drop","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_drop_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_dye":{"piece":"sign_dye","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_dye_body.fbx","center":[0.0,0.0,0.105],"size":[5.8,4.2,0.21],"triangles":56}]},"sign_pot":{"piece":"sign_pot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_pot_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_tea":{"piece":"sign_tea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_tea_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"smoke":{"piece":"smoke","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"smoke","position":[0.0,0.2175,-0.0],"forward":[0,1,0],"up":[1,0,0]}],"joints":[{"part":"pin","type":"detach","pivot":[0.0112,0.2925,-0.0],"axis":[0,0,1],"amount":0,"unit":"direction"},{"part":"lever","type":"hinge","pivot":[-0.0412,0.3412,-0.0],"axis":[0,0,-1],"amount":100,"unit":"degrees"}],"parts":[{"id":"body","mesh":"parts/smoke_body.fbx","center":[0.0,0.002,-0.0],"size":[0.23,0.431,0.23],"triangles":312},{"id":"fuze","mesh":"parts/smoke_fuze.fbx","center":[0.004,0.275,-0.0],"size":[0.097,0.122,0.071],"triangles":80},{"id":"lever","mesh":"parts/smoke_lever.fbx","center":[0.048,0.146,-0.0],"size":[0.179,0.399,0.056],"triangles":52},{"id":"pin","mesh":"parts/smoke_pin.fbx","center":[0.011,0.252,-0.0],"size":[0.094,0.092,0.112],"triangles":188}]}}]=]) :: any
+{"att_compensator":{"piece":"att_compensator","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_compensator_body.fbx","center":[0.109,0.0,-0.0],"size":[0.218,0.133,0.133],"triangles":256}]},"att_foregrip":{"piece":"att_foregrip","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_foregrip_body.fbx","center":[0.0,-0.152,-0.0],"size":[0.135,0.304,0.147],"triangles":164}]},"att_laser":{"piece":"att_laser","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"beam","position":[0.1537,0.0112,-0.0488],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_laser_body.fbx","center":[-0.002,0.007,-0.052],"size":[0.311,0.111,0.103],"triangles":468}]},"att_reddot":{"piece":"att_reddot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0619,0.1181,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_reddot_body.fbx","center":[0.0,0.107,-0.0],"size":[0.27,0.214,0.188],"triangles":220}]},"att_scope":{"piece":"att_scope","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"eye","position":[0.0,0.1162,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_scope_body.fbx","center":[0.004,0.103,-0.0],"size":[0.345,0.206,0.167],"triangles":432}]},"att_suppressor":{"piece":"att_suppressor","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"mount","position":[0.0,0.0,-0.0],"forward":[-1,0,0],"up":[0,1,0]}],"joints":[],"parts":[{"id":"body","mesh":"parts/att_suppressor_body.fbx","center":[0.311,0.0,-0.0],"size":[0.623,0.153,0.153],"triangles":272}]},"banner":{"piece":"banner","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/banner_body.fbx","center":[0.0,-2.72,0.15],"size":[2.5,5.6,0.3],"triangles":100}]},"bougainvillea":{"piece":"bougainvillea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/bougainvillea_body.fbx","center":[-0.01,-1.512,0.208],"size":[6.757,4.598,2.035],"triangles":4864}]},"ground":{"piece":"ground","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/ground_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"knife":{"piece":"knife","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"blade_base","position":[0.1488,0.0528,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"blade_tip","position":[0.5136,-0.0134,-0.0],"forward":[0.6,-0.8,0],"up":[0,1,0]},{"name":"ring","position":[-0.1392,-0.1968,-0.0],"forward":[0,0,-1],"up":[0,1,0]},{"name":"charm","position":[-0.1392,-0.2681,-0.0],"forward":[0,-1,0],"up":[0,1,0]}],"joints":[{"part":"knife","type":"hinge","pivot":[-0.1392,-0.1968,-0.0],"axis":[0,0,-1],"amount":360,"unit":"degrees"}],"parts":[{"id":"blade","mesh":"parts/knife_blade.fbx","center":[0.317,0.062,-0.0],"size":[0.394,0.162,0.02],"triangles":104},{"id":"charm","mesh":"parts/knife_charm.fbx","center":[-0.132,-0.335,-0.0],"size":[0.083,0.189,0.049],"triangles":68},{"id":"handle","mesh":"parts/knife_handle.fbx","center":[-0.021,-0.011,-0.0],"size":[0.376,0.29,0.092],"triangles":916},{"id":"ring","mesh":"parts/knife_ring.fbx","center":[-0.139,-0.197,-0.0],"size":[0.144,0.144,0.031],"triangles":240}]},"lantern":{"piece":"lantern","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_body.fbx","center":[0.0,-1.795,-0.0],"size":[1.103,3.59,1.103],"triangles":224},{"id":"glass","mesh":"parts/lantern_glass.fbx","center":[0.0,-2.515,-0.0],"size":[0.84,1.15,0.84],"triangles":12}]},"lantern_wall":{"piece":"lantern_wall","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/lantern_wall_body.fbx","center":[0.0,-1.195,0.851],"size":[1.103,2.89,1.702],"triangles":260},{"id":"glass","mesh":"parts/lantern_wall_glass.fbx","center":[0.0,-1.565,1.15],"size":[0.84,1.15,0.84],"triangles":12}]},"paving_a":{"piece":"paving_a","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_a_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_b":{"piece":"paving_b","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_b_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_bricks":{"piece":"paving_bricks","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_bricks_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_c":{"piece":"paving_c","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_c_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_channel":{"piece":"paving_channel","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_channel_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_dyed":{"piece":"paving_dyed","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_dyed_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_pool":{"piece":"paving_pool","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_pool_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"paving_tiles":{"piece":"paving_tiles","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/paving_tiles_body.fbx","center":[0.0,0.25,-0.0],"size":[8.0,0.5,8.0],"triangles":12}]},"pistol":{"piece":"pistol","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[0.9113,0.1613,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.5625,0.2362,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[0.6375,0.015,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"side","position":[0.6375,0.045,-0.0647],"forward":[1,0,0],"up":[0,1,0]},{"name":"magazine","position":[-0.0225,-0.33,-0.0],"forward":[-0.2,-1,0],"up":[0,1,0]},{"name":"aim_rear","position":[-0.0638,0.27,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[0.8475,0.2625,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"slide","type":"slide","pivot":[0.075,0.1837,-0.0],"axis":[-1,0,0],"amount":0.2175,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.3262,-0.0112,-0.0],"axis":[0,0,-1],"amount":12,"unit":"degrees"},{"part":"hammer","type":"hinge","pivot":[-0.1237,0.1125,-0.0],"axis":[0,0,-1],"amount":50,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[-0.0225,-0.33,-0.0],"axis":[-0.2,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/pistol_barrel.fbx","center":[0.594,0.191,-0.0],"size":[0.634,0.142,0.129],"triangles":292},{"id":"body","mesh":"parts/pistol_body.fbx","center":[0.33,-0.105,-0.006],"size":[1.02,0.45,0.141],"triangles":224},{"id":"charm","mesh":"parts/pistol_charm.fbx","center":[-0.036,-0.308,-0.0],"size":[0.341,0.15,0.171],"triangles":100},{"id":"grip","mesh":"parts/pistol_grip.fbx","center":[0.0,-0.157,-0.0],"size":[0.3,0.285,0.164],"triangles":128},{"id":"hammer","mesh":"parts/pistol_hammer.fbx","center":[-0.141,0.163,-0.0],"size":[0.049,0.101,0.034],"triangles":52},{"id":"magazine","mesh":"parts/pistol_magazine.fbx","center":[-0.026,-0.197,-0.0],"size":[0.337,0.334,0.125],"triangles":40},{"id":"slide","mesh":"parts/pistol_slide.fbx","center":[0.368,0.176,-0.0],"size":[0.96,0.188,0.161],"triangles":140},{"id":"trigger","mesh":"parts/pistol_trigger.fbx","center":[0.319,-0.066,-0.0],"size":[0.053,0.109,0.026],"triangles":20}]},"rifle":{"piece":"rifle","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"muzzle","position":[2.2988,0.1687,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"optic","position":[0.2812,0.3037,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"underbarrel","position":[1.0687,0.0037,-0.0],"forward":[1,0,0],"up":[0,-1,0]},{"name":"side","position":[1.3013,0.1087,-0.0945],"forward":[1,0,0],"up":[0,1,0]},{"name":"magazine","position":[0.4763,0.0,-0.0],"forward":[0.2,-1,0],"up":[0,1,0]},{"name":"stock","position":[-0.2062,0.1012,-0.0],"forward":[-1,0,0],"up":[0,1,0]},{"name":"aim_rear","position":[0.8812,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]},{"name":"aim_front","position":[1.9762,0.3412,-0.0],"forward":[1,0,0],"up":[0,1,0]}],"joints":[{"part":"bolt","type":"slide","pivot":[0.5363,0.24,-0.0],"axis":[-1,0,0],"amount":0.2625,"unit":"studs"},{"part":"trigger","type":"hinge","pivot":[0.2137,0.0037,-0.0],"axis":[0,0,-1],"amount":15,"unit":"degrees"},{"part":"selector","type":"hinge","pivot":[0.6937,0.1237,-0.0],"axis":[0,0,-1],"amount":20,"unit":"degrees"},{"part":"magazine","type":"detach","pivot":[0.4763,0.0,-0.0],"axis":[0.35,-1,0],"amount":0,"unit":"direction"}],"parts":[{"id":"barrel","mesh":"parts/rifle_barrel.fbx","center":[1.477,0.238,-0.0],"size":[1.432,0.282,0.09],"triangles":232},{"id":"body","mesh":"parts/rifle_body.fbx","center":[0.364,0.097,-0.0],"size":[1.14,0.502,0.16],"triangles":308},{"id":"bolt","mesh":"parts/rifle_bolt.fbx","center":[0.517,0.242,0.111],"size":[0.322,0.049,0.131],"triangles":56},{"id":"cover","mesh":"parts/rifle_cover.fbx","center":[0.278,0.258,-0.0],"size":[0.877,0.088,0.135],"triangles":152},{"id":"grip","mesh":"parts/rifle_grip.fbx","center":[-0.011,-0.193,-0.0],"size":[0.24,0.401,0.117],"triangles":80},{"id":"handguard","mesh":"parts/rifle_handguard.fbx","center":[1.065,0.069,-0.0],"size":[0.585,0.491,0.223],"triangles":348},{"id":"magazine","mesh":"parts/rifle_magazine.fbx","center":[0.583,-0.391,-0.0],"size":[0.453,0.852,0.138],"triangles":264},{"id":"muzzle","mesh":"parts/rifle_muzzle.fbx","center":[2.246,0.169,-0.0],"size":[0.105,0.104,0.104],"triangles":164},{"id":"selector","mesh":"parts/rifle_selector.fbx","center":[0.548,0.112,0.08],"size":[0.382,0.067,0.012],"triangles":16},{"id":"stock","mesh":"parts/rifle_stock.fbx","center":[-0.679,-0.049,-0.0],"size":[0.96,0.48,0.14],"triangles":132},{"id":"trigger","mesh":"parts/rifle_trigger.fbx","center":[0.21,-0.053,-0.0],"size":[0.052,0.112,0.023],"triangles":20}]},"rug":{"piece":"rug","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/rug_body.fbx","center":[0.0,0.035,-0.0],"size":[6.48,0.07,4.0],"triangles":300}]},"sand_drift":{"piece":"sand_drift","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sand_drift_body.fbx","center":[0.005,0.25,0.95],"size":[6.61,0.5,1.9],"triangles":68}]},"sign_bread":{"piece":"sign_bread","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_bread_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_cloth":{"piece":"sign_cloth","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_cloth_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_drop":{"piece":"sign_drop","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_drop_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_dye":{"piece":"sign_dye","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_dye_body.fbx","center":[0.0,0.0,0.105],"size":[5.8,4.2,0.21],"triangles":56}]},"sign_pot":{"piece":"sign_pot","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_pot_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"sign_tea":{"piece":"sign_tea","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[],"joints":[],"parts":[{"id":"body","mesh":"parts/sign_tea_body.fbx","center":[0.0,-1.15,1.45],"size":[0.6,2.9,2.9],"triangles":128}]},"smoke":{"piece":"smoke","mode":"parts","coords":"Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.","sockets":[{"name":"smoke","position":[0.0,0.2175,-0.0],"forward":[0,1,0],"up":[1,0,0]}],"joints":[{"part":"pin","type":"detach","pivot":[0.0112,0.2925,-0.0],"axis":[0,0,1],"amount":0,"unit":"direction"},{"part":"lever","type":"hinge","pivot":[-0.0412,0.3412,-0.0],"axis":[0,0,-1],"amount":100,"unit":"degrees"}],"parts":[{"id":"body","mesh":"parts/smoke_body.fbx","center":[0.0,0.002,-0.0],"size":[0.23,0.431,0.23],"triangles":312},{"id":"fuze","mesh":"parts/smoke_fuze.fbx","center":[0.004,0.275,-0.0],"size":[0.097,0.122,0.071],"triangles":80},{"id":"lever","mesh":"parts/smoke_lever.fbx","center":[0.048,0.146,-0.0],"size":[0.179,0.399,0.056],"triangles":52},{"id":"pin","mesh":"parts/smoke_pin.fbx","center":[0.011,0.252,-0.0],"size":[0.094,0.092,0.112],"triangles":188}]}}]=]) :: any
 ]==] },
 	{ path = { "ServerStorage", "DesertFps", "Buildings", "BuildingBuilder" }, class = "ModuleScript", source = [=[
 --!strict
@@ -5455,11 +5624,9 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 
 	local source = weaponModels:FindFirstChild(name) :: Instance
 	local fitting = Attachments.fitting(source, attachmentModels, attached)
-	local function add(template: BasePart, at: Vector3, stretch: number?)
+	local function add(template: BasePart, at: Vector3, size: Vector3)
 		local part = template:Clone()
-		if stretch then
-			part.Size, at = Attachments.stretched(part.Size, at, stretch)
-		end
+		part.Size = size
 		part.Anchored = false
 		part.Massless = true
 		part.CastShadow = true
@@ -5472,11 +5639,16 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	end
 	for _, template in source:GetChildren() do
 		if template:IsA("BasePart") then
-			add(template, template:GetAttribute("Offset") :: Vector3, fitting.stretch[template.Name])
+			local size, at = template.Size, template:GetAttribute("Offset") :: Vector3
+			local stretch = fitting.stretch[template.Name]
+			if stretch then
+				size, at = Attachments.stretched(size, at, stretch)
+			end
+			add(template, at, size)
 		end
 	end
 	for _, each in fitting.adds do
-		add(each.template, each.at)
+		add(each.template, each.at, each.size)
 	end
 	return tool
 end
@@ -5783,7 +5955,13 @@ local function viewArms(parent: Instance)
 		PhysicsService:CollisionGroupSetCollidable(group, other.name, false)
 	end
 
-	local arms = Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
+	-- The body the animations were made on (the kit's R15, the classic block proportions). Left to itself a
+	-- new body has arms a twentieth longer, and a hand that the animation put on the weapon then misses it
+	-- by a sixth of a stud.
+	local classic = Instance.new("HumanoidDescription")
+	classic.BodyTypeScale = 0
+	classic.ProportionScale = 0
+	local arms = Players:CreateHumanoidModelFromDescription(classic, Enum.HumanoidRigType.R15)
 	arms.Name = "ViewArms"
 	for _, each in arms:GetDescendants() do
 		if each:IsA("LuaSourceContainer") or each:IsA("Decal") then
@@ -6209,7 +6387,8 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 	local eye = if sights then math.deg(2 * math.atan(math.tan(math.rad(hip / 2)) / sights.Zoom)) else hip
 	camera.FieldOfView = hip + (eye - hip) * ease(aim)
 	UserInputService.MouseDeltaSensitivity = camera.FieldOfView / hip
-	hud:setOptic(weapon.View.Dot == true and aim > 0.5)
+	hud:setOptic(weapon.View.Reticle == true and aim > 0.5)
+	viewmodel:veil(hud:setScope(if weapon.View.Scope then aim else 0) >= 0.5)
 	local stance = `{walkHeld}{aiming}`
 	if stance ~= stanceTold then
 		stanceTold = stance
@@ -6370,6 +6549,7 @@ local function onCharacter(character: Model)
 		current = nil
 		triggerHeld, aimHeld = false, false
 		viewmodel:show(nil)
+		hud:setScope(0)
 		menu:hide()
 		laserDot.Parent = nil
 		hud:setCrosshair(false)

@@ -1,9 +1,10 @@
 """Attachments for the guns. Each is a piece of its own, built with the guns' toolkit and at their scale,
-and goes on a gun at one of its sockets (muzzle, optic, underbarrel).
+and goes on a gun at one of its sockets (muzzle, optic, underbarrel, side).
 
 An attachment's origin is where it meets the gun: the back face of a muzzle device on the bore's axis, the
-underside of an optic's base, the top of whatever hangs under the barrel. x runs toward the muzzle and z up,
-as on the guns. An optic has a socket "eye": the middle of what the shooter looks through.
+underside of an optic's base, the top of whatever hangs under the barrel, the inner face of what sits on the
+gun's left side. x runs toward the muzzle and z up, as on the guns. An optic has a socket "eye": the middle
+of what the shooter looks through.
 One part each: body.
 """
 import math
@@ -123,14 +124,24 @@ def foregrip(p):
 
 
 def laser(p):
-    """A laser pointer: a small box under the barrel with its lens at the front."""
+    """A laser unit: a box on the gun's left side, where the shooter sees it, with its emitter and a smaller
+    lamp at the front, a battery cap at the back and a turquoise switch on top. The box lies wholly to the
+    left of its origin, which is the middle of the face that meets the gun."""
     g = Gun(p, (0.0, 0.0), CHUNKY)
-    box = g.shape("body", "gunmetal", [(-24, 0), (-24, -21), (17, -21), (23, -15), (23, 0)], 22, bevel=2)
-    g.muzzle("body", "brass", 21, 28, -10.5, 6.0, 3.4, 4)                                           # the lens
-    for side in (-1, 1):
-        g.stud("body", "brass", -14, -6, side, 22, radius=2.6)
-    g.shape("body", "steel", [(-10, -21), (-10, -24), (4, -24), (4, -21)], 12, bevel=0.8, tone=2)   # the switch
-    g.line(box, [(-20, -12), (12, -12)], width=1.3)
-    g.line(box, [(-4, -3), (-4, -19)], width=1.3, tone=-3)
+    deep = 26.0                                                     # mm from the gun's side to the box's outer face
+    mid = deep / 2
+    outer = deep * 2 / CHUNKY                                       # the width whose half reaches the outer face
+    box = g.plate("body", "gunmetal", [(-35, -13), (-35, 9), (-30, 13), (22, 13), (30, 7), (30, -13)], 1, 0, deep,
+                  bevel=2.2)
+    g.muzzle("body", "brass", 27, 41, 3, 6.0, 3.6, 6, out=mid)                                       # the emitter
+    g.muzzle("body", "steel", 28, 35, -8, 3.2, 1.9, 3, out=mid - 5)                                  # the lamp
+    g.tube("body", "brass", -42, -34, 2, 5.6, segments=8, out=mid)                                   # battery cap
+    g.plate("body", "cloth", [(-19, 12), (-19, 16.5), (-3, 16.5), (-3, 12)], 1, 0, 13, bevel=1.2, grain=None,
+            sink=6.5 - mid)                                                                          # the switch
+    for x in (-25, 16):
+        g.stud("body", "brass", x, -7, 1, outer, radius=2.8)                                         # clamp screws
+    g.line(box, [(-29, 4), (-8, 4), (-8, -9), (-29, -9)], sides=("+y",), width=1.3, closed=True)     # battery door
+    g.line(box, [(-2, 9), (24, 9)], sides=("+y",), width=1.3)
+    g.line(box, [(-2, -2), (20, -2)], sides=("+y",), width=1.1, tone=-3)
     g.socket("mount", 0, 0)
-    g.socket("beam", 28, -10.5)
+    g.socket("beam", 41, 3, side=1, out=mid)

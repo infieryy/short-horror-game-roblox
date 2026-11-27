@@ -622,7 +622,7 @@ Notes for the next session:
 
 The owner, asked what should come next: "Yes, attachments". Asked which, the owner chose **all seven**, and said yes to uploading the models.
 
-**The outcome.** A player presses B, picks what goes on the weapon in hand, and the weapon changes: how it looks in first person and to everyone else, and what it does. Seven attachments on four sockets. The rifle takes all seven, the pistol four, the knife none. Pictures: `assets/studio/fps-attachments-*.jpg`. Video (45 s): `Documents/desert-fps/recordings/fps-maxxing-attachments-20261127.mp4`.
+**The outcome.** A player presses B, picks what goes on the weapon in hand, and the weapon changes: how it looks in first person and to everyone else, and what it does. Seven attachments on five sockets (four at first: the laser moved to one of its own after the owner's first look, next section). The rifle takes all seven, the pistol four, the knife none. Pictures: `assets/studio/fps-attachments-*.jpg`. Video of the first version (45 s): `Documents/desert-fps/recordings/fps-maxxing-attachments-20261127.mp4`.
 
 | Attachment | Socket | Goes on | What it does |
 |---|---|---|---|
@@ -631,7 +631,7 @@ The owner, asked what should come next: "Yes, attachments". Asked which, the own
 | Red dot | optic | rifle, pistol | Rifle: raised in 0.12 s instead of 0.16, aimed shots stray 0.85 as far. Pistol: it can aim at all (1.15 zoom) |
 | 2x scope | optic | rifle | Twice as close, aimed shots stray 0.6 as far; raised in 0.24 s, and the shooter walks at 0.8 of the usual aiming pace |
 | Foregrip | underbarrel | rifle | A spray swings 0.65 as wide and spreads 0.8 as fast; the draw takes 0.9 s instead of 0.8 |
-| Laser | underbarrel | rifle, pistol | Shots stray less on the move: walking x0.7, running x0.75, in the air x0.8. Its holder sees a red dot where the weapon points |
+| Laser | side | rifle, pistol | Shots stray less on the move: walking x0.7, running x0.75, in the air x0.8. Its holder sees a red dot where the weapon points |
 | Extended magazine | magazine | rifle, pistol | 35 rounds instead of 25, 18 instead of 12; a reload takes 1.12 as long |
 
 **How it works.**
@@ -639,7 +639,7 @@ The owner, asked what should come next: "Yes, attachments". Asked which, the own
 - `Weapons/Attachments.build(weapon, chosen)` gives the weapon's numbers with those attachments on. Server and client both ask it, so a shot is decided and felt with the same numbers. The same weapon fitted the same way is always the same table.
 - `Attachments.fitting` says what to add to a weapon's model. The server uses it for the weapon everyone sees, the client for the one in front of the camera.
 - **Server** (`WeaponService`): a new remote, `Attach(slot, socket, name)`. It checks the types, the socket, that the thing goes on that weapon and on that socket, and the rate. What a player has fitted outlives their death. Fitting the weapon in hand draws it again (so it is not free in a fight) and stops a reload. Rounds a smaller magazine cannot hold go back to the reserve.
-- **Client**: `Client/LoadoutMenu` is the menu (B). While it shows the mouse is free and the weapon does nothing. Looking through an optic, the crosshair gives way to a red dot (`Hud.setOptic`). Draw and reload animations play slower when an attachment makes the draw or the reload longer, so the magazine still changes hands at the right moment.
+- **Client**: `Client/LoadoutMenu` is the menu (B). While it shows the mouse is free and the weapon does nothing. Looking through an optic, the crosshair gives way to the optic's red cross (`Hud.setOptic`). Draw and reload animations play slower when an attachment makes the draw or the reload longer, so the magazine still changes hands at the right moment.
 - **Aiming changed for every sight.** It used to slide the weapon until the rear sight was at the eye. Now it also turns it, so the barrel points exactly where the eye looks: looking down a scope's tube shows any tilt. And where the weapon rests is followed fast (`ViewArms.RestFollow` 30, was 2), so an aimed weapon no longer drifts with the breath of the idle. Through a scope 0.4 studs from the eye that drift was a degree.
 - **Models**: six new kit pieces, `att_suppressor`, `att_compensator`, `att_reddot`, `att_scope`, `att_foregrip`, `att_laser` (`assets/recipes/attach.py`), built and painted like the guns and at their scale. Each has its origin where it meets the gun, so it goes on at the gun's socket with no turning. The extended magazine has no model: the weapon's own magazine is made 1.22 times as long.
 
@@ -655,7 +655,7 @@ The owner, asked what should come next: "Yes, attachments". Asked which, the own
 
 **Decisions made here.**
 - Everything is free and can be changed at any time, until there is a shop. The only cost is the redraw.
-- The scope is a real hollow tube, not a picture of a lens. The clear circle is about a quarter of the screen's height. The whole screen is zoomed, not only what is in the tube.
+- The scope was first looked through as the real hollow tube it is, with a clear circle a quarter of the screen's height. The owner asked for a sniper's view instead (next section). The whole screen is zoomed, not only what is in the window.
 - The red dot is built half as big again as a real one, so its window is worth looking through.
 - The laser's dot is drawn where the shot will go (the middle of the screen), for its holder only.
 - The numbers are first guesses from how these attachments work in other tactical shooters. Nobody has played with them.
@@ -673,6 +673,31 @@ Notes for the next session:
 - A button with `Modal` on frees the mouse in first person while it shows. `UserInputService.MouseBehavior` still reads LockCenter.
 - A weapon's numbers in a script are `Attachments.build(...)`, never `WeaponConfig.Weapons[...]` directly, or attachments are ignored there.
 - The Studio viewport on this PC is 1096 by 385, far wider than a screen. A sight that looks small in these pictures is larger in a 16:9 window.
+
+### Attachments: the owner's first look (2026-11-27)
+
+The owner, on the pictures and the clip: "have the red dot be a red cross with a subtle black outline so its more visible in the environment. Then have the round circular scope feel more like a sniper scope with that fov and the black fuzz padding around the red dot (make it a cross again, like i said before). The square scope is fine in terms of fov just fix the circular scope". Then: "Also, fix the grip on the pistol, both hands should clutch the handle. the laser should also be its own mesh on the side of the guns, like recon phantom from valorant. Fix that, i dont see that mesh". Asked, the owner said yes to uploading the new laser and the reworked pistol animations.
+
+**What changed.**
+- **The optic's mark is a red cross** with a thin dark line round it (`HudConfig.SightCross`), in the red dot and in the scope. Each bar lies on a dark one a little bigger, so the dark goes round the cross and not across its middle.
+- **The scope is a sniper's view.** Raised all the way, the screen goes black but for a round window with a soft edge, and the weapon is not drawn (`HudConfig.Scope`, `Hud.setScope`, `Viewmodel.veil`). The zoom is the same 2x. The window is 0.74 of the screen's height and the black comes in over a tenth more. The soft edge is sixteen UIStroke rings laid on one another; rings side by side left hairlines of light between them. No image was uploaded for it. The scope's model still shows on the weapon, and while it is being raised.
+- **The laser is a box on the weapon's left side**, the side its holder sees: the emitter and a smaller lamp at the front, a brass battery cap at the back, a turquoise switch on top. It goes on a new socket, `side`, so a rifle can carry a laser and a foregrip together. On the rifle it is 1.4 times as big as it was made (`Size` in `AttachmentConfig`): one box that suits the pistol looked lost on the rifle. The guns got a `side` socket in their data. Their meshes did not change and were not uploaded again.
+- **Both hands hold the pistol's handle.** In the seven pistol animations the left hand now sits on the left of the handle, turned as the right hand is, mirrored. In the pistol's own space its end is at (0.06, -0.20, -0.10); it used to come up from below, 0.2 to the left. In the reload it leaves for the magazine at once. The old versions are in the work file as "... (one hand under)".
+- **The first-person arms have the proportions the animations were made on.** This was the cause, and not only for the pistol. `CreateHumanoidModelFromDescription` with an empty description makes arms 0.92 and 0.81 studs long; the kit's rig has 0.88 and 0.76, as a body with `BodyTypeScale` 0 and `ProportionScale` 0 does. A left hand that the animation put on the weapon missed it by 0.16 studs in the game. With the right body the game matches Blender: the rifle rests 0.55 right, 0.51 down and 1.00 ahead of the eye (the frame the owner picked), and the pistol's left hand is 0.0005 studs from where it was posed and stays within 0.002 through four shots.
+
+**Tested.** The 37 checks pass on the final version (75 s). Pictures: `assets/studio/fps-attachments-*.jpg` and `fps-pistol-two-hands*.jpg`. Video (40 s): `Documents/desert-fps/recordings/fps-maxxing-attachments-v2-20261127.mp4`.
+
+**Uploads.** Nine more files, all approved: the laser's model and texture (80545025910238, 103299523819440) and seven pistol animations (their ids are in `AnimationConfig`). Unused now and still in the inventory: the first laser (124716580185428, 94890159381762) and the seven first pistol animations (108605858556304, 137279406699731, 126204687311857, 126691491055902, 108763930015179, 123277761668379, 108603579052641).
+
+**Not done, not verified.**
+- **On the character everyone sees, where the left hand ends up depends on the avatar.** An animation turns joints, and the hand lands where the arms' lengths put it. On this account's avatar (upper arm 0.67, forearm 0.80) the two hands meet at the pistol, but the left one's end is 0.65 studs from the handle. An `IKControl` was tried. On a character it pulls the left hand toward the weapon (to 0.3 studs here: the handle is out of this avatar's reach in that pose). On the first-person arms it wrecks the pose (their body has AnimationConstraints and an anchored root). It is not in the game.
+- The first-person arms changed shape a little for every weapon, the rifle and the knife too. That was seen in a clip, not compared frame by frame with before.
+- The scope's view and the menu were looked at on one screen size.
+
+Notes for the next session:
+- Make the body for the first-person arms with `BodyTypeScale` 0 and `ProportionScale` 0, or animations made on the kit's rig miss.
+- Running a gun's recipe again repaints its texture a little differently. After adding a socket, keep the new `<gun>.parts.json` and put the other files back from git, or the repository no longer holds what was uploaded.
+- An MCP call may run for 25 seconds. Start anything longer in a `task.spawn`, keep the result in `shared`, and ask for it afterwards.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

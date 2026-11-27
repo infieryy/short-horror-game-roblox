@@ -23,8 +23,23 @@ return {
 
 	-- Four lines round the middle of the screen. It does not move: where it points is where a first shot goes.
 	Crosshair = { Gap = 5, Length = 9, Thickness = 2, Dot = false },
-	-- Looking through an optic, the crosshair gives way to the optic's own dot: its width and colour.
-	SightDot = { Size = 5, Color = Color3.fromRGB(255, 72, 64) },
+	-- Looking through an optic, the crosshair gives way to the optic's own mark: a red cross with a thin dark
+	-- line round it, so it shows on bright plaster and on red cloth alike. Arm is how far each arm reaches
+	-- from the middle and Thickness how wide it is; Outline is the dark line's width, OutlineTransparency
+	-- how see-through it is.
+	SightCross = {
+		Arm = 10,
+		Thickness = 2,
+		Color = Color3.fromRGB(255, 40, 32),
+		Outline = 1,
+		OutlineColor = Color3.new(0, 0, 0),
+		OutlineTransparency = 0.35,
+	},
+	-- A scope's view: the screen is black but for a round window, and the weapon is not drawn. Window is how
+	-- wide the clear part is, as a share of the screen's height. Over Fuzz more (a share of the height too)
+	-- the black comes in, in Steps rings. From is how far the weapon is raised (0 to 1) when the view starts
+	-- to come in; it is all there at 1.
+	Scope = { Window = 0.74, Fuzz = 0.1, Steps = 16, From = 0.8, Color = Color3.new(0, 0, 0) },
 	-- The cross that flashes on a hit: seconds it shows, and its size.
 	HitMark = { Time = 0.18, Gap = 8, Length = 10, Thickness = 2 },
 	-- Being hit tints the screen for this long, this strongly (0 is solid colour, 1 is nothing).

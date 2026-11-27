@@ -11,9 +11,10 @@ local Attachments = {}
 -- socket -> attachment name
 export type Chosen = { [string]: string }
 -- What to do to a weapon's model: parts to copy onto it (`at` is where the part's middle goes from the weapon's
--- origin, `socket` the socket it is on), and which of its own parts to make how many times as long.
+-- origin, `size` how big the part is to be, `socket` the socket it is on), and which of its own parts to make
+-- how many times as long.
 export type Fitting = {
-	adds: { { template: BasePart, at: Vector3, socket: string } },
+	adds: { { template: BasePart, at: Vector3, size: Vector3, socket: string } },
 	stretch: { [string]: number },
 	-- Named points on what was added, from the weapon's origin: an optic's "eye", a laser's "beam".
 	points: { [string]: Vector3 },
@@ -101,9 +102,10 @@ function Attachments.build(weapon: string, chosen: Chosen?): any
 	return config
 end
 
--- What `attached` (a weapon's Attached) adds to the weapon's model. `weapon` is the weapon's model and `models`
--- holds the attachments' (ReplicatedStorage.DesertFps.WeaponModels.<weapon> and .AttachmentModels): their
--- parts carry an "Offset" and the models a "Socket_<name>" for each socket, both from the model's origin.
+-- What `attached` (a weapon's Attached) adds to the weapon's model. `weapon` is the weapon's model, named
+-- after the weapon, and `models` holds the attachments' (ReplicatedStorage.DesertFps.WeaponModels.<weapon>
+-- and .AttachmentModels): their parts carry an "Offset" and the models a "Socket_<name>" for each socket,
+-- both from the model's origin.
 function Attachments.fitting(weapon: Instance, models: Instance, attached: Chosen): Fitting
 	local fitting: Fitting = { adds = {}, stretch = {}, points = {} }
 	for socket, name in attached do
@@ -117,18 +119,21 @@ function Attachments.fitting(weapon: Instance, models: Instance, attached: Chose
 		end
 		local model = what.Model and models:FindFirstChild(what.Model)
 		if model then
+			-- A piece is as big as it was made, or Size times that: it grows from where it meets the weapon.
+			local size = what.Fits[weapon.Name].Size or 1
 			for _, template in model:GetChildren() do
 				if template:IsA("BasePart") then
 					table.insert(fitting.adds, {
 						template = template,
-						at = at + (template:GetAttribute("Offset") :: Vector3),
+						at = at + (template:GetAttribute("Offset") :: Vector3) * size,
+						size = template.Size * size,
 						socket = socket,
 					})
 				end
 			end
 			for attribute, value in model:GetAttributes() do
 				if string.sub(attribute, 1, 7) == "Socket_" then
-					fitting.points[string.sub(attribute, 8)] = at + (value :: Vector3)
+					fitting.points[string.sub(attribute, 8)] = at + (value :: Vector3) * size
 				end
 			end
 		end

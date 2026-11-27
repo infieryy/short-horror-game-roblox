@@ -125,14 +125,15 @@ def render_gun(name):
 
 # Which socket of a gun each attachment goes on, and guns dressed with them to look at.
 FITS = {"att_suppressor": "muzzle", "att_compensator": "muzzle", "att_reddot": "optic", "att_scope": "optic",
-        "att_foregrip": "underbarrel", "att_laser": "underbarrel"}
+        "att_foregrip": "underbarrel", "att_laser": "side"}
 FITTED = {"rifle-quiet": ("rifle", ["att_suppressor", "att_reddot", "att_foregrip"]),
           "rifle-long": ("rifle", ["att_compensator", "att_scope", "att_laser"]),
           "pistol-quiet": ("pistol", ["att_suppressor", "att_reddot", "att_laser"])}
 
 
-def render_fitted(tag):
-    """A gun with attachments on its sockets: a side view and a three-quarter view."""
+def render_fitted(tag, only=None):
+    """A gun with attachments on its sockets: a side view, a three-quarter view, and one from behind its
+    left side, which is the side its holder sees."""
     gun, attachments = FITTED[tag]
     with open(os.path.join(OUT, gun, gun + ".parts.json")) as fh:
         sockets = {s["name"]: s["position"] for s in json.load(fh)["sockets"]}
@@ -145,8 +146,11 @@ def render_fitted(tag):
         x, y, z = sockets[FITS[name]]                               # the parts data is in Roblox axes: y is up
         scene.append((name, (x, -z, 1.6 + y), 0, {}))
     views = {"side": ((cx, -2.6 * span, h), (cx, 0, h), 85, (1600, 640)),
-             "front": ((cx + 0.87 * span, -0.74 * span, h + 0.26 * span), (cx, 0, h), 50, (1600, 900))}
+             "front": ((cx + 0.87 * span, -0.74 * span, h + 0.26 * span), (cx, 0, h), 50, (1600, 900)),
+             "left": ((cx - 0.8 * span, 1.3 * span, h + 0.4 * span), (cx + 0.1 * span, 0, h), 60, (1600, 900))}
     for view, (eye, target, lens, size) in views.items():
+        if only and view != only:
+            continue
         SCENES["gun"] = scene
         CAMERAS["gun"] = (eye, target, lens)
         render("gun", "gun", os.path.join(OUT, f"fitted-{tag}-{view}.png"), size=size)
@@ -251,10 +255,11 @@ if __name__ == "__main__":
         for name in scenes:
             render(name.split("-")[0], name, os.path.join(OUT, f"preview-{name}.png"))
         sys.exit()
-    fitted = [name for name in sys.argv[1:] if name in FITTED]
-    if fitted:                                  # python3 preview.py rifle-quiet rifle-long pistol-quiet
+    fitted = [name for name in sys.argv[1:] if name.split(":")[0] in FITTED]
+    if fitted:                                  # python3 preview.py rifle-quiet rifle-long:left pistol-quiet
         for name in fitted:
-            render_fitted(name)
+            tag, _, only = name.partition(":")
+            render_fitted(tag, only or None)
         sys.exit()
     guns = [name for name in sys.argv[1:] if name in GUNS]
     if guns:

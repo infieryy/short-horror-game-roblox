@@ -108,11 +108,9 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 
 	local source = weaponModels:FindFirstChild(name) :: Instance
 	local fitting = Attachments.fitting(source, attachmentModels, attached)
-	local function add(template: BasePart, at: Vector3, stretch: number?)
+	local function add(template: BasePart, at: Vector3, size: Vector3)
 		local part = template:Clone()
-		if stretch then
-			part.Size, at = Attachments.stretched(part.Size, at, stretch)
-		end
+		part.Size = size
 		part.Anchored = false
 		part.Massless = true
 		part.CastShadow = true
@@ -125,11 +123,16 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	end
 	for _, template in source:GetChildren() do
 		if template:IsA("BasePart") then
-			add(template, template:GetAttribute("Offset") :: Vector3, fitting.stretch[template.Name])
+			local size, at = template.Size, template:GetAttribute("Offset") :: Vector3
+			local stretch = fitting.stretch[template.Name]
+			if stretch then
+				size, at = Attachments.stretched(size, at, stretch)
+			end
+			add(template, at, size)
 		end
 	end
 	for _, each in fitting.adds do
-		add(each.template, each.at)
+		add(each.template, each.at, each.size)
 	end
 	return tool
 end
@@ -436,7 +439,13 @@ local function viewArms(parent: Instance)
 		PhysicsService:CollisionGroupSetCollidable(group, other.name, false)
 	end
 
-	local arms = Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
+	-- The body the animations were made on (the kit's R15, the classic block proportions). Left to itself a
+	-- new body has arms a twentieth longer, and a hand that the animation put on the weapon then misses it
+	-- by a sixth of a stud.
+	local classic = Instance.new("HumanoidDescription")
+	classic.BodyTypeScale = 0
+	classic.ProportionScale = 0
+	local arms = Players:CreateHumanoidModelFromDescription(classic, Enum.HumanoidRigType.R15)
 	arms.Name = "ViewArms"
 	for _, each in arms:GetDescendants() do
 		if each:IsA("LuaSourceContainer") or each:IsA("Decal") then

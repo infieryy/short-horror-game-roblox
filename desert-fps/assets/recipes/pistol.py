@@ -79,6 +79,7 @@ def build(p):
     g.socket("muzzle", 273, -1)
     g.socket("optic", 180, 19)
     g.socket("underbarrel", 200, -40, up=(0, 0, -1))
+    g.socket("side", 200, -32, side=1, on=30)                      # the frame's left face, ahead of the trigger guard
     g.socket("magazine", 24, -132, forward=(-0.2, 0, -1))
     g.socket("aim_rear", 13, 28)
     g.socket("aim_front", 256, 26)

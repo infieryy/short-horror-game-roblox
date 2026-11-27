@@ -2,7 +2,7 @@
 
  - it is built as named parts (body, stock, grip, barrel, muzzle, magazine, bolt or slide, trigger...)
    and each part is exported as its own mesh, so it can be animated, rigged or swapped for an attachment;
- - sockets mark where attachments go (muzzle, optic, underbarrel, magazine) and where the sights line up;
+ - sockets mark where attachments go (muzzle, optic, underbarrel, side, magazine) and where the sights line up;
  - joints say how the moving parts move (slide, hinge, detach).
 
 Shapes are side-view outlines in millimetres taken from the real gun: x runs toward the muzzle,
@@ -56,23 +56,25 @@ class Gun:
         return self.p.extrude(self.outline(points), thick * MM / 2, mat, bevel=bevel * MM, grain=grain,
                               frame=Matrix.Translation((0, centre, 0)), extra=self._tags(part, tone))
 
-    def tube(self, part, mat, x0, x1, z, radius, segments=10, tone=0, profile=None, smooth=True):
-        """A round part along the barrel. profile: optional (radius factor, mm from x0) points."""
+    def tube(self, part, mat, x0, x1, z, radius, segments=10, tone=0, profile=None, smooth=True, out=0.0):
+        """A round part along the barrel, `out` mm to the left of the gun's middle. profile: optional
+        (radius factor, mm from x0) points."""
         r = radius * MM * self.chunky
         points = [(r * k, d * MM) for k, d in profile] if profile else [(r, 0), (r, (x1 - x0) * MM)]
         px, pz = self.pt(x0, z)
         return self.p.lathe(points, segments, mat, smooth=smooth, extra=self._tags(part, tone),
-                            frame=frame_axes((px, 0, pz), (0, 1, 0), (0, 0, 1)))
+                            frame=frame_axes((px, out * MM, pz), (0, 1, 0), (0, 0, 1)))
 
-    def muzzle(self, part, mat, x0, x1, z, radius, bore, depth, flare=1.0, tone=0):
-        """The open end of a barrel: a ring from x0 to x1 with a dark bore `depth` mm inside it."""
+    def muzzle(self, part, mat, x0, x1, z, radius, bore, depth, flare=1.0, tone=0, out=0.0):
+        """The open end of a barrel: a ring from x0 to x1 with a dark bore `depth` mm inside it, `out` mm to
+        the left of the gun's middle."""
         r, b, length = radius * MM * self.chunky, bore * MM * self.chunky, (x1 - x0) * MM
         px, pz = self.pt(x0, z)
         self.p.lathe([(b, 0), (r * flare, 0), (r * flare, length * 0.7), (r, length), (b, length)], 12, mat, closed=True,
-                     smooth=True, extra=self._tags(part, tone), frame=frame_axes((px, 0, pz), (0, 1, 0), (0, 0, 1)))
+                     smooth=True, extra=self._tags(part, tone), frame=frame_axes((px, out * MM, pz), (0, 1, 0), (0, 0, 1)))
         px, pz = self.pt(x1 - depth - 1.0, z)
         self.p.lathe([(b * 1.03, 0), (b * 1.03, 1.0 * MM)], 12, "bore", grain=None, extra=self._tags(part, 0),
-                     frame=frame_axes((px, 0, pz), (0, 1, 0), (0, 0, 1)))
+                     frame=frame_axes((px, out * MM, pz), (0, 1, 0), (0, 0, 1)))
 
     def stud(self, part, mat, x, z, side, on, radius=3.6, height=1.6):
         """A rivet or screw head on one side of a part that is `on` mm wide."""
@@ -92,9 +94,11 @@ class Gun:
         self.p.mark(pid, facet, [self.at(x, z, -reach * MM), self.at(x, z, reach * MM)], tone, width * MM)
 
     # ---- rigging
-    def socket(self, name, x, z, forward=(1, 0, 0), up=(0, 0, 1)):
-        """A named point for attachments and aiming."""
-        self.p.sockets.append({"name": name, "position": self.at(x, z), "forward": forward, "up": up})
+    def socket(self, name, x, z, forward=(1, 0, 0), up=(0, 0, 1), side=0, on=0.0, out=0.0):
+        """A named point for attachments and aiming. On the gun's middle, or with `side` (+1 left, -1 right) on
+        the face of a part that is `on` mm wide, `out` mm beyond it."""
+        self.p.sockets.append({"name": name, "position": self.at(x, z, side * (self.half(on) + out * MM)),
+                               "forward": forward, "up": up})
 
     def joint(self, part, kind, x, z, axis, amount):
         """How a part moves. kind: "slide" (amount in mm along axis), "hinge" (degrees about axis),

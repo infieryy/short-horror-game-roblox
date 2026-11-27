@@ -113,5 +113,5 @@ return {
 	att_reddot = { Model = 123464859283896, Texture = 79114053329453 },
 	att_scope = { Model = 92951252183787, Texture = 94016934404918 },
 	att_foregrip = { Model = 113941948735240, Texture = 99962778696816 },
-	att_laser = { Model = 124716580185428, Texture = 94890159381762 },
+	att_laser = { Model = 80545025910238, Texture = 103299523819440 },
 }

@@ -98,8 +98,83 @@ local function cross(parent: Instance, shape: { Gap: number, Length: number, Thi
 	return holder
 end
 
+-- A part of a scope's view, and how see-through it is when the view is all there.
+type Veil = { item: Instance, property: string, solid: number }
+
+-- Draws a scope's view on a screen of that size: rings that make it blacker outward from the window's edge,
+-- one that is all black, and bars from there to the screen's edges. Returns what was drawn.
+local function scopeView(gui: ScreenGui, screen: Vector2): { Veil }
+	gui:ClearAllChildren()
+	local shape = Config.Scope
+	local veils: { Veil } = {}
+	local function ring(inner: number, thickness: number, transparency: number)
+		local frame = Instance.new("Frame")
+		frame.BackgroundTransparency = 1
+		frame.AnchorPoint = Vector2.new(0.5, 0.5)
+		frame.Position = UDim2.fromScale(0.5, 0.5)
+		frame.Size = UDim2.fromOffset(2 * inner, 2 * inner)
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(1, 0)
+		round.Parent = frame
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = shape.Color
+		stroke.Thickness = thickness
+		stroke.Transparency = transparency
+		stroke.Parent = frame
+		frame.Parent = gui
+		table.insert(veils, { item = stroke, property = "Transparency", solid = transparency })
+	end
+	local window = shape.Window * screen.Y / 2
+	local fuzz = shape.Fuzz * screen.Y
+	local step = fuzz / shape.Steps
+	-- Every ring reaches from its own inner edge to where the black begins, so they lie on one another:
+	-- rings laid side by side leave hairlines of light between them.
+	local behind = 0 -- how black the rings inside this one already make it
+	for index = 1, shape.Steps do
+		local along = index / shape.Steps
+		local wanted = along * along * (3 - 2 * along)
+		ring(window + (index - 1) * step, fuzz - (index - 1) * step + 1, (1 - wanted) / (1 - behind))
+		behind = wanted
+	end
+	-- The black ring reaches to the corners of the square round it; the bars take over from the square's sides.
+	local black = window + fuzz
+	ring(black, black * 0.45, 0)
+	local sides = math.max(0, screen.X / 2 - black + 1)
+	local ends = math.max(0, screen.Y / 2 - black + 1)
+	for _, bar in
+		{
+			{ UDim2.fromScale(0, 0), UDim2.new(0, sides, 1, 0), Vector2.zero },
+			{ UDim2.fromScale(1, 0), UDim2.new(0, sides, 1, 0), Vector2.new(1, 0) },
+			{ UDim2.fromScale(0, 0), UDim2.new(1, 0, 0, ends), Vector2.zero },
+			{ UDim2.fromScale(0, 1), UDim2.new(1, 0, 0, ends), Vector2.new(0, 1) },
+		}
+	do
+		local frame = Instance.new("Frame")
+		frame.Position, frame.Size, frame.AnchorPoint = bar[1], bar[2], bar[3]
+		frame.BackgroundColor3 = shape.Color
+		frame.BorderSizePixel = 0
+		frame.Parent = gui
+		table.insert(veils, { item = frame, property = "BackgroundTransparency", solid = 0 })
+	end
+	return veils
+end
+
 function Hud.new(playerGui: Instance, camera: Camera)
 	local self = setmetatable({}, Hud)
+
+	-- A scope's view, behind everything else the display shows. It is measured off the screen itself, not
+	-- scaled with the rest.
+	local scope = Instance.new("ScreenGui")
+	scope.Name = "ScopeView"
+	scope.IgnoreGuiInset = true
+	scope.ResetOnSpawn = false
+	scope.DisplayOrder = -1
+	scope.Enabled = false
+	scope.Parent = playerGui
+	self.scope = scope
+	self.camera = camera
+	self.scopeVeils = {} :: { Veil }
+	self.scopeIn = 0
 
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "Hud"
@@ -111,7 +186,11 @@ function Hud.new(playerGui: Instance, camera: Camera)
 	local function fit()
 		scale.Scale = math.max(camera.ViewportSize.Y / Config.ReferenceHeight, Config.SmallestScale)
 	end
-	camera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
+	camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		fit()
+		self.scopeVeils = {} -- drawn for the old size: drawn again when next looked through
+		self:setScope(0)
+	end)
 	fit()
 
 	-- Being hit: the whole screen, behind everything else.
@@ -132,19 +211,31 @@ function Hud.new(playerGui: Instance, camera: Camera)
 		dot.BorderSizePixel = 0
 		dot.Parent = self.crosshair
 	end
-	-- An optic's dot, in place of the crosshair while looking through one.
-	local sightDot = Instance.new("Frame")
-	sightDot.AnchorPoint = Vector2.new(0.5, 0.5)
-	sightDot.Position = UDim2.fromScale(0.5, 0.5)
-	sightDot.Size = UDim2.fromOffset(Config.SightDot.Size, Config.SightDot.Size)
-	sightDot.BackgroundColor3 = Config.SightDot.Color
-	sightDot.BorderSizePixel = 0
-	sightDot.Visible = false
-	local round = Instance.new("UICorner")
-	round.CornerRadius = UDim.new(1, 0)
-	round.Parent = sightDot
-	sightDot.Parent = gui
-	self.sightDot = sightDot
+	-- An optic's mark, in place of the crosshair while looking through one: a red cross. Each of its bars
+	-- lies on a dark one a little bigger, so the dark shows as a line round the whole cross and not across
+	-- its middle.
+	local mark = Config.SightCross
+	local sightCross = Instance.new("Frame")
+	sightCross.BackgroundTransparency = 1
+	sightCross.AnchorPoint = Vector2.new(0.5, 0.5)
+	sightCross.Position = UDim2.fromScale(0.5, 0.5)
+	sightCross.Size = UDim2.fromOffset(0, 0)
+	sightCross.Visible = false
+	for layer, grow in { mark.Outline, 0 } do
+		local long, thick = 2 * (mark.Arm + grow), mark.Thickness + 2 * grow
+		for _, size in { UDim2.fromOffset(long, thick), UDim2.fromOffset(thick, long) } do
+			local bar = Instance.new("Frame")
+			bar.AnchorPoint = Vector2.new(0.5, 0.5)
+			bar.Size = size
+			bar.BackgroundColor3 = if grow > 0 then mark.OutlineColor else mark.Color
+			bar.BackgroundTransparency = if grow > 0 then mark.OutlineTransparency else 0
+			bar.BorderSizePixel = 0
+			bar.ZIndex = layer
+			bar.Parent = sightCross
+		end
+	end
+	sightCross.Parent = gui
+	self.sightCross = sightCross
 	self.crosshairShown, self.throughOptic = true, false
 
 	self.hitMark = cross(gui, Config.HitMark, true)
@@ -235,15 +326,34 @@ end
 function Hud.setCrosshair(self: any, shown: boolean)
 	self.crosshairShown = shown
 	self.crosshair.Visible = shown and not self.throughOptic
-	self.sightDot.Visible = shown and self.throughOptic
+	self.sightCross.Visible = shown and self.throughOptic
 end
 
--- Whether the player is looking through an optic: its dot then stands in for the crosshair.
+-- Whether the player is looking through an optic: its cross then stands in for the crosshair.
 function Hud.setOptic(self: any, through: boolean)
 	if through ~= self.throughOptic then
 		self.throughOptic = through
 		self:setCrosshair(self.crosshairShown)
 	end
+end
+
+-- How far a weapon with a scope is raised, 0 to 1; 0 for any other weapon. Returns how much of the scope's
+-- view is there, 0 to 1: once it is, the weapon itself should not be drawn.
+function Hud.setScope(self: any, raised: number): number
+	local from = Config.Scope.From
+	local there = math.clamp((raised - from) / (1 - from), 0, 1)
+	if there > 0 and #self.scopeVeils == 0 then
+		self.scopeVeils = scopeView(self.scope, self.camera.ViewportSize)
+		self.scopeIn = -1
+	end
+	if there ~= self.scopeIn then
+		self.scopeIn = there
+		self.scope.Enabled = there > 0
+		for _, veil: Veil in self.scopeVeils do
+			(veil.item :: any)[veil.property] = 1 - (1 - veil.solid) * there
+		end
+	end
+	return there
 end
 
 -- A line under the weapons carried, naming a key and what it is for.
