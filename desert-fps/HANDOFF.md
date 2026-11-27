@@ -559,7 +559,7 @@ The owner: "Can we start the actual fps system now. I want it to feel tactical l
 
 **Not done, not verified.**
 - **No second player has been in it.** Seeing another player's shots, being hit, the kill feed between players and whether another client sees the animations are untested. (This PC had about 300 MB of memory free with Studio and Blender open.)
-- **The animations only play in Studio.** A published game needs them uploaded to Roblox and their ids put in `AnimationConfig`.
+- The animations are uploaded (the owner said yes; eight assets, all approved; ids in `AnimationConfig` and `animations/README.md`). They load from those ids in a Studio playtest. Not checked in a published game.
 - No sound at all: no shots, no footsteps.
 - No crouch. No wall penetration: a banner or a cloth stops a bullet.
 - No arms in first person, only the weapon. The knife reads small in first person.
@@ -568,7 +568,11 @@ The owner: "Can we start the actual fps system now. I want it to feel tactical l
 - Touch controls are not designed. A fire and a reload button appear on a phone; aiming and walking do not.
 - Attachments (the rifle and pistol have the sockets for them), more weapons, the utility, the shop, rounds, teams.
 
+**A video of a playtest** was recorded for the owner (58 s, in `Documents/desert-fps/recordings/`, outside the repository): each weapon on the dummies, a reload, aiming at the pacing dummy, the knife from behind, the character from outside, and a kiosk wall shot down in 6.9 s. The run is scripted through the test hook, since nobody was at the keyboard.
+
 Notes for the next session:
+- Roblox's player list is switched off: it sat on top of the kill feed. There is no scoreboard in its place yet.
+- Every animation is fetched when the character spawns (`CharacterAnimator.new`). Fetched at first use, an uploaded animation does not play that first time.
 - A test cannot press keys. `ReplicatedStorage.DesertFps.DevWeapon:Invoke("trigger" | "aim" | "walk", held)`, `("equip", slot)`, `("reload")`, `("state")` drive the weapon from the client; the camera is aimed by setting its CFrame.
 - The client's `require` gives the running game's own modules, so a value in `WeaponConfig` can be changed while playing to tune it.
 - `Players:CreateHumanoidModelFromDescription` with a new description gives a black body: its colours default to black.

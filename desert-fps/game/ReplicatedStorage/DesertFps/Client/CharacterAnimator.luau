@@ -33,6 +33,12 @@ function CharacterAnimator.new(character: Model)
 	self.animator = humanoid:WaitForChild("Animator") :: Animator
 	self.tracks = {} :: { [string]: AnimationTrack | false }
 	self.set = nil :: { [string]: string }? -- the animations of the weapon in hand
+	-- Every animation is fetched now. One fetched at its first use plays late, or not at all, that first time.
+	task.spawn(function()
+		for name in Config.Ids do
+			self:track(name)
+		end
+	end)
 	return self
 end
 

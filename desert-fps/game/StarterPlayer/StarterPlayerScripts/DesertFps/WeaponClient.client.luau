@@ -32,8 +32,11 @@ local camera = workspace.CurrentCamera
 local random = Random.new()
 
 player.CameraMode = Enum.CameraMode.LockFirstPerson
-StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
-StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
+-- The display here stands in for Roblox's own: the weapon bar, the health bar, and the player list, which sits
+-- where the kills are listed.
+for _, theirs in { Enum.CoreGuiType.Backpack, Enum.CoreGuiType.Health, Enum.CoreGuiType.PlayerList } do
+	StarterGui:SetCoreGuiEnabled(theirs, false)
+end
 
 local effects = Instance.new("Folder")
 effects.Name = "WeaponEffects"

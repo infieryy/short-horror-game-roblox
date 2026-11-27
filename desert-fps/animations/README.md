@@ -20,6 +20,7 @@ on walking underneath.
 
 - `fps_*.rbxmx`: the animations as Roblox KeyframeSequences. `build/11_import_animations.luau` loads them
   into the place.
+- `fps_*.rbxm`: the same, in the binary format the upload takes.
 - `Desert FPS Weapons (work).blend`: the Blender file they were made in, with every animation in it.
   A copy, and one `.blend` per animation, is in the kit: `Desktop/Roblox Animation Kit/Packs/Desert FPS Weapons/`.
 
@@ -38,7 +39,24 @@ With the owner's "Roblox Animation Kit" (its rig, its reference animations, its 
 - How each weapon sits in the hand is worked out from its hold pose and written to `WeaponConfig` (`Hand`).
   Change a hold and that number has to be worked out again.
 
-## A live game needs them uploaded
+## Uploaded
 
-Studio plays the KeyframeSequences straight from the place. A published game can only play animations that
-are uploaded to Roblox. Once they are, put each id in `AnimationConfig.Ids`.
+A published game can only play animations that are uploaded to Roblox. All eight were uploaded to the
+owner's account on 2026-11-27 (the owner said yes), and all were approved. The ids are in
+`AnimationConfig.Ids`:
+
+| Animation | Asset id |
+|---|---|
+| FPS Rifle Hold | 83028381190337 |
+| FPS Rifle Fire | 96286693108659 |
+| FPS Rifle Reload | 124740467076400 |
+| FPS Pistol Hold | 108605858556304 |
+| FPS Pistol Fire | 137279406699731 |
+| FPS Pistol Reload | 126204687311857 |
+| FPS Knife Hold | 108323231141444 |
+| FPS Knife Slash | 78142187319149 |
+
+To change one: export it from Blender again, load it with `build/11_import_animations.luau`, set its id to
+0 in `AnimationConfig` (Studio then plays the stored sequence), and test. To upload it, save the
+KeyframeSequence as a binary `.rbxm` and send it to the Open Cloud Assets API as asset type `Animation`.
+The API refuses the `.rbxmx` form. An upload is a new asset with a new id; ask the owner first.
