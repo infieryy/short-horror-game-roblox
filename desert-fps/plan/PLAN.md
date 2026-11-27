@@ -64,7 +64,7 @@ How it got there:
 
 ![The Courtyard House and the Tea House in the gray-box town](../assets/studio/town-two-buildings.png)
 
-`game/ServerStorage/DesertFps/Town/TownConfig.luau` lists the buildings that have a recipe; `TownBuilder` stands them at their plan cells and leaves the rest as gray boxes. So far: the Tea House, the Courtyard House and the Dye Works.
+`game/ServerStorage/DesertFps/Town/TownConfig.luau` lists the buildings that have a recipe; `TownBuilder` stands them at their plan cells and leaves the rest as gray boxes. So far: the Tea House, the Courtyard House, the Dye Works and the Cistern Hall (started).
 
 ![The town paved, three buildings built](../assets/studio/town-paved.png)
 
@@ -99,7 +99,8 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 **Frame rate itself is not measured.** This Studio session draws 16 frames a second whether the whole tea house or an empty sky is on screen, so it says nothing. It needs a run on a phone and on an ordinary PC.
 
 ### Not done
-- The Tea House, the Courtyard House and the Dye Works are built. The Cistern Hall, the Market Square and all the small houses are boxes.
+- The Tea House, the Courtyard House and the Dye Works are built; the Cistern Hall is started. The Market Square and all the small houses are boxes.
+- The plan has one cell kind the v1 planner lacks: `u`, shallow water indoors (the Cistern Hall's two channels). `town.py` adds it.
 - Sight is still only checked at eye level on the ground, not from roofs.
 - Barriers that close an arena, rounds and team spawns are not built.
 

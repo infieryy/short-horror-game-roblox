@@ -35,6 +35,7 @@ local FIDELITY = {
 	wall2_window = PRECISE,
 	wall2_shutter = PRECISE,
 	tree = PRECISE, -- you walk under the crown
+	spout = PRECISE,
 	wall2_arcade = PRECISE,
 	wall2_upper_door = PRECISE,
 	wall2_upper_window = PRECISE,

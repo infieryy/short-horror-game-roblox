@@ -34,6 +34,10 @@ return {
 		paving_tiles = true,
 		paving_bricks = true,
 		paving_dyed = true,
+		paving_channel = true,
+		paving_a = true,
+		paving_b = true,
+		paving_c = true,
 	},
 	-- A fill is a soft light with no lamp to see, where a recipe asks for one (daylight under a dome).
 	Fill = {

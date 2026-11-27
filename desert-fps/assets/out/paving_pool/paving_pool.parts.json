@@ -1,0 +1,24 @@
+{
+ "piece": "paving_pool",
+ "mode": "parts",
+ "coords": "Roblox studs, Y up, relative to the piece origin. center = part bounding-box centre. The barrel points along +X.",
+ "sockets": [],
+ "joints": [],
+ "parts": [
+  {
+   "id": "body",
+   "mesh": "parts/paving_pool_body.fbx",
+   "center": [
+    0.0,
+    0.25,
+    -0.0
+   ],
+   "size": [
+    8.0,
+    0.5,
+    8.0
+   ],
+   "triangles": 12
+  }
+ ]
+}

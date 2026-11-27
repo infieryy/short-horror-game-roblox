@@ -78,6 +78,10 @@ return {
 	paving_bricks = { Model = 118797870425051, Texture = 128881648527339 },
 	paving_dyed = { Model = 94737529748017, Texture = 102692256344018 },
 	sand_drift = { Model = 80070480170020, Texture = 75962112650924 },
+	-- water (the Cistern Hall)
+	paving_channel = { Model = 73916905440737, Texture = 130582771791281 },
+	paving_pool = { Model = 101227973655529, Texture = 133346465174669 },
+	spout = { Model = 138532787894615, Texture = 140428161218197 },
 	-- weapons
 	rifle = { Model = 118729713583609, Texture = 98441666077201 },
 	pistol = { Model = 87247004083333, Texture = 102072335700837 },

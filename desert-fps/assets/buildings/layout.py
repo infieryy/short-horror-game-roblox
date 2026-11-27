@@ -15,7 +15,7 @@ BACK_TO = {"N": 0, "S": 180, "E": -90, "W": 90}      # turn that puts a piece's 
 STEP = {"N": (-1, 0), "S": (1, 0), "E": (0, 1), "W": (0, -1)}
 OUT = {"N": (0, 1), "S": (0, -1), "E": (1, 0), "W": (-1, 0)}           # the same directions in studs (x, y)
 
-ROOM = set("idWpqQ")              # plan/planner.py: cells with thin walls round them
+ROOM = set("idWpqQu")             # plan/planner.py and plan/town.py: cells with thin walls round them
 SOLID = set("123")
 HERE = os.path.dirname(os.path.abspath(__file__))
 

@@ -8,6 +8,8 @@ as laid stone by stone. The piece itself is one flat slab: the stones are paint,
     bricks   courts, yards and squares: paving bricks laid in pairs, basket-weave
     dyed     the dyers' yard: flagstones splashed with the four dyes
     drift    sand blown against the foot of a wall (the origin is on the wall face, at the ground)
+    channel  a cell of a water channel indoors: water between two stone kerbs (the channel runs east-west)
+    pool     a cell of open water
 """
 import math
 import random
@@ -109,6 +111,36 @@ def bricks(p):
                 cream = rng.random() < 0.3
                 _stone(stones, p, pid, t, corners, rng.randint(-4, 3), "stone" if cream else None, joint=0.06)
     p.parts[pid]["stones"] = stones
+    p.seams = SEAMS
+
+
+def _ripples(p, pid, t, rng, count):
+    for _ in range(count):
+        x, y, length = rng.uniform(-3.2, 1.5), rng.uniform(-2.6, 2.6), rng.uniform(1.0, 2.2)
+        p.mark(pid, "+z", [(x + length * k / 4, y + 0.07 * math.sin(k * 1.9), t) for k in range(5)], tone=4, width=0.07)
+
+
+def channel(p):
+    pid, t = _slab(p, "water")
+    rng = random.Random(8)
+    stones, depth = [], 0.7
+    for side in (-1, 1):                                         # a kerb of cut stones along each bank
+        y0, y1 = sorted((side * HALF, side * (HALF - depth)))
+        x = -HALF
+        while x < HALF - 0.01:
+            x1 = min(x + rng.uniform(1.6, 2.4), HALF)
+            if HALF - x1 < 0.8:
+                x1 = HALF
+            _stone(stones, p, pid, t, [(x, y0), (x1, y0), (x1, y1), (x, y1)], rng.randint(-2, 3), "stone", joint=0.06)
+            x = x1
+    p.parts[pid]["stones"] = stones
+    _ripples(p, pid, t, rng, 12)
+    p.seams = SEAMS
+
+
+def pool(p):
+    pid, t = _slab(p, "water")
+    _ripples(p, pid, t, random.Random(9), 18)
     p.seams = SEAMS
 
 

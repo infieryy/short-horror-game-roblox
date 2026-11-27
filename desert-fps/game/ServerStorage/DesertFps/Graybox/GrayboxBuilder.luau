@@ -283,7 +283,8 @@ local function buildStreetProps(ctx: Ctx)
 		rectBox(ctx, "Water", "Water", rect, 0, Config.Water.Height)
 	end
 	for _, rect in mergeRects(ctx.n, function(r, c)
-		return cellAt(ctx, r, c) == "v"
+		local ch = cellAt(ctx, r, c)
+		return ch == "v" or ch == "u"
 	end) do
 		-- TODO: slow players standing in ShallowWater by SlowFactor once movement code exists.
 		rectBox(ctx, "ShallowWater", "ShallowWater", rect, 0, Config.ShallowWater.Height):SetAttribute(

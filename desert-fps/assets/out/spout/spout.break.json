@@ -1,0 +1,162 @@
+{
+ "piece": "spout",
+ "mode": "shatter",
+ "coords": "Roblox studs, Y up, relative to the piece origin (bottom centre). center = shard bounding-box centre.",
+ "health": 210,
+ "chunks": [
+  {
+   "id": "s00",
+   "mesh": "chunks/spout_s00.fbx",
+   "center": [
+    0.419,
+    4.142,
+    0.173
+   ],
+   "size": [
+    2.163,
+    3.571,
+    0.347
+   ],
+   "material": "stone",
+   "health": 15,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 24,
+   "neighbors": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s01",
+   "mesh": "chunks/spout_s01.fbx",
+   "center": [
+    -0.382,
+    1.425,
+    1.0
+   ],
+   "size": [
+    2.836,
+    2.85,
+    2.0
+   ],
+   "material": "stone",
+   "health": 110,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 92,
+   "neighbors": [
+    "s00",
+    "s02",
+    "s03",
+    "s05"
+   ]
+  },
+  {
+   "id": "s02",
+   "mesh": "chunks/spout_s02.fbx",
+   "center": [
+    -0.225,
+    4.666,
+    0.525
+   ],
+   "size": [
+    2.55,
+    3.686,
+    1.05
+   ],
+   "material": "stone",
+   "health": 20,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 64,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s04",
+    "s05"
+   ]
+  },
+  {
+   "id": "s03",
+   "mesh": "chunks/spout_s03.fbx",
+   "center": [
+    1.162,
+    1.296,
+    1.0
+   ],
+   "size": [
+    1.276,
+    2.593,
+    2.0
+   ],
+   "material": "stone",
+   "health": 45,
+   "collision": "Hull",
+   "grounded": true,
+   "touches": [],
+   "triangles": 76,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s05"
+   ]
+  },
+  {
+   "id": "s04",
+   "mesh": "chunks/spout_s04.fbx",
+   "center": [
+    0.0,
+    6.294,
+    0.1
+   ],
+   "size": [
+    3.0,
+    1.011,
+    0.2
+   ],
+   "material": "stone",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 16,
+   "neighbors": [
+    "s00",
+    "s02"
+   ]
+  },
+  {
+   "id": "s05",
+   "mesh": "chunks/spout_s05.fbx",
+   "center": [
+    -0.078,
+    3.12,
+    0.558
+   ],
+   "size": [
+    2.844,
+    1.52,
+    1.115
+   ],
+   "material": "stone",
+   "health": 10,
+   "collision": "Hull",
+   "grounded": false,
+   "touches": [],
+   "triangles": 36,
+   "neighbors": [
+    "s00",
+    "s01",
+    "s02",
+    "s03"
+   ]
+  }
+ ]
+}

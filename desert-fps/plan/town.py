@@ -36,6 +36,14 @@ import zones as Z
 
 SIZE = 40
 
+# One cell kind the v1 planner does not have: shallow water indoors (the channels of the Cistern Hall).
+# It is a room cell, so no walls are drawn round it, and it is waded through like the water outside.
+Z.LEGEND["u"] = "shallow water indoors - walkable but slow"
+P.ROOM.add("u")
+P.GROUND_WALK.add("u")
+P.SHALLOW.add("u")
+P.COL["u"] = P.COL["v"]
+
 # Each row: west lane (2) | west block (9) | street (2) | middle block (11) | street (3) | east block (8) | east lane (3).
 # The town wall closes it in on all four sides.
 ROWS = [
@@ -73,9 +81,9 @@ ROWS = [
     ("..", ".....1...", ".1", "....C......", ".k.", "........", ".C."),
     # Gate Quarter | Cistern Hall | Weavers' Quarter
     ("..", "...22....", "..", "...diiQiid.", "...", "111.....", "..."),
-    ("..", "11.22.Wid", "..", ".C.ipiiipi.", "...", "111=11.k", "..."),
+    ("..", "11.22.Wid", "..", ".C.ipuuupi.", "...", "111=11.k", "..."),
     (".T", "11....iii", "..", "...Wiipiiid", ".C.", "....11.k", "..."),
-    ("..", "...c..diW", "C.", "11.ipiiipii", "...", ".c..L...", ".C."),
+    ("..", "...c..diW", "C.", "11.ipuuupii", "...", ".c..L...", ".C."),
     ("..", ".T.......", "..", "11.diiiiiiW", "...", "..22..T.", "..."),
     ("..", "222.C.11.", "..", ".....dipid.", "..k", "T.22.C..", "..."),
     ("..", "222...11s", "..", ".T.c.iidii.", "...", "..222..1", "..."),

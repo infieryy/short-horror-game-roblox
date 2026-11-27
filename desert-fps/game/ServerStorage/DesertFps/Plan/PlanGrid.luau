@@ -8,7 +8,7 @@ local PlanGrid = {}
 
 export type Grid = { { string } } -- [row][column], both from 1; rows run north to south
 
-PlanGrid.ROOM_CELLS = "idWpqQ"
+PlanGrid.ROOM_CELLS = "idWpqQu" -- "u" is shallow water indoors (plan/town.py)
 PlanGrid.SIDES = {
 	{ name = "N", dr = -1, dc = 0 },
 	{ name = "S", dr = 1, dc = 0 },

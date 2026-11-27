@@ -16,6 +16,8 @@ return {
 		Street = { "paving_a", "paving_b", "paving_c" },
 		-- The Market Square is laid in brick ({ row0, column0, row1, column1 } of plan/town.py).
 		Square = { Piece = "paving_bricks", Rect = { 14, 14, 25, 24 } },
+		-- Open water in the plan (the cistern's overflow pool).
+		Pool = "paving_pool",
 		-- Sand blows against the foot of walls: against one wall face in every OneIn, picked by the cell.
 		Sand = { Piece = "sand_drift", OneIn = 3, WallOut = 0.66 },
 	},
@@ -26,5 +28,6 @@ return {
 		{ Recipe = "teahouse", Row = 7, Column = 17, Rows = 4, Columns = 4 },
 		{ Recipe = "courtyard", Row = 15, Column = 3, Rows = 9, Columns = 7 },
 		{ Recipe = "dyeworks", Row = 15, Column = 28, Rows = 9, Columns = 8 },
+		{ Recipe = "cistern", Row = 28, Column = 17, Rows = 7, Columns = 8 },
 	},
 }

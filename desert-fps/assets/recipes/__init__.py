@@ -1,7 +1,7 @@
 """Recipe registry: piece name -> (build function, options)."""
 from . import awning, barrel, cloth, corner, crate, door, ground, knife, ladder, parapet, pillar, pistol, plank
 from . import pot, rifle, roof, sacks, smoke, stairs, stall, wall, well
-from . import floor, furnish, hangings, lantern, paving, pergola, stores, tree, wall2
+from . import floor, furnish, hangings, lantern, paving, pergola, stores, tree, wall2, water
 
 RECIPES = {
     "wall_plain": (wall.build, {}),
@@ -60,6 +60,9 @@ RECIPES = {
     "paving_bricks": (paving.bricks, {}),
     "paving_dyed": (paving.flags, {"seed": 5, "rows": 4, "splashes": True}),
     "sand_drift": (paving.drift, {}),
+    "paving_channel": (paving.channel, {}),
+    "paving_pool": (paving.pool, {}),
+    "spout": (water.spout, {}),
     "stairs": (stairs.build, {}),
     "stairs_narrow": (stairs.build, {"narrow": True}),
     "ladder": (ladder.build, {}),

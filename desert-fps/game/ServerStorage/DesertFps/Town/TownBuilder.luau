@@ -73,7 +73,10 @@ local function pave(blank: { { number } }): (number, number)
 			end
 			local hash = row0 * 7919 + column0 * 104729
 			local inSquare = row0 >= square[1] and row0 <= square[3] and column0 >= square[2] and column0 <= square[4]
-			local piece = if inSquare then settings.Square.Piece else settings.Street[hash % #settings.Street + 1]
+			local piece = if here == "v"
+				then settings.Pool
+				elseif inSquare then settings.Square.Piece
+				else settings.Street[hash % #settings.Street + 1]
 			local middle = TownBuilder.cellCorner(row0, column0) * CFrame.new(cell / 2, Config.Lift, cell / 2)
 			lay(piece, middle * CFrame.new(0, settings.Drop, 0) * CFrame.Angles(0, (hash // 7 % 4) * math.pi / 2, 0))
 			laid += 1

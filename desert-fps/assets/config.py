@@ -210,6 +210,10 @@ CORE.update({"saffron": "saffron", "plum": "plum", "indigo": "indigo"})
 PALETTE["sand"] = {"h": (22, 30), "l": (0.68, 0.80), "s": (0.80, 0.98), "step": 0.014, "hue_step": 0.5,
                    "bases": [(26, 0.745, 0.95), (24, 0.76, 0.92)]}
 CORE["sand"] = "sand"
+# water in the cistern (reference/zones/cistern.webp): turquoise, a little greener than the wall band
+PALETTE["water"] = {"h": (164, 182), "l": (0.58, 0.82), "s": (0.38, 0.62), "step": 0.022, "hue_step": -0.8,
+                    "bases": [(173, 0.69, 0.52), (170, 0.67, 0.50)]}
+CORE["water"] = "water"
 
 PAINT["leaf"] = {                               # foliage: round dabs every way
     "lean": 30, "lean_jitter": 90,
@@ -224,6 +228,9 @@ PAINT["glow"] = {"lean": 80, "lean_jitter": 10,
 
 for _dye in ("saffron", "plum", "indigo"):
     PAINT[_dye] = PAINT["canvas"]
+PAINT["water"] = {"lean": 0, "lean_jitter": 7,          # long level strokes: light lying on still water
+                  "layers": [{"per_stud2": 4.0, "len": (1.0, 2.8), "wid": (0.14, 0.34), "opacity": (0.35, 0.6), "round": 0.5},
+                             {"per_stud2": 6.0, "len": (0.5, 1.6), "wid": (0.04, 0.09), "opacity": (0.45, 0.75), "round": 0.2}]}
 PAINT["sand"] = {"lean": 8, "lean_jitter": 14,          # long shallow ripples
                  "layers": [{"per_stud2": 5.0, "len": (0.8, 2.2), "wid": (0.12, 0.3), "opacity": (0.35, 0.6), "round": 0.4},
                             {"per_stud2": 8.0, "len": (0.4, 1.2), "wid": (0.04, 0.09), "opacity": (0.4, 0.7), "round": 0.1}]}
@@ -308,7 +315,7 @@ KIT["parapet"]["pierced"] = {"count": 5, "w": 0.9, "z0": 1.1, "z1": 2.0}
 DETAIL_SCALE = {"rifle": 0.2, "pistol": 0.12, "knife": 0.1, "smoke": 0.1,
                 "pot": 0.45, "vase": 0.4, "sacks": 0.7, "ladder": 0.6, "well": 0.7, "vat": 0.7, "stall": 0.7, "awning": 0.7,
                 "lantern": 0.3, "tea": 0.4, "rug": 0.6, "divan": 0.7, "shelf": 0.4, "counter": 0.6, "sign": 0.4,
-                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7, "bolts": 0.7}
+                "banner": 0.6, "bougainvillea": 0.6, "pergola": 0.7, "tree": 0.7, "bolts": 0.7, "spout": 0.5}
 
 # ---------------------------------------------------------------- per-piece style
 # Extra hand-painted detail for pieces seen up close. Everything here adds to the shared rules.
@@ -368,7 +375,7 @@ BREAK = {
     "hp_per_stud3": {"plaster": 12, "stone": 16, "adobe": 12, "wood": 7, "darkwood": 7, "rawwood": 7, "iron": 30,
                      "canvas": 2, "redcloth": 2, "burlap": 4, "clay": 6, "rope": 3, "paving": 16, "band": 6,
                      "brass": 20, "leaf": 2, "bloom": 2, "glow": 4, "cloth": 2,
-                     "saffron": 2, "plum": 2, "indigo": 2, "sand": 2},
+                     "saffron": 2, "plum": 2, "indigo": 2, "sand": 2, "water": 2},
     "hp_min": 10,
     "pieces": {
         "wall_plain": {"mode": "chunks", "shards": 12, "through": "y", "slant": 0.9, "apart": 0.55},
@@ -418,6 +425,7 @@ BREAK = {
         "shelf": {"mode": "shatter", "shards": 5, "apart": 0.5},
         "counter": {"mode": "shatter", "shards": 8, "apart": 0.5},
         "tree": {"mode": "shatter", "shards": 8, "apart": 0.5},
+        "spout": {"mode": "shatter", "shards": 6, "apart": 0.5},
         "rack_red": {"mode": "shatter", "shards": 4, "apart": 0.5},
         "rack_saffron": {"mode": "shatter", "shards": 4, "apart": 0.5},
         "rack_plum": {"mode": "shatter", "shards": 4, "apart": 0.5},
@@ -438,6 +446,8 @@ BREAK = {
         "paving_bricks": {"mode": "parts"},
         "paving_dyed": {"mode": "parts"},
         "sand_drift": {"mode": "parts"},
+        "paving_channel": {"mode": "parts"},
+        "paving_pool": {"mode": "parts"},
         "banner": {"mode": "parts"},
         "bougainvillea": {"mode": "parts"},
         "ground": {"mode": "parts"},
