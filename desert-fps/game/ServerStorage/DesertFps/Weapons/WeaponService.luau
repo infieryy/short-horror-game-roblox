@@ -134,6 +134,14 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	for _, each in fitting.adds do
 		add(each.template, each.at, each.size)
 	end
+	-- Where a laser's beam leaves the weapon, looking along the barrel, for clients to draw it from
+	-- (Client/LaserSight).
+	if fitting.points.beam then
+		local emitter = Instance.new("Attachment")
+		emitter.Name = "Laser"
+		emitter.Position = AIM * fitting.points.beam
+		emitter.Parent = handle
+	end
 	return tool
 end
 

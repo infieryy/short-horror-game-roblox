@@ -13,9 +13,18 @@ return {
 	-- The sockets, in the order the loadout shows them.
 	Sockets = { "muzzle", "optic", "underbarrel", "side", "magazine" },
 
-	-- The dot a laser puts where the weapon points, which only its holder sees: its colour, how big it is for
-	-- each stud it is away and at least, and how far it carries.
-	Laser = { Color = Color3.fromRGB(255, 72, 64), PerStud = 0.004, Least = 0.03, Range = 300 },
+	-- A laser's light (Client/LaserSight): a dot where the weapon points and a thin beam to it from the laser,
+	-- which everyone sees. The dot: how big it is for each stud it is from the eye, and at least; Range is how
+	-- far the light carries. The beam: how wide it is at the laser, how wide at its far end for each stud that
+	-- end is from the eye, how see-through it is near and far, and Glow, how much it adds its light to what
+	-- is behind it instead of covering it (all the way, it washes out to white over the town's bright walls).
+	Laser = {
+		Color = Color3.fromRGB(255, 40, 32),
+		PerStud = 0.004,
+		Least = 0.03,
+		Range = 300,
+		Beam = { Width = 0.016, PerStud = 0.0018, Near = 0.05, Far = 0.4, Glow = 0.3 },
+	},
 
 	Attachments = {
 		-- Nobody else sees where the shots come from. The price is damage at long range: past 150 studs the
@@ -94,7 +103,7 @@ return {
 		-- A box on the weapon's left side, the side its holder sees.
 		laser = {
 			Title = "Laser",
-			About = "Shots from the hip stray less on the move.",
+			About = "Shots from the hip stray less on the move. Its beam shows.",
 			Socket = "side",
 			Model = "att_laser",
 			Fits = {

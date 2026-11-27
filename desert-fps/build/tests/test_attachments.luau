@@ -10,7 +10,8 @@
 --   an extended magazine is filled by a reload, and its extra rounds go back to the reserve when it comes off
 --   a compensator lowers the climb of a spray
 --   aiming brings the sight in use onto the line of sight: the iron sights, the red dot, the scope
---   a laser shows its dot, and only while it is on the weapon
+--   a laser shows its dot and a beam to it from the laser, only while it is on the weapon, and the weapon
+--     everyone sees says where its beam starts
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -234,12 +235,25 @@ hook:Invoke("equip", "primary")
 task.wait(DRAWN)
 fit("optic", nil)
 local effects = (camera :: any).WeaponEffects
-check(effects:FindFirstChild("LaserDot") == nil, "no laser, no dot")
+local function light(): (Instance?, Beam?)
+	local dot = effects:FindFirstChild("LaserDot")
+	return dot, if dot then dot:FindFirstChildOfClass("Beam") else nil
+end
+check(light() == nil, "no laser, no light")
 fit("side", "laser")
 task.wait(DRAWN)
-check(effects:FindFirstChild("LaserDot") ~= nil, "a laser on the rifle shows its dot")
+local dot, beam = light()
+check(
+	dot ~= nil and beam ~= nil and beam.Enabled and beam.Attachment0 ~= nil and beam.Attachment0.Name == "Laser",
+	"a laser on the rifle shows its dot, and a beam to it from the laser"
+)
+local inHand = player.Character and player.Character:FindFirstChildOfClass("Tool")
+check(
+	inHand ~= nil and inHand:FindFirstChild("Laser", true) ~= nil,
+	"the weapon everyone sees says where its beam starts"
+)
 fit("side", nil)
 task.wait(DRAWN)
-check(effects:FindFirstChild("LaserDot") == nil, "taken off, the dot goes")
+check(light() == nil, "taken off, the light goes")
 
 return table.concat(lines, "\n")

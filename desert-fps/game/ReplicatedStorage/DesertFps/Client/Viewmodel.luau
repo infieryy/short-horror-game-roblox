@@ -213,6 +213,17 @@ local function fit(held: Held, config: any, attachments: Instance)
 		table.insert(held.added, part)
 	end
 	held.sight = fitting.points.eye or held.sockets.aim_rear
+	-- Where a laser's beam leaves the weapon.
+	local emitter = held.handle:FindFirstChild("Laser")
+	if emitter then
+		emitter:Destroy()
+	end
+	if fitting.points.beam then
+		local from = Instance.new("Attachment")
+		from.Name = "Laser"
+		from.Position = AIM * fitting.points.beam
+		from.Parent = held.handle
+	end
 end
 
 -- Puts a weapon in the hands and draws it, or shows nothing. `config`: the weapon's numbers as it is fitted
@@ -343,6 +354,13 @@ function Viewmodel.update(self: any, pose: Pose)
 		end
 	end
 	self.magazineOut = out
+end
+
+-- Where the beam of a laser on the weapon in hand starts, if it carries one and is being drawn.
+function Viewmodel.emitter(self: any): Attachment?
+	local held: Held? = self.current
+	local emitter = if held and not self.veiled then held.handle:FindFirstChild("Laser") else nil
+	return if emitter and emitter:IsA("Attachment") then emitter else nil
 end
 
 -- Where a socket of the weapon in hand is in the world (the muzzle, for a tracer).

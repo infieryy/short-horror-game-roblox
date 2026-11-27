@@ -28,7 +28,7 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 
 `tests/test_weapons.luau` runs on the client during a playtest, with `DevConfig.TestHooks` and `DevConfig.Dummies` on. It shoots the target dummies with the rifle and the pistol and returns six checks that should all start "ok".
 
-`tests/test_attachments.luau` runs on the client during a playtest, with `DevConfig.TestHooks` on, from the spawn. It fits every attachment on the rifle and the pistol and returns 37 checks that should all start "ok": the numbers each one changes, what is refused, the magazine's rounds, the compensator's climb, every sight on the line of sight, the laser's dot. It takes 80 seconds, longer than one MCP call may run: start it in a `task.spawn` and read the result from `shared` afterwards.
+`tests/test_attachments.luau` runs on the client during a playtest, with `DevConfig.TestHooks` on, from the spawn. It fits every attachment on the rifle and the pistol and returns 38 checks that should all start "ok": the numbers each one changes, what is refused, the magazine's rounds, the compensator's climb, every sight on the line of sight, the laser's dot and beam. It takes 80 seconds, longer than one MCP call may run: start it in a `task.spawn` and read the result from `shared` afterwards.
 
 `tests/measure_views.luau` runs on the client during a playtest. It stands the player at seven viewpoints and returns draw calls, triangles on screen, drawing time and frames a second for each. Set the graphics level by hand first.
 

@@ -631,7 +631,7 @@ The owner, asked what should come next: "Yes, attachments". Asked which, the own
 | Red dot | optic | rifle, pistol | Rifle: raised in 0.12 s instead of 0.16, aimed shots stray 0.85 as far. Pistol: it can aim at all (1.15 zoom) |
 | 2x scope | optic | rifle | Twice as close, aimed shots stray 0.6 as far; raised in 0.24 s, and the shooter walks at 0.8 of the usual aiming pace |
 | Foregrip | underbarrel | rifle | A spray swings 0.65 as wide and spreads 0.8 as fast; the draw takes 0.9 s instead of 0.8 |
-| Laser | side | rifle, pistol | Shots stray less on the move: walking x0.7, running x0.75, in the air x0.8. Its holder sees a red dot where the weapon points |
+| Laser | side | rifle, pistol | Shots stray less on the move: walking x0.7, running x0.75, in the air x0.8. A thin red beam runs from it to a dot where the weapon points, and everyone sees it |
 | Extended magazine | magazine | rifle, pistol | 35 rounds instead of 25, 18 instead of 12; a reload takes 1.12 as long |
 
 **How it works.**
@@ -657,7 +657,7 @@ The owner, asked what should come next: "Yes, attachments". Asked which, the own
 - Everything is free and can be changed at any time, until there is a shop. The only cost is the redraw.
 - The scope was first looked through as the real hollow tube it is, with a clear circle a quarter of the screen's height. The owner asked for a sniper's view instead (next section). The whole screen is zoomed, not only what is in the window.
 - The red dot is built half as big again as a real one, so its window is worth looking through.
-- The laser's dot is drawn where the shot will go (the middle of the screen), for its holder only.
+- The laser's dot is drawn where the shot will go (the middle of the screen). At first only its holder saw it, and there was no beam; see "The laser's beam" below.
 - The numbers are first guesses from how these attachments work in other tactical shooters. Nobody has played with them.
 
 **Not done, not verified.**
@@ -666,7 +666,6 @@ The owner, asked what should come next: "Yes, attachments". Asked which, the own
 - The left hand stays on the handguard: it does not hold the foregrip.
 - The pistol's red dot stays still when the slide goes back.
 - The menu and the B key have no touch or gamepad way in. The menu was looked at on one screen size.
-- Nobody else sees a laser's dot.
 - The owner has seen pictures and a video, nothing in person.
 
 Notes for the next session:
@@ -698,6 +697,20 @@ Notes for the next session:
 - Make the body for the first-person arms with `BodyTypeScale` 0 and `ProportionScale` 0, or animations made on the kit's rig miss.
 - Running a gun's recipe again repaints its texture a little differently. After adding a socket, keep the new `<gun>.parts.json` and put the other files back from git, or the repository no longer holds what was uploaded.
 - An MCP call may run for 25 seconds. Start anything longer in a `task.spawn`, keep the result in `shared`, and ask for it afterwards.
+
+### The laser's beam (2026-11-27)
+
+The owner, on the laser box: "the laser should actually have a thin laser beam coming out of it (shocking, I know)".
+
+**The outcome.** A thin red beam runs from the laser's emitter to a dot on what the weapon points at. Its holder sees it from the weapon in front of the camera, going to where the shot will land. Everyone else sees it leave the weapon in the holder's hand, straight along the barrel, so a laser now gives its holder away. Pictures: `assets/studio/fps-laser-beam*.jpg`.
+
+**How it works.** `Client/LaserSight` draws it: a `Beam` between an attachment at the emitter and one in the dot, turned to face the camera. The server puts an attachment named `Laser` on the weapon everyone sees, at the emitter, looking along the barrel; each client draws every other player's beam from there with a ray of its own. The player's own beam starts at the same point on the weapon in front of the camera and ends where a ray from the eye lands. It is not drawn while the scope's view is up, as the weapon is not; the dot stays. Width, colour and how far it carries are in `AttachmentConfig.Laser`.
+
+**Tested.** `test_attachments.luau` now has 38 checks and they pass: the beam is there with the laser, starts at the laser, and goes when the laser comes off; the weapon in the character's hand carries the emitter's attachment. Another player's beam was looked at by drawing this player's own as another client would, with the camera pulled out to the side. No second client has seen it.
+
+Notes for the next session:
+- A `Beam` with `LightEmission` 1 adds its colour to what is behind it. Over this town's bright plaster a red beam came out near white. It is at 0.3.
+- A beam a hundredth of a stud wide is under a pixel across a square. Its far end is widened by its distance from the eye, as the dot is.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

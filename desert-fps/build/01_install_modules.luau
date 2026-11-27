@@ -626,6 +626,110 @@ return {
 	},
 }
 ]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Client", "LaserSight" }, class = "ModuleScript", source = [=[
+--!strict
+-- A laser's light: a thin beam from the laser on a weapon to what it points at, and a dot there.
+-- The player's own shines from the weapon in front of their camera to where their shot will go. Everyone
+-- else's shines straight out of the weapon in their character's hand, so a laser gives its holder away.
+
+local Players = game:GetService("Players")
+
+local AttachmentConfig = require(script.Parent.Parent.Weapons.AttachmentConfig)
+
+local LaserSight = {}
+LaserSight.__index = LaserSight
+
+local Look = AttachmentConfig.Laser
+
+function LaserSight.new(parent: Instance)
+	local self = setmetatable({}, LaserSight)
+	local dot = Instance.new("Part")
+	dot.Name = "LaserDot"
+	dot.Shape = Enum.PartType.Ball
+	dot.Material = Enum.Material.Neon
+	dot.Color = Look.Color
+	dot.Anchored = true
+	dot.CanCollide = false
+	dot.CanQuery = false
+	dot.CanTouch = false
+	dot.CastShadow = false
+	local finish = Instance.new("Attachment")
+	finish.Parent = dot
+	local beam = Instance.new("Beam")
+	beam.Attachment1 = finish
+	beam.FaceCamera = true
+	beam.Segments = 1
+	beam.Color = ColorSequence.new(Look.Color)
+	beam.LightEmission = Look.Beam.Glow
+	beam.LightInfluence = 0
+	beam.Transparency = NumberSequence.new(Look.Beam.Near, Look.Beam.Far)
+	beam.Width0 = Look.Beam.Width
+	beam.Parent = dot
+	self.parent, self.dot, self.beam = parent, dot, beam
+	return self
+end
+
+-- Shines it at `at`: the dot there if it landed on something (`landed`), and a beam to it from `from`, the
+-- laser's emitter, if one is given. With no `at` it goes dark.
+function LaserSight.shine(self: any, at: Vector3?, landed: boolean?, from: Attachment?)
+	if not at then
+		self.dot.Parent = nil
+		return
+	end
+	-- Both are sized by how far they are from the eye, so that neither thins to nothing across a square.
+	local away = (at - workspace.CurrentCamera.CFrame.Position).Magnitude
+	self.dot.Size = Vector3.one * math.max(Look.Least, away * Look.PerStud)
+	self.dot.Transparency = if landed then 0 else 1
+	self.dot.Position = at
+	self.beam.Attachment0 = from
+	self.beam.Enabled = from ~= nil
+	self.beam.Width1 = math.max(Look.Beam.Width, away * Look.Beam.PerStud)
+	self.dot.Parent = self.parent
+end
+
+function LaserSight.destroy(self: any)
+	self.dot:Destroy()
+end
+
+-- The lasers on the weapons other players hold, by player. The server puts an attachment named "Laser" on a
+-- weapon that carries one, at the emitter, looking along the barrel.
+local theirs: { [Player]: any } = {}
+
+-- Shines every other player's laser: call each frame. `me` is left out.
+function LaserSight.shineOthers(parent: Instance, me: Player?)
+	for _, other in Players:GetPlayers() do
+		local tool = if other ~= me and other.Character then other.Character:FindFirstChildOfClass("Tool") else nil
+		local handle = tool and tool:FindFirstChild("Handle")
+		local emitter = handle and handle:FindFirstChild("Laser")
+		if not (emitter and emitter:IsA("Attachment")) then
+			if theirs[other] then
+				theirs[other]:shine(nil)
+			end
+			continue
+		end
+		local laser = theirs[other]
+		if not laser then
+			laser = LaserSight.new(parent)
+			theirs[other] = laser
+		end
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { other.Character :: Instance, parent }
+		local from, along = emitter.WorldPosition, emitter.WorldCFrame.LookVector
+		local hit = workspace:Raycast(from, along * Look.Range, params)
+		laser:shine(if hit then hit.Position else from + along * Look.Range, hit ~= nil, emitter)
+	end
+end
+
+Players.PlayerRemoving:Connect(function(gone)
+	if theirs[gone] then
+		theirs[gone]:destroy()
+		theirs[gone] = nil
+	end
+end)
+
+return LaserSight
+]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "LoadoutMenu" }, class = "ModuleScript", source = [=[
 --!strict
 -- The loadout: what is on the weapon in hand, and what else could be. A row for each socket of the weapon that
@@ -1049,6 +1153,17 @@ local function fit(held: Held, config: any, attachments: Instance)
 		table.insert(held.added, part)
 	end
 	held.sight = fitting.points.eye or held.sockets.aim_rear
+	-- Where a laser's beam leaves the weapon.
+	local emitter = held.handle:FindFirstChild("Laser")
+	if emitter then
+		emitter:Destroy()
+	end
+	if fitting.points.beam then
+		local from = Instance.new("Attachment")
+		from.Name = "Laser"
+		from.Position = AIM * fitting.points.beam
+		from.Parent = held.handle
+	end
 end
 
 -- Puts a weapon in the hands and draws it, or shows nothing. `config`: the weapon's numbers as it is fitted
@@ -1181,6 +1296,13 @@ function Viewmodel.update(self: any, pose: Pose)
 	self.magazineOut = out
 end
 
+-- Where the beam of a laser on the weapon in hand starts, if it carries one and is being drawn.
+function Viewmodel.emitter(self: any): Attachment?
+	local held: Held? = self.current
+	local emitter = if held and not self.veiled then held.handle:FindFirstChild("Laser") else nil
+	return if emitter and emitter:IsA("Attachment") then emitter else nil
+end
+
 -- Where a socket of the weapon in hand is in the world (the muzzle, for a tracer).
 function Viewmodel.socket(self: any, name: string): Vector3?
 	local held: Held? = self.current
@@ -1288,9 +1410,18 @@ return {
 	-- The sockets, in the order the loadout shows them.
 	Sockets = { "muzzle", "optic", "underbarrel", "side", "magazine" },
 
-	-- The dot a laser puts where the weapon points, which only its holder sees: its colour, how big it is for
-	-- each stud it is away and at least, and how far it carries.
-	Laser = { Color = Color3.fromRGB(255, 72, 64), PerStud = 0.004, Least = 0.03, Range = 300 },
+	-- A laser's light (Client/LaserSight): a dot where the weapon points and a thin beam to it from the laser,
+	-- which everyone sees. The dot: how big it is for each stud it is from the eye, and at least; Range is how
+	-- far the light carries. The beam: how wide it is at the laser, how wide at its far end for each stud that
+	-- end is from the eye, how see-through it is near and far, and Glow, how much it adds its light to what
+	-- is behind it instead of covering it (all the way, it washes out to white over the town's bright walls).
+	Laser = {
+		Color = Color3.fromRGB(255, 40, 32),
+		PerStud = 0.004,
+		Least = 0.03,
+		Range = 300,
+		Beam = { Width = 0.016, PerStud = 0.0018, Near = 0.05, Far = 0.4, Glow = 0.3 },
+	},
 
 	Attachments = {
 		-- Nobody else sees where the shots come from. The price is damage at long range: past 150 studs the
@@ -1369,7 +1500,7 @@ return {
 		-- A box on the weapon's left side, the side its holder sees.
 		laser = {
 			Title = "Laser",
-			About = "Shots from the hip stray less on the move.",
+			About = "Shots from the hip stray less on the move. Its beam shows.",
 			Socket = "side",
 			Model = "att_laser",
 			Fits = {
@@ -5650,6 +5781,14 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	for _, each in fitting.adds do
 		add(each.template, each.at, each.size)
 	end
+	-- Where a laser's beam leaves the weapon, looking along the barrel, for clients to draw it from
+	-- (Client/LaserSight).
+	if fitting.points.beam then
+		local emitter = Instance.new("Attachment")
+		emitter.Name = "Laser"
+		emitter.Position = AIM * fitting.points.beam
+		emitter.Parent = handle
+	end
 	return tool
 end
 
@@ -6067,6 +6206,7 @@ local CombatConfig = require(Shared:WaitForChild("Combat"):WaitForChild("CombatC
 local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"))
 local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
+local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
 
@@ -6115,18 +6255,9 @@ local slots: { [string]: Slot } = {}
 local current: string? = nil
 local weapon: any = nil -- the numbers of the weapon in hand, as it is fitted
 
--- The dot of a laser on the weapon in hand.
+-- The light of a laser on the weapon in hand.
 local Laser = AttachmentConfig.Laser
-local laserDot = Instance.new("Part")
-laserDot.Name = "LaserDot"
-laserDot.Shape = Enum.PartType.Ball
-laserDot.Material = Enum.Material.Neon
-laserDot.Color = Laser.Color
-laserDot.Anchored = true
-laserDot.CanCollide = false
-laserDot.CanQuery = false
-laserDot.CanTouch = false
-laserDot.CastShadow = false
+local laser = LaserSight.new(effects)
 
 local triggerHeld, triggerFresh = false, false -- fresh: pulled since the last shot
 local aimHeld, walkHeld = false, false
@@ -6342,6 +6473,7 @@ RunService:BindToRenderStep("DesertFpsBareAim", Enum.RenderPriority.Camera.Value
 end)
 
 RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value + 1, function(dt: number)
+	LaserSight.shineOthers(effects, player)
 	local now = os.clock()
 	local character, humanoid, root = body()
 	if not (character and humanoid and root and current) then
@@ -6413,15 +6545,14 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 		sideways = root.CFrame.RightVector:Dot(velocity) / weapon.RunSpeed,
 	})
 
-	-- A laser shows where the weapon points, once it is up.
-	local lit = if weapon.View.Laser and ready()
-		then workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Laser.Range, sightline(character))
-		else nil
-	if lit then
-		laserDot.Size = Vector3.one * math.max(Laser.Least, lit.Distance * Laser.PerStud)
-		laserDot.Position = lit.Position
+	-- A laser shines at where the shot will go, once the weapon is up: from the eye that is straight ahead.
+	if weapon.View.Laser and ready() then
+		local eye, ahead = camera.CFrame.Position, camera.CFrame.LookVector
+		local lit = workspace:Raycast(eye, ahead * Laser.Range, sightline(character))
+		laser:shine(if lit then lit.Position else eye + ahead * Laser.Range, lit ~= nil, viewmodel:emitter())
+	else
+		laser:shine(nil)
 	end
-	laserDot.Parent = if lit then effects else nil
 
 	hud:setVitals(humanoid.Health, (character:GetAttribute("Armor") :: number?) or 0)
 	hud:setReload(if reloadFrom then (now - reloadFrom) / weapon.ReloadTime else nil)
@@ -6551,7 +6682,7 @@ local function onCharacter(character: Model)
 		viewmodel:show(nil)
 		hud:setScope(0)
 		menu:hide()
-		laserDot.Parent = nil
+		laser:shine(nil)
 		hud:setCrosshair(false)
 		hud:setReload(nil)
 	end)

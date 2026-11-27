@@ -19,6 +19,7 @@ local CombatConfig = require(Shared:WaitForChild("Combat"):WaitForChild("CombatC
 local Viewmodel = require(Shared:WaitForChild("Client"):WaitForChild("Viewmodel"))
 local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
+local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
 
@@ -67,18 +68,9 @@ local slots: { [string]: Slot } = {}
 local current: string? = nil
 local weapon: any = nil -- the numbers of the weapon in hand, as it is fitted
 
--- The dot of a laser on the weapon in hand.
+-- The light of a laser on the weapon in hand.
 local Laser = AttachmentConfig.Laser
-local laserDot = Instance.new("Part")
-laserDot.Name = "LaserDot"
-laserDot.Shape = Enum.PartType.Ball
-laserDot.Material = Enum.Material.Neon
-laserDot.Color = Laser.Color
-laserDot.Anchored = true
-laserDot.CanCollide = false
-laserDot.CanQuery = false
-laserDot.CanTouch = false
-laserDot.CastShadow = false
+local laser = LaserSight.new(effects)
 
 local triggerHeld, triggerFresh = false, false -- fresh: pulled since the last shot
 local aimHeld, walkHeld = false, false
@@ -294,6 +286,7 @@ RunService:BindToRenderStep("DesertFpsBareAim", Enum.RenderPriority.Camera.Value
 end)
 
 RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value + 1, function(dt: number)
+	LaserSight.shineOthers(effects, player)
 	local now = os.clock()
 	local character, humanoid, root = body()
 	if not (character and humanoid and root and current) then
@@ -365,15 +358,14 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 		sideways = root.CFrame.RightVector:Dot(velocity) / weapon.RunSpeed,
 	})
 
-	-- A laser shows where the weapon points, once it is up.
-	local lit = if weapon.View.Laser and ready()
-		then workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Laser.Range, sightline(character))
-		else nil
-	if lit then
-		laserDot.Size = Vector3.one * math.max(Laser.Least, lit.Distance * Laser.PerStud)
-		laserDot.Position = lit.Position
+	-- A laser shines at where the shot will go, once the weapon is up: from the eye that is straight ahead.
+	if weapon.View.Laser and ready() then
+		local eye, ahead = camera.CFrame.Position, camera.CFrame.LookVector
+		local lit = workspace:Raycast(eye, ahead * Laser.Range, sightline(character))
+		laser:shine(if lit then lit.Position else eye + ahead * Laser.Range, lit ~= nil, viewmodel:emitter())
+	else
+		laser:shine(nil)
 	end
-	laserDot.Parent = if lit then effects else nil
 
 	hud:setVitals(humanoid.Health, (character:GetAttribute("Armor") :: number?) or 0)
 	hud:setReload(if reloadFrom then (now - reloadFrom) / weapon.ReloadTime else nil)
@@ -503,7 +495,7 @@ local function onCharacter(character: Model)
 		viewmodel:show(nil)
 		hud:setScope(0)
 		menu:hide()
-		laserDot.Parent = nil
+		laser:shine(nil)
 		hud:setCrosshair(false)
 		hud:setReload(nil)
 	end)
