@@ -80,4 +80,14 @@ return {
 	-- Collision groups. Rubble does not shove players around, and shots pass through it.
 	DebrisGroup = "Debris",
 	CharacterGroup = "Characters",
+	-- Whether rubble piles up on other rubble. It always lands on the ground and on what still stands.
+	-- Off: piling up is most of the collision work when a house comes down (the Watchtower: 34,000 contacts
+	-- and a 114 ms frame with it on, 7,800 and 53 ms with it off; build/tests/measure_collapse.luau).
+	RubbleStacks = false,
+	-- The most shards that lie about as rubble at once. A piece that crumbles while that many are down drops
+	-- through the ground instead, in one piece if it was still whole, and is gone after LightRubbleSeconds.
+	-- The largest building is 263 pieces, 1,765 shards: all of them as rubble at once stopped the server
+	-- for 0.7 s.
+	RubbleBudget = 300,
+	LightRubbleSeconds = 1.5,
 }

@@ -26,6 +26,8 @@ type ShardData = { id: string, center: { number }, size: { number }, health: num
 type PieceData = { piece: string, mode: string, health: number?, chunks: { ShardData } }
 
 local random = Random.new()
+-- How many shards lie about as rubble right now (Config.RubbleBudget).
+local rubble = 0
 
 for _, group in { Config.DebrisGroup, Config.CharacterGroup } do
 	if not PhysicsService:IsCollisionGroupRegistered(group) then
@@ -33,6 +35,7 @@ for _, group in { Config.DebrisGroup, Config.CharacterGroup } do
 	end
 end
 PhysicsService:CollisionGroupSetCollidable(Config.DebrisGroup, Config.CharacterGroup, false)
+PhysicsService:CollisionGroupSetCollidable(Config.DebrisGroup, Config.DebrisGroup, Config.RubbleStacks)
 
 local function pieceData(piece: string): PieceData
 	local data = BreakData[piece]
@@ -144,8 +147,8 @@ local function crack(model: Model, data: PieceData, stage: number)
 	model:SetAttribute("Cracks", stage)
 end
 
--- Lets a shard go: it is thrown, tumbles, lies as rubble, fades and is removed.
-local function fall(part: BasePart, velocity: Vector3)
+-- Lets a shard go: it is thrown, tumbles, lies as rubble, fades and is removed `lifetime` seconds on.
+local function fall(part: BasePart, velocity: Vector3, lifetime: number)
 	if not part.Parent then
 		return
 	end
@@ -155,14 +158,8 @@ local function fall(part: BasePart, velocity: Vector3)
 	end
 	part.AssemblyLinearVelocity = velocity
 	part.AssemblyAngularVelocity = random:NextUnitVector() * Config.Tumble
-	local fade = TweenInfo.new(
-		Config.DebrisFade,
-		Enum.EasingStyle.Linear,
-		Enum.EasingDirection.Out,
-		0,
-		false,
-		Config.DebrisLifetime - Config.DebrisFade
-	)
+	local fading = math.min(Config.DebrisFade, lifetime)
+	local fade = TweenInfo.new(fading, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, lifetime - fading)
 	TweenService:Create(part, fade, { Transparency = 1 }):Play()
 end
 
@@ -181,21 +178,40 @@ local function crumble(model: Model, data: PieceData, point: Vector3, push: Vect
 			unseen:Destroy()
 		end
 	end
-	for _, part in shardsOf(model, data):GetChildren() do
+	-- Past the budget the piece lands on nothing and is gone sooner. If it was still whole it goes down in
+	-- one piece: its shards are never made.
+	local count = #data.chunks
+	local light = rubble + count > Config.RubbleBudget
+	local lifetime = if light then Config.LightRubbleSeconds else Config.DebrisLifetime
+	local whole = model:FindFirstChild("Whole")
+	local parts = if light and whole and not model:FindFirstChild("Shards")
+		then { whole }
+		else shardsOf(model, data):GetChildren()
+	if not light then
+		rubble += count
+		task.delay(how.Stagger + lifetime, function()
+			rubble -= count
+		end)
+	end
+	for _, part in parts do
 		if part:IsA("BasePart") then
 			part.CollisionGroup = Config.DebrisGroup
 			part.CanQuery = false
 			part.CanTouch = false
+			if light then
+				part.CanCollide = false
+				part.CastShadow = false
+			end
 
 			local near = 1 - math.clamp((part.Position - point).Magnitude / reach, 0, 1)
 			local away, outward = part.Position - point, part.Position - middle
 			local velocity = (push + (if away.Magnitude > 1e-3 then away.Unit else Vector3.zero) * blast) * near
 				+ (if outward.Magnitude > 1e-3 then outward.Unit else Vector3.zero) * how.Outward
 				+ random:NextUnitVector() * Vector3.new(1, 0, 1) * how.Scatter
-			task.delay((1 - near) * how.Stagger, fall, part, velocity)
+			task.delay((1 - near) * how.Stagger, fall, part, velocity, lifetime)
 		end
 	end
-	Debris:AddItem(model, how.Stagger + Config.DebrisLifetime)
+	Debris:AddItem(model, how.Stagger + lifetime)
 	for _, heard in Breakable.Crumbled do
 		task.spawn(heard, model)
 	end

@@ -25,6 +25,12 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 
 `tests/test_collapse.luau` runs on the server during a playtest, with `DevConfig.TestHooks` on. It shoots out the ground walls of one end of the Captain's House and all of the Watchtower's and returns how many pieces are left standing (49 of 72, and 2 of 68).
 
+`tests/measure_views.luau` runs on the client during a playtest. It stands the player at seven viewpoints and returns draw calls, triangles on screen, drawing time and frames a second for each. Set the graphics level by hand first.
+
+`tests/measure_collapse.luau` runs on the server during a playtest, with `DevConfig.TestHooks` on. It brings a whole building down at once and returns the server's frame times, the physics step, and how many pieces moved and touched.
+
+The old town (`Workspace.Map`) and the kit showcase were deleted from the place on 2026-11-27. `break_wall.luau`, `climb_stairs.luau`, `time_all_routes.luau` and `time_market_routes.luau` need them: run steps 5 and 6 first, or import `backups/old_town_and_showcase.rbxm` into Workspace.
+
 `tests/break_wall.luau` runs on the server during a playtest. It damages a wall through its crack stages until it crumbles, bursts a crate and sets off a blast, and returns a list of checks that should all be `ok = true`.
 
 ## Uploading the kit

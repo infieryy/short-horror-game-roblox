@@ -39,8 +39,14 @@ if DevConfig.TestHooks then
 end
 
 -- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by
--- one the first time it cracks.
+-- one the first time it cracks. The low-detail meshes are not placed anywhere yet, so they are left out.
 local preload = DesertFps.Meshes:Clone()
+for _, piece in preload:GetChildren() do
+	local low = piece:FindFirstChild("Low")
+	if low then
+		low:Destroy()
+	end
+end
 preload.Name = "MeshPreload"
 preload.Parent = ReplicatedStorage:WaitForChild("DesertFps")
 

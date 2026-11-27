@@ -74,8 +74,14 @@ if DevConfig.TestHooks then
 end
 
 -- Clients load every kit mesh up front (Preload.client.luau). Otherwise the shards of a piece pop in one by
--- one the first time it cracks.
+-- one the first time it cracks. The low-detail meshes are not placed anywhere yet, so they are left out.
 local preload = DesertFps.Meshes:Clone()
+for _, piece in preload:GetChildren() do
+	local low = piece:FindFirstChild("Low")
+	if low then
+		low:Destroy()
+	end
+end
 preload.Name = "MeshPreload"
 preload.Parent = ReplicatedStorage:WaitForChild("DesertFps")
 
@@ -271,6 +277,8 @@ return HttpService:JSONDecode([=[
 -- Every mesh gets the piece's texture as a SurfaceAppearance colour map, and an "Offset" attribute:
 -- where its centre sits relative to the piece origin. It stops if a mesh is not where its data says.
 
+local AssetService = game:GetService("AssetService")
+
 local DesertFps = script.Parent.Parent
 local AssetIds = require(script.Parent.AssetIds)
 local BreakData = require(script.Parent.BreakData)
@@ -355,12 +363,24 @@ local function import(piece: string, ids: { Model: number, Texture: number }, me
 	group.Parent = folder
 
 	local worst = 0
-	for _, part in model:GetDescendants() do
-		if not part:IsA("MeshPart") then
+	for _, source in model:GetDescendants() do
+		if not source:IsA("MeshPart") then
 			continue
 		end
-		local offset = pivot:ToObjectSpace(part.CFrame)
-		assert(offset.Rotation:FuzzyEq(CFrame.identity, 1e-4), `{part.Name} arrived turned`)
+		local offset = pivot:ToObjectSpace(source.CFrame)
+		assert(offset.Rotation:FuzzyEq(CFrame.identity, 1e-4), `{source.Name} arrived turned`)
+
+		local whole = source.Name == piece or source.Name == piece .. "_low"
+		local fidelity = if fixed
+			then Enum.CollisionFidelity.Box
+			elseif whole then FIDELITY[piece] or Enum.CollisionFidelity.Default
+			else HULL
+		-- The collision shape has to be asked for as the mesh part is made. Set on a part afterwards, the
+		-- property changes and the shape does not, and every clone of the part is back at the default: all
+		-- 539 kinds of rubble then collide as sets of blocks instead of one hull each.
+		local part = AssetService:CreateMeshPartAsync(source.MeshId, { CollisionFidelity = fidelity })
+		part.Size = source.Size
+		part.Material, part.Color, part.DoubleSided = source.Material, source.Color, source.DoubleSided
 		part:SetAttribute("Offset", offset.Position)
 		part.Anchored = true
 		part.CFrame = CFrame.new(offset.Position)
@@ -369,16 +389,14 @@ local function import(piece: string, ids: { Model: number, Texture: number }, me
 		appearance.ColorMap = `rbxassetid://{ids.Texture}`
 		appearance.Parent = part
 
-		if part.Name == piece or part.Name == piece .. "_low" then
-			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else FIDELITY[piece] or Enum.CollisionFidelity.Default
+		if whole then
 			part.CanCollide = not WALK_THROUGH[piece]
-			part.Name = if part.Name == piece then "Whole" else "Low"
+			part.Name = if source.Name == piece then "Whole" else "Low"
 			part.Parent = folder
 		else
-			local id = part.Name:sub(#piece + 2)
-			assert(centres[id], `{part.Name} is not in the data for "{piece}"`)
+			local id = source.Name:sub(#piece + 2)
+			assert(centres[id], `{source.Name} is not in the data for "{piece}"`)
 			worst = math.max(worst, (offset.Position - centres[id]).Magnitude)
-			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else HULL
 			part.Name = id
 			part.Parent = group
 		end
@@ -697,6 +715,8 @@ type ShardData = { id: string, center: { number }, size: { number }, health: num
 type PieceData = { piece: string, mode: string, health: number?, chunks: { ShardData } }
 
 local random = Random.new()
+-- How many shards lie about as rubble right now (Config.RubbleBudget).
+local rubble = 0
 
 for _, group in { Config.DebrisGroup, Config.CharacterGroup } do
 	if not PhysicsService:IsCollisionGroupRegistered(group) then
@@ -704,6 +724,7 @@ for _, group in { Config.DebrisGroup, Config.CharacterGroup } do
 	end
 end
 PhysicsService:CollisionGroupSetCollidable(Config.DebrisGroup, Config.CharacterGroup, false)
+PhysicsService:CollisionGroupSetCollidable(Config.DebrisGroup, Config.DebrisGroup, Config.RubbleStacks)
 
 local function pieceData(piece: string): PieceData
 	local data = BreakData[piece]
@@ -815,8 +836,8 @@ local function crack(model: Model, data: PieceData, stage: number)
 	model:SetAttribute("Cracks", stage)
 end
 
--- Lets a shard go: it is thrown, tumbles, lies as rubble, fades and is removed.
-local function fall(part: BasePart, velocity: Vector3)
+-- Lets a shard go: it is thrown, tumbles, lies as rubble, fades and is removed `lifetime` seconds on.
+local function fall(part: BasePart, velocity: Vector3, lifetime: number)
 	if not part.Parent then
 		return
 	end
@@ -826,14 +847,8 @@ local function fall(part: BasePart, velocity: Vector3)
 	end
 	part.AssemblyLinearVelocity = velocity
 	part.AssemblyAngularVelocity = random:NextUnitVector() * Config.Tumble
-	local fade = TweenInfo.new(
-		Config.DebrisFade,
-		Enum.EasingStyle.Linear,
-		Enum.EasingDirection.Out,
-		0,
-		false,
-		Config.DebrisLifetime - Config.DebrisFade
-	)
+	local fading = math.min(Config.DebrisFade, lifetime)
+	local fade = TweenInfo.new(fading, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, lifetime - fading)
 	TweenService:Create(part, fade, { Transparency = 1 }):Play()
 end
 
@@ -852,21 +867,40 @@ local function crumble(model: Model, data: PieceData, point: Vector3, push: Vect
 			unseen:Destroy()
 		end
 	end
-	for _, part in shardsOf(model, data):GetChildren() do
+	-- Past the budget the piece lands on nothing and is gone sooner. If it was still whole it goes down in
+	-- one piece: its shards are never made.
+	local count = #data.chunks
+	local light = rubble + count > Config.RubbleBudget
+	local lifetime = if light then Config.LightRubbleSeconds else Config.DebrisLifetime
+	local whole = model:FindFirstChild("Whole")
+	local parts = if light and whole and not model:FindFirstChild("Shards")
+		then { whole }
+		else shardsOf(model, data):GetChildren()
+	if not light then
+		rubble += count
+		task.delay(how.Stagger + lifetime, function()
+			rubble -= count
+		end)
+	end
+	for _, part in parts do
 		if part:IsA("BasePart") then
 			part.CollisionGroup = Config.DebrisGroup
 			part.CanQuery = false
 			part.CanTouch = false
+			if light then
+				part.CanCollide = false
+				part.CastShadow = false
+			end
 
 			local near = 1 - math.clamp((part.Position - point).Magnitude / reach, 0, 1)
 			local away, outward = part.Position - point, part.Position - middle
 			local velocity = (push + (if away.Magnitude > 1e-3 then away.Unit else Vector3.zero) * blast) * near
 				+ (if outward.Magnitude > 1e-3 then outward.Unit else Vector3.zero) * how.Outward
 				+ random:NextUnitVector() * Vector3.new(1, 0, 1) * how.Scatter
-			task.delay((1 - near) * how.Stagger, fall, part, velocity)
+			task.delay((1 - near) * how.Stagger, fall, part, velocity, lifetime)
 		end
 	end
-	Debris:AddItem(model, how.Stagger + Config.DebrisLifetime)
+	Debris:AddItem(model, how.Stagger + lifetime)
 	for _, heard in Breakable.Crumbled do
 		task.spawn(heard, model)
 	end
@@ -1084,6 +1118,16 @@ return {
 	-- Collision groups. Rubble does not shove players around, and shots pass through it.
 	DebrisGroup = "Debris",
 	CharacterGroup = "Characters",
+	-- Whether rubble piles up on other rubble. It always lands on the ground and on what still stands.
+	-- Off: piling up is most of the collision work when a house comes down (the Watchtower: 34,000 contacts
+	-- and a 114 ms frame with it on, 7,800 and 53 ms with it off; build/tests/measure_collapse.luau).
+	RubbleStacks = false,
+	-- The most shards that lie about as rubble at once. A piece that crumbles while that many are down drops
+	-- through the ground instead, in one piece if it was still whole, and is gone after LightRubbleSeconds.
+	-- The largest building is 263 pieces, 1,765 shards: all of them as rubble at once stopped the server
+	-- for 0.7 s.
+	RubbleBudget = 300,
+	LightRubbleSeconds = 1.5,
 }
 ]=] },
 	{ path = { "ServerStorage", "DesertFps", "Destruction", "Structure" }, class = "ModuleScript", source = [=[

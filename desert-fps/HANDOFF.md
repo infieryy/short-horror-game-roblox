@@ -366,10 +366,10 @@ The owner, going to bed: "finish this entire map structure by structure... Do it
 - **Goods in the street keep off the cells the test bots walk through** unless they are shallow (pots of plants, baskets, vases). 67 street cells have goods.
 - **The gate** is in the south wall at column 8. The plan only says "the gatehouse".
 - **`DevConfig.TestHooks`** (on): a `DevDamage` function a test script can call. Turn it off with the other dev switches for the real game.
-- **The old town (`Workspace.Map`, about 57,000 instances) and `Workspace.KitShowcase` were left alone.** Deleting them was never asked for. They are a long way east of the new town and cost memory and load time.
+- **The old town (`Workspace.Map`, about 57,000 instances) and `Workspace.KitShowcase` were left alone.** Deleting them was never asked for. (The owner said yes the next morning; they are gone. See "The optimisation test".)
 
 **Not done, not verified.**
-- **Frame rate is still not measured.** The town is about 1,080,000 triangles; the estimate in `plan/PLAN.md` was 700,000. Houses are 568,000 of it and the street dressing 135,000. The heaviest pieces by count are barrels, plain and shuttered walls, bougainvillea, divans and trees.
+- **Frame rate is still not measured.** (It is now: see "The optimisation test".) The town is about 1,080,000 triangles; the estimate in `plan/PLAN.md` was 700,000. Houses are 568,000 of it and the street dressing 135,000. The heaviest pieces by count are barrels, plain and shuttered walls, bougainvillea, divans and trees.
 - Nothing was judged by a person. Every picture here was looked at, but the owner has not seen any of it.
 - Rubble does not hurt anyone, and a player standing on a roof that falls just drops.
 - All roofs but six cannot be reached; what is on them is to be looked at.
@@ -440,6 +440,76 @@ Notes for the next session:
 - Shade in Roblox is lavender (look rule). In the Blender render it is warmer, because Blender bounces light off the orange ground.
 - A few dark pin-pricks show along shard seams once a wall is in shards. Not investigated.
 - Clients preload every kit mesh at start (`Preload.client.luau`). Without it, the shards of a piece appear one by one over about a second the first time it cracks.
+
+### The optimisation test (2026-11-27)
+
+The owner: "Can we test optimization on this map", with a list of what matters more than the triangle total (reused meshes, draw calls and materials, collisions, streaming) and "see what applies; due to our method some things may not apply here". The old town and the kit showcase were deleted first, on the owner's yes.
+
+**The outcome.** Standing still, the town is cheap: it holds 60 frames a second from every viewpoint at the highest graphics level on this PC's integrated graphics. What was slow was a building coming down, and that is fixed for a house and four times better for the largest building.
+
+**Measured standing still** (`build/tests/measure_views.luau`; graphics level 21, a 1096 x 385 window, Intel UHD P630; Studio caps at 60):
+
+| Viewpoint | Draw calls | Triangles on screen | Frames a second |
+|---|---|---|---|
+| Spawn, looking south to the market | 86 | 393,000 | 60 |
+| Market middle, looking west | 73 | 276,000 | 60 |
+| Watchtower roof, the whole town in view | 93 | 703,000 | 60 |
+| South-east street, looking north-west | 86 | 487,000 | 60 |
+| Gate street, looking north | 91 | 681,000 | 58 |
+
+- The processor spends 5 to 9 ms of each 16.7 ms frame on drawing. The game's own scripts are 0.1% of script time.
+- From the watchtower roof the graphics chip is about 93% busy at level 21 and 58% at level 1. So this chip is at its limit there at the top level, in a small window.
+- The triangle count is the same at every graphics level. Roblox only swaps in lighter meshes beyond 250 studs, and the town is 320 studs across.
+
+**The owner's four points, checked.**
+- **Reused meshes:** good as it is. 5,454 mesh parts are 70 different meshes and 80 textures.
+- **Draw calls and materials:** good as it is. 65 to 93 draw calls for anything in view (211 at graphics level 10). One material, no transparency.
+- **Collisions:** this is where the cost was. See below.
+- **Streaming:** on already (192 / 384 studs). The whole town fits inside that, so everything stays loaded, which is right for a duel map this size: with a shorter reach, far walls would vanish from the roofs.
+
+**What was wrong with collisions.**
+- `KitImporter` set each mesh's collision shape after the mesh part existed. The property changed, the shape did not, and every clone went back to the default. So every placed piece and all 539 kinds of rubble collided as the default set of blocks. Now the shape is asked for as the part is made (`AssetService:CreateMeshPartAsync`), and it sticks: in the town, 616 pieces are precise, 2,109 are boxes, 4 are hulls and 2,725 are default; every shard is a hull.
+- On its own that changed little. The cost of a collapse was rubble colliding with rubble.
+
+**What changed for a collapse** (`DestructionConfig`):
+- `RubbleStacks = false`: rubble lands on the ground and on what stands, and passes through other rubble.
+- `RubbleBudget = 300`, `LightRubbleSeconds = 1.5`: with 300 shards already down, the next piece to crumble drops through the ground in one piece and is gone in a second and a half.
+
+| Brought down at once (`build/tests/measure_collapse.luau`) | Before | After |
+|---|---|---|
+| Watchtower, 68 pieces: worst server frame | 169 ms | 34 ms |
+| Watchtower: server frames over 33 ms | 69 | 1 |
+| Watchtower: contacts at the peak | 35,610 | 4,651 |
+| Watchtower: worst frame on the client | 162 ms | 37 ms |
+| Courtyard House, 263 pieces: worst server frame | 689 ms | 119 ms |
+| Courtyard House: pieces moving at the peak | 1,765 | 587 |
+
+The Courtyard House "before" is with hull shards and no stacking but no budget; it was not measured in the first state. Pictures: `assets/studio/perf-watchtower-roof-view.jpg`, `assets/studio/perf-courtyard-house-collapse.jpg`.
+
+**Also changed.**
+- Clients no longer preload the 95 low-detail meshes, which are not placed anywhere (`Main.server.luau`).
+- `Workspace.Map` (the old town) and `Workspace.KitShowcase` are gone: 57,888 instances. A copy is in `backups/old_town_and_showcase.rbxm`, and `build/05_kit_showcase.luau` and `06_build_map.luau` rebuild them. Four tests need them: `break_wall.luau`, `climb_stairs.luau`, `time_all_routes.luau`, `time_market_routes.luau`.
+- The kit was imported again (4 minutes 51 seconds for 779 meshes) and the town rebuilt from it. Backup: `backups/town_optimized_with_kit.rbxm`. Place version 56.
+
+**Checked after the change.** The test bots pass 35 of 35 routes; two run more than 10% slower than planned (worst 14%), where it was four before. The Watchtower still comes down to 2 pieces of 68.
+
+**Decisions made here.**
+- Rubble not piling up is a change to how a collapse looks: the rubble spreads flatter. It was judged on two screenshots. One line in `DestructionConfig` turns it back.
+- The budget of 300 was picked by measuring, on this PC, which runs the server, the client and Studio together.
+
+**Not done, not verified.**
+- **Not measured on a phone, on a normal graphics card, or at full window size.** The graphics chip's own time per frame cannot be read here; "percent busy" is a rough guide.
+- The collapse numbers are from Studio, where the server and the client share one processor. A live server has its own.
+- The Courtyard House still gives a 119 ms frame when all 48 of its ground walls go in the same instant. No weapon does that yet.
+- 700,000 triangles from a roof at the lowest graphics level is untested on a weak phone. The low-detail meshes every piece has (35% fewer triangles for the whole town) are still not used.
+- The Captain's House test and `walk_teahouse.luau` were not run again.
+
+Notes for the next session:
+- Set a MeshPart's collision shape only through `CreateMeshPartAsync`. To check a shape, clone the part and read the clone, or cast rays at it: the property on the original can lie. At run time it always reads as Default.
+- Studio's frame rate here is capped at 60 and sometimes drops to 15 for no reason the game causes. Before trusting a timing, set the graphics level by hand (Automatic falls to level 1) and read the frame time with the camera on the sky.
+- Run `time_town_routes.luau` once per playtest. A second run in the same playtest comes out about 30% slow on every route.
+- A Studio plugin (Elttob Reclass) costs about 9 ms of every frame in a playtest. It is not part of the game.
+- After a collapse the dev rebuild sometimes takes two rounds: a few pieces stand up before what holds them and fall again.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

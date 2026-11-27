@@ -7,6 +7,8 @@
 -- Every mesh gets the piece's texture as a SurfaceAppearance colour map, and an "Offset" attribute:
 -- where its centre sits relative to the piece origin. It stops if a mesh is not where its data says.
 
+local AssetService = game:GetService("AssetService")
+
 local DesertFps = script.Parent.Parent
 local AssetIds = require(script.Parent.AssetIds)
 local BreakData = require(script.Parent.BreakData)
@@ -91,12 +93,24 @@ local function import(piece: string, ids: { Model: number, Texture: number }, me
 	group.Parent = folder
 
 	local worst = 0
-	for _, part in model:GetDescendants() do
-		if not part:IsA("MeshPart") then
+	for _, source in model:GetDescendants() do
+		if not source:IsA("MeshPart") then
 			continue
 		end
-		local offset = pivot:ToObjectSpace(part.CFrame)
-		assert(offset.Rotation:FuzzyEq(CFrame.identity, 1e-4), `{part.Name} arrived turned`)
+		local offset = pivot:ToObjectSpace(source.CFrame)
+		assert(offset.Rotation:FuzzyEq(CFrame.identity, 1e-4), `{source.Name} arrived turned`)
+
+		local whole = source.Name == piece or source.Name == piece .. "_low"
+		local fidelity = if fixed
+			then Enum.CollisionFidelity.Box
+			elseif whole then FIDELITY[piece] or Enum.CollisionFidelity.Default
+			else HULL
+		-- The collision shape has to be asked for as the mesh part is made. Set on a part afterwards, the
+		-- property changes and the shape does not, and every clone of the part is back at the default: all
+		-- 539 kinds of rubble then collide as sets of blocks instead of one hull each.
+		local part = AssetService:CreateMeshPartAsync(source.MeshId, { CollisionFidelity = fidelity })
+		part.Size = source.Size
+		part.Material, part.Color, part.DoubleSided = source.Material, source.Color, source.DoubleSided
 		part:SetAttribute("Offset", offset.Position)
 		part.Anchored = true
 		part.CFrame = CFrame.new(offset.Position)
@@ -105,16 +119,14 @@ local function import(piece: string, ids: { Model: number, Texture: number }, me
 		appearance.ColorMap = `rbxassetid://{ids.Texture}`
 		appearance.Parent = part
 
-		if part.Name == piece or part.Name == piece .. "_low" then
-			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else FIDELITY[piece] or Enum.CollisionFidelity.Default
+		if whole then
 			part.CanCollide = not WALK_THROUGH[piece]
-			part.Name = if part.Name == piece then "Whole" else "Low"
+			part.Name = if source.Name == piece then "Whole" else "Low"
 			part.Parent = folder
 		else
-			local id = part.Name:sub(#piece + 2)
-			assert(centres[id], `{part.Name} is not in the data for "{piece}"`)
+			local id = source.Name:sub(#piece + 2)
+			assert(centres[id], `{source.Name} is not in the data for "{piece}"`)
 			worst = math.max(worst, (offset.Position - centres[id]).Magnitude)
-			part.CollisionFidelity = if fixed then Enum.CollisionFidelity.Box else HULL
 			part.Name = id
 			part.Parent = group
 		end

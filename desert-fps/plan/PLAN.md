@@ -101,10 +101,10 @@ Budgets, from what the tea house costs (measured in a playtest with nothing else
 - **Landmark building** (5 of them): about 1,500 triangles per plan cell, up to 12 lamps that cast shadows. The Tea House (16 cells, two stories) is 72,000; the Courtyard House (63 cells) is 116,000 with its roof dressed; the Dye Works (72 cells with its yard) is 86,000. The first budget here said 75,000 for any landmark; that was set from the Tea House alone and does not fit a building four times its footprint.
 - **Small house** (16 of them): up to 15,000 triangles, 2 lamps that cast shadows.
 - **Whole town:** the estimate was about 700,000 triangles and 6,000 pieces. Built, it is 4,071 pieces (5,246 with the paving and sand) and about 1,080,000 triangles: 44 houses 568,000, the six buildings 345,000, street dressing 135,000, the wall 34,000. A house averages 13,000. The source video's town is about 2,000,000.
-- **Any view in a round:** aim for under 150,000 triangles.
+- **Any view in a round:** the aim was under 150,000 triangles. Built, a street view is 276,000 to 490,000 and the whole town from the watchtower roof is 703,000, in 65 to 93 draw calls (measured 2026-11-27).
 - **Lamps:** hanging lanterns cast shadows, wall lanterns do not. Rugs, banners, signs, tables, shelves and small pots cast no shadows (`Buildings/BuildingConfig.luau`).
 
-**Frame rate itself is not measured.** This Studio session draws 16 frames a second whether the whole tea house or an empty sky is on screen, so it says nothing. It needs a run on a phone and on an ordinary PC.
+**Frame rate, measured 2026-11-27 on this PC's integrated graphics (Intel UHD P630) in a 1096 x 385 window:** 60 frames a second from every viewpoint at the highest graphics level, with the graphics chip about 93% busy on the widest view. It still needs a run on a phone and on an ordinary PC at full window size. The numbers and what a collapse costs are in `HANDOFF.md`, "The optimisation test".
 
 ### Not done
 - The whole town is built. Nothing in it has been seen by the owner yet.
