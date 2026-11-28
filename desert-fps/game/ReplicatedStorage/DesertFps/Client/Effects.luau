@@ -27,7 +27,9 @@ type Streak = {
 	reach: number?,
 	age: number,
 }
-type Flash = { part: BasePart, spikes: { { beam: Beam, tip: Attachment } }, core: BasePart, light: PointLight, shown: number }
+-- A spike of a flash is drawn twice: wide in the flash's edge colour, and narrower and hot inside that, so
+-- that it keeps its colour against a sunlit wall instead of washing out to white.
+type Flash = { part: BasePart, spikes: { { beam: Beam, inner: Beam, tip: Attachment } }, core: BasePart, light: PointLight, shown: number }
 
 -- The most spikes a flash has, the forward one apart.
 local SPIKES = 6
@@ -80,6 +82,8 @@ end
 
 -- Sends a streak off from `from` at `velocity`. Its head is `hot` and `wide`, its tail `cool` and a point;
 -- `clear` makes the tail fade to nothing as well (a tracer), where a spark or a shard is solid to its tip.
+-- `glow` is how much it adds its light to what is behind it, 0 to 1: something hot glows; something with a
+-- colour of its own must not, or a sunlit wall behind it washes the colour out to white.
 local function streak(
 	from: Vector3,
 	velocity: Vector3,
@@ -90,6 +94,7 @@ local function streak(
 	hot: Color3,
 	cool: Color3,
 	clear: boolean,
+	glow: number,
 	reach: number?
 )
 	local anchor = host :: BasePart
@@ -106,8 +111,13 @@ local function streak(
 	made.from, made.velocity, made.gravity = from, velocity, gravity
 	made.long, made.wide, made.life, made.reach, made.age = long, wide, life, reach, 0
 	made.beam.Color = ColorSequence.new(cool, hot)
-	made.beam.Transparency = if clear then NumberSequence.new(1, 0) else NumberSequence.new(0.15, 0)
+	-- A tracer is clear at its tail and solid over its leading half.
+	made.beam.Transparency = if clear
+		then NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.25), NumberSequenceKeypoint.new(1, 0) })
+		else NumberSequence.new(0.15, 0)
 	made.beam.Width1 = wide
+	made.beam.LightEmission = glow
+	made.beam.Brightness = 1 + glow
 	made.tail.WorldPosition, made.head.WorldPosition = from, from
 	made.beam.Enabled = true
 	table.insert(flying, made)
@@ -170,10 +180,12 @@ local function newFlash(): Flash
 	for _ = 1, SPIKES + 1 do
 		local tip = Instance.new("Attachment")
 		tip.Parent = part
-		local beam = taper(middle, tip)
-		beam.Width1 = 0
-		beam.Parent = part
-		table.insert(spikes, { beam = beam, tip = tip })
+		local beam, inner = taper(middle, tip), taper(middle, tip)
+		beam.Width1, inner.Width1 = 0, 0
+		beam.LightEmission = 0.25
+		inner.ZOffset = 0.02
+		beam.Parent, inner.Parent = part, part
+		table.insert(spikes, { beam = beam, inner = inner, tip = tip })
 	end
 	local core = Instance.new("Part")
 	core.Shape = Enum.PartType.Ball
@@ -209,21 +221,22 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 	local sides = random:NextInteger(how.Spikes[1], how.Spikes[2])
 	local turn = random:NextNumber(0, math.pi * 2)
 	for index, spike in made.spikes do
-		local beam = spike.beam
-		beam.Color = ColorSequence.new(hot, edge)
-		beam.Transparency = NumberSequence.new(0, 0.35)
+		local beam, inner = spike.beam, spike.inner
+		beam.Color = ColorSequence.new(edge)
+		beam.Transparency = NumberSequence.new(0.05, 0.3)
+		inner.Color = ColorSequence.new(hot)
+		inner.Transparency = NumberSequence.new(0, 0.2)
+		local wide = 0
 		if index == 1 then
 			spike.tip.Position = Vector3.new(0, 0, -between(how.Forward) * size)
-			beam.Width0 = how.ForwardWide * size
-			beam.Enabled = true
+			wide = how.ForwardWide * size
 		elseif index - 1 <= sides then
 			local angle = turn + (index - 1 + random:NextNumber(-0.25, 0.25)) / sides * math.pi * 2
 			spike.tip.Position = Vector3.new(math.cos(angle), math.sin(angle), -0.15) * between(how.Long) * size
-			beam.Width0 = between(how.Wide) * size
-			beam.Enabled = true
-		else
-			beam.Enabled = false
+			wide = between(how.Wide) * size
 		end
+		beam.Width0, inner.Width0 = wide, wide * how.Inner
+		beam.Enabled, inner.Enabled = wide > 0, wide > 0
 	end
 	made.core.Color = hot
 	made.core.Size = Vector3.one * how.Core * size
@@ -238,7 +251,7 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 			return
 		end
 		for _, spike in made.spikes do
-			spike.beam.Enabled = false
+			spike.beam.Enabled, spike.inner.Enabled = false, false
 		end
 		made.core.Parent = nil
 		made.light.Enabled = false
@@ -281,7 +294,7 @@ function Effects.tracer(from: Vector3, to: Vector3)
 	if reach < how.Least then
 		return
 	end
-	streak(from, (to - from).Unit * how.Speed, how.Long, how.Wide, reach / how.Speed + 1, 0, how.Hot, how.Tail, true, reach)
+	streak(from, (to - from).Unit * how.Speed, how.Long, how.Wide, reach / how.Speed + 1, 0, how.Hot, how.Tail, true, how.Glow, reach)
 	count("tracer")
 end
 
@@ -294,8 +307,9 @@ function Effects.sparks(at: Vector3, normal: Vector3, kind: string, chip: Color3
 		return
 	end
 	local colour = chip or how.Hot
+	local glow = if chip then 0 else how.Glow
 	for _ = 1, random:NextInteger(what.Count[1], what.Count[2]) do
-		streak(at, within(normal, how.Cone) * between(what.Speed), between(how.Long), how.Wide, between(what.Life), how.Gravity, colour, colour, false)
+		streak(at, within(normal, how.Cone) * between(what.Speed), between(how.Long), how.Wide, between(what.Life), how.Gravity, colour, colour, false, glow)
 	end
 	count("sparks")
 end
@@ -307,7 +321,7 @@ function Effects.struck(at: Vector3, zone: string, along: Vector3)
 	local how = if zone == "head" then all.head else all.body
 	local back = if along.Magnitude > 0.5 then -along.Unit else Vector3.yAxis
 	for _ = 1, random:NextInteger(how.Count[1], how.Count[2]) do
-		streak(at, within(back, all.Cone) * between(how.Speed), between(how.Long), between(how.Wide), between(how.Life), all.Gravity, how.Hot, how.Edge, false)
+		streak(at, within(back, all.Cone) * between(how.Speed), between(how.Long), between(how.Wide), between(how.Life), all.Gravity, how.Hot, how.Edge, false, how.Glow)
 	end
 	if zone == "head" then
 		flash(CFrame.lookAlong(at, back), all.head.Flash, how.Hot, how.Edge, false)

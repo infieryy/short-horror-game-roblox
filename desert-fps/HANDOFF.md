@@ -904,6 +904,40 @@ Notes for the next session:
 - After a long run of playtests Studio froze and dropped both MCP connections. Closing it (`taskkill /F /T`) and opening the place again by its `roblox-studio:` link fixed it; the frozen process stayed listed as a husk until later.
 - A script cannot read `Source` at run time, so to tell Roblox's `RbxCharacterSounds` from a stand-in, look for its child `AtomicBinding`.
 
+### Shot effects (2026-11-28)
+
+The owner: "do a VFX pass and make the VFX exactly like valorant, from the muzzle flash to the hit and headshot vfx and the bullet tracers".
+
+**The outcome.** Four effects, made to read the way Valorant's do. They are my own drawings of that look: nothing of Valorant's was copied, and no picture was made or uploaded.
+
+| Effect | What it is now |
+|---|---|
+| Muzzle flash | A star: four or five spikes to the sides and a longer one forward, hot inside an orange edge, round a bright core. Gone in 0.05 s, a different shape every shot, and it lights the walls near by. On everyone's weapon, at its muzzle. Suppressed: no flash, a wisp of smoke |
+| Tracer | A streak 16 studs long that leaves the muzzle at 1100 studs a second and ends where the shot does, bright at the head and clear at the tail. Before, it was a line drawn the whole way for a twentieth of a second |
+| Sparks | Where a shot marks the town: hot sparks off stone and plaster, chips of wood off wood, none off cloth |
+| Hit on a body | Red angular shards that burst back the way the shot came. On a head: more of them, faster, white-hot, with a star of a flash. Everyone sees it, also for a suppressed shot |
+
+**How it works.**
+- `Client/Effects` draws everything from two things: a streak (a tapered beam that flies: a tracer, a spark, a shard) and a flash (a star of tapered beams round a neon core, with a light). Streaks and flashes are reused, not made anew for each shot. `Client/EffectConfig` is every size, speed, time and colour.
+- The server marks each weapon's muzzle with an attachment named `Muzzle` on its handle, so other players' flashes and tracers leave from the barrel and not the hand.
+- The server tells the shooter where a hit landed and which way the shot was going (two more values on `Hit`), and tells everyone else on a new `Struck` message. A hit is shown when the server says so, not when the client guesses.
+- `Glow` in the config: hot things add their light to what is behind them; things with a colour of their own (a red shard, a chip of wood) do not, because against this town's sunlit walls an added colour washes out to white. The spikes of a flash are drawn twice, wide in orange and narrow in white, for the same reason.
+
+**Tested.**
+- `build/tests/test_effects.luau` (client): 6 checks, all ok. A shot shows a flash and a tracer; a moment later the light is out and nothing is in flight; a suppressed shot shows a wisp and no flash; a shot through a wall throws sparks going in and coming out and cloth throws none; a body hit and a head hit each burst as what they are.
+- Looked at in a playtest with the effects slowed down or held: the flash from the eye, the tracer from the side, a head hit and a body hit from the side.
+- Every other test, run again with the effects in: `test_sound` 17 of 17, `test_attachments` 38 of 38, `test_utility` 15 of 15, `test_marks` 11 of 11, `test_weapons` 6 of 6, `test_wallbang` 15 of 15. (`test_attachments` and `test_utility` each need a fresh spawn: after a test that has fired or thrown, they report wrong counts of rounds and darts.)
+
+The place is saved with this in (version 92). Backup: `backups/fps_effects_scripts_kit_animations.rbxm`. Clip: `Documents/desert-fps/recordings/fps-maxxing-effects-20261128.mp4`.
+
+**Decisions made here.** Every number in `EffectConfig`. The hit mark on the crosshair stays, though Valorant has none: it was not part of what was asked. Body hits are red shards, as in Valorant.
+
+**Not done, not verified.**
+- Not compared side by side with Valorant, only built from how its effects read. The owner has the clip.
+- No second player looked at these: other players' flashes, tracers and hit bursts use the same code with the server's `Muzzle` mark and `Struck` message, and were not watched from a second screen (two clients filled this PC's memory earlier in the day).
+- No shell casings, no smoke after a long spray, nothing when a body dies.
+- A flash stays where the muzzle was when the shot left; it is gone before the weapon has moved far.
+
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
 2. Read `desert-fps/README.md`, `plan/PLAN.md` and `assets/README.md`.

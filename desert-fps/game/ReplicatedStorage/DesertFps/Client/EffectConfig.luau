@@ -5,6 +5,8 @@
 -- that bursts into angular shards, larger and white-hot with a flash for a head. Everything is drawn from
 -- tapered beams and a little light: no picture was made or uploaded for it.
 -- Lengths are studs, times seconds, speeds studs a second. A { low, high } pair is picked from each time.
+-- Glow is how much a thing adds its light to what is behind it (0 to 1): hot things glow, and things with a
+-- colour of their own do not, or the town's sunlit walls wash that colour out to white.
 return {
 	-- The flash at the muzzle: spikes out to the sides and a longer one forward, round a small bright core,
 	-- with a light that reaches the walls near by. Mine is how big the player's own is beside everyone else's:
@@ -12,15 +14,17 @@ return {
 	Muzzle = {
 		Time = 0.05,
 		Spikes = { 4, 5 },
-		Long = { 0.5, 0.9 },
-		Wide = { 0.16, 0.26 },
-		Forward = { 1.2, 1.8 },
-		ForwardWide = 0.3,
-		Core = 0.28,
-		Hot = Color3.fromRGB(255, 250, 226),
-		Edge = Color3.fromRGB(255, 170, 60),
+		Long = { 0.6, 1.05 },
+		Wide = { 0.26, 0.4 },
+		Forward = { 1.3, 1.9 },
+		ForwardWide = 0.42,
+		-- The hot inside of a spike is this share of its width.
+		Inner = 0.5,
+		Core = 0.3,
+		Hot = Color3.fromRGB(255, 248, 214),
+		Edge = Color3.fromRGB(255, 138, 36),
 		Light = { Range = 12, Brightness = 3, Color = Color3.fromRGB(255, 206, 140) },
-		Mine = 0.55,
+		Mine = 1,
 		-- Suppressed: no flash, a wisp of smoke that grows From and To across and is gone in Time.
 		Quiet = { From = 0.15, To = 0.55, Time = 0.16, Color = Color3.fromRGB(226, 216, 232), Start = 0.55 },
 		-- By weapon: how big its flash is.
@@ -31,9 +35,10 @@ return {
 	-- and Wide, its tail thin and clear. A shot that lands nearer than Least has none.
 	Tracer = {
 		Speed = 1100,
-		Long = 14,
-		Wide = 0.09,
+		Long = 16,
+		Wide = 0.24,
 		Least = 5,
+		Glow = 0.7,
 		Hot = Color3.fromRGB(255, 244, 206),
 		Tail = Color3.fromRGB(255, 188, 92),
 	},
@@ -49,6 +54,7 @@ return {
 		Wide = 0.05,
 		Cone = 65,
 		Gravity = 60,
+		Glow = 0.7,
 		-- A spark off stone or plaster is hot; off anything else it is a chip of the stuff (MarkConfig's Rim).
 		Hot = Color3.fromRGB(255, 226, 150),
 	},
@@ -62,8 +68,9 @@ return {
 			Life = { 0.2, 0.32 },
 			Long = { 0.45, 0.8 },
 			Wide = { 0.16, 0.26 },
-			Hot = Color3.fromRGB(255, 120, 96),
-			Edge = Color3.fromRGB(214, 52, 58),
+			Glow = 0.05,
+			Hot = Color3.fromRGB(246, 78, 70),
+			Edge = Color3.fromRGB(186, 34, 48),
 		},
 		head = {
 			Count = { 10, 13 },
@@ -71,6 +78,7 @@ return {
 			Life = { 0.24, 0.4 },
 			Long = { 0.6, 1.1 },
 			Wide = { 0.18, 0.3 },
+			Glow = 0.6,
 			Hot = Color3.fromRGB(255, 252, 232),
 			Edge = Color3.fromRGB(255, 196, 84),
 			Flash = 1.5,
