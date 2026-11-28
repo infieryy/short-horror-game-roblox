@@ -904,7 +904,7 @@ Notes for the next session:
 - After a long run of playtests Studio froze and dropped both MCP connections. Closing it (`taskkill /F /T`) and opening the place again by its `roblox-studio:` link fixed it; the frozen process stayed listed as a husk until later.
 - A script cannot read `Source` at run time, so to tell Roblox's `RbxCharacterSounds` from a stand-in, look for its child `AtomicBinding`.
 
-### Shot effects (2026-11-28)
+### Shot effects (2026-11-28): two versions drawn from memory, both replaced (see the next section)
 
 The owner: "do a VFX pass and make the VFX exactly like valorant, from the muzzle flash to the hit and headshot vfx and the bullet tracers".
 
@@ -938,6 +938,37 @@ The place is saved with this in (version 95). Backup: `backups/fps_effects_scrip
 - Not compared side by side with Valorant, only built from how its effects read. The owner has the clip.
 - No second player looked at these: other players' flashes, tracers and hit bursts use the same code with the server's `Muzzle` mark and `Struck` message, and were not watched from a second screen (two clients filled this PC's memory earlier in the day).
 - No shell casings, no smoke after a long spray, nothing when a body dies.
+
+### Shot effects, drawn from Valorant's own frames (2026-11-28)
+
+**This replaces the two versions in the section above.** The owner, on those: "No, you're just making vfx up. Make it exactly like valorant, minimal differences". And before that: "make the vfx super stylized and way higher quality. Use the stylized vfx skill (i have no unreal so substitute what u need to)". Both earlier versions were drawn from memory of Valorant, which is what was wrong with them.
+
+**The reference.** `assets/vfx/REFERENCE.md` is what Valorant's effects look like, frame by frame, from Riot's own slow-motion clip of a rifle shot to the head (in "The State of Hit Registration"), Riot's stills, and a forum breakdown of the pistol's flash. YouTube would not play without a sign-in, so nothing is from video.
+
+**The outcome.**
+
+| Effect | Valorant, in the reference | Here |
+|---|---|---|
+| Muzzle flash | A thin-spiked star, the upright spike the tallest, in an orange glow; a red beam level across the muzzle that outlives the star; about three frames | The same, as a 16-frame flipbook played in 0.1 s on the end of the barrel |
+| Tracer | A thin pale line from the muzzle all the way to where the shot lands, for one frame | A line all the way for 0.045 s, pale in the middle and orange at its edges, thicker at the muzzle. (The version before was a streak that flew: wrong) |
+| Where a shot lands | At once: a small white star, then a grey puff | The same flipbook, on walls and bodies alike |
+| Body hit | When the server confirms: a pale core in orange, ringed with crimson blobs | The same; how it ends is a guess (no frames of that were found) |
+| Head hit | A pale flame standing on the hit, orange-edged with a red glow; it stretches up, reddens and is eaten away over eight frames; a white glint at its foot; it stays on the head | The same, 16 frames in 0.42 s, riding the head |
+
+**How it is made.** The owner's stylized VFX skill: build the effect, take every frame, pack 16 frames 4x4, play the sheet on a Roblox particle. The skill builds in Unreal; there is none on this PC, so `assets/vfx/flipbooks.py` draws the frames directly (which also gives the clean cutout the skill gets by filming on black and on white). Five images were uploaded with the owner's yes: `fx_muzzle` 134196612509295, `fx_spark` 95683785238525, `fx_body` 76832780576017, `fx_head` 100954136247399, `fx_tracer` 71134728944059. `Client/Effects` plays them; `Client/EffectConfig` has each one's image, size, time and glow. The streaks and beam-built flashes of the earlier versions are gone, and so are the sparks off walls.
+
+**What was learned.**
+- A flipbook whose image has not arrived when it is played shows nothing, so the images are fetched at the start.
+- A particle's `Size` is its full width in studs here (the skill warns it may be half).
+- `LightEmission` must stay low (0.05 to 0.2): the colour is in the drawing, and anything added over this town's walls goes white.
+
+**Tested.** `build/tests/test_effects.luau` (client, 6 checks): a shot into the sky shows a flash and a tracer and no spark; a moment later nothing is still showing; a suppressed shot shows a wisp and no flash; a shot that lands shows a spark; a body hit and a head hit each burst as what they are. Every other test still passes with these in: `test_sound` 17, `test_attachments` 38, `test_utility` 15, `test_marks` 11, `test_weapons` 6, `test_wallbang` 15. A 12-second clip at normal speed is in `Documents/desert-fps/recordings/fps-maxxing-effects-v3-20261128.mp4`, and the head shot from it frame by frame in `assets/studio/fps-effects-v3-head-shot-frames.png`. The place is saved with this in (version 98). Backup: `backups/fps_effects_scripts_kit_animations.rbxm`.
+
+**Not done, not verified.**
+- **Side by side in motion.** The sheets were compared with the reference as stills (the comparison picture the owner was sent), and looked at in the game held still. They were not compared in motion.
+- **Differences that remain.** Riot's flash has a hand-drawn irregular shape; this one is built from a few spikes and a glow. The body hit's ending is invented. Valorant's third-person flash differs from its first-person one; here both use one sheet. Wall hits use the landing spark because no close-up of a wall hit was found.
+- No second player has seen these.
+- The hit mark on the crosshair is still there; Valorant has none.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.

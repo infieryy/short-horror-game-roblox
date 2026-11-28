@@ -504,15 +504,18 @@ return BulletMarks
 -- Each image is a sheet of sixteen frames drawn by assets/vfx/flipbooks.py and uploaded (Image is its asset).
 -- Size is studs across a frame of the sheet, Time seconds to play it through, Glow how much it adds its light
 -- to what is behind it (0 to 1), Near studs it is drawn nearer the eye than it is, so it is not sunk in what
--- it is on.
+-- it is on. Glow is kept low: the colour is in the drawing, and light added over this town's sunlit walls
+-- turns any colour white (the owner on an earlier version: "too washed out ... white pale yellow").
+-- Sizes are from the reference: the flash's star stands about an eighth of the screen high, a head hit about
+-- two heads, a body hit about a head and a third.
 return {
 	Muzzle = {
 		Image = 134196612509295,
 		Time = 0.1,
-		Glow = 0.45,
+		Glow = 0.1,
 		Near = 0.25,
 		-- By weapon. The star itself is about half as wide as its frame.
-		Size = { rifle = 1.9, pistol = 1.5 },
+		Size = { rifle = 0.9, pistol = 0.75 },
 		Light = { Range = 10, Brightness = 2.5, Color = Color3.fromRGB(255, 150, 70), Time = 0.05 },
 		-- Suppressed: no flash, a wisp of smoke that grows From and To across and is gone in Time.
 		Quiet = { From = 0.12, To = 0.4, Time = 0.16, Color = Color3.fromRGB(226, 216, 232), Start = 0.55 },
@@ -523,19 +526,19 @@ return {
 	Tracer = {
 		Image = 71134728944059,
 		Time = 0.045,
-		Glow = 0.5,
-		Wide = 0.16,
-		Thin = 0.06,
+		Glow = 0.15,
+		Wide = 0.14,
+		Thin = 0.05,
 		Fade = 0.25,
 		Least = 5,
 	},
 
-	Spark = { Image = 95683785238525, Time = 0.22, Glow = 0.35, Near = 0.4, Size = 2.2 },
+	Spark = { Image = 95683785238525, Time = 0.22, Glow = 0.2, Near = 0.4, Size = 2.2 },
 
 	Struck = {
-		body = { Image = 76832780576017, Time = 0.32, Glow = 0.25, Near = 1.2, Size = 3 },
+		body = { Image = 76832780576017, Time = 0.32, Glow = 0.05, Near = 1.2, Size = 2.4 },
 		-- Foot: the hit is this far below the middle of the frame, as a share of half its height.
-		head = { Image = 100954136247399, Time = 0.42, Glow = 0.35, Near = 1.2, Size = 3.6, Foot = 0.8 },
+		head = { Image = 100954136247399, Time = 0.42, Glow = 0.1, Near = 1.2, Size = 3, Foot = 0.8 },
 		-- A burst rides the part of a body nearest where it landed, if one is within this many studs.
 		Reach = 1.5,
 	},
@@ -548,6 +551,7 @@ return {
 -- played once on a single particle (assets/vfx/flipbooks.py draws them, to Valorant's frames; Client/
 -- EffectConfig says which image, how big and for how long).
 
+local ContentProvider = game:GetService("ContentProvider")
 local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -612,6 +616,16 @@ end
 function Effects.start(where: Instance)
 	parent = where
 	RunService.RenderStepped:Connect(step)
+	-- Fetched now: a flipbook whose image has not arrived when it is played shows nothing at all.
+	task.spawn(function()
+		ContentProvider:PreloadAsync({
+			content(Config.Muzzle.Image),
+			content(Config.Tracer.Image),
+			content(Config.Spark.Image),
+			content(Config.Struck.body.Image),
+			content(Config.Struck.head.Image),
+		})
+	end)
 end
 
 local function freeRig(): Rig

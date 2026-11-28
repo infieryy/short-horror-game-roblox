@@ -4,6 +4,7 @@
 -- played once on a single particle (assets/vfx/flipbooks.py draws them, to Valorant's frames; Client/
 -- EffectConfig says which image, how big and for how long).
 
+local ContentProvider = game:GetService("ContentProvider")
 local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -68,6 +69,16 @@ end
 function Effects.start(where: Instance)
 	parent = where
 	RunService.RenderStepped:Connect(step)
+	-- Fetched now: a flipbook whose image has not arrived when it is played shows nothing at all.
+	task.spawn(function()
+		ContentProvider:PreloadAsync({
+			content(Config.Muzzle.Image),
+			content(Config.Tracer.Image),
+			content(Config.Spark.Image),
+			content(Config.Struck.body.Image),
+			content(Config.Struck.head.Image),
+		})
+	end)
 end
 
 local function freeRig(): Rig

@@ -43,7 +43,7 @@ end
 
 hook:Invoke("equip", "primary")
 task.wait(1.2)
-camera.CFrame = CFrame.lookAlong(camera.CFrame.Position, Vector3.new(0, 0.2, -1).Unit)
+camera.CFrame = CFrame.lookAlong(camera.CFrame.Position, Vector3.new(0, 1, -0.2).Unit)
 frames(3)
 local shot = during({ "flash", "tracer", "wisp", "spark" }, function()
 	tap()
