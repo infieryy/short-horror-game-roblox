@@ -912,10 +912,10 @@ The owner: "do a VFX pass and make the VFX exactly like valorant, from the muzzl
 
 | Effect | What it is now |
 |---|---|
-| Muzzle flash | A star: four or five spikes to the sides and a longer one forward, hot inside an orange edge, round a bright core. Gone in 0.05 s, a different shape every shot, and it lights the walls near by. On everyone's weapon, at its muzzle. Suppressed: no flash, a wisp of smoke |
-| Tracer | A streak 16 studs long that leaves the muzzle at 1100 studs a second and ends where the shot does, bright at the head and clear at the tail. Before, it was a line drawn the whole way for a twentieth of a second |
+| Muzzle flash | A small burst out of the end of the barrel: four or five spikes that lean forward round a longer one straight ahead, amber inside an orange edge. Gone in 0.05 s, a different shape every shot, it stays on the barrel as the weapon kicks, and it lights the walls near by. On everyone's weapon. Suppressed: no flash, a wisp of smoke from the suppressor's end |
+| Tracer | An orange streak 14 studs long that leaves the muzzle at 1100 studs a second and ends where the shot does, amber at the head and clear at the tail. Before, it was a line drawn the whole way for a twentieth of a second |
 | Sparks | Where a shot marks the town: hot sparks off stone and plaster, chips of wood off wood, none off cloth |
-| Hit on a body | Red angular shards that burst back the way the shot came. On a head: more of them, faster, white-hot, with a star of a flash. Everyone sees it, also for a suppressed shot |
+| Hit on a body | Red angular shards that burst back the way the shot came. On a head: more of them, faster, orange with red edges, round a flash of the same colours. Everyone sees it, also for a suppressed shot |
 
 **How it works.**
 - `Client/Effects` draws everything from two things: a streak (a tapered beam that flies: a tracer, a spark, a shard) and a flash (a star of tapered beams round a neon core, with a light). Streaks and flashes are reused, not made anew for each shot. `Client/EffectConfig` is every size, speed, time and colour.
@@ -928,7 +928,9 @@ The owner: "do a VFX pass and make the VFX exactly like valorant, from the muzzl
 - Looked at in a playtest with the effects slowed down or held: the flash from the eye, the tracer from the side, a head hit and a body hit from the side.
 - Every other test, run again with the effects in: `test_sound` 17 of 17, `test_attachments` 38 of 38, `test_utility` 15 of 15, `test_marks` 11 of 11, `test_weapons` 6 of 6, `test_wallbang` 15 of 15. (`test_attachments` and `test_utility` each need a fresh spawn: after a test that has fired or thrown, they report wrong counts of rounds and darts.)
 
-The place is saved with this in (version 92). Backup: `backups/fps_effects_scripts_kit_animations.rbxm`. Clip: `Documents/desert-fps/recordings/fps-maxxing-effects-20261128.mp4`.
+The place is saved with this in (version 95). Backup: `backups/fps_effects_scripts_kit_animations.rbxm`. Clip of the second version: `Documents/desert-fps/recordings/fps-maxxing-effects-v2-20261128.mp4`. Pictures: `assets/studio/fps-effects-flash-barrel.png` (the flash, enlarged), `fps-effects-orange-held.png` (a head hit and the flash, held still), `fps-effects-tracer-side.jpg` (the first version's tracer).
+
+**The owner's first look, and what changed.** "the vfx looks too washed out. Its like white pale yellow. I need it to be more pop! with orange effects like valorant. also make the vfx smaller, the muzzle flash emit directly from the gun barrel. Make the headshot vfx the same way with orange and red in the core rather than white washed out fx". The first version was white-hot with a yellow edge and glowed, and a glow over this town's bright walls goes white. Now: every colour is a saturated orange, amber or red and barely glows; the flash is about half the size; it starts at the end of the barrel, or of what is fitted on it (`Attachments.fitting` works that point out as `points.muzzle`, and the server's `Muzzle` mark uses it too), leans forward, and follows the barrel while it shows (`Viewmodel.muzzle`); the head hit is orange inside red.
 
 **Decisions made here.** Every number in `EffectConfig`. The hit mark on the crosshair stays, though Valorant has none: it was not part of what was asked. Body hits are red shards, as in Valorant.
 
@@ -936,7 +938,6 @@ The place is saved with this in (version 92). Backup: `backups/fps_effects_scrip
 - Not compared side by side with Valorant, only built from how its effects read. The owner has the clip.
 - No second player looked at these: other players' flashes, tracers and hit bursts use the same code with the server's `Muzzle` mark and `Struck` message, and were not watched from a second screen (two clients filled this PC's memory earlier in the day).
 - No shell casings, no smoke after a long spray, nothing when a body dies.
-- A flash stays where the muzzle was when the shot left; it is gone before the weapon has moved far.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
