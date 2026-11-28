@@ -11,6 +11,7 @@ local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(script.Parent.MarkConfig)
+local Sounds = require(script.Parent.Sounds)
 local Penetration = require(script.Parent.Parent.Weapons.Penetration)
 
 local BulletMarks = {}
@@ -287,7 +288,10 @@ function BulletMarks.leave(self: any, marks: { Penetration.Mark })
 	if typeof(marks) ~= "table" then
 		return
 	end
-	for _, mark in marks do
+	-- A shot is heard where it first meets something, and where it ends if that is somewhere else: not at
+	-- every hole of a shot that goes through four things.
+	local sounded = 0
+	for index, mark in marks do
 		local on = mark.part
 		-- What the shot broke is gone by the time its marks are heard of.
 		if typeof(on) ~= "Instance" or not on:IsA("BasePart") or not on:IsDescendantOf(workspace) then
@@ -301,6 +305,10 @@ function BulletMarks.leave(self: any, marks: { Penetration.Mark })
 		local look = (Config.Materials :: any)[material] or Config.Materials.hard
 		if look.Dust then
 			puff(self.parent, mark, look.Dust)
+		end
+		if look.Sound and mark.kind ~= "out" and (sounded == 0 or index == #marks) then
+			sounded += 1
+			Sounds.play(if mark.kind == "stop" then look.Sound.Stopped else look.Sound.Through, mark.at)
 		end
 		if not look.Rim then
 			continue

@@ -53,4 +53,8 @@ return {
 		Fill = 0.7,
 		Fade = 0.3,
 	},
+
+	-- How it sounds (Sound/SoundConfig): thrown, stuck, and each pulse, all heard where the dart is. Seen is
+	-- heard by the thrower when a pulse sees someone, Spotted by whoever it saw.
+	Sounds = { Throw = "Dart Throw", Stick = "Dart Stick", Pulse = "Dart Pulse", Seen = "Dart Seen", Spotted = "Spotted" },
 }

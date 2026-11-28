@@ -22,6 +22,9 @@ local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
 local BulletMarks = require(Shared.Client:WaitForChild("BulletMarks"))
+local Sounds = require(Shared.Client:WaitForChild("Sounds"))
+local Footsteps = require(Shared.Client:WaitForChild("Footsteps"))
+local SoundConfig = require(Shared:WaitForChild("Sound"):WaitForChild("SoundConfig"))
 local UtilityClient = require(Shared.Client:WaitForChild("UtilityClient"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
@@ -49,6 +52,8 @@ end
 local effects = Instance.new("Folder")
 effects.Name = "WeaponEffects"
 effects.Parent = camera
+Sounds.start(effects)
+Footsteps.start(player)
 
 local viewmodel = Viewmodel.new(
 	Shared:WaitForChild("WeaponModels"),
@@ -82,6 +87,10 @@ local aimHeld, walkHeld = false, false
 local drawnAt = 0
 local lastShot = 0
 local reloadFrom: number? = nil
+-- The sounds of the reload under way, each with the share of the reload at which it is heard, and how many
+-- of them have been.
+local reloadCues: { { at: number, sound: string } } = {}
+local reloadHeard = 0
 local spray = 0 -- shots fired in the spray so far
 local recoilUp, recoilRight = 0, 0 -- where the spray has pushed the shots, in degrees off the aim
 local viewUp, viewRight = 0, 0 -- how much of that the view has climbed
@@ -127,6 +136,7 @@ local function take(slotName: string)
 	reloadFrom = nil
 	spray, recoilUp, recoilRight = 0, 0, 0
 	viewmodel:show(weapon)
+	Sounds.play(weapon.Sounds.Draw)
 	hud:setCrosshair(true)
 	if animator then
 		animator:switch(weapon.Animations, "Hold")
@@ -161,6 +171,21 @@ local function attach(slotName: string, socket: string, name: string?)
 	end
 end
 
+-- The sounds of a reload of that weapon, each with the share of the reload at which it is heard: the
+-- magazine out and a full one in, where the weapon's animation has them, and the bolt.
+local function cuesOf(what: any): { { at: number, sound: string } }
+	local cues = {}
+	local view, sounds = what.View, what.Sounds
+	if view.Magazine then
+		table.insert(cues, { at = view.Magazine.Out, sound = sounds.MagazineOut })
+		table.insert(cues, { at = view.Magazine.In, sound = sounds.MagazineIn })
+	end
+	if view.Bolt then
+		table.insert(cues, { at = view.Bolt.From, sound = sounds.Bolt })
+	end
+	return cues
+end
+
 local function reload()
 	if not (current and body() and weapon.Kind == "gun" and ready()) or reloadFrom then
 		return
@@ -168,6 +193,7 @@ local function reload()
 	local slot = slots[current]
 	if slot.magazine < weapon.Magazine and slot.reserve > 0 then
 		reloadFrom = os.clock()
+		reloadCues, reloadHeard = cuesOf(weapon), 0
 		remote("Reload"):FireServer()
 		viewmodel:play("Reload")
 		if animator then
@@ -245,6 +271,7 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		animator:play("Fire")
 	end
 	tracer(viewmodel:socket("muzzle") or origin, path.finish, weapon.View)
+	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
 end
@@ -255,6 +282,7 @@ local function slash(character: Model)
 	local reach = direction * weapon.Range
 	local target, part = struck(workspace:Spherecast(origin, CombatConfig.MeleeMargin, reach, sightline(character)))
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
+	Sounds.play(weapon.Sounds.Fire)
 	viewmodel:play("Fire")
 	if animator then
 		animator:play("Fire")
@@ -277,7 +305,9 @@ local function pullTrigger(now: number, character: Model, humanoid: Humanoid, ro
 			shoot(character, humanoid, root)
 		end
 	elseif triggerFresh then
-		reload() -- pulling the trigger on an empty magazine
+		-- Pulling the trigger on an empty magazine: a click, and a reload if there is anything to load.
+		Sounds.play(weapon.Sounds.Empty)
+		reload()
 	end
 	triggerFresh = false
 end
@@ -308,6 +338,13 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 		slot.reserve -= rounds
 		reloadFrom = nil
 		refresh()
+	end
+	if reloadFrom then
+		local done = (now - reloadFrom) / weapon.ReloadTime
+		while reloadCues[reloadHeard + 1] and done >= reloadCues[reloadHeard + 1].at do
+			reloadHeard += 1
+			Sounds.play(reloadCues[reloadHeard].sound)
+		end
 	end
 	if triggerHeld then
 		pullTrigger(now, character, humanoid, root)
@@ -469,19 +506,55 @@ remote("State").OnClientEvent:Connect(function(state: { current: string, slots: 
 end)
 remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean)
 	hud:hit(zone, killed)
+	local cues = SoundConfig.Cues
+	Sounds.play(if weapon and weapon.Kind == "melee" then cues.Blade elseif zone == "head" then cues.Head else cues.Hit)
+	if killed then
+		Sounds.play(cues.Kill)
+	end
 end)
 remote("Hurt").OnClientEvent:Connect(function()
 	hud:hurt()
+	Sounds.play(SoundConfig.Cues.Hurt)
 end)
 remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean, through: boolean)
 	hud:killed(killer, victim, weaponTitle, head, through)
 end)
--- Someone else's shot: a line from the weapon in their hand to where it ended.
+-- Where the weapon of that name is in someone else's hand, if they still hold it.
+local function heldAt(holder: Player, weaponName: string): Vector3?
+	local tool = holder.Character and holder.Character:FindFirstChildOfClass("Tool")
+	local handle = tool and tool.Name == weaponName and tool:FindFirstChild("Handle")
+	return if handle and handle:IsA("BasePart") then handle.Position else nil
+end
+
+-- Someone else's shot: a line from the weapon in their hand to where it ended, and its sound there.
 remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: string, origin: Vector3, finish: Vector3)
-	local tool = shooter.Character and shooter.Character:FindFirstChildOfClass("Tool")
-	local handle = tool and tool:FindFirstChild("Handle")
-	local from = if handle and handle:IsA("BasePart") then handle.Position else origin
-	tracer(from, finish, (WeaponConfig.Weapons :: any)[weaponName].View)
+	local theirs = (WeaponConfig.Weapons :: any)[weaponName]
+	local from = heldAt(shooter, weaponName) or origin
+	tracer(from, finish, theirs.View)
+	Sounds.play(theirs.Sounds.Fire, from)
+end)
+-- Something someone near by did that is heard and not seen: a shot from a weapon that hides it (`sound` is
+-- that weapon's, as it is fitted), a weapon drawn, a reload that takes `seconds`. The server tells only
+-- those near enough to hear it.
+remote("Heard").OnClientEvent:Connect(function(who: Player, weaponName: string, what: string, sound: string?, seconds: number?)
+	local theirs = (WeaponConfig.Weapons :: any)[weaponName]
+	local at = heldAt(who, weaponName)
+	if not (theirs and at) then
+		return
+	end
+	if what == "Reload" and seconds then
+		for _, cue in cuesOf(theirs) do
+			task.delay(cue.at * seconds, function()
+				-- They may have died or put it away meanwhile.
+				local now = heldAt(who, weaponName)
+				if now then
+					Sounds.play(cue.sound, now)
+				end
+			end)
+		end
+	else
+		Sounds.play(sound, at)
+	end
 end)
 -- What someone else's shot left on the town. A weapon that hides its shot does not hide this.
 remote("Marks").OnClientEvent:Connect(function(left: { Penetration.Mark })
@@ -574,6 +647,7 @@ local function testHook()
 				numbers = weapon,
 				utility = UtilityClient.state(),
 				marks = marks:state(),
+				sounds = Sounds.state(),
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),

@@ -1,0 +1,4 @@
+--!strict
+-- Stands in for Roblox's own script of this name, which gives every body footsteps at any pace, a jump, a
+-- landing and a cry when it dies. A script with its name here stops Roblox adding its own. The game's
+-- footsteps are Client/Footsteps: heard when someone runs, silent when they walk.

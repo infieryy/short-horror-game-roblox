@@ -27,16 +27,17 @@ return {
 	},
 
 	Attachments = {
-		-- Nobody else sees where the shots come from. The price is damage at long range: past 150 studs the
+		-- Nobody else sees where the shots come from, and only those near by hear them: the shot has another
+		-- sound, which does not carry (SoundConfig). The price is damage at long range: past 150 studs the
 		-- rifle's shot to the head no longer kills through heavy armor.
 		suppressor = {
 			Title = "Suppressor",
-			About = "Enemies see no tracer. Less damage at long range.",
+			About = "Enemies see no tracer and hear the shot only near by. Less damage at long range.",
 			Socket = "muzzle",
 			Model = "att_suppressor",
 			Fits = {
-				rifle = { Set = { Silent = true, Falloff = { { 150, 0.9 } } } },
-				pistol = { Set = { Silent = true, Falloff = { { 70, 0.85 } } } },
+				rifle = { Set = { Silent = true, Falloff = { { 150, 0.9 } }, ["Sounds.Fire"] = "Rifle Shot Quiet" } },
+				pistol = { Set = { Silent = true, Falloff = { { 70, 0.85 } }, ["Sounds.Fire"] = "Pistol Shot Quiet" } },
 			},
 		},
 		compensator = {

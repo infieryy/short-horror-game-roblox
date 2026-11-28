@@ -153,6 +153,7 @@ local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(script.Parent.MarkConfig)
+local Sounds = require(script.Parent.Sounds)
 local Penetration = require(script.Parent.Parent.Weapons.Penetration)
 
 local BulletMarks = {}
@@ -429,7 +430,10 @@ function BulletMarks.leave(self: any, marks: { Penetration.Mark })
 	if typeof(marks) ~= "table" then
 		return
 	end
-	for _, mark in marks do
+	-- A shot is heard where it first meets something, and where it ends if that is somewhere else: not at
+	-- every hole of a shot that goes through four things.
+	local sounded = 0
+	for index, mark in marks do
 		local on = mark.part
 		-- What the shot broke is gone by the time its marks are heard of.
 		if typeof(on) ~= "Instance" or not on:IsA("BasePart") or not on:IsDescendantOf(workspace) then
@@ -443,6 +447,10 @@ function BulletMarks.leave(self: any, marks: { Penetration.Mark })
 		local look = (Config.Materials :: any)[material] or Config.Materials.hard
 		if look.Dust then
 			puff(self.parent, mark, look.Dust)
+		end
+		if look.Sound and mark.kind ~= "out" and (sounded == 0 or index == #marks) then
+			sounded += 1
+			Sounds.play(if mark.kind == "stop" then look.Sound.Stopped else look.Sound.Through, mark.at)
 		end
 		if not look.Rim then
 			continue
@@ -479,6 +487,82 @@ function BulletMarks.state(self: any): { [string]: number }
 end
 
 return BulletMarks
+]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Client", "Footsteps" }, class = "ModuleScript", source = [=[
+--!strict
+-- Footsteps and landings, everyone's: each client works them out from how the bodies it sees move.
+-- Someone who runs is heard; someone who walks (Shift) is not. That is the point of walking.
+-- Roblox's own footsteps are switched off (StarterPlayerScripts/RbxCharacterSounds): they play at any pace.
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Config = require(script.Parent.Parent.Sound.SoundConfig)
+local Sounds = require(script.Parent.Sounds)
+
+local Footsteps = {}
+
+local How = Config.Footsteps
+
+-- How far each body has run since its last step, whether it was in the air, and how fast it fell.
+type Gait = { run: number, air: boolean, fell: number }
+local gaits: { [Model]: Gait } = {}
+local me: Player? = nil
+
+local function step(dt: number)
+	for _, player in Players:GetPlayers() do
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not (character and humanoid and humanoid.Health > 0 and root and root:IsA("BasePart")) then
+			continue
+		end
+		local gait = gaits[character]
+		if not gait then
+			gait = { run = 0, air = false, fell = 0 }
+			gaits[character] = gait
+		end
+		-- The player's own are heard in the head, and softer: they tell the player nothing new.
+		local where: Instance? = if player == me then nil else root
+		local volume = if player == me then How.Own else 1
+		local velocity = root.AssemblyLinearVelocity
+		if humanoid.FloorMaterial == Enum.Material.Air then
+			gait.air = true
+			gait.fell = math.max(gait.fell, -velocity.Y)
+			continue
+		end
+		if gait.air then
+			if gait.fell >= How.LandFrom then
+				Sounds.play(How.Land, where, volume)
+			end
+			gait.air, gait.fell = false, 0
+		end
+		local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+		if speed < How.From then
+			-- Standing or walking. The first step of a run comes soon after it starts.
+			gait.run = How.Stride * How.First
+			continue
+		end
+		gait.run += speed * dt
+		if gait.run >= How.Stride then
+			gait.run -= How.Stride
+			Sounds.play(How.Step, where, volume)
+		end
+	end
+	for character in gaits do
+		if not character:IsDescendantOf(workspace) then
+			gaits[character] = nil
+		end
+	end
+end
+
+-- `player` is the one whose steps are their own.
+function Footsteps.start(player: Player)
+	me = player
+	RunService.Heartbeat:Connect(step)
+end
+
+return Footsteps
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "Hud" }, class = "ModuleScript", source = [=[
 --!strict
@@ -1357,6 +1441,8 @@ return {
 	--   Rim    the broken edge round a hole, and a chip: the stuff under the paint
 	--   Edge   the line round a rim or a chip, so that it shows on a wall of its own colour, and the cracks
 	--   Dust   what flies off
+	--   Sound  what is heard there (Sound/SoundConfig): Through where a shot goes in and comes out again,
+	--          Stopped where it does not
 	-- A material with no Rim is not marked: a shot through leaves only shakes some loose.
 	Materials = {
 		plaster = {
@@ -1364,30 +1450,176 @@ return {
 			Rim = Color3.fromRGB(255, 220, 178),
 			Edge = Color3.fromRGB(150, 80, 72),
 			Dust = Color3.fromRGB(250, 214, 178),
+			Sound = { Through = "Plaster Through", Stopped = "Stone Stopped" },
 		},
 		wood = {
 			Hole = Color3.fromRGB(50, 32, 44),
 			Rim = Color3.fromRGB(250, 210, 150),
 			Edge = Color3.fromRGB(104, 58, 44),
 			Dust = Color3.fromRGB(236, 196, 142),
+			Sound = { Through = "Wood Through", Stopped = "Wood Stopped" },
 		},
 		cloth = {
 			Hole = Color3.fromRGB(52, 38, 60),
 			Rim = Color3.fromRGB(250, 236, 214),
 			Edge = Color3.fromRGB(110, 86, 112),
 			Dust = Color3.fromRGB(250, 236, 214),
+			Sound = { Through = "Cloth Through", Stopped = "Cloth Through" },
 		},
 		leaves = {
 			Dust = Color3.fromRGB(132, 164, 96),
+			Sound = { Through = "Leaves Through", Stopped = "Leaves Through" },
 		},
 		hard = {
 			Hole = Color3.fromRGB(58, 40, 62),
 			Rim = Color3.fromRGB(250, 228, 204),
 			Edge = Color3.fromRGB(122, 96, 128),
 			Dust = Color3.fromRGB(244, 222, 196),
+			Sound = { Through = "Stone Stopped", Stopped = "Stone Stopped" },
 		},
 	},
 }
+]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Client", "Sounds" }, class = "ModuleScript", source = [=[
+--!strict
+-- Plays the game's sounds on this client. Sound/SoundConfig says what each sound is, how loud and how far it
+-- carries; everything else names a sound and says where it is:
+--   Sounds.play("Rifle Shot")                 in the player's own head (their own weapon, the display)
+--   Sounds.play("Rifle Shot", position)       at a point in the world
+--   Sounds.play("Step", part)                 on a part or an attachment, moving with it
+-- A sound in the world fades with distance and is not heard past its Far.
+
+local ContentProvider = game:GetService("ContentProvider")
+local Debris = game:GetService("Debris")
+local SoundService = game:GetService("SoundService")
+
+local Config = require(script.Parent.Parent.Sound.SoundConfig)
+
+local Sounds = {}
+
+-- One recording a sound may be played from: see SoundConfig.
+type Take = { Id: number, Gain: number?, From: number?, To: number? }
+type Entry = { Takes: { Take }, Volume: number, Pitch: { number }?, Near: number?, Far: number? }
+
+-- Seconds after which a sound that never said it ended is taken away (one that failed to load, say).
+local GIVE_UP = 8
+-- The loudest Roblox plays a sound.
+local LOUDEST = 10
+
+local random = Random.new()
+local group: SoundGroup? = nil
+local heads: Instance? = nil -- sounds in the player's own head
+local world: BasePart? = nil -- holds a point for each sound at a place in the world
+local last: { [string]: Take } = {} -- the take each sound played last
+local played: { [string]: number } = {} -- how often each sound has been played, for tests
+local at: { [string]: Vector3 } = {} -- where each sound in the world was played last, for tests
+
+local function content(id: number): string
+	return "rbxassetid://" .. id
+end
+
+-- One of a sound's takes: not the one it played last, if it has others.
+local function pick(name: string, takes: { Take }): Take
+	local take = takes[random:NextInteger(1, #takes)]
+	if #takes > 1 and take == last[name] then
+		take = takes[table.find(takes, take) :: number % #takes + 1]
+	end
+	last[name] = take
+	return take
+end
+
+-- `parent` is where sounds in the player's head are kept. Call once, before the first sound.
+function Sounds.start(parent: Instance)
+	local made = Instance.new("SoundGroup")
+	made.Name = "DesertFps"
+	made.Volume = Config.Master
+	made.Parent = SoundService
+	group = made
+
+	local folder = Instance.new("Folder")
+	folder.Name = "Sounds"
+	folder.Parent = parent
+	heads = folder
+
+	local anchor = Instance.new("Part")
+	anchor.Name = "SoundPoints"
+	anchor.Anchored = true
+	anchor.Transparency = 1
+	anchor.Size = Vector3.one * 0.2
+	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.CanTouch = false
+	anchor.Parent = parent
+	world = anchor
+
+	-- Fetched now, so that the first shot is heard when it is fired and not when its sound arrives.
+	task.spawn(function()
+		local fetch = {}
+		for _, entry: Entry in Config.Sounds :: any do
+			for _, take in entry.Takes do
+				table.insert(fetch, content(take.Id))
+			end
+		end
+		ContentProvider:PreloadAsync(fetch)
+	end)
+end
+
+-- Plays the sound of that name: in the player's head, or at a place or on a part in the world. `volume`
+-- multiplies its own. Returns nothing if there is no such sound (a weapon need not have every sound).
+function Sounds.play(name: string?, where: (Vector3 | Instance)?, volume: number?): Sound?
+	local entry: Entry? = if name then (Config.Sounds :: any)[name] else nil
+	if not (name and entry and heads and world) or #entry.Takes == 0 then
+		return nil
+	end
+	local take = pick(name, entry.Takes)
+	local sound = Instance.new("Sound")
+	sound.Name = name
+	sound.SoundId = content(take.Id)
+	sound.Volume = math.min(entry.Volume * (take.Gain or 1) * (volume or 1), LOUDEST)
+	if entry.Pitch then
+		sound.PlaybackSpeed = random:NextNumber(entry.Pitch[1], entry.Pitch[2])
+	end
+	if take.From or take.To then
+		sound.PlaybackRegionsEnabled = true
+		sound.PlaybackRegion = NumberRange.new(take.From or 0, take.To or GIVE_UP)
+	end
+	sound.RollOffMode = Enum.RollOffMode.InverseTapered
+	sound.RollOffMinDistance = entry.Near or 10
+	sound.RollOffMaxDistance = entry.Far or 100
+	sound.SoundGroup = group
+
+	local holder: Instance = sound -- what goes when the sound is over
+	if typeof(where) == "Vector3" then
+		local point = Instance.new("Attachment")
+		point.WorldPosition = where
+		point.Parent = world
+		sound.Parent = point
+		holder = point
+		at[name] = where
+	elseif typeof(where) == "Instance" then
+		sound.Parent = where
+		at[name] = if where:IsA("BasePart")
+			then where.Position
+			elseif where:IsA("Attachment") then where.WorldPosition
+			else Vector3.zero
+	else
+		sound.Parent = heads
+	end
+	sound.Ended:Once(function()
+		holder:Destroy()
+	end)
+	Debris:AddItem(holder, GIVE_UP)
+	sound:Play()
+	played[name] = (played[name] or 0) + 1
+	return sound
+end
+
+-- How often each sound has been played and where each sound in the world was played last, for tests.
+function Sounds.state(): { played: { [string]: number }, at: { [string]: Vector3 } }
+	return { played = table.clone(played), at = table.clone(at) }
+end
+
+return Sounds
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "UtilityClient" }, class = "ModuleScript", source = [=[
 --!strict
@@ -1404,6 +1636,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local Config = require(script.Parent.Parent.Utility.UtilityConfig)
 local HudConfig = require(script.Parent.HudConfig)
+local Sounds = require(script.Parent.Sounds)
 
 local UtilityClient = {}
 
@@ -1501,20 +1734,23 @@ local function fly(name: string, origin: Vector3, velocity: Vector3, seconds: nu
 	end
 	place(model, at(0), what.Size)
 	model.Parent = hands.effects
+	Sounds.play(Config.Sounds.Throw, origin)
 	local flying: RBXScriptConnection
 	flying = RunService.RenderStepped:Connect(function()
 		local t = os.clock() - started
 		if t >= seconds then
 			flying:Disconnect()
 			model:Destroy()
+			Sounds.play(Config.Sounds.Stick, at(seconds).Position)
 		else
 			place(model, at(t), what.Size)
 		end
 	end)
 end
 
--- A pulse: a bubble of the dart's light that grows and fades.
+-- A pulse: a bubble of the dart's light that grows and fades, and its sound.
 local function pulse(at: Vector3)
+	Sounds.play(Config.Sounds.Pulse, at)
 	local bubble = Instance.new("Part")
 	bubble.Shape = Enum.PartType.Ball
 	bubble.Material = Enum.Material.Neon
@@ -1555,6 +1791,7 @@ local function reveal(seen: { Model }, seconds: number)
 	end
 	if #seen > 0 then
 		hands.hud:notice(`{#seen} REVEALED`, HudConfig.Accent)
+		Sounds.play(Config.Sounds.Seen)
 	end
 end
 
@@ -1597,6 +1834,7 @@ function UtilityClient.start(lent: Hands)
 	remote("Reveal").OnClientEvent:Connect(reveal)
 	remote("Spotted").OnClientEvent:Connect(function()
 		hands.hud:notice("SPOTTED", HudConfig.Harm)
+		Sounds.play(Config.Sounds.Spotted)
 	end)
 	RunService.RenderStepped:Connect(fade)
 end
@@ -2020,6 +2258,185 @@ return {
 	RespawnSeconds = 3,
 }
 ]=] },
+	{ path = { "ReplicatedStorage", "DesertFps", "Sound", "SoundConfig" }, class = "ModuleScript", source = [=[
+--!strict
+-- Every sound in the game: which recordings it is played from, how loud it is and how far it carries.
+-- Read by the client, which plays them (Client/Sounds), and by the server, which goes by Far when it decides
+-- who is told about a noise (a suppressed shot, a reload).
+--
+-- All the recordings are from Roblox's licensed library: creator "ProSoundEffects" on the Creator Store, free
+-- to use in an experience. Nothing was uploaded. To change a sound, change its takes here. Take them only
+-- from that creator: most other sounds on the store are lifted from other games.
+--
+--   Takes    the recordings. One is picked each time, never the same twice running. Each is
+--              Id     the asset
+--              Gain   times as loud as recorded, so that the takes of one sound are alike (they are not
+--                     recorded at one level)
+--              From   seconds into the recording at which to start: many have silence at their head, and a
+--                     shot that sounds a twentieth of a second late feels late
+--              To     seconds into the recording at which to stop
+--   Volume   how loud the sound is, after Gain. Roblox plays nothing louder than 10 in all.
+--   Pitch    { lowest, highest } speed it is played at, picked each time
+--   Near     studs within which a sound in the world is at its full volume
+--   Far      studs past which it is not heard at all
+-- A sound in the player's own head (their own weapon, the display) is at its Volume, wherever they stand.
+return {
+	-- Everything at once.
+	Master = 1,
+
+	Sounds = {
+		-- The rifle: four single shots of one automatic rifle. Heard across the town.
+		["Rifle Shot"] = {
+			Takes = {
+				{ Id = 9114727096, Gain = 0.75 },
+				{ Id = 9114727608 },
+				{ Id = 9114727563 },
+				{ Id = 9114727718 },
+			},
+			Volume = 1,
+			Pitch = { 0.97, 1.03 },
+			Near = 30,
+			Far = 500,
+		},
+		-- The pistol: lighter and sharper.
+		["Pistol Shot"] = {
+			Takes = { { Id = 9114729355, From = 0.03 }, { Id = 9114729252, Gain = 0.83, From = 0.03 } },
+			Volume = 0.85,
+			Pitch = { 0.97, 1.03 },
+			Near = 25,
+			Far = 400,
+		},
+		-- Suppressed: a low thump that does not carry. The server tells nobody further off than Far.
+		["Rifle Shot Quiet"] = {
+			Takes = { { Id = 9119135495 }, { Id = 9119135228, Gain = 0.95 }, { Id = 9119135785, Gain = 1.1 } },
+			Volume = 0.45,
+			Pitch = { 0.88, 0.94 },
+			Near = 10,
+			Far = 70,
+		},
+		["Pistol Shot Quiet"] = {
+			Takes = { { Id = 9119135495 }, { Id = 9119135228, Gain = 0.95 }, { Id = 9119135785, Gain = 1.1 } },
+			Volume = 0.38,
+			Pitch = { 1.08, 1.16 },
+			Near = 8,
+			Far = 55,
+		},
+		-- The trigger on an empty weapon.
+		["Dry Fire"] = { Takes = { { Id = 9117396156, From = 0.03 } }, Volume = 1, Pitch = { 0.97, 1.03 } },
+
+		-- A reload, piece by piece, and a weapon drawn. Heard by those close.
+		["Rifle Magazine Out"] = { Takes = { { Id = 9117396464, From = 0.26 } }, Volume = 0.9, Pitch = { 0.8, 0.85 }, Near = 6, Far = 45 },
+		["Rifle Magazine In"] = { Takes = { { Id = 9116347612, From = 0.2 } }, Volume = 0.3, Pitch = { 0.97, 1.03 }, Near = 6, Far = 45 },
+		["Rifle Bolt"] = { Takes = { { Id = 9116357621, From = 0.02 } }, Volume = 0.5, Pitch = { 0.97, 1.03 }, Near = 6, Far = 45 },
+		["Pistol Magazine Out"] = { Takes = { { Id = 9117396164, From = 0.86 } }, Volume = 1.4, Pitch = { 0.97, 1.03 }, Near = 6, Far = 40 },
+		["Pistol Magazine In"] = { Takes = { { Id = 9117396464, From = 0.55 } }, Volume = 0.8, Pitch = { 1.1, 1.18 }, Near = 6, Far = 40 },
+		["Rifle Draw"] = { Takes = { { Id = 9116362330 } }, Volume = 3.5, Pitch = { 0.97, 1.03 }, Near = 6, Far = 35 },
+		["Pistol Draw"] = {
+			Takes = { { Id = 9117396530, From = 0.01 }, { Id = 9117396574, Gain = 1.15 } },
+			Volume = 1.8,
+			Pitch = { 0.97, 1.03 },
+			Near = 6,
+			Far = 30,
+		},
+
+		-- The knife.
+		["Knife Draw"] = { Takes = { { Id = 9116190478 } }, Volume = 1.5, Pitch = { 0.95, 1.05 }, Near = 5, Far = 25 },
+		["Knife Swing"] = {
+			Takes = { { Id = 9119750223, Gain = 6, From = 0.055 }, { Id = 9119750447, Gain = 0.5, From = 0.05 } },
+			Volume = 1,
+			Pitch = { 0.94, 1.06 },
+			Near = 5,
+			Far = 30,
+		},
+
+		-- Where a shot lands (Client/MarkConfig). Through something is a bright crack or crunch; stopped is a
+		-- dull thud, and off stone now and then a ricochet. So the ear can tell them apart, like the eye.
+		["Wood Through"] = {
+			Takes = { { Id = 9120962232, Gain = 1.3 }, { Id = 9120962354, From = 0.055, To = 0.42 } },
+			Volume = 1,
+			Pitch = { 0.94, 1.06 },
+			Near = 8,
+			Far = 130,
+		},
+		["Wood Stopped"] = {
+			Takes = { { Id = 9113632382, From = 0.03 }, { Id = 9113632248, Gain = 1.07, From = 0.035 } },
+			Volume = 0.6,
+			Pitch = { 1.1, 1.22 },
+			Near = 8,
+			Far = 130,
+		},
+		["Plaster Through"] = { Takes = { { Id = 9113632073, From = 0.09 } }, Volume = 0.6, Pitch = { 0.94, 1.08 }, Near = 8, Far = 130 },
+		["Stone Stopped"] = {
+			Takes = {
+				{ Id = 9113632382, Gain = 0.6, From = 0.03 },
+				{ Id = 9113632248, Gain = 0.65, From = 0.035 },
+				{ Id = 9118168273, Gain = 1.05 },
+				{ Id = 9118168585, Gain = 0.9 },
+			},
+			Volume = 1,
+			Pitch = { 0.94, 1.06 },
+			Near = 8,
+			Far = 130,
+		},
+		["Cloth Through"] = {
+			Takes = { { Id = 9113819490, From = 0.07 }, { Id = 9113818686, Gain = 0.62, From = 0.05 } },
+			Volume = 0.8,
+			Pitch = { 0.95, 1.1 },
+			Near = 6,
+			Far = 80,
+		},
+		-- A soft recording: as loud as it goes.
+		["Leaves Through"] = { Takes = { { Id = 9114517148 } }, Volume = 10, Pitch = { 0.95, 1.1 }, Near = 6, Far = 80 },
+
+		-- What the player is told (Cues, below). In the head.
+		["Hit"] = { Takes = { { Id = 9118598470 } }, Volume = 0.7, Pitch = { 0.98, 1.02 } },
+		["Headshot"] = { Takes = { { Id = 9125361323 } }, Volume = 1.6, Pitch = { 0.98, 1.02 } },
+		["Kill"] = { Takes = { { Id = 9126073064, From = 0.105 } }, Volume = 3 },
+		["Knife Hit"] = { Takes = { { Id = 9116197520 }, { Id = 9116197517, Gain = 2.2 } }, Volume = 0.9, Pitch = { 0.95, 1.05 } },
+		["Hurt"] = { Takes = { { Id = 9113523963, From = 0.08 } }, Volume = 0.6, Pitch = { 0.95, 1.05 } },
+
+		-- Feet (Footsteps, below).
+		["Step"] = {
+			Takes = {
+				{ Id = 9118249165, Gain = 1.25 },
+				{ Id = 9118250949, Gain = 1.2 },
+				{ Id = 9118249853 },
+				{ Id = 9118249166, Gain = 0.95 },
+			},
+			Volume = 0.7,
+			Pitch = { 0.93, 1.07 },
+			Near = 8,
+			Far = 70,
+		},
+		["Land"] = { Takes = { { Id = 9118252696, From = 0.02 } }, Volume = 0.9, Pitch = { 0.76, 0.84 }, Near = 8, Far = 70 },
+
+		-- The recon dart (Utility/UtilityConfig). Its pulse carries further than it sees.
+		["Dart Throw"] = { Takes = { { Id = 9119750447, Gain = 0.5, From = 0.05 } }, Volume = 0.8, Pitch = { 1.3, 1.4 }, Near = 5, Far = 40 },
+		["Dart Stick"] = { Takes = { { Id = 9113160683, From = 0.58 } }, Volume = 5, Pitch = { 0.97, 1.03 }, Near = 6, Far = 60 },
+		["Dart Pulse"] = { Takes = { { Id = 9126138068 } }, Volume = 4.5, Near = 12, Far = 110 },
+		["Dart Seen"] = { Takes = { { Id = 9126138070 } }, Volume = 3, Pitch = { 1.33, 1.37 } },
+		["Spotted"] = { Takes = { { Id = 9126138070 } }, Volume = 4, Pitch = { 0.74, 0.76 } },
+	},
+
+	-- What the player hears when the server says: a shot of theirs landed on a body (Hit), on a head (Head),
+	-- it killed (Kill, on top), their knife cut (Blade), or they were hurt.
+	Cues = { Hit = "Hit", Head = "Headshot", Kill = "Kill", Blade = "Knife Hit", Hurt = "Hurt" },
+
+	-- Footsteps (Client/Footsteps). Someone moving faster than From studs a second is heard: that is running
+	-- with any weapon, and running while aiming. Walking (Shift) is at most 9.9 with the knife, and silent.
+	-- A step every Stride studs; the first of a run comes First of a stride in. The player's own steps are
+	-- Own times as loud. A landing is heard after a fall of LandFrom studs a second or faster.
+	Footsteps = {
+		Step = "Step",
+		Land = "Land",
+		From = 10.5,
+		Stride = 4.8,
+		First = 0.6,
+		Own = 0.3,
+		LandFrom = 12,
+	},
+}
+]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Utility", "UtilityConfig" }, class = "ModuleScript", source = [=[
 --!strict
 -- Utility: what a player throws to find enemies. Read by the server (what it does) and the client (how it
@@ -2076,6 +2493,10 @@ return {
 		Fill = 0.7,
 		Fade = 0.3,
 	},
+
+	-- How it sounds (Sound/SoundConfig): thrown, stuck, and each pulse, all heard where the dart is. Seen is
+	-- heard by the thrower when a pulse sees someone, Spotted by whoever it saw.
+	Sounds = { Throw = "Dart Throw", Stick = "Dart Stick", Pulse = "Dart Pulse", Seen = "Dart Seen", Spotted = "Spotted" },
 }
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Weapons", "AnimationConfig" }, class = "ModuleScript", source = [=[
@@ -2148,16 +2569,17 @@ return {
 	},
 
 	Attachments = {
-		-- Nobody else sees where the shots come from. The price is damage at long range: past 150 studs the
+		-- Nobody else sees where the shots come from, and only those near by hear them: the shot has another
+		-- sound, which does not carry (SoundConfig). The price is damage at long range: past 150 studs the
 		-- rifle's shot to the head no longer kills through heavy armor.
 		suppressor = {
 			Title = "Suppressor",
-			About = "Enemies see no tracer. Less damage at long range.",
+			About = "Enemies see no tracer and hear the shot only near by. Less damage at long range.",
 			Socket = "muzzle",
 			Model = "att_suppressor",
 			Fits = {
-				rifle = { Set = { Silent = true, Falloff = { { 150, 0.9 } } } },
-				pistol = { Set = { Silent = true, Falloff = { { 70, 0.85 } } } },
+				rifle = { Set = { Silent = true, Falloff = { { 150, 0.9 } }, ["Sounds.Fire"] = "Rifle Shot Quiet" } },
+				pistol = { Set = { Silent = true, Falloff = { { 70, 0.85 } }, ["Sounds.Fire"] = "Pistol Shot Quiet" } },
 			},
 		},
 		compensator = {
@@ -2861,6 +3283,16 @@ return {
 			-- weapon in Blender, so the weapon is level and the left hand is on it.
 			Hand = CFrame.new(0, -0.18, 0.05, 0.46297, 0.7368, 0.49273, -0.47555, 0.67559, -0.56341, -0.748, 0.02653, 0.66316),
 			Animations = { Hold = "FPS Rifle Hold", Fire = "FPS Rifle Fire", Reload = "FPS Rifle Reload" },
+			-- What it sounds like (Sound/SoundConfig). The reload's sounds are heard where its animation has
+			-- the magazine leave and come back and the bolt pulled (View, below).
+			Sounds = {
+				Fire = "Rifle Shot",
+				Empty = "Dry Fire",
+				Draw = "Rifle Draw",
+				MagazineOut = "Rifle Magazine Out",
+				MagazineIn = "Rifle Magazine In",
+				Bolt = "Rifle Bolt",
+			},
 
 			-- In first person.
 			View = {
@@ -2913,6 +3345,13 @@ return {
 
 			Hand = CFrame.new(-0.035, -0.204, -0.0175, 0.5246, 0.51696, 0.67642, -0.29871, 0.85579, -0.42238, -0.79722, 0.01953, 0.60337),
 			Animations = { Hold = "FPS Pistol Hold", Fire = "FPS Pistol Fire", Reload = "FPS Pistol Reload" },
+			Sounds = {
+				Fire = "Pistol Shot",
+				Empty = "Dry Fire",
+				Draw = "Pistol Draw",
+				MagazineOut = "Pistol Magazine Out",
+				MagazineIn = "Pistol Magazine In",
+			},
 
 			View = {
 				Animations = { Idle = "FPV Pistol Idle", Equip = "FPV Pistol Equip", Fire = "FPV Pistol Fire", Reload = "FPV Pistol Reload" },
@@ -2937,6 +3376,7 @@ return {
 
 			Hand = CFrame.new(-0.0104, -0.061, 0.0712, 0.95692, -0.07396, 0.28077, 0.25866, 0.65646, -0.70863, -0.13191, 0.75073, 0.64731),
 			Animations = { Hold = "FPS Knife Hold", Fire = "FPS Knife Slash" },
+			Sounds = { Fire = "Knife Swing", Draw = "Knife Draw" },
 
 			View = {
 				-- It slashes one way, then back the other.
@@ -6998,6 +7438,7 @@ local Penetration = require(Shared.Weapons.Penetration)
 local AttachmentConfig = require(Shared.Weapons.AttachmentConfig)
 local Attachments = require(Shared.Weapons.Attachments)
 local CombatConfig = require(Shared.Combat.CombatConfig)
+local SoundConfig = require(Shared.Sound.SoundConfig)
 local DesertFps = (ServerStorage :: any).DesertFps
 local Breakable = require(DesertFps.Destruction.Breakable)
 local Structure = require(DesertFps.Destruction.Structure)
@@ -7141,6 +7582,23 @@ local function tell(player: Player, gunner: Gunner)
 	remotes.State:FireClient(player, { current = gunner.current, slots = gunner.slots })
 end
 
+-- Tells everyone near enough to hear it that `player` made a noise with the weapon in hand: "Quiet" (a shot
+-- from a weapon that hides its shots), "Draw" or "Reload". `sound` is the sound it makes (SoundConfig), which
+-- says how far it carries; nobody further off is told, so the noise gives nothing away to them.
+local function heard(player: Player, weaponName: string, what: string, sound: string?, seconds: number?)
+	local entry = if sound then (SoundConfig.Sounds :: any)[sound] else nil
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not (entry and root and root:IsA("BasePart")) then
+		return
+	end
+	for _, other in Players:GetPlayers() do
+		local theirs = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if other ~= player and theirs and theirs:IsA("BasePart") and (theirs.Position - root.Position).Magnitude <= entry.Far then
+			remotes.Heard:FireClient(other, player, weaponName, what, sound, seconds)
+		end
+	end
+end
+
 local function pace(gunner: Gunner, humanoid: Humanoid)
 	humanoid.WalkSpeed = Ballistics.pace(weaponOf(gunner), gunner.walking, gunner.aiming)
 end
@@ -7160,6 +7618,7 @@ local function hold(player: Player, gunner: Gunner)
 	handModel(slot.weapon, weapon.Attached).Parent = character
 	gunner.readyAt = os.clock() + weapon.EquipTime - WeaponConfig.Grace
 	pace(gunner, humanoid)
+	heard(player, slot.weapon, "Draw", weapon.Sounds.Draw)
 end
 
 local function interruptReload(gunner: Gunner)
@@ -7314,6 +7773,10 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			end
 		end
 	end
+	-- A shot that is hidden is still heard, near by.
+	if weapon.Silent then
+		heard(player, slot.weapon, "Quiet", weapon.Sounds.Fire)
+	end
 end
 
 local function onReload(player: Player)
@@ -7330,6 +7793,7 @@ local function onReload(player: Player)
 	end
 	gunner.reloads += 1
 	local mine = gunner.reloads
+	heard(player, slot.weapon, "Reload", weapon.Sounds.MagazineIn, weapon.ReloadTime)
 	local seconds = weapon.ReloadTime - WeaponConfig.Grace
 	gunner.reloadEnds = os.clock() + seconds
 	task.delay(seconds, function()
@@ -7485,8 +7949,8 @@ function WeaponService.start()
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Remotes"
-	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Killed.
-	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Killed" } do
+	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Heard, Killed.
+	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Heard", "Killed" } do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
 		remote.Parent = folder
@@ -7564,6 +8028,9 @@ local Hud = require(Shared.Client:WaitForChild("Hud"))
 local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
 local BulletMarks = require(Shared.Client:WaitForChild("BulletMarks"))
+local Sounds = require(Shared.Client:WaitForChild("Sounds"))
+local Footsteps = require(Shared.Client:WaitForChild("Footsteps"))
+local SoundConfig = require(Shared:WaitForChild("Sound"):WaitForChild("SoundConfig"))
 local UtilityClient = require(Shared.Client:WaitForChild("UtilityClient"))
 local AnimationPlayer = require(Shared.Client:WaitForChild("AnimationPlayer"))
 local remotes = Shared:WaitForChild("Remotes")
@@ -7591,6 +8058,8 @@ end
 local effects = Instance.new("Folder")
 effects.Name = "WeaponEffects"
 effects.Parent = camera
+Sounds.start(effects)
+Footsteps.start(player)
 
 local viewmodel = Viewmodel.new(
 	Shared:WaitForChild("WeaponModels"),
@@ -7624,6 +8093,10 @@ local aimHeld, walkHeld = false, false
 local drawnAt = 0
 local lastShot = 0
 local reloadFrom: number? = nil
+-- The sounds of the reload under way, each with the share of the reload at which it is heard, and how many
+-- of them have been.
+local reloadCues: { { at: number, sound: string } } = {}
+local reloadHeard = 0
 local spray = 0 -- shots fired in the spray so far
 local recoilUp, recoilRight = 0, 0 -- where the spray has pushed the shots, in degrees off the aim
 local viewUp, viewRight = 0, 0 -- how much of that the view has climbed
@@ -7669,6 +8142,7 @@ local function take(slotName: string)
 	reloadFrom = nil
 	spray, recoilUp, recoilRight = 0, 0, 0
 	viewmodel:show(weapon)
+	Sounds.play(weapon.Sounds.Draw)
 	hud:setCrosshair(true)
 	if animator then
 		animator:switch(weapon.Animations, "Hold")
@@ -7703,6 +8177,21 @@ local function attach(slotName: string, socket: string, name: string?)
 	end
 end
 
+-- The sounds of a reload of that weapon, each with the share of the reload at which it is heard: the
+-- magazine out and a full one in, where the weapon's animation has them, and the bolt.
+local function cuesOf(what: any): { { at: number, sound: string } }
+	local cues = {}
+	local view, sounds = what.View, what.Sounds
+	if view.Magazine then
+		table.insert(cues, { at = view.Magazine.Out, sound = sounds.MagazineOut })
+		table.insert(cues, { at = view.Magazine.In, sound = sounds.MagazineIn })
+	end
+	if view.Bolt then
+		table.insert(cues, { at = view.Bolt.From, sound = sounds.Bolt })
+	end
+	return cues
+end
+
 local function reload()
 	if not (current and body() and weapon.Kind == "gun" and ready()) or reloadFrom then
 		return
@@ -7710,6 +8199,7 @@ local function reload()
 	local slot = slots[current]
 	if slot.magazine < weapon.Magazine and slot.reserve > 0 then
 		reloadFrom = os.clock()
+		reloadCues, reloadHeard = cuesOf(weapon), 0
 		remote("Reload"):FireServer()
 		viewmodel:play("Reload")
 		if animator then
@@ -7787,6 +8277,7 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		animator:play("Fire")
 	end
 	tracer(viewmodel:socket("muzzle") or origin, path.finish, weapon.View)
+	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
 end
@@ -7797,6 +8288,7 @@ local function slash(character: Model)
 	local reach = direction * weapon.Range
 	local target, part = struck(workspace:Spherecast(origin, CombatConfig.MeleeMargin, reach, sightline(character)))
 	remote("FireWeapon"):FireServer(origin, direction, target, part)
+	Sounds.play(weapon.Sounds.Fire)
 	viewmodel:play("Fire")
 	if animator then
 		animator:play("Fire")
@@ -7819,7 +8311,9 @@ local function pullTrigger(now: number, character: Model, humanoid: Humanoid, ro
 			shoot(character, humanoid, root)
 		end
 	elseif triggerFresh then
-		reload() -- pulling the trigger on an empty magazine
+		-- Pulling the trigger on an empty magazine: a click, and a reload if there is anything to load.
+		Sounds.play(weapon.Sounds.Empty)
+		reload()
 	end
 	triggerFresh = false
 end
@@ -7850,6 +8344,13 @@ RunService:BindToRenderStep("DesertFpsWeapon", Enum.RenderPriority.Camera.Value 
 		slot.reserve -= rounds
 		reloadFrom = nil
 		refresh()
+	end
+	if reloadFrom then
+		local done = (now - reloadFrom) / weapon.ReloadTime
+		while reloadCues[reloadHeard + 1] and done >= reloadCues[reloadHeard + 1].at do
+			reloadHeard += 1
+			Sounds.play(reloadCues[reloadHeard].sound)
+		end
 	end
 	if triggerHeld then
 		pullTrigger(now, character, humanoid, root)
@@ -8011,19 +8512,55 @@ remote("State").OnClientEvent:Connect(function(state: { current: string, slots: 
 end)
 remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean)
 	hud:hit(zone, killed)
+	local cues = SoundConfig.Cues
+	Sounds.play(if weapon and weapon.Kind == "melee" then cues.Blade elseif zone == "head" then cues.Head else cues.Hit)
+	if killed then
+		Sounds.play(cues.Kill)
+	end
 end)
 remote("Hurt").OnClientEvent:Connect(function()
 	hud:hurt()
+	Sounds.play(SoundConfig.Cues.Hurt)
 end)
 remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean, through: boolean)
 	hud:killed(killer, victim, weaponTitle, head, through)
 end)
--- Someone else's shot: a line from the weapon in their hand to where it ended.
+-- Where the weapon of that name is in someone else's hand, if they still hold it.
+local function heldAt(holder: Player, weaponName: string): Vector3?
+	local tool = holder.Character and holder.Character:FindFirstChildOfClass("Tool")
+	local handle = tool and tool.Name == weaponName and tool:FindFirstChild("Handle")
+	return if handle and handle:IsA("BasePart") then handle.Position else nil
+end
+
+-- Someone else's shot: a line from the weapon in their hand to where it ended, and its sound there.
 remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: string, origin: Vector3, finish: Vector3)
-	local tool = shooter.Character and shooter.Character:FindFirstChildOfClass("Tool")
-	local handle = tool and tool:FindFirstChild("Handle")
-	local from = if handle and handle:IsA("BasePart") then handle.Position else origin
-	tracer(from, finish, (WeaponConfig.Weapons :: any)[weaponName].View)
+	local theirs = (WeaponConfig.Weapons :: any)[weaponName]
+	local from = heldAt(shooter, weaponName) or origin
+	tracer(from, finish, theirs.View)
+	Sounds.play(theirs.Sounds.Fire, from)
+end)
+-- Something someone near by did that is heard and not seen: a shot from a weapon that hides it (`sound` is
+-- that weapon's, as it is fitted), a weapon drawn, a reload that takes `seconds`. The server tells only
+-- those near enough to hear it.
+remote("Heard").OnClientEvent:Connect(function(who: Player, weaponName: string, what: string, sound: string?, seconds: number?)
+	local theirs = (WeaponConfig.Weapons :: any)[weaponName]
+	local at = heldAt(who, weaponName)
+	if not (theirs and at) then
+		return
+	end
+	if what == "Reload" and seconds then
+		for _, cue in cuesOf(theirs) do
+			task.delay(cue.at * seconds, function()
+				-- They may have died or put it away meanwhile.
+				local now = heldAt(who, weaponName)
+				if now then
+					Sounds.play(cue.sound, now)
+				end
+			end)
+		end
+	else
+		Sounds.play(sound, at)
+	end
 end)
 -- What someone else's shot left on the town. A weapon that hides its shot does not hide this.
 remote("Marks").OnClientEvent:Connect(function(left: { Penetration.Mark })
@@ -8116,6 +8653,7 @@ local function testHook()
 				numbers = weapon,
 				utility = UtilityClient.state(),
 				marks = marks:state(),
+				sounds = Sounds.state(),
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),
@@ -8134,6 +8672,12 @@ local function testHook()
 end
 Shared:GetAttributeChangedSignal("TestHooks"):Connect(testHook)
 testHook()
+]=] },
+	{ path = { "StarterPlayer", "StarterPlayerScripts", "RbxCharacterSounds" }, class = "LocalScript", source = [=[
+--!strict
+-- Stands in for Roblox's own script of this name, which gives every body footsteps at any pace, a jump, a
+-- landing and a cry when it dies. A script with its name here stops Roblox adding its own. The game's
+-- footsteps are Client/Footsteps: heard when someone runs, silent when they walk.
 ]=] },
 }
 

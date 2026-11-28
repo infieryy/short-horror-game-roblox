@@ -115,6 +115,16 @@ return {
 			-- weapon in Blender, so the weapon is level and the left hand is on it.
 			Hand = CFrame.new(0, -0.18, 0.05, 0.46297, 0.7368, 0.49273, -0.47555, 0.67559, -0.56341, -0.748, 0.02653, 0.66316),
 			Animations = { Hold = "FPS Rifle Hold", Fire = "FPS Rifle Fire", Reload = "FPS Rifle Reload" },
+			-- What it sounds like (Sound/SoundConfig). The reload's sounds are heard where its animation has
+			-- the magazine leave and come back and the bolt pulled (View, below).
+			Sounds = {
+				Fire = "Rifle Shot",
+				Empty = "Dry Fire",
+				Draw = "Rifle Draw",
+				MagazineOut = "Rifle Magazine Out",
+				MagazineIn = "Rifle Magazine In",
+				Bolt = "Rifle Bolt",
+			},
 
 			-- In first person.
 			View = {
@@ -167,6 +177,13 @@ return {
 
 			Hand = CFrame.new(-0.035, -0.204, -0.0175, 0.5246, 0.51696, 0.67642, -0.29871, 0.85579, -0.42238, -0.79722, 0.01953, 0.60337),
 			Animations = { Hold = "FPS Pistol Hold", Fire = "FPS Pistol Fire", Reload = "FPS Pistol Reload" },
+			Sounds = {
+				Fire = "Pistol Shot",
+				Empty = "Dry Fire",
+				Draw = "Pistol Draw",
+				MagazineOut = "Pistol Magazine Out",
+				MagazineIn = "Pistol Magazine In",
+			},
 
 			View = {
 				Animations = { Idle = "FPV Pistol Idle", Equip = "FPV Pistol Equip", Fire = "FPV Pistol Fire", Reload = "FPV Pistol Reload" },
@@ -191,6 +208,7 @@ return {
 
 			Hand = CFrame.new(-0.0104, -0.061, 0.0712, 0.95692, -0.07396, 0.28077, 0.25866, 0.65646, -0.70863, -0.13191, 0.75073, 0.64731),
 			Animations = { Hold = "FPS Knife Hold", Fire = "FPS Knife Slash" },
+			Sounds = { Fire = "Knife Swing", Draw = "Knife Draw" },
 
 			View = {
 				-- It slashes one way, then back the other.

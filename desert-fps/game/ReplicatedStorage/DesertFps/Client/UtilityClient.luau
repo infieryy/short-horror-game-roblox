@@ -12,6 +12,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("DesertFps")
 local Config = require(script.Parent.Parent.Utility.UtilityConfig)
 local HudConfig = require(script.Parent.HudConfig)
+local Sounds = require(script.Parent.Sounds)
 
 local UtilityClient = {}
 
@@ -109,20 +110,23 @@ local function fly(name: string, origin: Vector3, velocity: Vector3, seconds: nu
 	end
 	place(model, at(0), what.Size)
 	model.Parent = hands.effects
+	Sounds.play(Config.Sounds.Throw, origin)
 	local flying: RBXScriptConnection
 	flying = RunService.RenderStepped:Connect(function()
 		local t = os.clock() - started
 		if t >= seconds then
 			flying:Disconnect()
 			model:Destroy()
+			Sounds.play(Config.Sounds.Stick, at(seconds).Position)
 		else
 			place(model, at(t), what.Size)
 		end
 	end)
 end
 
--- A pulse: a bubble of the dart's light that grows and fades.
+-- A pulse: a bubble of the dart's light that grows and fades, and its sound.
 local function pulse(at: Vector3)
+	Sounds.play(Config.Sounds.Pulse, at)
 	local bubble = Instance.new("Part")
 	bubble.Shape = Enum.PartType.Ball
 	bubble.Material = Enum.Material.Neon
@@ -163,6 +167,7 @@ local function reveal(seen: { Model }, seconds: number)
 	end
 	if #seen > 0 then
 		hands.hud:notice(`{#seen} REVEALED`, HudConfig.Accent)
+		Sounds.play(Config.Sounds.Seen)
 	end
 end
 
@@ -205,6 +210,7 @@ function UtilityClient.start(lent: Hands)
 	remote("Reveal").OnClientEvent:Connect(reveal)
 	remote("Spotted").OnClientEvent:Connect(function()
 		hands.hud:notice("SPOTTED", HudConfig.Harm)
+		Sounds.play(Config.Sounds.Spotted)
 	end)
 	RunService.RenderStepped:Connect(fade)
 end

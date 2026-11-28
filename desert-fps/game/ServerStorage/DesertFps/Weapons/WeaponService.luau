@@ -17,6 +17,7 @@ local Penetration = require(Shared.Weapons.Penetration)
 local AttachmentConfig = require(Shared.Weapons.AttachmentConfig)
 local Attachments = require(Shared.Weapons.Attachments)
 local CombatConfig = require(Shared.Combat.CombatConfig)
+local SoundConfig = require(Shared.Sound.SoundConfig)
 local DesertFps = (ServerStorage :: any).DesertFps
 local Breakable = require(DesertFps.Destruction.Breakable)
 local Structure = require(DesertFps.Destruction.Structure)
@@ -160,6 +161,23 @@ local function tell(player: Player, gunner: Gunner)
 	remotes.State:FireClient(player, { current = gunner.current, slots = gunner.slots })
 end
 
+-- Tells everyone near enough to hear it that `player` made a noise with the weapon in hand: "Quiet" (a shot
+-- from a weapon that hides its shots), "Draw" or "Reload". `sound` is the sound it makes (SoundConfig), which
+-- says how far it carries; nobody further off is told, so the noise gives nothing away to them.
+local function heard(player: Player, weaponName: string, what: string, sound: string?, seconds: number?)
+	local entry = if sound then (SoundConfig.Sounds :: any)[sound] else nil
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not (entry and root and root:IsA("BasePart")) then
+		return
+	end
+	for _, other in Players:GetPlayers() do
+		local theirs = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if other ~= player and theirs and theirs:IsA("BasePart") and (theirs.Position - root.Position).Magnitude <= entry.Far then
+			remotes.Heard:FireClient(other, player, weaponName, what, sound, seconds)
+		end
+	end
+end
+
 local function pace(gunner: Gunner, humanoid: Humanoid)
 	humanoid.WalkSpeed = Ballistics.pace(weaponOf(gunner), gunner.walking, gunner.aiming)
 end
@@ -179,6 +197,7 @@ local function hold(player: Player, gunner: Gunner)
 	handModel(slot.weapon, weapon.Attached).Parent = character
 	gunner.readyAt = os.clock() + weapon.EquipTime - WeaponConfig.Grace
 	pace(gunner, humanoid)
+	heard(player, slot.weapon, "Draw", weapon.Sounds.Draw)
 end
 
 local function interruptReload(gunner: Gunner)
@@ -333,6 +352,10 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			end
 		end
 	end
+	-- A shot that is hidden is still heard, near by.
+	if weapon.Silent then
+		heard(player, slot.weapon, "Quiet", weapon.Sounds.Fire)
+	end
 end
 
 local function onReload(player: Player)
@@ -349,6 +372,7 @@ local function onReload(player: Player)
 	end
 	gunner.reloads += 1
 	local mine = gunner.reloads
+	heard(player, slot.weapon, "Reload", weapon.Sounds.MagazineIn, weapon.ReloadTime)
 	local seconds = weapon.ReloadTime - WeaponConfig.Grace
 	gunner.reloadEnds = os.clock() + seconds
 	task.delay(seconds, function()
@@ -504,8 +528,8 @@ function WeaponService.start()
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Remotes"
-	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Killed.
-	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Killed" } do
+	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Heard, Killed.
+	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Heard", "Killed" } do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
 		remote.Parent = folder
