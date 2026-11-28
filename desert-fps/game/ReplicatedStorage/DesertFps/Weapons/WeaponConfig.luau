@@ -138,10 +138,6 @@ return {
 				-- hand and when a full one is back in, and when the bolt is pulled.
 				Magazine = { Out = 0.187, In = 0.56 },
 				Bolt = { From = 0.69, To = 0.77 },
-				-- The line from the muzzle to the hit: seconds it stays, width, colour.
-				TracerTime = 0.05,
-				TracerWidth = 0.04,
-				TracerColor = Color3.fromRGB(255, 222, 168),
 			},
 		},
 
@@ -188,9 +184,6 @@ return {
 			View = {
 				Animations = { Idle = "FPV Pistol Idle", Equip = "FPV Pistol Equip", Fire = "FPV Pistol Fire", Reload = "FPV Pistol Reload" },
 				Magazine = { Out = 0.18, In = 0.6 },
-				TracerTime = 0.05,
-				TracerWidth = 0.03,
-				TracerColor = Color3.fromRGB(255, 222, 168),
 			},
 		},
 

@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(script.Parent.MarkConfig)
 local Sounds = require(script.Parent.Sounds)
+local Effects = require(script.Parent.Effects)
 local Penetration = require(script.Parent.Parent.Weapons.Penetration)
 
 local BulletMarks = {}
@@ -305,6 +306,9 @@ function BulletMarks.leave(self: any, marks: { Penetration.Mark })
 		local look = (Config.Materials :: any)[material] or Config.Materials.hard
 		if look.Dust then
 			puff(self.parent, mark, look.Dust)
+		end
+		if look.Sparks ~= false then
+			Effects.sparks(mark.at, mark.normal, mark.kind, look.Chip)
 		end
 		if look.Sound and mark.kind ~= "out" and (sounded == 0 or index == #marks) then
 			sounded += 1

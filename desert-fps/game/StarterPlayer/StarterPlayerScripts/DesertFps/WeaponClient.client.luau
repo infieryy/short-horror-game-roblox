@@ -23,6 +23,7 @@ local LoadoutMenu = require(Shared.Client:WaitForChild("LoadoutMenu"))
 local LaserSight = require(Shared.Client:WaitForChild("LaserSight"))
 local BulletMarks = require(Shared.Client:WaitForChild("BulletMarks"))
 local Sounds = require(Shared.Client:WaitForChild("Sounds"))
+local Effects = require(Shared.Client:WaitForChild("Effects"))
 local Footsteps = require(Shared.Client:WaitForChild("Footsteps"))
 local SoundConfig = require(Shared:WaitForChild("Sound"):WaitForChild("SoundConfig"))
 local UtilityClient = require(Shared.Client:WaitForChild("UtilityClient"))
@@ -53,6 +54,7 @@ local effects = Instance.new("Folder")
 effects.Name = "WeaponEffects"
 effects.Parent = camera
 Sounds.start(effects)
+Effects.start(effects)
 Footsteps.start(player)
 
 local viewmodel = Viewmodel.new(
@@ -210,24 +212,6 @@ local function sightline(character: Model): RaycastParams
 	return params
 end
 
-local function tracer(from: Vector3, to: Vector3, view: any)
-	if not view.TracerTime or (to - from).Magnitude < 0.5 then
-		return
-	end
-	local line = Instance.new("Part")
-	line.Anchored = true
-	line.CanCollide = false
-	line.CanQuery = false
-	line.CanTouch = false
-	line.CastShadow = false
-	line.Material = Enum.Material.Neon
-	line.Color = view.TracerColor
-	line.Size = Vector3.new(view.TracerWidth, view.TracerWidth, (to - from).Magnitude)
-	line.CFrame = CFrame.lookAt((from + to) / 2, to)
-	line.Parent = effects
-	task.delay(view.TracerTime, line.Destroy, line)
-end
-
 -- Whose body a cast met, if anyone's, and which part of it. This is what the client tells the server it
 -- thinks it hit; the server's own test is the one that counts.
 local function struck(hit: RaycastResult?): (Model?, string?)
@@ -270,7 +254,10 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 	if animator then
 		animator:play("Fire")
 	end
-	tracer(viewmodel:socket("muzzle") or origin, path.finish, weapon.View)
+	-- The flash and the tracer leave the muzzle in the player's hands, towards where the shot lands.
+	local muzzle = viewmodel:socket("muzzle") or origin
+	Effects.muzzle(CFrame.lookAlong(muzzle, direction), weapon.Name, weapon.Silent == true, true)
+	Effects.tracer(muzzle, path.finish)
 	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
@@ -504,8 +491,11 @@ remote("State").OnClientEvent:Connect(function(state: { current: string, slots: 
 		refresh()
 	end
 end)
-remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean)
+remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean, at: Vector3?, along: Vector3?)
 	hud:hit(zone, killed)
+	if at and along then
+		Effects.struck(at, zone, along)
+	end
 	local cues = SoundConfig.Cues
 	Sounds.play(if weapon and weapon.Kind == "melee" then cues.Blade elseif zone == "head" then cues.Head else cues.Hit)
 	if killed then
@@ -519,28 +509,44 @@ end)
 remote("Killed").OnClientEvent:Connect(function(killer: string, victim: string, weaponTitle: string, head: boolean, through: boolean)
 	hud:killed(killer, victim, weaponTitle, head, through)
 end)
--- Where the weapon of that name is in someone else's hand, if they still hold it.
-local function heldAt(holder: Player, weaponName: string): Vector3?
+-- Where the weapon of that name is in someone else's hand, if they still hold it, and where its muzzle is,
+-- looking along the barrel (the server marks it on a weapon that has one).
+local function heldAt(holder: Player, weaponName: string): (Vector3?, CFrame?)
 	local tool = holder.Character and holder.Character:FindFirstChildOfClass("Tool")
 	local handle = tool and tool.Name == weaponName and tool:FindFirstChild("Handle")
-	return if handle and handle:IsA("BasePart") then handle.Position else nil
+	if not (handle and handle:IsA("BasePart")) then
+		return nil, nil
+	end
+	local muzzle = handle:FindFirstChild("Muzzle")
+	return handle.Position, if muzzle and muzzle:IsA("Attachment") then muzzle.WorldCFrame else nil
 end
 
 -- Someone else's shot: a line from the weapon in their hand to where it ended, and its sound there.
 remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: string, origin: Vector3, finish: Vector3)
 	local theirs = (WeaponConfig.Weapons :: any)[weaponName]
-	local from = heldAt(shooter, weaponName) or origin
-	tracer(from, finish, theirs.View)
+	local held, muzzle = heldAt(shooter, weaponName)
+	local from = if muzzle then muzzle.Position else held or origin
+	if theirs.Kind == "gun" then
+		Effects.muzzle(CFrame.lookAt(from, finish), weaponName, false, false)
+		Effects.tracer(from, finish)
+	end
 	Sounds.play(theirs.Sounds.Fire, from)
+end)
+-- Someone's shot landed on a body, there, in that zone, travelling that way: everyone sees it burst.
+remote("Struck").OnClientEvent:Connect(function(at: Vector3, zone: string, along: Vector3)
+	Effects.struck(at, zone, along)
 end)
 -- Something someone near by did that is heard and not seen: a shot from a weapon that hides it (`sound` is
 -- that weapon's, as it is fitted), a weapon drawn, a reload that takes `seconds`. The server tells only
 -- those near enough to hear it.
 remote("Heard").OnClientEvent:Connect(function(who: Player, weaponName: string, what: string, sound: string?, seconds: number?)
 	local theirs = (WeaponConfig.Weapons :: any)[weaponName]
-	local at = heldAt(who, weaponName)
+	local at, muzzle = heldAt(who, weaponName)
 	if not (theirs and at) then
 		return
+	end
+	if what == "Quiet" and muzzle then
+		Effects.muzzle(muzzle, weaponName, true, false)
 	end
 	if what == "Reload" and seconds then
 		for _, cue in cuesOf(theirs) do
@@ -648,6 +654,7 @@ local function testHook()
 				utility = UtilityClient.state(),
 				marks = marks:state(),
 				sounds = Sounds.state(),
+				effects = Effects.state(),
 				magazine = slots[current].magazine,
 				reserve = slots[current].reserve,
 				ready = ready(),

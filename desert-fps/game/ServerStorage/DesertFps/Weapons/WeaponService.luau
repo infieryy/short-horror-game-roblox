@@ -109,6 +109,15 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	for _, each in fitting.adds do
 		add(each.template, each.at, each.size)
 	end
+	-- Where shots leave the weapon, looking along the barrel, for clients to draw the flash and the tracer
+	-- from (Client/Effects).
+	local muzzle = source:GetAttribute("Socket_muzzle")
+	if typeof(muzzle) == "Vector3" then
+		local mark = Instance.new("Attachment")
+		mark.Name = "Muzzle"
+		mark.CFrame = AIM * CFrame.new(muzzle) * AIM:Inverse()
+		mark.Parent = handle
+	end
 	-- Where a laser's beam leaves the weapon, looking along the barrel, for clients to draw it from
 	-- (Client/LaserSight).
 	if fitting.points.beam then
@@ -314,7 +323,13 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			{ attacker = player, weapon = slot.weapon, zone = zone, from = origin, through = force < 1 }
 		)
 		finish, ends = origin + direction * distance, distance
-		remotes.Hit:FireClient(player, zone, dealt, killed)
+		remotes.Hit:FireClient(player, zone, dealt, killed, finish, direction)
+		-- Everyone else sees the hit burst where it landed, whatever the weapon hides.
+		for _, other in Players:GetPlayers() do
+			if other ~= player then
+				remotes.Struck:FireClient(other, finish, zone, direction)
+			end
+		end
 	end
 	-- Everything it went through before it ended is struck, and whatever stopped it, each with the force the
 	-- shot still had there.
@@ -528,8 +543,8 @@ function WeaponService.start()
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Remotes"
-	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Heard, Killed.
-	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Heard", "Killed" } do
+	-- From a client: FireWeapon, Reload, Equip, Stance, Attach. To clients: State, Hit, Hurt, Shot, Marks, Heard, Struck, Killed.
+	for _, name in { "FireWeapon", "Reload", "Equip", "Stance", "Attach", "State", "Hit", "Hurt", "Shot", "Marks", "Heard", "Struck", "Killed" } do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
 		remote.Parent = folder
