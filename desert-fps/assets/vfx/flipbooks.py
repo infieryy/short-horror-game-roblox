@@ -1,278 +1,359 @@
-"""Draws the shot effects as flipbook sheets: python flipbooks.py   (writes out/fx_*.png and out/preview.png)
+"""Draws the shot effects as flipbook sheets: python flipbooks.py   (writes out/fx_*.png and out/preview*.png)
 
-Every sheet is drawn to match Valorant frame for frame, from Riot's own material (see REFERENCE.md beside
-this file for what each frame of it shows). Nothing of Riot's is copied into the sheets: the shapes are
-drawn here, to the reference's shapes, colours, sizes and timing.
+Second drawing, from scratch. The first was soft shapes filled by depth, and it read as clip art: the owner,
+"The VFX is still really bad. Redraw the flipbooks from scratch ... use multiple valorant references".
 
-The method is the owner's stylized VFX skill: build the effect, take every frame, pack 16 frames 4x4, play
-the sheet on a Roblox particle. The skill builds and films in Unreal; there is none here, so the frames are
-drawn directly, which also gives a clean cutout without filming on black and on white.
+What Riot's frames show (REFERENCE.md has them one by one) is flat, hard-edged, angular drawing: every shape is
+a cluster of long tapered blades, each blade a different length, filled in flat bands that go pale yellow in
+the middle, yellow, orange, and red at the tips. Light is a separate flat disc behind. Nothing is a gradient.
+So everything here is polygons: a blade is a four-cornered kite, a burst is blades round a lump, and the
+colour bands are the same burst drawn again shorter and thinner inside itself.
 
 Sheets (1024 x 1024, 16 frames of 256, read left to right, top to bottom):
-    fx_muzzle   the flash: a thin-spiked star with a tall upright spike, an orange glow, and a red beam
-                across it that outlives the star
-    fx_spark    where a shot lands: a small white star, then a grey puff
-    fx_body     a hit on a body: a pale core in orange, ringed with crimson blobs
-    fx_head     a hit on a head: a pale flame that stands up from the hit, reddens and is eaten away, with a
-                white four-pointed glint at its foot
-And fx_tracer (256 x 32): the tracer's line, pale in the middle and orange at its edges.
+    fx_muzzle   the flash at the muzzle
+    fx_spark    where a shot lands: a white star, then a puff
+    fx_body     a hit on a body
+    fx_head     a hit on a head
+And fx_tracer (256 x 32): the tracer's line across its width.
 """
+import math
 import os
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
 FRAME = 256
-SUPER = 2
+SUPER = 4
+W = FRAME * SUPER
 
-WHITE = (255, 255, 250)
-PALE = (255, 244, 198)
-YELLOW = (255, 216, 96)
-ORANGE = (255, 142, 40)
-RED = (236, 66, 36)
-CRIMSON = (188, 26, 44)
-SALMON = (255, 132, 100)
-PINK = (238, 82, 96)
-GREY = (226, 222, 228)
-
-
-def lattice(rng, size):
-    return rng.random((size + 1, size + 1))
-
-
-def value_noise(x, y, grid):
-    n = grid.shape[0] - 1
-    xi, yi = np.floor(x).astype(int), np.floor(y).astype(int)
-    fx, fy = x - xi, y - yi
-    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
-    xi, yi = xi % n, yi % n
-    a, b = grid[yi, xi], grid[yi, xi + 1]
-    c, d = grid[yi + 1, xi], grid[yi + 1, xi + 1]
-    return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy
+WHITE = (255, 252, 214)
+PALE = (255, 240, 150)
+HOT = (255, 246, 178)
+YELLOW = (255, 224, 84)
+AMBER = (255, 178, 40)
+ORANGE = (255, 126, 26)
+FLAME = (248, 82, 34)
+RED = (228, 44, 42)
+CRIMSON = (178, 22, 46)
+SALMON = (244, 108, 84)
+SMOKE = (234, 228, 222)
 
 
-def fbm(x, y, grids):
-    total, weight, scale = 0.0, 0.0, 1.0
-    for index, grid in enumerate(grids):
-        total += value_noise(x * scale + index * 7.3, y * scale + index * 3.1, grid) / scale
-        weight += 1 / scale
-        scale *= 2
-    return total / weight
+def px(point):
+    return ((point[0] + 1) * 0.5 * W, (1 - point[1]) * 0.5 * W)
 
 
-def mix(a, b, t):
-    return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
+def mask(polys, blur=0.0, grow=0.0, holes=()):
+    """The polygons as one shape. `grow` fattens it, `blur` softens its edge (both in frame units, where the
+    frame is 2 across), `holes` are polygons cut out of it."""
+    image = Image.new("L", (W, W), 0)
+    draw = ImageDraw.Draw(image)
+    for poly in polys:
+        points = [px(p) for p in poly]
+        draw.polygon(points, fill=255)
+        if grow > 0:
+            draw.line(points + points[:2], fill=255, width=max(1, int(round(grow * W))), joint="curve")
+    for poly in holes:
+        draw.polygon([px(p) for p in poly], fill=0)
+    if blur > 0:
+        image = image.filter(ImageFilter.GaussianBlur(blur * W / 2))
+    return image
 
 
-class Canvas:
-    """One frame: coordinates from -1 to 1, y up. Layers of colour are laid over one another, soft-edged."""
+class Frame:
+    def __init__(self):
+        self.rgb = np.zeros((W, W, 3), np.float32)  # premultiplied
+        self.alpha = np.zeros((W, W), np.float32)
 
-    def __init__(self, width=FRAME, height=FRAME):
-        w, h = width * SUPER, height * SUPER
-        xs = (np.arange(w) + 0.5) / w * 2 - 1
-        ys = 1 - (np.arange(h) + 0.5) / h * 2
-        self.x, self.y = np.meshgrid(xs * (width / height), ys)
-        self.pixel = 2 / h
-        self.rgb = np.zeros((h, w, 3))  # premultiplied
-        self.alpha = np.zeros((h, w))
-        self.size = (width, height)
+    def lay(self, shape, colour, alpha=1.0):
+        m = np.asarray(shape, np.float32) * (alpha / 255.0)
+        self.rgb = self.rgb * (1 - m[..., None]) + np.asarray(colour, np.float32) * m[..., None]
+        self.alpha = self.alpha * (1 - m) + m
 
-    def polar(self, ox=0.0, oy=0.0):
-        return np.hypot(self.x - ox, self.y - oy), np.arctan2(self.y - oy, self.x - ox)
-
-    def lay(self, colour, alpha):
-        alpha = np.clip(alpha, 0, 1)
-        self.rgb = np.asarray(colour)[None, None, :] * alpha[..., None] + self.rgb * (1 - alpha[..., None])
-        self.alpha = alpha + self.alpha * (1 - alpha)
-
-    def edge(self, field, soft=1.5):
-        """1 inside a shape (field > 0), 0 outside, over `soft` pixels."""
-        return np.clip(field / (self.pixel * soft) + 0.5, 0, 1)
-
-    def fill(self, field, stops, opacity=1.0):
-        """Fills a shape with colours by how deep inside it a point is: stops is [(depth, colour)], rising."""
-        inside = self.edge(field) * opacity
-        for index, (depth, colour) in enumerate(stops):
-            if index == 0:
-                self.lay(colour, inside)
-            else:
-                before = stops[index - 1][0]
-                self.lay(colour, inside * np.clip((field - before) / max(depth - before, 1e-6), 0, 1))
-
-    def glow(self, colour, distance, reach, strength):
-        """A soft light that is `strength` at distance 0 and gone by about twice `reach`."""
-        self.lay(colour, strength * np.exp(-((np.maximum(distance, 0) / reach) ** 2)))
-
-    def image(self):
-        w, h = self.size
-        alpha = self.alpha.reshape(h, SUPER, w, SUPER).mean(axis=(1, 3))
-        rgb = self.rgb.reshape(h, SUPER, w, SUPER, 3).mean(axis=(1, 3))
-        straight = np.where(alpha[..., None] > 1e-4, rgb / np.maximum(alpha[..., None], 1e-4), ORANGE)
-        out = np.dstack([straight, alpha * 255]).round().clip(0, 255).astype(np.uint8)
+    def image(self, bleed=ORANGE):
+        a = self.alpha.reshape(FRAME, SUPER, FRAME, SUPER).mean(axis=(1, 3))
+        c = self.rgb.reshape(FRAME, SUPER, FRAME, SUPER, 3).mean(axis=(1, 3))
+        straight = np.where(a[..., None] > 1e-3, c / np.maximum(a[..., None], 1e-3), np.asarray(bleed, np.float32))
+        out = np.dstack([straight, a * 255]).round().clip(0, 255).astype(np.uint8)
         return Image.fromarray(out, "RGBA")
 
 
-def star(r, a, angles, lengths, widths, body):
-    """How far inside a star a point is: a round body with a pointed spike at each angle."""
-    reach = np.full(r.shape, body)
-    for angle, length, width in zip(angles, lengths, widths):
-        off = np.abs((a - angle + np.pi) % (2 * np.pi) - np.pi)
-        reach = np.maximum(reach, body + length * np.clip(1 - off / width, 0, 1) ** 1.5)
-    return reach - r
+def kite(origin, degrees, length, width, start=0.0, tail=0.0, shoulder=0.24, lean=0.0, skew=1.0):
+    """A blade: a point at its tail, widest a quarter of the way along, a long taper to a point. `start`
+    moves all of it out along its own direction (a blade that has left the burst)."""
+    a = math.radians(degrees)
+    dx, dy = math.cos(a), math.sin(a)
+    nx, ny = -dy, dx
+    ox, oy = origin[0] + dx * start, origin[1] + dy * start
+    sx, sy = ox + dx * length * shoulder, oy + dy * length * shoulder
+    return [
+        (ox - dx * tail, oy - dy * tail),
+        (sx + nx * width, sy + ny * width),
+        (ox + dx * length + nx * lean, oy + dy * length + ny * lean),
+        (sx - nx * width * skew, sy - ny * width * skew),
+    ]
 
 
-def tongue(c, ox, oy, angle, length, width, belly=0.3):
-    """How far inside a flame's tongue a point is: it starts at a point, swells, and ends in a point."""
-    u = (c.x - ox) * np.cos(angle) + (c.y - oy) * np.sin(angle)
-    v = np.abs(-(c.x - ox) * np.sin(angle) + (c.y - oy) * np.cos(angle))
-    s = np.clip(u / length, 0, 1)
-    profile = np.where(s < belly, (s / belly) ** 0.7, ((1 - s) / (1 - belly)) ** 1.25)
-    return np.where((u >= 0) & (u <= length), width * profile - v, -1.0)
+def lump(origin, radius, seed, corners=11):
+    """An uneven many-cornered middle for a burst."""
+    rng = np.random.default_rng(seed)
+    points = []
+    for index in range(corners):
+        a = 2 * math.pi * (index + rng.uniform(-0.25, 0.25)) / corners
+        r = radius * rng.uniform(0.78, 1.12)
+        points.append((origin[0] + math.cos(a) * r, origin[1] + math.sin(a) * r))
+    return points
 
 
-def ease(t):
-    return 1 - (1 - t) ** 3
+def disc(origin, radius, squash=1.0, corners=40):
+    return [
+        (origin[0] + math.cos(2 * math.pi * i / corners) * radius, origin[1] + math.sin(2 * math.pi * i / corners) * radius * squash)
+        for i in range(corners)
+    ]
 
 
-def muzzle(frame):
-    rng = np.random.default_rng(7)
-    grids = [lattice(rng, 8) for _ in range(3)]
-    c = Canvas()
-    r, a = c.polar()
-    t = frame / 15
-    # Reference: the star is whole on the first frame; on the second the glow is at its widest and a red beam
-    # lies across the muzzle; on the third the star has shrunk and the beam is shorter; then only a few orange
-    # points are left. Sixteen frames here cover those four.
-    stage = frame / 4.0  # 0..4 through the reference's frames
-    size = np.interp(stage, [0, 0.5, 1.5, 2.5, 3.5, 4], [0.8, 1.0, 0.95, 0.55, 0.25, 0.0])
-    halo = np.interp(stage, [0, 1, 1.6, 2.6, 3.4, 4], [0.45, 0.8, 0.85, 0.5, 0.12, 0.0])
-    beam = np.interp(stage, [0, 0.8, 1.5, 2.6, 3.5, 4], [0.25, 0.9, 0.95, 0.6, 0.2, 0.0])
-    wobble = fbm(c.x * 4 + 1.0, c.y * 4 + stage, grids) - 0.5
-    # the glow
-    c.glow(RED, r, 0.5 * (0.6 + 0.4 * halo), 0.4 * halo)
-    c.glow(ORANGE, r, 0.3 * (0.6 + 0.4 * halo), 0.95 * halo)
-    c.glow(YELLOW, r, 0.14 * (0.6 + 0.4 * halo), 0.9 * halo)
-    # the beam: thin, long, level, redder than the rest
+def burst(frame, origin, blades, bands, size=1.0, core=0.0, seed=1, apart=0.0, only=None):
+    """Blades round a lump, drawn once for each colour band, outermost first. A band is (colour, how long,
+    how wide, how big the lump, alpha), each a share of the full burst. `apart` is how far the blades have
+    left the middle, as a share of their own length."""
+    for colour, long, wide, middle, alpha in bands:
+        polys = []
+        for degrees, length, width in blades:
+            if only and not only(degrees):
+                continue
+            reach = length * size
+            polys.append(kite(origin, degrees, reach * long, width * size * wide, start=reach * apart + reach * (1 - long) * 0.12))
+        if core > 0 and middle > 0:
+            polys.append(lump(origin, core * size * middle, seed))
+        frame.lay(mask(polys), colour, alpha)
+
+
+def at(stage, keys, values):
+    return float(np.interp(stage, keys, values))
+
+
+# ---------------------------------------------------------------------------------------------------------
+# The flash. Riot's frames of it (clip 1 frames 33 to 36, clip 2 frames 18 to 20, and the concept sheet's
+# rifles): a cluster of blades with one thin one standing far above the rest, a long level beam, and a flat
+# orange disc of light behind; the blades are pale in the middle and go orange then red to their tips. On the
+# third frame the blades have left the middle and are orange; on the fourth a few salmon ones are left, to
+# the forward side, with a thin pale arc in the air.
+RIFLE = [
+    (88, 0.92, 0.05), (124, 0.62, 0.11), (150, 0.44, 0.075), (200, 0.66, 0.1), (232, 0.42, 0.085),
+    (266, 0.36, 0.07), (54, 0.5, 0.09), (16, 0.36, 0.075), (320, 0.33, 0.07), (104, 0.46, 0.06),
+    (72, 0.4, 0.065), (176, 0.5, 0.07), (140, 0.56, 0.06), (216, 0.36, 0.06),
+]
+
+
+def muzzle(index):
+    frame = Frame()
+    stage = index / 15 * 4
+    size = at(stage, [0, 0.27, 1, 2, 3, 4], [0.78, 1.0, 0.96, 0.8, 0.6, 0.45])
+    hot = at(stage, [0, 1.3, 2.2, 3], [1, 1, 0.4, 0])
+    beam = at(stage, [0, 0.3, 1.4, 2.4, 3.3, 4], [0.7, 1, 0.95, 0.6, 0.22, 0])
+    light = at(stage, [0, 0.4, 1.5, 2.6, 3.4], [0.75, 1, 0.85, 0.4, 0])
+    apart = at(stage, [0, 1.7, 2.4, 4], [0, 0, 0.16, 0.42])
+    fade = at(stage, [0, 2.8, 4], [1, 1, 0.3])
+    rng = np.random.default_rng(100 + index)
+    blades = [(a + rng.uniform(-1.5, 1.5), l * rng.uniform(0.93, 1.07), w) for a, l, w in RIFLE]
+    if light > 0:
+        frame.lay(mask([disc((-0.04, 0.02), 0.6)], blur=0.1), FLAME, 0.4 * light)
+        frame.lay(mask([disc((-0.04, 0.02), 0.46)], blur=0.07), ORANGE, 0.5 * light)
+        frame.lay(mask([disc((-0.02, 0.01), 0.3)], blur=0.05), AMBER, 0.55 * light)
     if beam > 0.02:
-        length, thick = 0.92 * beam, 0.035 * (0.5 + 0.5 * beam)
-        # longer to one side: on the reference it runs out to the left of the muzzle
-        reach = np.where(c.x < 0, length, length * 0.45)
-        level = thick * np.clip(1 - np.abs(c.x) / reach, 0, 1) ** 0.8 - np.abs(c.y)
-        c.glow(RED, -level, 0.035, 0.5 * beam)
-        c.fill(level, [(0, RED), (0.012, ORANGE), (0.024, YELLOW)])
-    # the star: thin spikes of uneven length, the upright one much the tallest
+        left, right = -0.98 * beam, 0.4 * beam
+        for colour, long, thick in ((FLAME, 1, 0.085), (ORANGE, 0.94, 0.064), (YELLOW, 0.82, 0.042), (PALE, 0.6, 0.022)):
+            if colour in (YELLOW, PALE) and hot < 0.5:
+                continue
+            t = thick * (0.45 + 0.55 * beam)
+            frame.lay(mask([[(left * long, 0), (-0.06, t), (right * long, 0), (-0.06, -t)]]), colour)
+    if hot > 0.6:
+        bands = [(FLAME, 1, 1, 1, 1), (ORANGE, 0.9, 0.84, 0.94, 1), (YELLOW, 0.72, 0.68, 0.84, 1), (PALE, 0.5, 0.5, 0.68, 1)]
+        burst(frame, (0, 0), blades, bands, size, core=0.3, seed=7)
+        frame.lay(mask([lump((0, 0), 0.13 * size, 9)], blur=0.02), HOT, 0.92)
+    elif hot > 0.05:
+        bands = [(FLAME, 1, 1, 0, 1), (ORANGE, 0.86, 0.8, 0, 1), (YELLOW, 0.5, 0.5, 0, 1)]
+        burst(frame, (0, 0), blades, bands, size, apart=apart)
+        frame.lay(mask([lump((0, 0), 0.14 * size, 7)]), ORANGE)
+        frame.lay(mask([lump((0, 0), 0.08 * size, 9)]), YELLOW)
+    else:
+        forward = lambda degrees: 95 < degrees < 265
+        bands = [(SALMON, 1, 1, 0, fade), (ORANGE, 0.6, 0.55, 0, fade)]
+        burst(frame, (0, 0), blades, bands, size, apart=apart, only=forward)
+    if 2.8 < stage:
+        ring = Image.new("L", (W, W), 0)
+        x0, y0 = px((-0.62, 0.7))
+        x1, y1 = px((0.2, -0.12))
+        ImageDraw.Draw(ring).arc([x0, y0, x1, y1], 195, 285, fill=255, width=int(0.009 * W))
+        frame.lay(ring.filter(ImageFilter.GaussianBlur(0.005 * W)), WHITE, 0.16 * at(stage, [2.8, 3.2, 4], [0, 1, 0.2]))
+    return frame.image(ORANGE)
+
+
+# ---------------------------------------------------------------------------------------------------------
+# Where the shot lands (clip 1 frames 33 to 35, clip 2 frames 18 to 22): at once, a small hard white star of
+# uneven points; then a pale round puff with the star's middle still in it, which opens into a ring and goes.
+STAR = [(82, 0.46, 0.085), (150, 0.31, 0.075), (213, 0.40, 0.08), (288, 0.28, 0.075), (8, 0.36, 0.08), (120, 0.2, 0.06), (330, 0.2, 0.06), (250, 0.19, 0.055)]
+
+
+def spark(index):
+    frame = Frame()
+    rng = np.random.default_rng(31)
+    if index >= 2:
+        reach = at(index, [2, 6, 15], [0.2, 0.44, 0.62])
+        show = at(index, [2, 4, 8, 14], [0.0, 0.58, 0.4, 0.0])
+        blobs, inner = [disc((0, 0), reach * 0.6)], []
+        for k in range(7):
+            a = 2 * math.pi * (k + rng.uniform(-0.3, 0.3)) / 7 + 0.3
+            r = reach * rng.uniform(0.3, 0.52)
+            d = reach * rng.uniform(0.5, 0.7)
+            blobs.append(disc((math.cos(a) * d, math.sin(a) * d), r))
+            inner.append(disc((math.cos(a) * d - 0.035, math.sin(a) * d + 0.035), r * 0.62))
+        hole = at(index, [5, 10, 15], [0.0, 0.52, 0.95]) * reach
+        holes = [lump((0.03, -0.02), hole, 40 + index // 2, corners=9)] if hole > 0.01 else []
+        for k in range(5):
+            a = 2 * math.pi * k / 5 + 0.9 + rng.uniform(-0.4, 0.4)
+            r = at(index, [6, 15], [0.0, 0.42]) * reach * rng.uniform(0.6, 1.2)
+            if r > 0.01:
+                holes.append(lump((math.cos(a) * reach * 0.85, math.sin(a) * reach * 0.85), r, 50 + k, corners=8))
+        frame.lay(mask(blobs, blur=0.022, holes=holes), SMOKE, show)
+        frame.lay(mask(inner, blur=0.022, holes=holes), WHITE, show * 0.5)
+    size = at(index, [0, 1, 3, 6, 9], [0.75, 1.0, 0.82, 0.42, 0.0])
     if size > 0.02:
-        angles = np.array([1.5, -1.78, 0.78, 2.28, -0.5, 3.45, 2.9])
-        lengths = np.array([0.64, 0.34, 0.26, 0.44, 0.22, 0.5, 0.18]) * size
-        widths = np.array([0.2, 0.26, 0.34, 0.26, 0.36, 0.22, 0.4])
-        field = star(r, a, angles, lengths, widths, 0.15 * size) + wobble * 0.05
-        c.glow(ORANGE, -field, 0.05, 0.75)
-        c.fill(field, [(0, RED), (0.012, ORANGE), (0.035, YELLOW), (0.075, PALE), (0.16, WHITE)])
-    return c.image()
+        bands = [((255, 232, 140), 1, 1, 1, 1), (WHITE, 0.88, 0.8, 0.86, 1)]
+        burst(frame, (0, 0), STAR, bands, size, core=0.12, seed=3)
+    for k, degrees in enumerate((40, 135, 250, 330, 195)):
+        out = at(index, [1, 12], [0.2, 0.8 + 0.05 * k])
+        long = at(index, [1, 4, 12], [0.0, 0.1, 0.0])
+        if long > 0.005:
+            frame.lay(mask([kite((0, 0), degrees, long, 0.014, start=out)]), PALE, 0.9)
+    return frame.image(SMOKE)
 
 
-def spark(frame):
-    rng = np.random.default_rng(13)
-    grids = [lattice(rng, 8) for _ in range(3)]
-    c = Canvas()
-    r, a = c.polar()
-    t = frame / 15
-    lump = fbm(c.x * 3.5 + 2.0, c.y * 3.5 - t * 2.0, grids) - 0.5
-    # the puff: grey, half see-through, a ring more than a ball, growing, then eaten away
-    if frame >= 3:
-        grow = ease((frame - 3) / 12)
-        radius = 0.2 + 0.4 * grow
-        puff = 0.16 * (1 - 0.3 * grow) - np.abs(r - radius * 0.75) + lump * 0.2
-        puff = puff - np.clip(lump + 0.5 - (0.95 - 0.8 * grow), 0, 1) * 0.8
-        c.lay(GREY, c.edge(puff, 6) * 0.5 * (1 - grow) ** 0.6)
-    # the star: white, six thin spikes, there from the first frame and smaller each frame after the third
-    size = np.interp(frame, [0, 1, 3, 9, 12], [0.7, 1.0, 0.9, 0.4, 0.0])
-    if size > 0.02:
-        angles = np.array([0.4, 1.5, 2.6, 3.7, 4.75, 5.8])
-        lengths = np.array([0.34, 0.26, 0.3, 0.28, 0.22, 0.3]) * size
-        field = star(r, a, angles, lengths, np.full(6, 0.2), 0.07 * size)
-        c.glow(PALE, -field, 0.04, 0.45)
-        c.fill(field, [(0, PALE), (0.015, WHITE)])
-    return c.image()
+# ---------------------------------------------------------------------------------------------------------
+# A hit on a body (clip 3 frames 26 to 28, and the two stills of it): a compact burst of blades, pale in the
+# middle, orange, red at the rim, there for three frames, then its blades fly apart. (The dark squares round
+# it in Riot's stills are the debug crosshair, not the effect: the first drawing here took them for blobs.)
+BODY = [
+    (78, 0.66, 0.12), (128, 0.5, 0.12), (168, 0.6, 0.11), (212, 0.46, 0.12), (250, 0.58, 0.12),
+    (296, 0.48, 0.12), (338, 0.62, 0.11), (22, 0.48, 0.12), (102, 0.42, 0.09), (190, 0.42, 0.09),
+    (274, 0.4, 0.09), (0, 0.42, 0.09), (52, 0.42, 0.09), (232, 0.4, 0.085), (148, 0.4, 0.08), (316, 0.4, 0.08),
+]
 
 
-def body(frame):
-    rng = np.random.default_rng(29)
-    grids = [lattice(rng, 8) for _ in range(3)]
-    c = Canvas()
-    r, a = c.polar()
-    t = frame / 15
-    lump = fbm(c.x * 3.5 + 5.0, c.y * 3.5 + t * 1.5, grids) - 0.5
-    count = 7
-    angles = np.linspace(0, 2 * np.pi, count, endpoint=False) + rng.uniform(-0.3, 0.3, count)
-    sizes = rng.uniform(0.09, 0.15, count)
-    out = np.interp(frame, [0, 2, 6, 15], [0.2, 0.36, 0.44, 0.62])
-    live = np.interp(frame, [0, 2, 7, 15], [0.6, 1.0, 0.9, 0.0])
-    c.glow(RED, r, 0.34, 0.4 * live)
-    # crimson blobs round the rim, drifting out and shrinking
-    for angle, size in zip(angles, sizes):
-        ox, oy = np.cos(angle) * out, np.sin(angle) * out
-        blob = size * (0.35 + 0.65 * live) - np.hypot(c.x - ox, c.y - oy) + lump * 0.05
-        c.fill(blob, [(0, (140, 16, 38)), (0.03, CRIMSON), (0.08, RED)])
-    # the burst: orange with a pale middle, whole for the first frames and then cut
-    burst = np.interp(frame, [0, 1, 5, 7, 9], [0.6, 1.0, 1.0, 0.5, 0.0])
-    if burst > 0.02:
-        spikes = np.linspace(0, 2 * np.pi, 9, endpoint=False) + 0.2
-        field = star(r, a, spikes, np.full(9, 0.1) * burst, np.full(9, 0.3), 0.27 * burst) + lump * 0.05
-        c.fill(field, [(0, RED), (0.02, ORANGE), (0.07, YELLOW), (0.14, PALE)])
-    return c.image()
+def body(index):
+    frame = Frame()
+    size = at(index, [0, 1, 2, 6, 15], [0.6, 1.0, 1.06, 1.0, 0.8])
+    apart = at(index, [6, 9, 15], [0.0, 0.5, 1.5])
+    shrink = at(index, [6, 15], [1.0, 0.3])
+    fade = at(index, [9, 15], [1.0, 0.45])
+    light = at(index, [0, 1, 6, 11], [0.6, 1, 0.8, 0])
+    rng = np.random.default_rng(200 + index // 2)
+    blades = [(a + rng.uniform(-2, 2), l * rng.uniform(0.94, 1.06) * shrink, w * (0.3 + 0.7 * shrink) ** 1.5) for a, l, w in BODY]
+    if light > 0:
+        frame.lay(mask([disc((0, 0), 0.66)], blur=0.1), RED, 0.5 * light)
+        frame.lay(mask([disc((0, 0), 0.48)], blur=0.07), FLAME, 0.5 * light)
+    if index <= 6:
+        bands = [(RED, 1, 1, 1, 1), (FLAME, 0.92, 0.88, 0.95, 1), (ORANGE, 0.82, 0.78, 0.9, 1), (YELLOW, 0.64, 0.64, 0.8, 1), (PALE, 0.46, 0.5, 0.68, 1)]
+        burst(frame, (0, 0), blades, bands, size, core=0.36, seed=11)
+        frame.lay(mask([lump((0, 0), 0.15 * size, 13)], blur=0.025), HOT, 0.92)
+    elif index <= 9:
+        bands = [(RED, 1, 1, 1, 1), (FLAME, 0.9, 0.84, 0.8, 1), (ORANGE, 0.72, 0.7, 0.55, 1), (YELLOW, 0.4, 0.45, 0, 1)]
+        burst(frame, (0, 0), blades, bands, size, core=0.12 * (8 - index) / 2 if index < 8 else 0, seed=11, apart=apart)
+    else:
+        bands = [(RED, 1, 1, 0, fade), (FLAME, 0.78, 0.72, 0, fade), (ORANGE, 0.45, 0.45, 0, fade)]
+        burst(frame, (0, 0), blades, bands, size, apart=apart)
+    return frame.image(FLAME)
 
 
-FOOT = -0.8  # where the hit is, in a head sheet's frame: the flame stands on it
+# ---------------------------------------------------------------------------------------------------------
+# A hit on a head (clip 1 frames 36 to 43, and the still of frame 36 at six times its size). It is not a
+# flame. It is a hard-edged pale fan thrown UP from the hit: pointed at its foot, widening to shoulders that
+# flick out into a short spike each side, with a tall spike in the middle. A thin orange line edges it and a
+# tight red light hugs that. From the second frame a white jagged star sits on the hit itself, with dark red
+# blades behind it to the sides, and a flat salmon patch lies behind everything. The fan grows taller, then
+# narrows to a streak and is gone; the star goes last.
+FOOT = (0.0, -0.5)
+UNIT = 1.1  # the fan's height on its first frame, in frame units
+
+GLINT = [(226, 0.4, 0.075), (314, 0.42, 0.075), (182, 0.36, 0.065), (358, 0.37, 0.065), (270, 0.24, 0.065), (136, 0.27, 0.065), (44, 0.27, 0.065), (92, 0.2, 0.06)]
+SHARDS = [(196, 0.62, 0.08), (344, 0.64, 0.08), (158, 0.54, 0.07), (22, 0.56, 0.07), (238, 0.4, 0.065), (302, 0.4, 0.065)]
 
 
-def head(frame):
-    rng = np.random.default_rng(41)
-    grids = [lattice(rng, 8) for _ in range(3)]
-    holes = [lattice(rng, 8) for _ in range(3)]
-    c = Canvas()
-    t = frame / 15
-    # Reference, eight frames: the flame is whole at once, pale with an orange edge and a red glow; it grows
-    # a little, then stretches upward and turns orange, then salmon, while holes eat it into a hooked wisp;
-    # a white four-pointed glint sits at its foot from the third frame to the sixth.
-    stage = frame / 2.0  # 0..7.5 through the reference's frames
-    tall = np.interp(stage, [0, 1, 3, 5, 7.5], [1.15, 1.3, 1.55, 1.68, 1.7])
-    wide = np.interp(stage, [0, 1, 3, 5, 7.5], [0.25, 0.28, 0.23, 0.16, 0.08])
-    eaten = np.interp(stage, [0, 2.5, 4, 6, 7.5], [0.0, 0.0, 0.35, 0.75, 1.0])
-    cool = np.interp(stage, [0, 2, 3.5, 5, 7.5], [0.0, 0.0, 0.5, 0.85, 1.0])
-    lump = fbm(c.x * 3.0 + 1.0, c.y * 3.0 - stage * 0.5, grids) - 0.5
-    hole = fbm(c.x * 3.6 + 4.0, c.y * 2.4 - stage * 0.6 + 2.0, holes)
-    up = np.pi / 2
-    field = tongue(c, 0, FOOT, up, tall, wide, 0.5)
-    field = np.maximum(field, tongue(c, -0.05, FOOT + 0.28, up + 0.44, tall * 0.5, wide * 0.6, 0.45))
-    field = np.maximum(field, tongue(c, 0.05, FOOT + 0.24, up - 0.48, tall * 0.46, wide * 0.6, 0.45))
-    field = field + lump * (0.05 + 0.1 * eaten)
-    field = field - np.clip(hole - (0.78 - 0.62 * eaten), 0, 1) * 1.5
-    rim = mix(ORANGE, PINK, cool)
-    middle = mix(YELLOW, SALMON, cool)
-    core = mix(PALE, SALMON, cool)
-    c.glow(mix(RED, PINK, cool), -field, 0.1, 0.8 * (1 - 0.5 * eaten))
-    c.fill(field, [(0, mix(RED, PINK, cool)), (0.012, rim), (0.03, middle), (0.07, core), (0.22, mix(WHITE, SALMON, cool))])
-    # the glint at the foot
-    glint = np.interp(stage, [1.5, 2.2, 5, 6], [0.0, 1.0, 1.0, 0.0])
-    if glint > 0.02:
-        r, a = c.polar(0, FOOT + 0.04)
-        angles = np.array([0.785, 2.356, 3.927, 5.498])
-        field = star(r, a, angles, np.full(4, 0.2) * glint, np.full(4, 0.16), 0.035 * glint)
-        c.glow(PALE, -field, 0.03, 0.5)
-        c.fill(field, [(0, PALE), (0.01, WHITE)])
-    return c.image()
+def fan(tall, wide, split, lean=0.0):
+    """The fan's outline. `tall` is its height and `wide` its half-width at the shoulders, in frame units;
+    `split` (0 to 1) is how far the side spikes stand out from the middle one."""
+    fx, fy = FOOT
+    def p(x, y):
+        return (fx + x * wide + lean * y, fy + y * tall)
+    side = 0.56 + 0.08 * split
+    return [
+        p(0.0, -0.1),
+        p(-0.26, 0.05), p(-0.5, 0.22), p(-0.84, 0.45),
+        p(-1.04 - 0.14 * split, side + 0.04),  # the left flick
+        p(-0.62, 0.53), p(-0.4, 0.62), p(-0.2, 0.8),
+        p(0.04, 1.0),  # the tall one
+        p(0.22, 0.78), p(0.42, 0.6), p(0.6, 0.52),
+        p(0.94 + 0.14 * split, side + 0.02),  # the right flick
+        p(0.78, 0.42), p(0.48, 0.2), p(0.25, 0.04),
+    ]
+
+
+def scaled(poly, about, k):
+    return [(about[0] + (x - about[0]) * k, about[1] + (y - about[1]) * k) for x, y in poly]
+
+
+def head(index):
+    frame = Frame()
+    stage = index / 2.0  # 0 to 7.5, through Riot's eight frames
+    tall = UNIT * at(stage, [0, 1, 2, 3, 4, 5, 6, 7], [0.9, 1.0, 1.12, 1.28, 1.3, 1.3, 1.1, 0.7])
+    wide = at(stage, [0, 1, 2, 3, 4, 5, 6, 7], [0.32, 0.42, 0.44, 0.4, 0.3, 0.19, 0.07, 0.02])
+    split = at(stage, [0, 1, 2, 4, 6], [0.3, 0.8, 1.0, 0.6, 0.0])
+    there = at(stage, [0, 6, 6.8, 7.2], [1, 1, 0.7, 0])
+    patch = at(stage, [0, 0.5, 4, 6, 7.5], [0.7, 1, 1, 0.75, 0.0])
+    star = at(stage, [0.4, 1, 2, 4.5, 5.5, 6.4], [0.0, 0.9, 1.0, 0.9, 0.6, 0.0])
+    shards = at(stage, [0.4, 1, 3, 4.5], [0.0, 1.0, 0.9, 0.0])
+    lift = at(stage, [0, 3, 6], [0.0, 0.0, 0.12])  # late on, the fan's foot leaves the hit
+    middle = (FOOT[0], FOOT[1] + 0.36)
+    if patch > 0:
+        frame.lay(mask([lump(middle, 0.6, 21, corners=14)], blur=0.035), (238, 84, 60), 0.62 * patch)
+    if shards > 0.02:
+        bands = [(CRIMSON, 1, 1, 0, 0.95), (RED, 0.82, 0.66, 0, 1)]
+        burst(frame, FOOT, SHARDS, bands, shards, apart=0.1)
+    if there > 0:
+        shape = fan(tall, wide, split, lean=0.03)
+        shape = [(x, y + lift) for x, y in shape]
+        frame.lay(mask([shape], grow=0.1, blur=0.04), (255, 52, 56), 0.9 * there)
+        frame.lay(mask([shape], grow=0.045, blur=0.012), FLAME, there)
+        frame.lay(mask([shape], grow=0.02), ORANGE, there)
+        frame.lay(mask([shape]), YELLOW, there)
+        frame.lay(mask([scaled(shape, (FOOT[0], FOOT[1] + 0.4 * tall + lift), 0.84)]), PALE, there)
+        frame.lay(mask([scaled(shape, (FOOT[0], FOOT[1] + 0.3 * tall + lift), 0.52)], blur=0.03), HOT, 0.85 * there)
+    if star > 0.02:
+        bands = [((255, 226, 120), 1.08, 1.1, 1.1, 1), (WHITE, 1, 1, 1, 1)]
+        burst(frame, FOOT, GLINT, bands, star, core=0.12, seed=5)
+    for k, (degrees, speed) in enumerate(((70, 1.0), (112, 0.8), (38, 0.7), (150, 0.6), (95, 1.2), (20, 0.5))):
+        out = at(stage, [1.5, 7.5], [0.25, 0.25 + 0.75 * speed])
+        long = at(stage, [1.5, 3, 7.5], [0.0, 0.11, 0.0])
+        if long > 0.005:
+            colour = PALE if k % 2 == 0 else ORANGE
+            frame.lay(mask([kite((FOOT[0], FOOT[1] + 0.2), degrees, long, 0.016, start=out)]), colour, 0.95)
+    return frame.image(SALMON)
 
 
 def tracer():
-    c = Canvas(256, 32)
-    across = np.abs(c.y)
-    c.lay(ORANGE, np.clip(1 - across / 0.95, 0, 1) ** 1.5 * 0.9)
-    c.lay(YELLOW, np.clip(1 - across / 0.5, 0, 1) ** 1.2)
-    c.lay(PALE, np.clip(1 - across / 0.22, 0, 1))
-    return c.image()
+    """The line across its width: Riot's is a strong yellow, pale in the very middle, orange at its edges."""
+    height, width = 32, 256
+    y = np.abs((np.arange(height) + 0.5) / height * 2 - 1)[:, None] * np.ones((1, width))
+    rgb = np.zeros((height, width, 3), np.float32)
+    alpha = np.zeros((height, width), np.float32)
+    for colour, reach, soft in ((ORANGE, 0.92, 0.2), (YELLOW, 0.62, 0.12), (PALE, 0.26, 0.1)):
+        m = np.clip((reach - y) / soft, 0, 1)
+        rgb = rgb * (1 - m[..., None]) + np.asarray(colour, np.float32) * m[..., None]
+        alpha = alpha * (1 - m) + m
+    straight = np.where(alpha[..., None] > 1e-3, rgb / np.maximum(alpha[..., None], 1e-3), np.asarray(ORANGE, np.float32))
+    return Image.fromarray(np.dstack([straight, alpha * 255]).round().clip(0, 255).astype(np.uint8), "RGBA")
 
 
 EFFECTS = {"fx_muzzle": muzzle, "fx_spark": spark, "fx_body": body, "fx_head": head}
@@ -280,24 +361,26 @@ EFFECTS = {"fx_muzzle": muzzle, "fx_spark": spark, "fx_body": body, "fx_head": h
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    wall = (196, 124, 62)  # the brick wall behind the reference frames
-    cell = 160
-    preview = Image.new("RGB", (cell * 16, cell * len(EFFECTS) + 60), wall)
+    grounds = {"preview": (196, 124, 62), "preview_dark": (58, 52, 70)}  # Riot's brick wall, and shade
+    cell = 192
+    previews = {name: Image.new("RGB", (cell * 16, cell * len(EFFECTS) + 60), ground) for name, ground in grounds.items()}
     for row, (name, draw) in enumerate(EFFECTS.items()):
         sheet = Image.new("RGBA", (FRAME * 4, FRAME * 4), (0, 0, 0, 0))
         for index in range(16):
             frame = draw(index)
             sheet.paste(frame, ((index % 4) * FRAME, (index // 4) * FRAME))
             small = frame.resize((cell, cell), Image.LANCZOS)
-            preview.paste(small, (index * cell, row * cell), small)
+            for preview in previews.values():
+                preview.paste(small, (index * cell, row * cell), small)
         sheet.save(os.path.join(OUT, name + ".png"))
         print("wrote", name)
     line = tracer()
     line.save(os.path.join(OUT, "fx_tracer.png"))
-    wide = line.resize((cell * 6, 14), Image.LANCZOS)
-    preview.paste(wide, (40, cell * len(EFFECTS) + 22), wide)
-    preview.save(os.path.join(OUT, "preview.png"))
-    print("wrote fx_tracer and the preview")
+    wide = line.resize((cell * 8, 12), Image.LANCZOS)
+    for name, preview in previews.items():
+        preview.paste(wide, (40, cell * len(EFFECTS) + 24), wide)
+        preview.save(os.path.join(OUT, name + ".png"))
+    print("wrote fx_tracer and the previews")
 
 
 if __name__ == "__main__":

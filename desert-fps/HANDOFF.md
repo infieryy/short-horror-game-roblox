@@ -941,6 +941,12 @@ The place is saved with this in (version 95). Backup: `backups/fps_effects_scrip
 
 ### Shot effects, drawn from Valorant's own frames (2026-11-28)
 
+> **Redrawn again the same day, and waiting on the owner.** The owner, on the sheets described below: "The VFX is still really bad. Redraw the flipbooks from scratch and I want to see. use multiple valorant references". They were soft shapes filled by depth and read as clip art; the body hit's "crimson blobs" were Riot's debug crosshair misread; the head hit was drawn as a flame and is a fan thrown up from the hit.
+>
+> **What exists now.** `assets/vfx/flipbooks.py` is a new drawing (hard-edged blades in flat colour bands), `assets/vfx/REFERENCE.md` is rewritten from four sources (Riot's muzzle flash concept sheet, three Riot slow-motion clips and eight stills, a forum breakdown), and `assets/vfx/out/` has the new sheets. `Client/Effects` takes an image as a number or a whole address, so a sheet can be tried in Studio before it is uploaded: copy `out/fx_*.png` into `<Studio's folder>/content/claude_fx/v2/` and give `EffectConfig` `"rbxasset://claude_fx/v2/fx_muzzle.png"` and so on. That is how they were looked at in play. The owner was sent a side-by-side with Riot's frames, a clip and a frame strip (`Documents/desert-fps/recordings/fps-effects-v4-*`, `fps-maxxing-effects-v4-preview-20261128.mp4`).
+>
+> **Not done.** The new sheets are **not uploaded** (an upload needs the owner's yes each time), so the saved place and the committed `EffectConfig` still play the old sheets. The working copy's `EffectConfig` has the new sizes and times with the local addresses, uncommitted on purpose: after the upload, put the five new asset numbers in it, install, run `test_effects`, save, and rewrite the table below.
+
 **This replaces the two versions in the section above.** The owner, on those: "No, you're just making vfx up. Make it exactly like valorant, minimal differences". And before that: "make the vfx super stylized and way higher quality. Use the stylized vfx skill (i have no unreal so substitute what u need to)". Both earlier versions were drawn from memory of Valorant, which is what was wrong with them.
 
 **The reference.** `assets/vfx/REFERENCE.md` is what Valorant's effects look like, frame by frame, from Riot's own slow-motion clip of a rifle shot to the head (in "The State of Hit Registration"), Riot's stills, and a forum breakdown of the pistol's flash. YouTube would not play without a sign-in, so nothing is from video.

@@ -43,8 +43,10 @@ local function unseen(part: BasePart)
 	part.CastShadow = false
 end
 
-local function content(id: number): string
-	return "rbxassetid://" .. id
+-- An image in EffectConfig is an asset's number, or (to try a sheet out in Studio before it is uploaded) a
+-- whole content address such as rbxasset://claude_fx/fx_muzzle.png.
+local function content(id: number | string): string
+	return if type(id) == "string" then id else "rbxassetid://" .. id
 end
 
 local function step()
