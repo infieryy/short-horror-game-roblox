@@ -122,7 +122,7 @@ local function play(kind: string, how: any, frame: CFrame, size: number, follow:
 		emitter.Speed = NumberRange.new(0)
 		emitter.Rotation = NumberRange.new(0)
 		emitter.RotSpeed = NumberRange.new(0)
-		emitter.Transparency = NumberSequence.new(0)
+		emitter.Transparency = NumberSequence.new(how.Clear or 0)
 		emitter.LightEmission = how.Glow
 		emitter.LightInfluence = 0
 		emitter.ZOffset = how.Near or 0
