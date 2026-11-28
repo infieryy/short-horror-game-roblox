@@ -323,11 +323,11 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			{ attacker = player, weapon = slot.weapon, zone = zone, from = origin, through = force < 1 }
 		)
 		finish, ends = origin + direction * distance, distance
-		remotes.Hit:FireClient(player, zone, dealt, killed, finish, direction)
+		remotes.Hit:FireClient(player, zone, dealt, killed, finish)
 		-- Everyone else sees the hit burst where it landed, whatever the weapon hides.
 		for _, other in Players:GetPlayers() do
 			if other ~= player then
-				remotes.Struck:FireClient(other, finish, zone, direction)
+				remotes.Struck:FireClient(other, finish, zone)
 			end
 		end
 	end

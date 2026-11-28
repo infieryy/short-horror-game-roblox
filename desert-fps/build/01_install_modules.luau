@@ -154,7 +154,6 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(script.Parent.MarkConfig)
 local Sounds = require(script.Parent.Sounds)
-local Effects = require(script.Parent.Effects)
 local Penetration = require(script.Parent.Parent.Weapons.Penetration)
 
 local BulletMarks = {}
@@ -449,9 +448,6 @@ function BulletMarks.leave(self: any, marks: { Penetration.Mark })
 		if look.Dust then
 			puff(self.parent, mark, look.Dust)
 		end
-		if look.Sparks ~= false then
-			Effects.sparks(mark.at, mark.normal, mark.kind, look.Chip)
-		end
 		if look.Sound and mark.kind ~= "out" and (sounded == 0 or index == #marks) then
 			sounded += 1
 			Sounds.play(if mark.kind == "stop" then look.Sound.Stopped else look.Sound.Through, mark.at)
@@ -494,108 +490,63 @@ return BulletMarks
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "EffectConfig" }, class = "ModuleScript", source = [=[
 --!strict
--- How shots look (Client/Effects): the flash at the muzzle, the tracer, what flies off a wall, and what a hit
--- on a body looks like. The reference is Valorant: a small sharp burst of a flash out of the barrel that is
--- gone in two frames, a tracer that is a short streak racing to where the shot lands and not a line drawn all
--- the way, and a hit that bursts into angular shards, more of them and with a flash for a head.
--- The colours are orange and red, saturated. The owner on the first version, which was white-hot with a
--- yellow edge: "too washed out ... I need it to be more pop! with orange effects like valorant", "smaller",
--- and for the head "orange and red in the core rather than white". Everything is drawn from
--- tapered beams and a little light: no picture was made or uploaded for it.
--- Lengths are studs, times seconds, speeds studs a second. A { low, high } pair is picked from each time.
--- Glow is how much a thing adds its light to what is behind it (0 to 1): hot things glow, and things with a
--- colour of their own do not, or the town's sunlit walls wash that colour out to white.
+-- How shots look (Client/Effects). Everything here is made to match Valorant, from Riot's own slow-motion
+-- frames of a rifle shot to the head (assets/vfx/REFERENCE.md says what each frame shows):
+--   the flash    a thin-spiked star, its upright spike the tallest, in an orange glow, with a red beam across
+--                the muzzle that outlives the star. About three frames.
+--   the tracer   a thin pale line from the muzzle all the way to where the shot lands, there for one frame.
+--   the spark    where the shot lands, at once: a small white star, then a grey puff.
+--   a body hit   when the server says so: a pale core in orange, ringed with crimson blobs.
+--   a head hit   a pale flame that stands up from the hit, reddens and is eaten away, with a white glint at
+--                its foot. It stays on the head as the head moves.
+-- The owner, on two earlier versions that were drawn from memory: "you're just making vfx up. Make it exactly
+-- like valorant, minimal differences".
+-- Each image is a sheet of sixteen frames drawn by assets/vfx/flipbooks.py and uploaded (Image is its asset).
+-- Size is studs across a frame of the sheet, Time seconds to play it through, Glow how much it adds its light
+-- to what is behind it (0 to 1), Near studs it is drawn nearer the eye than it is, so it is not sunk in what
+-- it is on.
 return {
-	-- The flash at the muzzle: a burst out of the barrel. Spikes lean forward round a longer one straight
-	-- ahead, each orange outside (Edge) and amber inside (Hot), from a small core at the barrel's end, with a
-	-- light that reaches the walls near by. It stays on the barrel while it shows.
 	Muzzle = {
-		Time = 0.05,
-		Spikes = { 4, 5 },
-		Long = { 0.3, 0.55 },
-		Wide = { 0.13, 0.2 },
-		-- How far forward the side spikes lean: 0 is straight out to the sides, 1 is halfway to straight ahead.
-		Sweep = 0.9,
-		Forward = { 0.6, 0.95 },
-		ForwardWide = 0.22,
-		-- The amber inside of a spike is this share of its width.
-		Inner = 0.5,
-		Core = 0.15,
-		Glow = 0.25,
-		Hot = Color3.fromRGB(255, 182, 48),
-		Edge = Color3.fromRGB(255, 92, 16),
-		Light = { Range = 10, Brightness = 2.5, Color = Color3.fromRGB(255, 150, 70) },
+		Image = 134196612509295,
+		Time = 0.1,
+		Glow = 0.45,
+		Near = 0.25,
+		-- By weapon. The star itself is about half as wide as its frame.
+		Size = { rifle = 1.9, pistol = 1.5 },
+		Light = { Range = 10, Brightness = 2.5, Color = Color3.fromRGB(255, 150, 70), Time = 0.05 },
 		-- Suppressed: no flash, a wisp of smoke that grows From and To across and is gone in Time.
 		Quiet = { From = 0.12, To = 0.4, Time = 0.16, Color = Color3.fromRGB(226, 216, 232), Start = 0.55 },
-		-- By weapon: how big its flash is.
-		Size = { rifle = 1, pistol = 0.75 },
 	},
 
-	-- The tracer: a streak Long that leaves the muzzle at Speed and ends where the shot does. Its head is Hot
-	-- and Wide, its tail thin and clear. A shot that lands nearer than Least has none.
+	-- The line: Wide at the muzzle, Thin where it lands and Fade see-through there. A shot that lands nearer
+	-- than Least has none.
 	Tracer = {
-		Speed = 1100,
-		Long = 14,
-		Wide = 0.15,
+		Image = 71134728944059,
+		Time = 0.045,
+		Glow = 0.5,
+		Wide = 0.16,
+		Thin = 0.06,
+		Fade = 0.25,
 		Least = 5,
-		Glow = 0.25,
-		Hot = Color3.fromRGB(255, 190, 70),
-		Tail = Color3.fromRGB(255, 104, 22),
 	},
 
-	-- What flies off where a shot lands on the town, by the mark it leaves (Client/BulletMarks): Count
-	-- sparks, each a streak Long and Wide that leaves at Speed within Cone degrees of straight out, falls at
-	-- Gravity and is gone in Life.
-	Sparks = {
-		["in"] = { Count = { 2, 3 }, Speed = { 14, 24 }, Life = { 0.1, 0.16 } },
-		out = { Count = { 3, 5 }, Speed = { 18, 34 }, Life = { 0.12, 0.2 } },
-		stop = { Count = { 4, 6 }, Speed = { 20, 40 }, Life = { 0.12, 0.22 } },
-		Long = { 0.25, 0.55 },
-		Wide = 0.04,
-		Cone = 65,
-		Gravity = 60,
-		Glow = 0.25,
-		-- A spark off stone or plaster is hot; off anything else it is a chip of the stuff (MarkConfig's Chip).
-		Hot = Color3.fromRGB(255, 160, 48),
-	},
+	Spark = { Image = 95683785238525, Time = 0.22, Glow = 0.35, Near = 0.4, Size = 2.2 },
 
-	-- A hit on a body: shards that burst from where the shot landed, back along the shot and outwards, red.
-	-- A hit to the head is more of them, faster, orange with red edges, round a flash of the same colours
-	-- Flash times the size of a muzzle's.
 	Struck = {
-		body = {
-			Count = { 5, 7 },
-			Speed = { 10, 20 },
-			Life = { 0.18, 0.28 },
-			Long = { 0.35, 0.6 },
-			Wide = { 0.16, 0.26 },
-			Glow = 0.05,
-			Hot = Color3.fromRGB(240, 58, 48),
-			Edge = Color3.fromRGB(168, 22, 38),
-		},
-		head = {
-			Count = { 9, 12 },
-			Speed = { 14, 30 },
-			Life = { 0.22, 0.36 },
-			Long = { 0.45, 0.85 },
-			Wide = { 0.2, 0.34 },
-			Glow = 0.15,
-			Hot = Color3.fromRGB(255, 140, 28),
-			Edge = Color3.fromRGB(226, 36, 28),
-			Flash = 1.5,
-		},
-		-- Wide, so that most of them fly across the shooter's view and not straight at it, where a shard
-		-- seen end on is a dot.
-		Cone = 115,
-		Gravity = 34,
+		body = { Image = 76832780576017, Time = 0.32, Glow = 0.25, Near = 1.2, Size = 3 },
+		-- Foot: the hit is this far below the middle of the frame, as a share of half its height.
+		head = { Image = 100954136247399, Time = 0.42, Glow = 0.35, Near = 1.2, Size = 3.6, Foot = 0.8 },
+		-- A burst rides the part of a body nearest where it landed, if one is within this many studs.
+		Reach = 1.5,
 	},
 }
 ]=] },
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "Effects" }, class = "ModuleScript", source = [=[
 --!strict
--- How shots look on this client: the flash at a muzzle, the tracer, sparks off the town, and the burst of a
--- hit on a body. Client/EffectConfig says how each looks. All of it is two things: streaks (a tapered beam
--- that flies: a tracer, a spark, a shard) and flashes (a star of beams round a bright core, for an instant).
+-- How shots look on this client: the flash at a muzzle, the tracer, the spark where a shot lands, and the
+-- burst of a hit on a body or a head. Each but the tracer is a flipbook: sixteen drawn frames on one image,
+-- played once on a single particle (assets/vfx/flipbooks.py draws them, to Valorant's frames; Client/
+-- EffectConfig says which image, how big and for how long).
 
 local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
@@ -605,48 +556,23 @@ local Config = require(script.Parent.EffectConfig)
 
 local Effects = {}
 
-type Pair = { number }
--- A streak in flight: its beam between a tail and a head, where and how fast it set off, how it falls, how
--- long the streak is and how long it lasts, and how far it may go (a tracer stops where its shot does).
-type Streak = {
-	beam: Beam,
-	tail: Attachment,
-	head: Attachment,
-	from: Vector3,
-	velocity: Vector3,
-	gravity: number,
-	long: number,
-	wide: number,
-	life: number,
-	reach: number?,
-	age: number,
-}
--- A spike of a flash is drawn twice: wide in the flash's edge colour, and narrower and hot inside that, so
--- that it keeps its colour against a sunlit wall instead of washing out to white.
--- `follow` says where the flash is now, while it shows: it stays on the barrel it came out of.
-type Flash = {
+-- Something that shows flipbooks at a place: a point with a particle emitter for each kind of flipbook it
+-- has shown, and a light. `follow` says where it is now, while it shows (a flash stays on its barrel, a hit
+-- on the body it landed on). `busy` is until when.
+type Rig = {
 	part: BasePart,
-	spikes: { { beam: Beam, inner: Beam, tip: Attachment } },
-	core: BasePart,
+	point: Attachment,
+	emitters: { [string]: ParticleEmitter },
 	light: PointLight,
-	shown: number,
 	follow: (() -> CFrame?)?,
+	busy: number,
 }
+type Line = { beam: Beam, from: Attachment, to: Attachment, busy: number }
 
--- The most spikes a flash has, the forward one apart.
-local SPIKES = 6
-
-local random = Random.new()
 local parent: Instance? = nil
-local host: BasePart? = nil -- holds the ends of every streak
-local flying: { Streak } = {}
-local resting: { Streak } = {}
-local flashes: { Flash } = {}
+local rigs: { Rig } = {}
+local lines: { Line } = {}
 local shown: { [string]: number } = {} -- how often each effect has been shown, for tests
-
-local function between(pair: Pair): number
-	return random:NextNumber(pair[1], pair[2])
-end
 
 local function count(what: string)
 	shown[what] = (shown[what] or 0) + 1
@@ -660,105 +586,24 @@ local function unseen(part: BasePart)
 	part.CastShadow = false
 end
 
--- A beam that is wide at one end and a point at the other, glowing: a spike, a spark, a shard.
-local function taper(from: Attachment, to: Attachment): Beam
-	local beam = Instance.new("Beam")
-	beam.Attachment0 = from
-	beam.Attachment1 = to
-	beam.FaceCamera = true
-	beam.Segments = 1
-	beam.LightEmission = 0
-	beam.LightInfluence = 0
-	beam.Enabled = false
-	return beam
+local function content(id: number): string
+	return "rbxassetid://" .. id
 end
 
--- A unit vector within `cone` degrees of `along`.
-local function within(along: Vector3, cone: number): Vector3
-	local frame = CFrame.lookAlong(Vector3.zero, along, if math.abs(along.Y) > 0.99 then Vector3.xAxis else Vector3.yAxis)
-	local off = math.rad(random:NextNumber(0, cone))
-	local round = random:NextNumber(0, math.pi * 2)
-	return (frame * CFrame.Angles(0, 0, round) * CFrame.Angles(off, 0, 0)).LookVector
-end
-
--- Sends a streak off from `from` at `velocity`. Its head is `hot` and `wide`, its tail `cool` and a point;
--- `clear` makes the tail fade to nothing as well (a tracer), where a spark or a shard is solid to its tip.
--- `glow` is how much it adds its light to what is behind it, 0 to 1: something hot glows; something with a
--- colour of its own must not, or a sunlit wall behind it washes the colour out to white.
-local function streak(
-	from: Vector3,
-	velocity: Vector3,
-	long: number,
-	wide: number,
-	life: number,
-	gravity: number,
-	hot: Color3,
-	cool: Color3,
-	clear: boolean,
-	glow: number,
-	reach: number?
-)
-	local anchor = host :: BasePart
-	local it = table.remove(resting)
-	if not it then
-		local tail, head = Instance.new("Attachment"), Instance.new("Attachment")
-		tail.Parent, head.Parent = anchor, anchor
-		local beam = taper(tail, head)
-		beam.Width0 = 0
-		beam.Parent = anchor
-		it = { beam = beam, tail = tail, head = head } :: any
-	end
-	local made = it :: Streak
-	made.from, made.velocity, made.gravity = from, velocity, gravity
-	made.long, made.wide, made.life, made.reach, made.age = long, wide, life, reach, 0
-	made.beam.Color = ColorSequence.new(cool, hot)
-	-- A tracer is clear at its tail and solid over its leading half.
-	made.beam.Transparency = if clear
-		then NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.25), NumberSequenceKeypoint.new(1, 0) })
-		else NumberSequence.new(0.15, 0)
-	made.beam.Width1 = wide
-	made.beam.LightEmission = glow
-	made.beam.Brightness = 1 + glow
-	made.tail.WorldPosition, made.head.WorldPosition = from, from
-	made.beam.Enabled = true
-	table.insert(flying, made)
-end
-
-local function fly(dt: number)
-	for _, flash in flashes do
-		local now = if flash.shown > 0 and flash.follow then flash.follow() else nil
-		if now then
-			flash.part.CFrame = now
-			flash.core.CFrame = now
+local function step()
+	local now = os.clock()
+	for _, rig in rigs do
+		if rig.busy > now and rig.follow then
+			local frame = rig.follow()
+			if frame then
+				rig.part.CFrame = frame
+			end
 		end
 	end
-	for index = #flying, 1, -1 do
-		local it = flying[index]
-		it.age += dt
-		local t = math.min(it.age, it.life)
-		local gone = it.velocity.Magnitude * t
-		local over = it.age >= it.life
-		if it.reach then
-			-- A tracer: straight, and it stops where its shot did. Its tail catches up, and then it is over.
-			local along = it.velocity.Unit
-			local head = math.min(it.velocity.Magnitude * it.age, it.reach)
-			local tail = math.clamp(it.velocity.Magnitude * it.age - it.long, 0, it.reach)
-			it.head.WorldPosition = it.from + along * head
-			it.tail.WorldPosition = it.from + along * tail
-			over = tail >= it.reach
-		else
-			local down = Vector3.new(0, -it.gravity, 0)
-			local at = it.from + it.velocity * t + down * (t * t / 2)
-			local heading = it.velocity + down * t
-			it.head.WorldPosition = at
-			it.tail.WorldPosition = at - heading.Unit * math.min(it.long, gone)
-			-- It thins to nothing as it dies.
-			it.beam.Width1 = it.wide * (1 - t / it.life)
-		end
-		if over then
-			it.beam.Enabled = false
-			table.remove(flying, index)
-			table.insert(resting, it)
+	for _, line in lines do
+		if line.busy ~= 0 and line.busy <= now then
+			line.beam.Enabled = false
+			line.busy = 0
 		end
 	end
 end
@@ -766,108 +611,64 @@ end
 -- `where` is where the effects are drawn. Call once.
 function Effects.start(where: Instance)
 	parent = where
-	local anchor = Instance.new("Part")
-	anchor.Name = "Streaks"
-	anchor.Transparency = 1
-	anchor.Size = Vector3.one * 0.2
-	unseen(anchor)
-	anchor.Parent = where
-	host = anchor
-	RunService.RenderStepped:Connect(fly)
+	RunService.RenderStepped:Connect(step)
 end
 
-local function newFlash(): Flash
+local function freeRig(): Rig
+	local now = os.clock()
+	for _, rig in rigs do
+		if rig.busy <= now and not rig.light.Enabled then
+			return rig
+		end
+	end
 	local part = Instance.new("Part")
-	part.Name = "Flash"
+	part.Name = "Effect"
 	part.Transparency = 1
 	part.Size = Vector3.one * 0.2
 	unseen(part)
-	local middle = Instance.new("Attachment")
-	middle.Parent = part
-	local spikes = {}
-	for _ = 1, SPIKES + 1 do
-		local tip = Instance.new("Attachment")
-		tip.Parent = part
-		local beam, inner = taper(middle, tip), taper(middle, tip)
-		beam.Width1, inner.Width1 = 0, 0
-		inner.LightEmission = Config.Muzzle.Glow
-		inner.Brightness = 1 + Config.Muzzle.Glow
-		inner.ZOffset = 0.02
-		beam.Parent, inner.Parent = part, part
-		table.insert(spikes, { beam = beam, inner = inner, tip = tip })
-	end
-	local core = Instance.new("Part")
-	core.Shape = Enum.PartType.Ball
-	core.Material = Enum.Material.Neon
-	unseen(core)
+	local point = Instance.new("Attachment")
+	point.Parent = part
 	local light = Instance.new("PointLight")
 	light.Shadows = false
 	light.Enabled = false
 	light.Parent = part
 	part.Parent = parent
-	return { part = part, spikes = spikes, core = core, light = light, shown = 0 }
+	local rig: Rig = { part = part, point = point, emitters = {}, light = light, follow = nil, busy = 0 }
+	table.insert(rigs, rig)
+	return rig
 end
 
--- A burst of a flash at `frame`, out along where it looks: spikes that lean forward round a longer one
--- straight ahead, `size` times as big as EffectConfig.Muzzle makes it. With `lit` it lights what is near.
-local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit: boolean, follow: (() -> CFrame?)?)
-	local how = Config.Muzzle
-	local it: Flash? = nil
-	for _, each in flashes do
-		if each.shown == 0 then
-			it = each
-			break
-		end
+-- Plays the flipbook `how` (an EffectConfig entry: Image, Time, Glow, Near) once at `frame`, `size` studs
+-- across its frame. `kind` names it. Returns the rig it plays on.
+local function play(kind: string, how: any, frame: CFrame, size: number, follow: (() -> CFrame?)?): Rig
+	local rig = freeRig()
+	local emitter = rig.emitters[kind]
+	if not emitter then
+		emitter = Instance.new("ParticleEmitter")
+		emitter.Texture = content(how.Image)
+		emitter.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+		emitter.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
+		emitter.Lifetime = NumberRange.new(how.Time)
+		emitter.Rate = 0
+		emitter.Speed = NumberRange.new(0)
+		emitter.Rotation = NumberRange.new(0)
+		emitter.RotSpeed = NumberRange.new(0)
+		emitter.Transparency = NumberSequence.new(0)
+		emitter.LightEmission = how.Glow
+		emitter.LightInfluence = 0
+		emitter.ZOffset = how.Near or 0
+		emitter.LockedToPart = true
+		emitter.Enabled = false
+		emitter.Parent = rig.point
+		rig.emitters[kind] = emitter
 	end
-	if not it then
-		it = newFlash()
-		table.insert(flashes, it)
-	end
-	local made = it :: Flash
-	made.shown += 1
-	made.follow = follow
-	local showing = made.shown
-	made.part.CFrame = frame
-	local sides = random:NextInteger(how.Spikes[1], how.Spikes[2])
-	local turn = random:NextNumber(0, math.pi * 2)
-	for index, spike in made.spikes do
-		local beam, inner = spike.beam, spike.inner
-		beam.Color = ColorSequence.new(edge)
-		beam.Transparency = NumberSequence.new(0.05, 0.3)
-		inner.Color = ColorSequence.new(hot)
-		inner.Transparency = NumberSequence.new(0, 0.2)
-		local wide = 0
-		if index == 1 then
-			spike.tip.Position = Vector3.new(0, 0, -between(how.Forward) * size)
-			wide = how.ForwardWide * size
-		elseif index - 1 <= sides then
-			local angle = turn + (index - 1 + random:NextNumber(-0.25, 0.25)) / sides * math.pi * 2
-			spike.tip.Position = Vector3.new(math.cos(angle), math.sin(angle), -how.Sweep).Unit * between(how.Long) * size
-			wide = between(how.Wide) * size
-		end
-		beam.Width0, inner.Width0 = wide, wide * how.Inner
-		beam.Enabled, inner.Enabled = wide > 0, wide > 0
-	end
-	made.core.Color = hot:Lerp(edge, 0.35)
-	made.core.Size = Vector3.one * how.Core * size
-	made.core.CFrame = frame
-	made.core.Parent = made.part
-	made.light.Color = how.Light.Color
-	made.light.Range = how.Light.Range
-	made.light.Brightness = how.Light.Brightness
-	made.light.Enabled = lit
-	task.delay(how.Time, function()
-		if made.shown ~= showing then
-			return
-		end
-		for _, spike in made.spikes do
-			spike.beam.Enabled, spike.inner.Enabled = false, false
-		end
-		made.core.Parent = nil
-		made.light.Enabled = false
-		made.follow = nil
-		made.shown = 0
-	end)
+	rig.part.CFrame = frame
+	rig.follow = follow
+	rig.busy = os.clock() + how.Time
+	emitter.Size = NumberSequence.new(size)
+	emitter:Emit(1)
+	count(kind)
+	return rig
 end
 
 -- A shot leaves the muzzle at `frame`, which looks along the barrel. `weapon` is its name; `quiet` is a
@@ -875,76 +676,135 @@ end
 -- so that the flash stays on a barrel that kicks.
 function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, follow: (() -> CFrame?)?)
 	local how = Config.Muzzle
-	local size = (how.Size :: any)[weapon] or 1
 	if quiet then
+		local smoke = how.Quiet
 		local wisp = Instance.new("Part")
 		wisp.Shape = Enum.PartType.Ball
 		wisp.Material = Enum.Material.SmoothPlastic
-		wisp.Color = how.Quiet.Color
-		wisp.Transparency = how.Quiet.Start
-		wisp.Size = Vector3.one * how.Quiet.From * size
+		wisp.Color = smoke.Color
+		wisp.Transparency = smoke.Start
+		wisp.Size = Vector3.one * smoke.From
 		unseen(wisp)
 		wisp.CFrame = frame
 		wisp.Parent = parent
-		TweenService:Create(wisp, TweenInfo.new(how.Quiet.Time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Size = Vector3.one * how.Quiet.To * size,
-			Position = (frame * CFrame.new(0, 0, -how.Quiet.To * size)).Position,
+		TweenService:Create(wisp, TweenInfo.new(smoke.Time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = Vector3.one * smoke.To,
+			Position = (frame * CFrame.new(0, 0, -smoke.To)).Position,
 			Transparency = 1,
 		}):Play()
-		Debris:AddItem(wisp, how.Quiet.Time)
+		Debris:AddItem(wisp, smoke.Time)
 		count("wisp")
 		return
 	end
-	flash(frame, size, how.Hot, how.Edge, true, follow)
-	count("flash")
+	-- The flash stands upright on the screen whichever way the barrel points: only where it is follows.
+	local rig = play("flash", how, frame, (how.Size :: any)[weapon] or how.Size.rifle, follow)
+	rig.light.Color = how.Light.Color
+	rig.light.Range = how.Light.Range
+	rig.light.Brightness = how.Light.Brightness
+	rig.light.Enabled = true
+	task.delay(how.Light.Time, function()
+		rig.light.Enabled = false
+	end)
 end
 
--- The tracer of a shot from `from` that ended at `to`.
+-- The tracer of a shot from `from` that ended at `to`: a line all the way, there for an instant.
 function Effects.tracer(from: Vector3, to: Vector3)
 	local how = Config.Tracer
-	local reach = (to - from).Magnitude
-	if reach < how.Least then
+	if (to - from).Magnitude < how.Least then
 		return
 	end
-	streak(from, (to - from).Unit * how.Speed, how.Long, how.Wide, reach / how.Speed + 1, 0, how.Hot, how.Tail, true, how.Glow, reach)
+	local line: Line? = nil
+	for _, each in lines do
+		if each.busy == 0 then
+			line = each
+			break
+		end
+	end
+	if not line then
+		local host = Instance.new("Part")
+		host.Name = "Tracer"
+		host.Transparency = 1
+		host.Size = Vector3.one * 0.2
+		unseen(host)
+		local a, b = Instance.new("Attachment"), Instance.new("Attachment")
+		a.Parent, b.Parent = host, host
+		local beam = Instance.new("Beam")
+		beam.Attachment0, beam.Attachment1 = a, b
+		beam.Texture = content(how.Image)
+		beam.TextureMode = Enum.TextureMode.Stretch
+		beam.TextureLength = 1
+		beam.TextureSpeed = 0
+		beam.FaceCamera = true
+		beam.Segments = 1
+		beam.LightEmission = how.Glow
+		beam.LightInfluence = 0
+		beam.Width0, beam.Width1 = how.Wide, how.Thin
+		beam.Transparency = NumberSequence.new(0, how.Fade)
+		beam.Parent = host
+		host.Parent = parent
+		line = { beam = beam, from = a, to = b, busy = 0 }
+		table.insert(lines, line)
+	end
+	local made = line :: Line
+	made.from.WorldPosition, made.to.WorldPosition = from, to
+	made.beam.Enabled = true
+	made.busy = os.clock() + how.Time
 	count("tracer")
 end
 
--- Sparks off the town where a shot left a mark of that kind, out of the surface along `normal`. `chip` is
--- the colour of what the surface is made of; with none the sparks are hot.
-function Effects.sparks(at: Vector3, normal: Vector3, kind: string, chip: Color3?)
-	local how = Config.Sparks
-	local what = (how :: any)[kind]
-	if not what then
-		return
-	end
-	local colour = chip or how.Hot
-	local glow = if chip then 0 else how.Glow
-	for _ = 1, random:NextInteger(what.Count[1], what.Count[2]) do
-		streak(at, within(normal, how.Cone) * between(what.Speed), between(how.Long), how.Wide, between(what.Life), how.Gravity, colour, colour, false, glow)
-	end
-	count("sparks")
+-- A shot landed at `at`, on anything: a small spark, at once, that stays where it is.
+function Effects.landed(at: Vector3)
+	play("spark", Config.Spark, CFrame.new(at), Config.Spark.Size)
 end
 
--- A shot landed on a body at `at`, in that zone (CombatConfig.Zones' names: "head", or anything else for
--- the rest), travelling along `along`. Shards burst back the way it came.
-function Effects.struck(at: Vector3, zone: string, along: Vector3)
-	local all = Config.Struck
-	local how = if zone == "head" then all.head else all.body
-	local back = if along.Magnitude > 0.5 then -along.Unit else Vector3.yAxis
-	for _ = 1, random:NextInteger(how.Count[1], how.Count[2]) do
-		streak(at, within(back, all.Cone) * between(how.Speed), between(how.Long), between(how.Wide), between(how.Life), all.Gravity, how.Hot, how.Edge, false, how.Glow)
+-- The body part nearest a point, if one is within reach of it.
+local function bodyPartAt(at: Vector3): BasePart?
+	local best: BasePart?, nearest = nil, math.huge
+	for _, part in workspace:GetPartBoundsInRadius(at, Config.Struck.Reach) do
+		local model = part:FindFirstAncestorWhichIsA("Model")
+		if model and model:FindFirstChildOfClass("Humanoid") then
+			local away = (part.Position - at).Magnitude
+			if away < nearest then
+				best, nearest = part, away
+			end
+		end
 	end
-	if zone == "head" then
-		flash(CFrame.lookAlong(at, back), all.head.Flash, how.Hot, how.Edge, false, nil)
-	end
-	count(if zone == "head" then "head" else "body")
+	return best
 end
 
--- How often each effect has been shown, and how many streaks are in flight, for tests.
+-- The server says a shot landed on a body at `at`, in that zone ("head", or anything else for the rest).
+-- The burst stays on the part of the body it landed on, as that moves.
+function Effects.struck(at: Vector3, zone: string)
+	local head = zone == "head"
+	local how = if head then Config.Struck.head else Config.Struck.body
+	-- The head's flame stands on the hit: the hit is at the foot of its frame, not its middle.
+	local lift = Vector3.new(0, (how.Foot or 0) * how.Size / 2, 0)
+	local on = bodyPartAt(at)
+	local follow: (() -> CFrame?)? = nil
+	if on then
+		local held = on.CFrame:PointToObjectSpace(at)
+		follow = function(): CFrame?
+			return if on.Parent then CFrame.new(on.CFrame:PointToWorldSpace(held) + lift) else nil
+		end
+	end
+	play(if head then "head" else "body", how, CFrame.new(at + lift), how.Size, follow)
+end
+
+-- How often each effect has been shown, and how many are showing now, for tests.
 function Effects.state(): { [string]: number }
 	local counts = table.clone(shown)
-	counts.flying = #flying
+	local now, showing = os.clock(), 0
+	for _, rig in rigs do
+		if rig.busy > now or rig.light.Enabled then
+			showing += 1
+		end
+	end
+	for _, line in lines do
+		if line.busy ~= 0 then
+			showing += 1
+		end
+	end
+	counts.showing = showing
 	return counts
 end
 
@@ -1920,8 +1780,6 @@ return {
 	--   Rim    the broken edge round a hole, and a chip: the stuff under the paint
 	--   Edge   the line round a rim or a chip, so that it shows on a wall of its own colour, and the cracks
 	--   Dust   what flies off
-	--   Chip   the colour of the sparks off it (Client/Effects); with none they are hot, as off stone.
-	--          Sparks = false: none fly
 	--   Sound  what is heard there (Sound/SoundConfig): Through where a shot goes in and comes out again,
 	--          Stopped where it does not
 	-- A material with no Rim is not marked: a shot through leaves only shakes some loose.
@@ -1938,7 +1796,6 @@ return {
 			Rim = Color3.fromRGB(250, 210, 150),
 			Edge = Color3.fromRGB(104, 58, 44),
 			Dust = Color3.fromRGB(236, 196, 142),
-			Chip = Color3.fromRGB(250, 210, 150),
 			Sound = { Through = "Wood Through", Stopped = "Wood Stopped" },
 		},
 		cloth = {
@@ -1946,12 +1803,10 @@ return {
 			Rim = Color3.fromRGB(250, 236, 214),
 			Edge = Color3.fromRGB(110, 86, 112),
 			Dust = Color3.fromRGB(250, 236, 214),
-			Sparks = false,
 			Sound = { Through = "Cloth Through", Stopped = "Cloth Through" },
 		},
 		leaves = {
 			Dust = Color3.fromRGB(132, 164, 96),
-			Chip = Color3.fromRGB(132, 164, 96),
 			Sound = { Through = "Leaves Through", Stopped = "Leaves Through" },
 		},
 		hard = {
@@ -8239,11 +8094,11 @@ local function onFire(player: Player, origin: unknown, direction: unknown, targe
 			{ attacker = player, weapon = slot.weapon, zone = zone, from = origin, through = force < 1 }
 		)
 		finish, ends = origin + direction * distance, distance
-		remotes.Hit:FireClient(player, zone, dealt, killed, finish, direction)
+		remotes.Hit:FireClient(player, zone, dealt, killed, finish)
 		-- Everyone else sees the hit burst where it landed, whatever the weapon hides.
 		for _, other in Players:GetPlayers() do
 			if other ~= player then
-				remotes.Struck:FireClient(other, finish, zone, direction)
+				remotes.Struck:FireClient(other, finish, zone)
 			end
 		end
 	end
@@ -8776,6 +8631,11 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		return viewmodel:muzzle()
 	end)
 	Effects.tracer(muzzle.Position, path.finish)
+	-- Where the shot lands, a spark at once, whatever it landed on. A hit on a body shows when the server
+	-- says so, a moment later.
+	if path.stopped or path.body then
+		Effects.landed(path.finish)
+	end
 	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
@@ -9009,10 +8869,10 @@ remote("State").OnClientEvent:Connect(function(state: { current: string, slots: 
 		refresh()
 	end
 end)
-remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean, at: Vector3?, along: Vector3?)
+remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean, at: Vector3?)
 	hud:hit(zone, killed)
-	if at and along then
-		Effects.struck(at, zone, along)
+	if at then
+		Effects.struck(at, zone)
 	end
 	local cues = SoundConfig.Cues
 	Sounds.play(if weapon and weapon.Kind == "melee" then cues.Blade elseif zone == "head" then cues.Head else cues.Hit)
@@ -9050,12 +8910,16 @@ remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: strin
 			return now
 		end)
 		Effects.tracer(from, finish)
+		-- Short of its range, it landed on something.
+		if (finish - origin).Magnitude < theirs.Range - 1 then
+			Effects.landed(finish)
+		end
 	end
 	Sounds.play(theirs.Sounds.Fire, from)
 end)
--- Someone's shot landed on a body, there, in that zone, travelling that way: everyone sees it burst.
-remote("Struck").OnClientEvent:Connect(function(at: Vector3, zone: string, along: Vector3)
-	Effects.struck(at, zone, along)
+-- Someone's shot landed on a body, there, in that zone: everyone sees it burst.
+remote("Struck").OnClientEvent:Connect(function(at: Vector3, zone: string)
+	Effects.struck(at, zone)
 end)
 -- Something someone near by did that is heard and not seen: a shot from a weapon that hides it (`sound` is
 -- that weapon's, as it is fitted), a weapon drawn, a reload that takes `seconds`. The server tells only

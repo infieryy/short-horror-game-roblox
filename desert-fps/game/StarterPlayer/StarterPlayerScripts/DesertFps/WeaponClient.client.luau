@@ -260,6 +260,11 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		return viewmodel:muzzle()
 	end)
 	Effects.tracer(muzzle.Position, path.finish)
+	-- Where the shot lands, a spark at once, whatever it landed on. A hit on a body shows when the server
+	-- says so, a moment later.
+	if path.stopped or path.body then
+		Effects.landed(path.finish)
+	end
 	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
@@ -493,10 +498,10 @@ remote("State").OnClientEvent:Connect(function(state: { current: string, slots: 
 		refresh()
 	end
 end)
-remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean, at: Vector3?, along: Vector3?)
+remote("Hit").OnClientEvent:Connect(function(zone: string, _, killed: boolean, at: Vector3?)
 	hud:hit(zone, killed)
-	if at and along then
-		Effects.struck(at, zone, along)
+	if at then
+		Effects.struck(at, zone)
 	end
 	local cues = SoundConfig.Cues
 	Sounds.play(if weapon and weapon.Kind == "melee" then cues.Blade elseif zone == "head" then cues.Head else cues.Hit)
@@ -534,12 +539,16 @@ remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: strin
 			return now
 		end)
 		Effects.tracer(from, finish)
+		-- Short of its range, it landed on something.
+		if (finish - origin).Magnitude < theirs.Range - 1 then
+			Effects.landed(finish)
+		end
 	end
 	Sounds.play(theirs.Sounds.Fire, from)
 end)
--- Someone's shot landed on a body, there, in that zone, travelling that way: everyone sees it burst.
-remote("Struck").OnClientEvent:Connect(function(at: Vector3, zone: string, along: Vector3)
-	Effects.struck(at, zone, along)
+-- Someone's shot landed on a body, there, in that zone: everyone sees it burst.
+remote("Struck").OnClientEvent:Connect(function(at: Vector3, zone: string)
+	Effects.struck(at, zone)
 end)
 -- Something someone near by did that is heard and not seen: a shot from a weapon that hides it (`sound` is
 -- that weapon's, as it is fitted), a weapon drawn, a reload that takes `seconds`. The server tells only

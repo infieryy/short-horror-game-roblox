@@ -39,8 +39,6 @@ return {
 	--   Rim    the broken edge round a hole, and a chip: the stuff under the paint
 	--   Edge   the line round a rim or a chip, so that it shows on a wall of its own colour, and the cracks
 	--   Dust   what flies off
-	--   Chip   the colour of the sparks off it (Client/Effects); with none they are hot, as off stone.
-	--          Sparks = false: none fly
 	--   Sound  what is heard there (Sound/SoundConfig): Through where a shot goes in and comes out again,
 	--          Stopped where it does not
 	-- A material with no Rim is not marked: a shot through leaves only shakes some loose.
@@ -57,7 +55,6 @@ return {
 			Rim = Color3.fromRGB(250, 210, 150),
 			Edge = Color3.fromRGB(104, 58, 44),
 			Dust = Color3.fromRGB(236, 196, 142),
-			Chip = Color3.fromRGB(250, 210, 150),
 			Sound = { Through = "Wood Through", Stopped = "Wood Stopped" },
 		},
 		cloth = {
@@ -65,12 +62,10 @@ return {
 			Rim = Color3.fromRGB(250, 236, 214),
 			Edge = Color3.fromRGB(110, 86, 112),
 			Dust = Color3.fromRGB(250, 236, 214),
-			Sparks = false,
 			Sound = { Through = "Cloth Through", Stopped = "Cloth Through" },
 		},
 		leaves = {
 			Dust = Color3.fromRGB(132, 164, 96),
-			Chip = Color3.fromRGB(132, 164, 96),
 			Sound = { Through = "Leaves Through", Stopped = "Leaves Through" },
 		},
 		hard = {
