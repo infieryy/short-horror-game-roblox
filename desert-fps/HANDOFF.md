@@ -856,6 +856,54 @@ Notes for the next session:
 - To aim the player from a script: set the camera's type to Scriptable, set its CFrame, wait a frame, set it back to Custom. The first-person camera keeps that direction.
 - Studio's MCP calls time out for a while right after a playtest stops. Ask again after a few seconds before assuming a call did not run.
 
+### Sound (2026-11-28)
+
+The owner, asked whether to add sound (shots, impacts, reload, footsteps): "Yes, add sound".
+
+**The outcome.** The game has its own sound. A 34-second clip with audio is in `Documents\desert-fps\recordings\fps-maxxing-sound-20261128.mp4`.
+
+| What | Heard by |
+|---|---|
+| Rifle and pistol shots | everyone, across the town |
+| A suppressed shot: another, lower sound | the shooter, and players within 70 studs (rifle) or 55 (pistol) |
+| The trigger on an empty weapon | the shooter |
+| A reload, as magazine out, magazine in and bolt, where the animation has them | the shooter, and players within 40 to 45 studs |
+| A weapon drawn; the knife drawn and swung | the holder, and players within 25 to 35 studs |
+| A shot landing: a bright crack where it goes through, a dull thud or a ricochet where it is stopped | everyone within 130 studs of the place |
+| A hit, a head shot, a kill, the knife cutting, being hurt | the player it concerns |
+| The dart thrown, stuck, pulsing; a tone when it sees someone, a lower one for whoever it saw | around the dart; the last two in the head |
+| Footsteps and landings | everyone within 70 studs. Running is heard. Walking (Shift) is silent |
+
+**Where the sounds are from.** Roblox's licensed library, creator "ProSoundEffects" on the Creator Store. Free to use in an experience; nothing was uploaded and nothing was spent. Take sounds only from that creator: most other audio on the store is lifted from other games (the descriptions say so). Its names end in "(SFX)" and its descriptions end "Courtesy of Pro Sound Effects", but another creator copies that naming, so go by the creator. `robloxCreatedOnly` in the search tools does not find them.
+
+**How it works.**
+- `Sound/SoundConfig` (shared) lists every sound: its takes (asset id, a gain that levels the takes, where in the recording to start and stop), its volume, pitch range, and how far it carries. Weapons name their sounds in `WeaponConfig` (`Sounds`), marks in `MarkConfig` (`Sound`), the dart in `UtilityConfig` (`Sounds`), the display's cues and the footsteps in `SoundConfig` itself. The suppressor swaps the weapon's `Sounds.Fire` like any other number.
+- `Client/Sounds.play(name, where)` plays one: in the head with no place, at a point, or on a part. `Client/Footsteps` works out everyone's steps from how their bodies move: faster than 10.5 studs a second is heard, a step every 4.8 studs.
+- Other players' shots are heard off the `Shot` message, which already drew the tracer. What a tracer does not cover goes on a new `Heard` message, which the **server** sends only to players within the sound's `Far`: a suppressed shot, a reload, a draw. So a suppressed shot tells nothing to anyone out of earshot.
+- Roblox's own footsteps (any pace, plus a cry on death) are off: `Client/Footsteps` disables Roblox's `RbxCharacterSounds` script and silences the sounds it put in each body. A stand-in script of that name in StarterPlayerScripts, the usual way, did not stop Roblox's own in Studio.
+
+**How the sounds were chosen, without ears.** I cannot hear. A helper shortlisted 86 recordings by description; all were played in a playtest and recorded through the PC's virtual audio cable (`ffmpeg -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)"`), then measured: how many separate events, how long, how bright. For the 45 kept, their level and the silence at their head were read in Studio from `PlaybackLoudness` against `TimePosition` at quarter speed. Gains level the takes of a sound; `From` skips lead-in silence (up to 0.9 s in one recording). `build/measure_sounds.py` is the measuring script. Two traps: the recording's clock drifts against Studio's by about 2 ms a second, and a sound's first play is about 0.1 s late, so long recordings cannot be lined up by one beep.
+
+**Tested.**
+- `build/tests/test_sound.luau` (client): 17 checks, all ok. Every recording can be fetched; every named sound exists; a shot, a suppressed shot, the empty click, the reload in order, draws, the knife, a shot through a wall and one stopped by it (different sounds, at the place), a head shot and its kill, the dart thrown, stuck and pulsing at the dart, running heard, Roblox's footsteps not, walking silent, a landing.
+- With a second player 31 studs off (`multiplayer_playtest`, each driven by script): they heard 2 of 2 loud shots, 2 of 2 suppressed ones, the reload's three sounds, 6 steps of a run and a landing, each placed at the other player. The pistol's draw (carries 30) was not sent at 31 studs. At 92 studs they heard 0 of 2 suppressed shots, and every loud shot the server accepted.
+- The older tests, run again with sound in: `test_attachments` 38 of 38, `test_utility` 15 of 15, `test_marks` 11 of 11, `test_weapons` 6 of 6, `test_wallbang` 15 of 15.
+
+The place is saved with this in (version 90). Backup: `backups/fps_sound_scripts_kit_animations.rbxm`.
+
+**Decisions made here.** Which sound stands for what, every volume and every distance are mine, and first guesses. Aiming while moving (12 studs a second with the rifle) is heard; only walking is silent.
+
+**Not done, not verified.**
+- **By ear.** Nothing here was listened to. The checks show that the right sound plays at the right time and place, not that it sounds good. The owner has the clip.
+- The least certain picks: the footsteps are a recording called "Robot Footsteps On Concrete" (no human footsteps on stone were found, and the stomps that were are 35 dB too soft); the empty click is a pistol magazine click; the rifle's magazine-out is a pistol magazine pitched down; the dart's pulse is a "tracker tone", not a clean sonar ping.
+- One step sound for every floor. No sound for other players' hits on bodies, for a death, for the loadout menu, and no ambience.
+- A sound is not muffled by a wall between it and the listener.
+- In the two-player run one test player crashed the first time: the PC has 12 GB and Studio with two clients fills it. At 92 studs the shooter had been stood inside a wall by the test, and the server refused two of its shots there (they did not start in the open); that is the test's doing.
+
+Notes for the next session:
+- After a long run of playtests Studio froze and dropped both MCP connections. Closing it (`taskkill /F /T`) and opening the place again by its `roblox-studio:` link fixed it; the frozen process stayed listed as a husk until later.
+- A script cannot read `Source` at run time, so to tell Roblox's `RbxCharacterSounds` from a stand-in, look for its child `AtomicBinding`.
+
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
 2. Read `desert-fps/README.md`, `plan/PLAN.md` and `assets/README.md`.

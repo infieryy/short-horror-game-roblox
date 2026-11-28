@@ -36,6 +36,10 @@ The place can be rebuilt from an empty baseplate by running these in order, in S
 
 `tests/test_marks.luau` runs on the client during a playtest. It stands slabs of its own in the air, has `Client/BulletMarks` draw what shots leave on them and returns 11 checks that should all start "ok": holes, ways out and chips where they belong, dust, marks that move with their part, stay on a wall that cracks and go with a part that goes.
 
+`tests/test_sound.luau` runs on the client during a playtest, with `DevConfig.TestHooks` and `DevConfig.Dummies` on, from a fresh spawn. It returns 17 checks that should all start "ok": every recording can be fetched, and each sound is played when and where it should be. It cannot tell how anything sounds. It takes 30 to 45 seconds: start it in a `task.spawn`.
+
+`measure_sounds.py` measures a recording of sounds played one after another (how many events, how long, how bright each is). It was used to choose the sounds: see "Sound" in `HANDOFF.md`.
+
 `pack_tests.py` packs every `tests/test_*.luau` into `out/Tests.rbxmx` as modules, so a test can be run without pasting it: import the file into ReplicatedStorage of the running server of a playtest and `require` the test on the side it runs on.
 
 `tests/measure_views.luau` runs on the client during a playtest. It stands the player at seven viewpoints and returns draw calls, triangles on screen, drawing time and frames a second for each. Set the graphics level by hand first.
