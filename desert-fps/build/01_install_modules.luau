@@ -492,7 +492,9 @@ return BulletMarks
 --!strict
 -- Footsteps and landings, everyone's: each client works them out from how the bodies it sees move.
 -- Someone who runs is heard; someone who walks (Shift) is not. That is the point of walking.
--- Roblox's own footsteps are switched off (StarterPlayerScripts/RbxCharacterSounds): they play at any pace.
+-- Roblox's own footsteps play at any pace, so its script is switched off here and the sounds it put in each
+-- body are silenced. (A script of the same name in StarterPlayerScripts is meant to stand in for it; in
+-- Studio, on 2026-11-28, Roblox's own ran all the same.)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -503,6 +505,8 @@ local Sounds = require(script.Parent.Sounds)
 local Footsteps = {}
 
 local How = Config.Footsteps
+-- Roblox's script for the sounds of bodies, in PlayerScripts.
+local THEIRS = "RbxCharacterSounds"
 
 -- How far each body has run since its last step, whether it was in the air, and how fast it fell.
 type Gait = { run: number, air: boolean, fell: number }
@@ -521,6 +525,13 @@ local function step(dt: number)
 		if not gait then
 			gait = { run = 0, air = false, fell = 0 }
 			gaits[character] = gait
+			-- What Roblox put in this body. The game's own sounds come later, one at a time.
+			for _, theirs in root:GetChildren() do
+				if theirs:IsA("Sound") then
+					theirs.Playing = false
+					theirs.Volume = 0
+				end
+			end
 		end
 		-- The player's own are heard in the head, and softer: they tell the player nothing new.
 		local where: Instance? = if player == me then nil else root
@@ -559,6 +570,12 @@ end
 -- `player` is the one whose steps are their own.
 function Footsteps.start(player: Player)
 	me = player
+	task.spawn(function()
+		local theirs = player:WaitForChild("PlayerScripts"):WaitForChild(THEIRS, 10)
+		if theirs and theirs:IsA("LocalScript") then
+			theirs.Enabled = false
+		end
+	end)
 	RunService.Heartbeat:Connect(step)
 end
 
@@ -8672,12 +8689,6 @@ local function testHook()
 end
 Shared:GetAttributeChangedSignal("TestHooks"):Connect(testHook)
 testHook()
-]=] },
-	{ path = { "StarterPlayer", "StarterPlayerScripts", "RbxCharacterSounds" }, class = "LocalScript", source = [=[
---!strict
--- Stands in for Roblox's own script of this name, which gives every body footsteps at any pace, a jump, a
--- landing and a cry when it dies. A script with its name here stops Roblox adding its own. The game's
--- footsteps are Client/Footsteps: heard when someone runs, silent when they walk.
 ]=] },
 }
 

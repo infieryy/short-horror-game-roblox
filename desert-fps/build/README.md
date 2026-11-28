@@ -64,4 +64,4 @@ python ../plan/routes.py
 python pack.py
 ```
 
-`pack.py` rewrites `01_install_modules.luau` and the files in `out/` (the same scripts as model files, for importing with an MCP tool). Each file is named after the place it is imported into, for example `StarterPlayer.StarterPlayerScripts.rbxmx`. Importing adds a second `DesertFps` folder, so delete the old one first. In ServerStorage, move `DesertFps.Meshes` out before deleting and back in after, or run step 4 again. StarterPlayerScripts also gets `RbxCharacterSounds`, a script outside the `DesertFps` folder that stands in for Roblox's own of that name: delete the old one there too.
+`pack.py` rewrites `01_install_modules.luau` and the files in `out/` (the same scripts as model files, for importing with an MCP tool). Each file is named after the place it is imported into, for example `StarterPlayer.StarterPlayerScripts.rbxmx`. Importing adds a second `DesertFps` folder, so delete the old one first. In ServerStorage, move `DesertFps.Meshes` out before deleting and back in after, or run step 4 again.

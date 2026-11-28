@@ -85,8 +85,10 @@ end
 local waiting = #ids
 for _, each in ids do
 	task.spawn(function()
+		-- A sound is only fetched once it is somewhere in the game.
 		local sound = Instance.new("Sound")
 		sound.SoundId = "rbxassetid://" .. each.id
+		sound.Parent = camera
 		ContentProvider:PreloadAsync({ sound }, function(_, status)
 			if status ~= Enum.AssetFetchStatus.Success then
 				table.insert(failed, `{each.name} {each.id}: {status.Name}`)
