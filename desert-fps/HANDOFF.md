@@ -939,42 +939,43 @@ The place is saved with this in (version 95). Backup: `backups/fps_effects_scrip
 - No second player looked at these: other players' flashes, tracers and hit bursts use the same code with the server's `Muzzle` mark and `Struck` message, and were not watched from a second screen (two clients filled this PC's memory earlier in the day).
 - No shell casings, no smoke after a long spray, nothing when a body dies.
 
-### Shot effects, drawn from Valorant's own frames (2026-11-28)
+### Shot effects, redrawn from several Valorant references (2026-11-28)
 
-> **Redrawn again the same day, and waiting on the owner.** The owner, on the sheets described below: "The VFX is still really bad. Redraw the flipbooks from scratch and I want to see. use multiple valorant references". They were soft shapes filled by depth and read as clip art; the body hit's "crimson blobs" were Riot's debug crosshair misread; the head hit was drawn as a flame and is a fan thrown up from the hit.
->
-> **What exists now.** `assets/vfx/flipbooks.py` is a new drawing (hard-edged blades in flat colour bands), `assets/vfx/REFERENCE.md` is rewritten from four sources (Riot's muzzle flash concept sheet, three Riot slow-motion clips and eight stills, a forum breakdown), and `assets/vfx/out/` has the new sheets. `Client/Effects` takes an image as a number or a whole address, so a sheet can be tried in Studio before it is uploaded: copy `out/fx_*.png` into `<Studio's folder>/content/claude_fx/v2/` and give `EffectConfig` `"rbxasset://claude_fx/v2/fx_muzzle.png"` and so on. That is how they were looked at in play. The owner was sent a side-by-side with Riot's frames, a clip and a frame strip (`Documents/desert-fps/recordings/fps-effects-v4-*`, `fps-maxxing-effects-v4-preview-20261128.mp4`).
->
-> **Not done.** The new sheets are **not uploaded** (an upload needs the owner's yes each time), so the saved place and the committed `EffectConfig` still play the old sheets. The working copy's `EffectConfig` has the new sizes and times with the local addresses, uncommitted on purpose: after the upload, put the five new asset numbers in it, install, run `test_effects`, save, and rewrite the table below.
+**This replaces every earlier version of the effects**, including the one this section used to describe (soft flipbooks drawn from a single Riot clip). The owner on that one: "The VFX is still really bad. Redraw the flipbooks from scratch and I want to see. use multiple valorant references". After seeing the redraw beside Riot's frames and in play: "Just make the body shot vfx smaller and the headshot vfx a bit more transparent (slightly)", then "Yes, upload".
 
-**This replaces the two versions in the section above.** The owner, on those: "No, you're just making vfx up. Make it exactly like valorant, minimal differences". And before that: "make the vfx super stylized and way higher quality. Use the stylized vfx skill (i have no unreal so substitute what u need to)". Both earlier versions were drawn from memory of Valorant, which is what was wrong with them.
+**The reference.** `assets/vfx/REFERENCE.md`: Riot's muzzle flash concept sheet for every gun, three Riot slow-motion clips stepped frame by frame, eight Riot stills looked at six times their size, and a forum breakdown of the pistol's flash. YouTube would not play without a sign-in, so nothing is from video.
 
-**The reference.** `assets/vfx/REFERENCE.md` is what Valorant's effects look like, frame by frame, from Riot's own slow-motion clip of a rifle shot to the head (in "The State of Hit Registration"), Riot's stills, and a forum breakdown of the pistol's flash. YouTube would not play without a sign-in, so nothing is from video.
+**What the earlier versions got wrong.**
+- The style. Valorant's effects are flat, hard-edged clusters of long tapered blades in colour bands (yellow in the middle, orange, red tips). The earlier sheets were soft shapes and read as clip art.
+- The body hit. Its "crimson blobs" were Riot's purple debug crosshair, misread from a blurred still.
+- The head hit. It is a pale fan thrown up from the hit with a white star on the hit, not a flame.
+- The tracer. It is a strong yellow line of even width.
 
 **The outcome.**
 
-| Effect | Valorant, in the reference | Here |
+| Effect | Here | Sheet's asset |
 |---|---|---|
-| Muzzle flash | A thin-spiked star, the upright spike the tallest, in an orange glow; a red beam level across the muzzle that outlives the star; about three frames | The same, as a 16-frame flipbook played in 0.1 s on the end of the barrel |
-| Tracer | A thin pale line from the muzzle all the way to where the shot lands, for one frame | A line all the way for 0.045 s, pale in the middle and orange at its edges, thicker at the muzzle. (The version before was a streak that flew: wrong) |
-| Where a shot lands | At once: a small white star, then a grey puff | The same flipbook, on walls and bodies alike |
-| Body hit | When the server confirms: a pale core in orange, ringed with crimson blobs | The same; how it ends is a guess (no frames of that were found) |
-| Head hit | A pale flame standing on the hit, orange-edged with a red glow; it stretches up, reddens and is eaten away over eight frames; a white glint at its foot; it stays on the head | The same, 16 frames in 0.42 s, riding the head |
+| Muzzle flash | A cluster of blades with one thin blade far above the rest, a thick level beam, a flat orange light; the blades leave the middle as it goes. 0.1 s, 1.2 studs across for the rifle | `fx_muzzle` 113323198339887 |
+| Tracer | A yellow line all the way, pale down its middle, orange edges, for 0.045 s | `fx_tracer` 75872092952618 |
+| Where a shot lands | A small hard white star, then a pale puff that opens and goes | `fx_spark` 107694068321201 |
+| Body hit | A compact burst with a hot middle and a jagged red rim, then its blades fly apart. 0.2 s, 1.4 studs across (the owner had it made smaller, from 2) | `fx_body` 77151486929998 |
+| Head hit | The fan, edged orange with a red light round it, a white star and dark red blades on the hit, a salmon patch behind; it narrows to a streak. 0.26 s, 2.5 studs, 20% see-through (the owner's ask), riding the head | `fx_head` 116958428878519 |
 
-**How it is made.** The owner's stylized VFX skill: build the effect, take every frame, pack 16 frames 4x4, play the sheet on a Roblox particle. The skill builds in Unreal; there is none on this PC, so `assets/vfx/flipbooks.py` draws the frames directly (which also gives the clean cutout the skill gets by filming on black and on white). Five images were uploaded with the owner's yes: `fx_muzzle` 134196612509295, `fx_spark` 95683785238525, `fx_body` 76832780576017, `fx_head` 100954136247399, `fx_tracer` 71134728944059. `Client/Effects` plays them; `Client/EffectConfig` has each one's image, size, time and glow. The streaks and beam-built flashes of the earlier versions are gone, and so are the sparks off walls.
+**How it is made.** `assets/vfx/flipbooks.py` draws every frame as polygons: a blade is a four-cornered kite, a burst is blades round a lump, and the colour bands are the same burst drawn again shorter and thinner inside itself. Sixteen frames go 4x4 on a sheet and `Client/Effects` plays the sheet once on a particle. `Client/EffectConfig` has each one's image, size, time, glow and (new) `Clear`, how see-through it is.
 
-**What was learned.**
-- A flipbook whose image has not arrived when it is played shows nothing, so the images are fetched at the start.
-- A particle's `Size` is its full width in studs here (the skill warns it may be half).
-- `LightEmission` must stay low (0.05 to 0.2): the colour is in the drawing, and anything added over this town's walls goes white.
+**Trying a sheet without uploading it.** `EffectConfig`'s `Image` can be a whole address instead of a number. Copy `out/fx_*.png` into `<Studio's folder>/content/claude_fx/` (`%LOCALAPPDATA%/Roblox/Versions/<version>/content`) and give `"rbxasset://claude_fx/fx_muzzle.png"`. Studio keeps an image by its address, so a changed sheet needs a new folder name. Only this PC's Studio can see such an image: never save or commit the config that way.
 
-**Tested.** `build/tests/test_effects.luau` (client, 6 checks): a shot into the sky shows a flash and a tracer and no spark; a moment later nothing is still showing; a suppressed shot shows a wisp and no flash; a shot that lands shows a spark; a body hit and a head hit each burst as what they are. Every other test still passes with these in: `test_sound` 17, `test_attachments` 38, `test_utility` 15, `test_marks` 11, `test_weapons` 6, `test_wallbang` 15. A 12-second clip at normal speed is in `Documents/desert-fps/recordings/fps-maxxing-effects-v3-20261128.mp4`, and the head shot from it frame by frame in `assets/studio/fps-effects-v3-head-shot-frames.png`. The place is saved with this in (version 98). Backup: `backups/fps_effects_scripts_kit_animations.rbxm`.
+**Tested (on the uploaded sheets).** `test_effects` 6 of 6, `test_attachments` 38, `test_utility` 15, `test_sound` 17, `test_marks` 11, `test_weapons` 6, `test_wallbang` 15. Looked at in play, held in slow motion and at normal speed. For the owner: `Documents/desert-fps/recordings/fps-effects-v4-compared-with-valorant.png` (Riot's frames beside the sheets), `fps-maxxing-effects-v4-preview-20261128.mp4`, `fps-effects-v4-head-shot-frames.png`, `fps-effects-v4-body-smaller-head-clearer.png`. The place is saved with this in (version 102). Backup: `backups/fps_effects_v4_scripts_kit_animations.rbxm`.
 
 **Not done, not verified.**
-- **Side by side in motion.** The sheets were compared with the reference as stills (the comparison picture the owner was sent), and looked at in the game held still. They were not compared in motion.
-- **Differences that remain.** Riot's flash has a hand-drawn irregular shape; this one is built from a few spikes and a glow. The body hit's ending is invented. Valorant's third-person flash differs from its first-person one; here both use one sheet. Wall hits use the landing spark because no close-up of a wall hit was found.
+- **`fx_head` was still in Roblox's review when this was written** (the other four were approved). It shows in Studio for the owner. If it is refused, head hits show nothing: check its state with a GET of `/assets/v1/assets/116958428878519`.
+- The clip and pictures the owner saw were recorded from the local sheets before the upload; the uploaded ones are the same files and were looked at once in play.
+- Wall hits use the landing star and puff: no close-up of a Valorant wall hit was found.
+- Other players see the holder's flash sheet; Valorant draws them a different one (its shapes are on the concept sheet).
+- The pistol's flash is the rifle's, smaller. The concept sheet has the pistols' own shapes.
 - No second player has seen these.
-- The hit mark on the crosshair is still there; Valorant has none.
+- The hit mark on the crosshair is still there; Valorant has none. The owner was asked and has not answered.
+- The five sheets of the version before (134196612509295, 95683785238525, 76832780576017, 100954136247399, 71134728944059) are still on the owner's account, unused.
 
 ### Job 0: set up
 1. Check out branch `claude/stoic-faraday-5tm9kr` and pull.
