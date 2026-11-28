@@ -255,9 +255,11 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		animator:play("Fire")
 	end
 	-- The flash and the tracer leave the muzzle in the player's hands, towards where the shot lands.
-	local muzzle = viewmodel:socket("muzzle") or origin
-	Effects.muzzle(CFrame.lookAlong(muzzle, direction), weapon.Name, weapon.Silent == true, true)
-	Effects.tracer(muzzle, path.finish)
+	local muzzle = viewmodel:muzzle() or CFrame.lookAlong(origin, direction)
+	Effects.muzzle(muzzle, weapon.Name, weapon.Silent == true, function()
+		return viewmodel:muzzle()
+	end)
+	Effects.tracer(muzzle.Position, path.finish)
 	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
@@ -527,7 +529,10 @@ remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: strin
 	local held, muzzle = heldAt(shooter, weaponName)
 	local from = if muzzle then muzzle.Position else held or origin
 	if theirs.Kind == "gun" then
-		Effects.muzzle(CFrame.lookAt(from, finish), weaponName, false, false)
+		Effects.muzzle(muzzle or CFrame.lookAt(from, finish), weaponName, false, function()
+			local _, now = heldAt(shooter, weaponName)
+			return now
+		end)
 		Effects.tracer(from, finish)
 	end
 	Sounds.play(theirs.Sounds.Fire, from)
@@ -546,7 +551,7 @@ remote("Heard").OnClientEvent:Connect(function(who: Player, weaponName: string, 
 		return
 	end
 	if what == "Quiet" and muzzle then
-		Effects.muzzle(muzzle, weaponName, true, false)
+		Effects.muzzle(muzzle, weaponName, true)
 	end
 	if what == "Reload" and seconds then
 		for _, cue in cuesOf(theirs) do

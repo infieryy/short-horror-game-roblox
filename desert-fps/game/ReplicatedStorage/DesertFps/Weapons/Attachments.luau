@@ -136,6 +136,16 @@ function Attachments.fitting(weapon: Instance, models: Instance, attached: Chose
 					fitting.points[string.sub(attribute, 8)] = at + (value :: Vector3) * size
 				end
 			end
+			-- Shots leave from the end of what is on the muzzle (weapons point along +X), not from under it.
+			if socket == "muzzle" then
+				local tip = at.X
+				for _, template in model:GetChildren() do
+					if template:IsA("BasePart") then
+						tip = math.max(tip, at.X + ((template:GetAttribute("Offset") :: Vector3).X + template.Size.X / 2) * size)
+					end
+				end
+				fitting.points.muzzle = Vector3.new(tip, at.Y, at.Z)
+			end
 		end
 	end
 	return fitting

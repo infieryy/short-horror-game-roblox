@@ -42,6 +42,7 @@ type Held = {
 	sockets: { [string]: Vector3 },
 	config: any, -- its numbers as it is fitted now (Attachments.build)
 	sight: Vector3?, -- the point that comes to the eye when aiming: the rear sight, or the middle of an optic
+	muzzle: Vector3?, -- where shots leave it: the end of the barrel, or of what is fitted on it
 	rest: CFrame?, -- where the weapon is from the camera, at rest in the hands
 }
 
@@ -154,6 +155,7 @@ function Viewmodel.new(models: Instance, attachments: Instance, arms: Model, par
 			sockets = sockets,
 			config = config,
 			sight = sockets.aim_rear,
+			muzzle = sockets.muzzle,
 		}
 		table.insert(sets, config.View.Animations)
 	end
@@ -213,6 +215,7 @@ local function fit(held: Held, config: any, attachments: Instance)
 		table.insert(held.added, part)
 	end
 	held.sight = fitting.points.eye or held.sockets.aim_rear
+	held.muzzle = fitting.points.muzzle or held.sockets.muzzle
 	-- Where a laser's beam leaves the weapon.
 	local emitter = held.handle:FindFirstChild("Laser")
 	if emitter then
@@ -363,11 +366,16 @@ function Viewmodel.emitter(self: any): Attachment?
 	return if emitter and emitter:IsA("Attachment") then emitter else nil
 end
 
--- Where a socket of the weapon in hand is in the world (the muzzle, for a tracer).
-function Viewmodel.socket(self: any, name: string): Vector3?
+-- Where shots leave the weapon in hand, looking along its barrel: the end of the barrel, or of what is
+-- fitted on it. The flash and the tracer start here.
+function Viewmodel.muzzle(self: any): CFrame?
 	local held: Held? = self.current
-	local at = held and held.sockets[name]
-	return if held and at then held.handle.CFrame * AIM * at else nil
+	local at = held and held.muzzle
+	if not (held and at) then
+		return nil
+	end
+	local frame = held.handle.CFrame
+	return CFrame.lookAlong(frame * AIM * at, frame.LookVector, frame.UpVector)
 end
 
 return Viewmodel

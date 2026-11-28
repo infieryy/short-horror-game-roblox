@@ -111,7 +111,7 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	end
 	-- Where shots leave the weapon, looking along the barrel, for clients to draw the flash and the tracer
 	-- from (Client/Effects).
-	local muzzle = source:GetAttribute("Socket_muzzle")
+	local muzzle = fitting.points.muzzle or source:GetAttribute("Socket_muzzle")
 	if typeof(muzzle) == "Vector3" then
 		local mark = Instance.new("Attachment")
 		mark.Name = "Muzzle"

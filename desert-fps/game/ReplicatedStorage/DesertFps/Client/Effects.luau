@@ -29,7 +29,15 @@ type Streak = {
 }
 -- A spike of a flash is drawn twice: wide in the flash's edge colour, and narrower and hot inside that, so
 -- that it keeps its colour against a sunlit wall instead of washing out to white.
-type Flash = { part: BasePart, spikes: { { beam: Beam, inner: Beam, tip: Attachment } }, core: BasePart, light: PointLight, shown: number }
+-- `follow` says where the flash is now, while it shows: it stays on the barrel it came out of.
+type Flash = {
+	part: BasePart,
+	spikes: { { beam: Beam, inner: Beam, tip: Attachment } },
+	core: BasePart,
+	light: PointLight,
+	shown: number,
+	follow: (() -> CFrame?)?,
+}
 
 -- The most spikes a flash has, the forward one apart.
 local SPIKES = 6
@@ -65,9 +73,8 @@ local function taper(from: Attachment, to: Attachment): Beam
 	beam.Attachment1 = to
 	beam.FaceCamera = true
 	beam.Segments = 1
-	beam.LightEmission = 0.7
+	beam.LightEmission = 0
 	beam.LightInfluence = 0
-	beam.Brightness = 2
 	beam.Enabled = false
 	return beam
 end
@@ -124,6 +131,13 @@ local function streak(
 end
 
 local function fly(dt: number)
+	for _, flash in flashes do
+		local now = if flash.shown > 0 and flash.follow then flash.follow() else nil
+		if now then
+			flash.part.CFrame = now
+			flash.core.CFrame = now
+		end
+	end
 	for index = #flying, 1, -1 do
 		local it = flying[index]
 		it.age += dt
@@ -182,7 +196,8 @@ local function newFlash(): Flash
 		tip.Parent = part
 		local beam, inner = taper(middle, tip), taper(middle, tip)
 		beam.Width1, inner.Width1 = 0, 0
-		beam.LightEmission = 0.25
+		inner.LightEmission = Config.Muzzle.Glow
+		inner.Brightness = 1 + Config.Muzzle.Glow
 		inner.ZOffset = 0.02
 		beam.Parent, inner.Parent = part, part
 		table.insert(spikes, { beam = beam, inner = inner, tip = tip })
@@ -199,9 +214,9 @@ local function newFlash(): Flash
 	return { part = part, spikes = spikes, core = core, light = light, shown = 0 }
 end
 
--- A star of a flash at `frame`, looking along it: spikes to the sides and a longer one forward, `size` times
--- as big as EffectConfig.Muzzle makes it. With `lit` it lights what is near.
-local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit: boolean)
+-- A burst of a flash at `frame`, out along where it looks: spikes that lean forward round a longer one
+-- straight ahead, `size` times as big as EffectConfig.Muzzle makes it. With `lit` it lights what is near.
+local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit: boolean, follow: (() -> CFrame?)?)
 	local how = Config.Muzzle
 	local it: Flash? = nil
 	for _, each in flashes do
@@ -216,6 +231,7 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 	end
 	local made = it :: Flash
 	made.shown += 1
+	made.follow = follow
 	local showing = made.shown
 	made.part.CFrame = frame
 	local sides = random:NextInteger(how.Spikes[1], how.Spikes[2])
@@ -232,13 +248,13 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 			wide = how.ForwardWide * size
 		elseif index - 1 <= sides then
 			local angle = turn + (index - 1 + random:NextNumber(-0.25, 0.25)) / sides * math.pi * 2
-			spike.tip.Position = Vector3.new(math.cos(angle), math.sin(angle), -0.15) * between(how.Long) * size
+			spike.tip.Position = Vector3.new(math.cos(angle), math.sin(angle), -how.Sweep).Unit * between(how.Long) * size
 			wide = between(how.Wide) * size
 		end
 		beam.Width0, inner.Width0 = wide, wide * how.Inner
 		beam.Enabled, inner.Enabled = wide > 0, wide > 0
 	end
-	made.core.Color = hot
+	made.core.Color = hot:Lerp(edge, 0.35)
 	made.core.Size = Vector3.one * how.Core * size
 	made.core.CFrame = frame
 	made.core.Parent = made.part
@@ -255,15 +271,17 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 		end
 		made.core.Parent = nil
 		made.light.Enabled = false
+		made.follow = nil
 		made.shown = 0
 	end)
 end
 
 -- A shot leaves the muzzle at `frame`, which looks along the barrel. `weapon` is its name; `quiet` is a
--- weapon that hides its shot (a wisp of smoke and no flash); `mine` is the player's own, seen from behind it.
-function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, mine: boolean)
+-- weapon that hides its shot (a wisp of smoke and no flash); `follow` says where the muzzle is from then on,
+-- so that the flash stays on a barrel that kicks.
+function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, follow: (() -> CFrame?)?)
 	local how = Config.Muzzle
-	local size = ((how.Size :: any)[weapon] or 1) * (if mine then how.Mine else 1)
+	local size = (how.Size :: any)[weapon] or 1
 	if quiet then
 		local wisp = Instance.new("Part")
 		wisp.Shape = Enum.PartType.Ball
@@ -283,7 +301,7 @@ function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, mine: boo
 		count("wisp")
 		return
 	end
-	flash(frame, size, how.Hot, how.Edge, true)
+	flash(frame, size, how.Hot, how.Edge, true, follow)
 	count("flash")
 end
 
@@ -324,7 +342,7 @@ function Effects.struck(at: Vector3, zone: string, along: Vector3)
 		streak(at, within(back, all.Cone) * between(how.Speed), between(how.Long), between(how.Wide), between(how.Life), all.Gravity, how.Hot, how.Edge, false, how.Glow)
 	end
 	if zone == "head" then
-		flash(CFrame.lookAlong(at, back), all.head.Flash, how.Hot, how.Edge, false)
+		flash(CFrame.lookAlong(at, back), all.head.Flash, how.Hot, how.Edge, false, nil)
 	end
 	count(if zone == "head" then "head" else "body")
 end

@@ -495,47 +495,52 @@ return BulletMarks
 	{ path = { "ReplicatedStorage", "DesertFps", "Client", "EffectConfig" }, class = "ModuleScript", source = [=[
 --!strict
 -- How shots look (Client/Effects): the flash at the muzzle, the tracer, what flies off a wall, and what a hit
--- on a body looks like. The reference is Valorant: a small sharp star of a flash that is gone in two frames,
--- a tracer that is a short streak racing to where the shot lands and not a line drawn all the way, and a hit
--- that bursts into angular shards, larger and white-hot with a flash for a head. Everything is drawn from
+-- on a body looks like. The reference is Valorant: a small sharp burst of a flash out of the barrel that is
+-- gone in two frames, a tracer that is a short streak racing to where the shot lands and not a line drawn all
+-- the way, and a hit that bursts into angular shards, more of them and with a flash for a head.
+-- The colours are orange and red, saturated. The owner on the first version, which was white-hot with a
+-- yellow edge: "too washed out ... I need it to be more pop! with orange effects like valorant", "smaller",
+-- and for the head "orange and red in the core rather than white". Everything is drawn from
 -- tapered beams and a little light: no picture was made or uploaded for it.
 -- Lengths are studs, times seconds, speeds studs a second. A { low, high } pair is picked from each time.
 -- Glow is how much a thing adds its light to what is behind it (0 to 1): hot things glow, and things with a
 -- colour of their own do not, or the town's sunlit walls wash that colour out to white.
 return {
-	-- The flash at the muzzle: spikes out to the sides and a longer one forward, round a small bright core,
-	-- with a light that reaches the walls near by. Mine is how big the player's own is beside everyone else's:
-	-- it sits a stud from the eye and must not hide what is being shot at.
+	-- The flash at the muzzle: a burst out of the barrel. Spikes lean forward round a longer one straight
+	-- ahead, each orange outside (Edge) and amber inside (Hot), from a small core at the barrel's end, with a
+	-- light that reaches the walls near by. It stays on the barrel while it shows.
 	Muzzle = {
 		Time = 0.05,
 		Spikes = { 4, 5 },
-		Long = { 0.6, 1.05 },
-		Wide = { 0.26, 0.4 },
-		Forward = { 1.3, 1.9 },
-		ForwardWide = 0.42,
-		-- The hot inside of a spike is this share of its width.
+		Long = { 0.3, 0.55 },
+		Wide = { 0.13, 0.2 },
+		-- How far forward the side spikes lean: 0 is straight out to the sides, 1 is halfway to straight ahead.
+		Sweep = 0.9,
+		Forward = { 0.6, 0.95 },
+		ForwardWide = 0.22,
+		-- The amber inside of a spike is this share of its width.
 		Inner = 0.5,
-		Core = 0.3,
-		Hot = Color3.fromRGB(255, 248, 214),
-		Edge = Color3.fromRGB(255, 138, 36),
-		Light = { Range = 12, Brightness = 3, Color = Color3.fromRGB(255, 206, 140) },
-		Mine = 1,
+		Core = 0.15,
+		Glow = 0.25,
+		Hot = Color3.fromRGB(255, 182, 48),
+		Edge = Color3.fromRGB(255, 92, 16),
+		Light = { Range = 10, Brightness = 2.5, Color = Color3.fromRGB(255, 150, 70) },
 		-- Suppressed: no flash, a wisp of smoke that grows From and To across and is gone in Time.
-		Quiet = { From = 0.15, To = 0.55, Time = 0.16, Color = Color3.fromRGB(226, 216, 232), Start = 0.55 },
+		Quiet = { From = 0.12, To = 0.4, Time = 0.16, Color = Color3.fromRGB(226, 216, 232), Start = 0.55 },
 		-- By weapon: how big its flash is.
-		Size = { rifle = 1, pistol = 0.7 },
+		Size = { rifle = 1, pistol = 0.75 },
 	},
 
 	-- The tracer: a streak Long that leaves the muzzle at Speed and ends where the shot does. Its head is Hot
 	-- and Wide, its tail thin and clear. A shot that lands nearer than Least has none.
 	Tracer = {
 		Speed = 1100,
-		Long = 16,
-		Wide = 0.24,
+		Long = 14,
+		Wide = 0.15,
 		Least = 5,
-		Glow = 0.7,
-		Hot = Color3.fromRGB(255, 244, 206),
-		Tail = Color3.fromRGB(255, 188, 92),
+		Glow = 0.25,
+		Hot = Color3.fromRGB(255, 190, 70),
+		Tail = Color3.fromRGB(255, 104, 22),
 	},
 
 	-- What flies off where a shot lands on the town, by the mark it leaves (Client/BulletMarks): Count
@@ -545,38 +550,39 @@ return {
 		["in"] = { Count = { 2, 3 }, Speed = { 14, 24 }, Life = { 0.1, 0.16 } },
 		out = { Count = { 3, 5 }, Speed = { 18, 34 }, Life = { 0.12, 0.2 } },
 		stop = { Count = { 4, 6 }, Speed = { 20, 40 }, Life = { 0.12, 0.22 } },
-		Long = { 0.35, 0.8 },
-		Wide = 0.05,
+		Long = { 0.25, 0.55 },
+		Wide = 0.04,
 		Cone = 65,
 		Gravity = 60,
-		Glow = 0.7,
-		-- A spark off stone or plaster is hot; off anything else it is a chip of the stuff (MarkConfig's Rim).
-		Hot = Color3.fromRGB(255, 226, 150),
+		Glow = 0.25,
+		-- A spark off stone or plaster is hot; off anything else it is a chip of the stuff (MarkConfig's Chip).
+		Hot = Color3.fromRGB(255, 160, 48),
 	},
 
-	-- A hit on a body: shards that burst from where the shot landed, back along the shot and outwards. A hit
-	-- to the head is more of them, faster, white-hot, with a star of a flash Flash across.
+	-- A hit on a body: shards that burst from where the shot landed, back along the shot and outwards, red.
+	-- A hit to the head is more of them, faster, orange with red edges, round a flash of the same colours
+	-- Flash times the size of a muzzle's.
 	Struck = {
 		body = {
-			Count = { 6, 8 },
-			Speed = { 10, 22 },
-			Life = { 0.2, 0.32 },
-			Long = { 0.45, 0.8 },
-			Wide = { 0.16, 0.26 },
+			Count = { 5, 7 },
+			Speed = { 10, 20 },
+			Life = { 0.18, 0.28 },
+			Long = { 0.3, 0.55 },
+			Wide = { 0.11, 0.18 },
 			Glow = 0.05,
-			Hot = Color3.fromRGB(246, 78, 70),
-			Edge = Color3.fromRGB(186, 34, 48),
+			Hot = Color3.fromRGB(240, 58, 48),
+			Edge = Color3.fromRGB(168, 22, 38),
 		},
 		head = {
-			Count = { 10, 13 },
-			Speed = { 16, 34 },
-			Life = { 0.24, 0.4 },
-			Long = { 0.6, 1.1 },
-			Wide = { 0.18, 0.3 },
-			Glow = 0.6,
-			Hot = Color3.fromRGB(255, 252, 232),
-			Edge = Color3.fromRGB(255, 196, 84),
-			Flash = 1.5,
+			Count = { 9, 12 },
+			Speed = { 14, 30 },
+			Life = { 0.22, 0.36 },
+			Long = { 0.4, 0.75 },
+			Wide = { 0.13, 0.22 },
+			Glow = 0.15,
+			Hot = Color3.fromRGB(255, 140, 28),
+			Edge = Color3.fromRGB(226, 36, 28),
+			Flash = 1.1,
 		},
 		Cone = 80,
 		Gravity = 34,
@@ -615,7 +621,15 @@ type Streak = {
 }
 -- A spike of a flash is drawn twice: wide in the flash's edge colour, and narrower and hot inside that, so
 -- that it keeps its colour against a sunlit wall instead of washing out to white.
-type Flash = { part: BasePart, spikes: { { beam: Beam, inner: Beam, tip: Attachment } }, core: BasePart, light: PointLight, shown: number }
+-- `follow` says where the flash is now, while it shows: it stays on the barrel it came out of.
+type Flash = {
+	part: BasePart,
+	spikes: { { beam: Beam, inner: Beam, tip: Attachment } },
+	core: BasePart,
+	light: PointLight,
+	shown: number,
+	follow: (() -> CFrame?)?,
+}
 
 -- The most spikes a flash has, the forward one apart.
 local SPIKES = 6
@@ -651,9 +665,8 @@ local function taper(from: Attachment, to: Attachment): Beam
 	beam.Attachment1 = to
 	beam.FaceCamera = true
 	beam.Segments = 1
-	beam.LightEmission = 0.7
+	beam.LightEmission = 0
 	beam.LightInfluence = 0
-	beam.Brightness = 2
 	beam.Enabled = false
 	return beam
 end
@@ -710,6 +723,13 @@ local function streak(
 end
 
 local function fly(dt: number)
+	for _, flash in flashes do
+		local now = if flash.shown > 0 and flash.follow then flash.follow() else nil
+		if now then
+			flash.part.CFrame = now
+			flash.core.CFrame = now
+		end
+	end
 	for index = #flying, 1, -1 do
 		local it = flying[index]
 		it.age += dt
@@ -768,7 +788,8 @@ local function newFlash(): Flash
 		tip.Parent = part
 		local beam, inner = taper(middle, tip), taper(middle, tip)
 		beam.Width1, inner.Width1 = 0, 0
-		beam.LightEmission = 0.25
+		inner.LightEmission = Config.Muzzle.Glow
+		inner.Brightness = 1 + Config.Muzzle.Glow
 		inner.ZOffset = 0.02
 		beam.Parent, inner.Parent = part, part
 		table.insert(spikes, { beam = beam, inner = inner, tip = tip })
@@ -785,9 +806,9 @@ local function newFlash(): Flash
 	return { part = part, spikes = spikes, core = core, light = light, shown = 0 }
 end
 
--- A star of a flash at `frame`, looking along it: spikes to the sides and a longer one forward, `size` times
--- as big as EffectConfig.Muzzle makes it. With `lit` it lights what is near.
-local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit: boolean)
+-- A burst of a flash at `frame`, out along where it looks: spikes that lean forward round a longer one
+-- straight ahead, `size` times as big as EffectConfig.Muzzle makes it. With `lit` it lights what is near.
+local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit: boolean, follow: (() -> CFrame?)?)
 	local how = Config.Muzzle
 	local it: Flash? = nil
 	for _, each in flashes do
@@ -802,6 +823,7 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 	end
 	local made = it :: Flash
 	made.shown += 1
+	made.follow = follow
 	local showing = made.shown
 	made.part.CFrame = frame
 	local sides = random:NextInteger(how.Spikes[1], how.Spikes[2])
@@ -818,13 +840,13 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 			wide = how.ForwardWide * size
 		elseif index - 1 <= sides then
 			local angle = turn + (index - 1 + random:NextNumber(-0.25, 0.25)) / sides * math.pi * 2
-			spike.tip.Position = Vector3.new(math.cos(angle), math.sin(angle), -0.15) * between(how.Long) * size
+			spike.tip.Position = Vector3.new(math.cos(angle), math.sin(angle), -how.Sweep).Unit * between(how.Long) * size
 			wide = between(how.Wide) * size
 		end
 		beam.Width0, inner.Width0 = wide, wide * how.Inner
 		beam.Enabled, inner.Enabled = wide > 0, wide > 0
 	end
-	made.core.Color = hot
+	made.core.Color = hot:Lerp(edge, 0.35)
 	made.core.Size = Vector3.one * how.Core * size
 	made.core.CFrame = frame
 	made.core.Parent = made.part
@@ -841,15 +863,17 @@ local function flash(frame: CFrame, size: number, hot: Color3, edge: Color3, lit
 		end
 		made.core.Parent = nil
 		made.light.Enabled = false
+		made.follow = nil
 		made.shown = 0
 	end)
 end
 
 -- A shot leaves the muzzle at `frame`, which looks along the barrel. `weapon` is its name; `quiet` is a
--- weapon that hides its shot (a wisp of smoke and no flash); `mine` is the player's own, seen from behind it.
-function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, mine: boolean)
+-- weapon that hides its shot (a wisp of smoke and no flash); `follow` says where the muzzle is from then on,
+-- so that the flash stays on a barrel that kicks.
+function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, follow: (() -> CFrame?)?)
 	local how = Config.Muzzle
-	local size = ((how.Size :: any)[weapon] or 1) * (if mine then how.Mine else 1)
+	local size = (how.Size :: any)[weapon] or 1
 	if quiet then
 		local wisp = Instance.new("Part")
 		wisp.Shape = Enum.PartType.Ball
@@ -869,7 +893,7 @@ function Effects.muzzle(frame: CFrame, weapon: string, quiet: boolean, mine: boo
 		count("wisp")
 		return
 	end
-	flash(frame, size, how.Hot, how.Edge, true)
+	flash(frame, size, how.Hot, how.Edge, true, follow)
 	count("flash")
 end
 
@@ -910,7 +934,7 @@ function Effects.struck(at: Vector3, zone: string, along: Vector3)
 		streak(at, within(back, all.Cone) * between(how.Speed), between(how.Long), between(how.Wide), between(how.Life), all.Gravity, how.Hot, how.Edge, false, how.Glow)
 	end
 	if zone == "head" then
-		flash(CFrame.lookAlong(at, back), all.head.Flash, how.Hot, how.Edge, false)
+		flash(CFrame.lookAlong(at, back), all.head.Flash, how.Hot, how.Edge, false, nil)
 	end
 	count(if zone == "head" then "head" else "body")
 end
@@ -2344,6 +2368,7 @@ type Held = {
 	sockets: { [string]: Vector3 },
 	config: any, -- its numbers as it is fitted now (Attachments.build)
 	sight: Vector3?, -- the point that comes to the eye when aiming: the rear sight, or the middle of an optic
+	muzzle: Vector3?, -- where shots leave it: the end of the barrel, or of what is fitted on it
 	rest: CFrame?, -- where the weapon is from the camera, at rest in the hands
 }
 
@@ -2456,6 +2481,7 @@ function Viewmodel.new(models: Instance, attachments: Instance, arms: Model, par
 			sockets = sockets,
 			config = config,
 			sight = sockets.aim_rear,
+			muzzle = sockets.muzzle,
 		}
 		table.insert(sets, config.View.Animations)
 	end
@@ -2515,6 +2541,7 @@ local function fit(held: Held, config: any, attachments: Instance)
 		table.insert(held.added, part)
 	end
 	held.sight = fitting.points.eye or held.sockets.aim_rear
+	held.muzzle = fitting.points.muzzle or held.sockets.muzzle
 	-- Where a laser's beam leaves the weapon.
 	local emitter = held.handle:FindFirstChild("Laser")
 	if emitter then
@@ -2665,11 +2692,16 @@ function Viewmodel.emitter(self: any): Attachment?
 	return if emitter and emitter:IsA("Attachment") then emitter else nil
 end
 
--- Where a socket of the weapon in hand is in the world (the muzzle, for a tracer).
-function Viewmodel.socket(self: any, name: string): Vector3?
+-- Where shots leave the weapon in hand, looking along its barrel: the end of the barrel, or of what is
+-- fitted on it. The flash and the tracer start here.
+function Viewmodel.muzzle(self: any): CFrame?
 	local held: Held? = self.current
-	local at = held and held.sockets[name]
-	return if held and at then held.handle.CFrame * AIM * at else nil
+	local at = held and held.muzzle
+	if not (held and at) then
+		return nil
+	end
+	local frame = held.handle.CFrame
+	return CFrame.lookAlong(frame * AIM * at, frame.LookVector, frame.UpVector)
 end
 
 return Viewmodel
@@ -3270,6 +3302,16 @@ function Attachments.fitting(weapon: Instance, models: Instance, attached: Chose
 				if string.sub(attribute, 1, 7) == "Socket_" then
 					fitting.points[string.sub(attribute, 8)] = at + (value :: Vector3) * size
 				end
+			end
+			-- Shots leave from the end of what is on the muzzle (weapons point along +X), not from under it.
+			if socket == "muzzle" then
+				local tip = at.X
+				for _, template in model:GetChildren() do
+					if template:IsA("BasePart") then
+						tip = math.max(tip, at.X + ((template:GetAttribute("Offset") :: Vector3).X + template.Size.X / 2) * size)
+					end
+				end
+				fitting.points.muzzle = Vector3.new(tip, at.Y, at.Z)
 			end
 		end
 	end
@@ -7983,7 +8025,7 @@ local function handModel(name: string, attached: Attachments.Chosen): Tool
 	end
 	-- Where shots leave the weapon, looking along the barrel, for clients to draw the flash and the tracer
 	-- from (Client/Effects).
-	local muzzle = source:GetAttribute("Socket_muzzle")
+	local muzzle = fitting.points.muzzle or source:GetAttribute("Socket_muzzle")
 	if typeof(muzzle) == "Vector3" then
 		local mark = Instance.new("Attachment")
 		mark.Name = "Muzzle"
@@ -8727,9 +8769,11 @@ local function shoot(character: Model, humanoid: Humanoid, root: BasePart)
 		animator:play("Fire")
 	end
 	-- The flash and the tracer leave the muzzle in the player's hands, towards where the shot lands.
-	local muzzle = viewmodel:socket("muzzle") or origin
-	Effects.muzzle(CFrame.lookAlong(muzzle, direction), weapon.Name, weapon.Silent == true, true)
-	Effects.tracer(muzzle, path.finish)
+	local muzzle = viewmodel:muzzle() or CFrame.lookAlong(origin, direction)
+	Effects.muzzle(muzzle, weapon.Name, weapon.Silent == true, function()
+		return viewmodel:muzzle()
+	end)
+	Effects.tracer(muzzle.Position, path.finish)
 	Sounds.play(weapon.Sounds.Fire)
 	marks:leave(Penetration.marks(path))
 	refresh()
@@ -8999,7 +9043,10 @@ remote("Shot").OnClientEvent:Connect(function(shooter: Player, weaponName: strin
 	local held, muzzle = heldAt(shooter, weaponName)
 	local from = if muzzle then muzzle.Position else held or origin
 	if theirs.Kind == "gun" then
-		Effects.muzzle(CFrame.lookAt(from, finish), weaponName, false, false)
+		Effects.muzzle(muzzle or CFrame.lookAt(from, finish), weaponName, false, function()
+			local _, now = heldAt(shooter, weaponName)
+			return now
+		end)
 		Effects.tracer(from, finish)
 	end
 	Sounds.play(theirs.Sounds.Fire, from)
@@ -9018,7 +9065,7 @@ remote("Heard").OnClientEvent:Connect(function(who: Player, weaponName: string, 
 		return
 	end
 	if what == "Quiet" and muzzle then
-		Effects.muzzle(muzzle, weaponName, true, false)
+		Effects.muzzle(muzzle, weaponName, true)
 	end
 	if what == "Reload" and seconds then
 		for _, cue in cuesOf(theirs) do
